@@ -9,12 +9,14 @@ const ValidateRequestSchema = z.object({
   blueprint: z.unknown(),
 });
 
+const GenerateOptionsSchema = z.object({
+  dryRun: z.boolean().default(false),
+  createGitHubRepo: z.boolean().default(false),
+});
+
 const GenerateRequestSchema = z.object({
   blueprint: z.unknown(),
-  options: z.object({
-    dryRun: z.boolean().default(false),
-    createGitHubRepo: z.boolean().default(false),
-  }).optional(),
+  options: GenerateOptionsSchema.optional(),
 });
 
 export const blueprintRoutes: FastifyPluginCallback = (fastify, _opts, done) => {
@@ -56,7 +58,7 @@ export const blueprintRoutes: FastifyPluginCallback = (fastify, _opts, done) => 
 
     // Parse the validated blueprint
     const blueprint = Blueprint.parse(body.blueprint);
-    const options = body.options || {};
+    const options = GenerateOptionsSchema.parse(body.options ?? {});
 
     // Create a run
     const run = runStore.create(blueprint.id);
@@ -96,7 +98,7 @@ export const blueprintRoutes: FastifyPluginCallback = (fastify, _opts, done) => 
 
     // Parse the validated blueprint
     const blueprint = Blueprint.parse(body.blueprint);
-    const options = body.options || {};
+    const options = GenerateOptionsSchema.parse(body.options ?? {});
 
     // Get GitHub token from request header (passed from user's OAuth session)
     const githubToken = request.headers['x-github-token'] as string | undefined;
