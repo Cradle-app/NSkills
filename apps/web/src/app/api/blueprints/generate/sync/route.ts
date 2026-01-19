@@ -7,7 +7,7 @@ function getGitHubToken(request: NextRequest): string | null {
   // #region agent log
   console.error('[DEBUG-C] generate/sync/route.ts:5 - getGitHubToken entry');
   // #endregion
-  const sessionCookie = request.cookies.get('dappforge_session')?.value;
+  const sessionCookie = request.cookies.get('cradle_session')?.value;
   // #region agent log
   console.error('[DEBUG-C] generate/sync/route.ts:8 - After get cookie', { hasCookie: !!sessionCookie });
   // #endregion
@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
     // For Vercel deployment: If orchestrator URL is not configured, return mock response immediately
     // To enable full code generation, deploy orchestrator separately (Railway, Render, etc.) and set ORCHESTRATOR_URL
     const orchestratorUrl = process.env.ORCHESTRATOR_URL;
-    
-    if (!orchestratorUrl || orchestratorUrl.includes('localhost')) {
+
+    if (!orchestratorUrl) {
       // #region agent log
       console.error('[DEBUG-E] generate/sync/route.ts:50 - Orchestrator not configured, returning mock response');
       // #endregion

@@ -231,9 +231,11 @@ function generateRootFiles(
   );
 
   // Generate .env.example
-  const envExample = envVars
+  const envExampleHeader = '# Environment Variables\n# Copy this file to .env and fill in the values\n\n';
+  const envVarsContent = envVars
     .map(v => `# ${v.description}${v.required ? ' (required)' : ''}${v.secret ? ' [secret]' : ''}\n${v.key}=${v.defaultValue || ''}`)
     .join('\n\n');
+  const envExample = envExampleHeader + (envVarsContent || '# No environment variables required\n');
 
   fs.writeFileSync(`${basePath}/.env.example`, envExample);
 
