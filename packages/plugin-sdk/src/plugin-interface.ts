@@ -20,7 +20,7 @@ export interface PluginMetadata {
   version: string;
   description: string;
   author?: string;
-  category: 'contracts' | 'payments' | 'agents' | 'app' | 'quality';
+  category: 'contracts' | 'payments' | 'agents' | 'app' | 'quality' | 'telegram';
   icon?: string;
   tags?: string[];
 }
@@ -119,7 +119,7 @@ export abstract class BasePlugin<TConfig = Record<string, unknown>> implements N
 
   async validate(config: TConfig, _context: ExecutionContext): Promise<PluginValidationResult> {
     const result = this.configSchema.safeParse(config);
-    
+
     if (!result.success) {
       return {
         valid: false,
@@ -165,9 +165,9 @@ export abstract class BasePlugin<TConfig = Record<string, unknown>> implements N
    * Helper to add an environment variable
    */
   protected addEnvVar(
-    output: CodegenOutput, 
-    key: string, 
-    description: string, 
+    output: CodegenOutput,
+    key: string,
+    description: string,
     options?: { required?: boolean; defaultValue?: string; secret?: boolean }
   ): void {
     output.envVars.push({

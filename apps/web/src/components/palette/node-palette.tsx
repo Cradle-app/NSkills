@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Box, 
-  CreditCard, 
-  Bot, 
-  Layout, 
+import {
+  Box,
+  CreditCard,
+  Bot,
+  Layout,
   ShieldCheck,
   ChevronRight,
   Search,
@@ -171,6 +171,35 @@ const NODE_CATEGORIES: NodeCategory[] = [
     ],
   },
   {
+    id: 'telegram',
+    name: 'Telegram',
+    icon: Bot,
+    color: 'node-app', // Reusing node-app color or could define 'node-telegram'
+    nodes: [
+      {
+        id: 'telegram-notifications',
+        name: 'Notifications',
+        description: 'Trigger alerts and updates to users',
+        icon: Sparkles,
+        color: 'node-app',
+      },
+      {
+        id: 'telegram-commands',
+        name: 'Commands',
+        description: 'Handle interactive commands via webhooks',
+        icon: Box,
+        color: 'node-app',
+      },
+      {
+        id: 'telegram-wallet-link',
+        name: 'Wallet Link',
+        description: 'Link Telegram profiles with Web3 wallets',
+        icon: Lock,
+        color: 'node-app',
+      },
+    ],
+  },
+  {
     id: 'quality',
     name: 'Quality',
     icon: ShieldCheck,
@@ -229,7 +258,7 @@ export function NodePalette() {
           </div>
           <h2 className="text-sm font-semibold text-white tracking-wide">Components</h2>
         </div>
-        
+
         {/* Search */}
         <div className="relative group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-forge-muted group-focus-within:text-accent-cyan transition-colors" />
@@ -241,7 +270,7 @@ export function NodePalette() {
             className="w-full pl-9 pr-8 py-2.5 text-sm bg-forge-bg/50 border border-forge-border/50 rounded-xl text-white placeholder:text-forge-muted focus:outline-none focus:border-accent-cyan/50 focus:bg-forge-bg transition-all duration-200"
           />
           {searchQuery && (
-            <button 
+            <button
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-forge-muted hover:text-white transition-colors"
             >
@@ -254,8 +283,8 @@ export function NodePalette() {
       {/* Categories */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {filteredCategories.map((category, categoryIndex) => (
-          <motion.div 
-            key={category.id} 
+          <motion.div
+            key={category.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: categoryIndex * 0.05 }}
@@ -278,8 +307,8 @@ export function NodePalette() {
               </motion.div>
               <div className={cn(
                 'w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200',
-                expandedCategories.has(category.id) 
-                  ? `bg-${category.color}/20` 
+                expandedCategories.has(category.id)
+                  ? `bg-${category.color}/20`
                   : 'bg-forge-elevated/50'
               )}>
                 <category.icon className={cn(

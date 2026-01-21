@@ -14,6 +14,9 @@ export { ChainDataPlugin } from './chain-data';
 export { IPFSStoragePlugin } from './ipfs-storage';
 export { ChainAbstractionPlugin } from './chain-abstraction';
 export { ZKPrimitivesPlugin } from './zk-primitives';
+export { TelegramNotificationsPlugin } from './telegram-notifications';
+export { TelegramCommandsPlugin } from './telegram-commands';
+export { TelegramWalletLinkPlugin } from './telegram-wallet-link';
 
 import { StylusContractPlugin } from './stylus-contract';
 import { StylusZKContractPlugin } from './stylus-zk-contract';
@@ -28,6 +31,9 @@ import { ChainDataPlugin } from './chain-data';
 import { IPFSStoragePlugin } from './ipfs-storage';
 import { ChainAbstractionPlugin } from './chain-abstraction';
 import { ZKPrimitivesPlugin } from './zk-primitives';
+import { TelegramNotificationsPlugin } from './telegram-notifications';
+import { TelegramCommandsPlugin } from './telegram-commands';
+import { TelegramWalletLinkPlugin } from './telegram-wallet-link';
 import { PluginRegistry, getDefaultRegistry } from '@dapp-forge/plugin-sdk';
 
 /**
@@ -35,14 +41,14 @@ import { PluginRegistry, getDefaultRegistry } from '@dapp-forge/plugin-sdk';
  */
 export function registerOfficialPlugins(registry?: PluginRegistry): void {
   const targetRegistry = registry ?? getDefaultRegistry();
-  
+
   // Original plugins
   targetRegistry.register(new StylusContractPlugin());
   targetRegistry.register(new StylusZKContractPlugin());
   targetRegistry.register(new X402PaywallPlugin());
   targetRegistry.register(new ERC8004AgentPlugin());
   targetRegistry.register(new RepoQualityGatesPlugin());
-  
+
   // New Arbitrum-focused plugins
   targetRegistry.register(new EIP7702SmartEOAPlugin());
   targetRegistry.register(new WalletAuthPlugin());
@@ -52,6 +58,9 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new IPFSStoragePlugin());
   targetRegistry.register(new ChainAbstractionPlugin());
   targetRegistry.register(new ZKPrimitivesPlugin());
+  targetRegistry.register(new TelegramNotificationsPlugin());
+  targetRegistry.register(new TelegramCommandsPlugin());
+  targetRegistry.register(new TelegramWalletLinkPlugin());
 }
 
 /**
@@ -74,5 +83,8 @@ export function getOfficialPlugins() {
     new IPFSStoragePlugin(),
     new ChainAbstractionPlugin(),
     new ZKPrimitivesPlugin(),
+    new TelegramNotificationsPlugin(),
+    new TelegramCommandsPlugin(),
+    new TelegramWalletLinkPlugin(),
   ];
 }
