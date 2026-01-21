@@ -127,6 +127,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'telegram-commands',
       'telegram-wallet-link',
       'ostium-trading',
+      'onchain-activity',
     ]);
   }
   return defaultRegistry;

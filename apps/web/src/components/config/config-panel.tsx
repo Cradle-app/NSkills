@@ -26,6 +26,7 @@ import { TelegramNotificationsForm } from './forms/telegram-notifications-form';
 import { TelegramCommandsForm } from './forms/telegram-commands-form';
 import { TelegramWalletLinkForm } from './forms/telegram-wallet-link-form';
 import { OstiumTradingForm } from './forms/ostium-trading-form';
+import { OnchainActivityForm } from './forms/onchain-activity-form';
 
 export function ConfigPanel() {
   const { blueprint, selectedNodeId, selectNode } = useBlueprintStore();
@@ -182,6 +183,9 @@ export function ConfigPanel() {
           )}
           {selectedNode.type === 'ostium-trading' && (
             <OstiumTradingForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+          {selectedNode.type === 'onchain-activity' && (
+            <OnchainActivityForm nodeId={selectedNode.id} config={selectedNode.config} />
           )}
         </motion.div>
       </AnimatePresence>

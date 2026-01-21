@@ -113,6 +113,13 @@ const NODE_CATEGORIES: NodeCategory[] = [
         icon: Zap,
         color: 'node-agents',
       },
+      {
+        id: 'onchain-activity',
+        name: 'Onchain Activity',
+        description: 'Fetch wallet transactions by category from Arbitrum',
+        icon: TrendingUp,
+        color: 'node-agents',
+      },
     ],
   },
   {

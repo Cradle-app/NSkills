@@ -29,6 +29,7 @@ export const NodeType = z.enum([
   // Agents
   'erc8004-agent-runtime',
   'ostium-trading',
+  'onchain-activity',
 
   // App
   'frontend-scaffold',
@@ -331,6 +332,17 @@ export const OstiumTradingConfig = BaseNodeConfig.extend({
 export type OstiumTradingConfig = z.infer<typeof OstiumTradingConfig>;
 
 /**
+ * Onchain Activity configuration
+ */
+export const OnchainActivityConfig = BaseNodeConfig.extend({
+  network: z.enum(['arbitrum', 'arbitrum-sepolia']).default('arbitrum'),
+  transactionLimit: z.enum(['5', '10', '15', '20', 'custom']).default('10'),
+  customLimit: z.number().min(1).max(100).optional().default(25),
+  categories: z.array(z.enum(['erc20', 'erc721', 'erc1155', 'external'])).default(['erc20']),
+});
+export type OnchainActivityConfig = z.infer<typeof OnchainActivityConfig>;
+
+/**
  * Union of all node configurations
  */
 export const NodeConfig = z.discriminatedUnion('type', [
@@ -371,6 +383,7 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'x402-paywall-api': 'payments',
     'erc8004-agent-runtime': 'agents',
     'ostium-trading': 'agents',
+    'onchain-activity': 'agents',
     'frontend-scaffold': 'app',
     'sdk-generator': 'app',
     'wallet-auth': 'app',
@@ -411,6 +424,7 @@ export function getConfigSchemaForType(type: NodeType) {
     'telegram-commands': TelegramCommandsConfig,
     'telegram-wallet-link': TelegramWalletLinkConfig,
     'ostium-trading': OstiumTradingConfig,
+    'onchain-activity': OnchainActivityConfig,
   };
   return schemaMap[type];
 }
