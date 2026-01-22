@@ -129,6 +129,10 @@ export function getDefaultRegistry(): PluginRegistry {
       'telegram-ai-agent',
       'ostium-trading',
       'onchain-activity',
+      "aixbt-momentum",
+      "aixbt-signals",
+      "aixbt-indigo",
+      "aixbt-observer"
     ]);
   }
   return defaultRegistry;

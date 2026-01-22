@@ -20,6 +20,12 @@ export { TelegramWalletLinkPlugin } from './telegram-wallet-link';
 export { TelegramAIAgentPlugin } from './telegram-ai-agent';
 export { OstiumTradingPlugin } from './ostium-trading';
 export { OnchainActivityPlugin } from './onchain-activity';
+export {
+  AIXBTMomentumPlugin,
+  AIXBTSignalsPlugin,
+  AIXBTIndigoPlugin,
+  AIXBTObserverPlugin
+} from './aixbt-intelligence';
 
 import { StylusContractPlugin } from './stylus-contract';
 import { StylusZKContractPlugin } from './stylus-zk-contract';
@@ -40,6 +46,12 @@ import { TelegramWalletLinkPlugin } from './telegram-wallet-link';
 import { TelegramAIAgentPlugin } from './telegram-ai-agent';
 import { OstiumTradingPlugin } from './ostium-trading';
 import { OnchainActivityPlugin } from './onchain-activity';
+import {
+  AIXBTMomentumPlugin,
+  AIXBTSignalsPlugin,
+  AIXBTIndigoPlugin,
+  AIXBTObserverPlugin
+} from './aixbt-intelligence';
 import { PluginRegistry, getDefaultRegistry } from '@dapp-forge/plugin-sdk';
 
 /**
@@ -70,6 +82,10 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new TelegramAIAgentPlugin());
   targetRegistry.register(new OstiumTradingPlugin());
   targetRegistry.register(new OnchainActivityPlugin());
+  targetRegistry.register(new AIXBTMomentumPlugin());
+  targetRegistry.register(new AIXBTSignalsPlugin());
+  targetRegistry.register(new AIXBTIndigoPlugin());
+  targetRegistry.register(new AIXBTObserverPlugin());
 }
 
 /**
@@ -98,5 +114,9 @@ export function getOfficialPlugins() {
     new TelegramAIAgentPlugin(),
     new OstiumTradingPlugin(),
     new OnchainActivityPlugin(),
+    new AIXBTMomentumPlugin(),
+    new AIXBTSignalsPlugin(),
+    new AIXBTIndigoPlugin(),
+    new AIXBTObserverPlugin(),
   ];
 }

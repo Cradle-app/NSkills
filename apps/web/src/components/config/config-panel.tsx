@@ -28,6 +28,8 @@ import { TelegramWalletLinkForm } from './forms/telegram-wallet-link-form';
 import { TelegramAIAgentForm } from './forms/telegram-ai-agent-form';
 import { OstiumTradingForm } from './forms/ostium-trading-form';
 import { OnchainActivityForm } from './forms/onchain-activity-form';
+import { AIXBTForm } from './forms/aixbt-form';
+
 
 export function ConfigPanel() {
   const { blueprint, selectedNodeId, selectNode } = useBlueprintStore();
@@ -191,6 +193,14 @@ export function ConfigPanel() {
           {selectedNode.type === 'onchain-activity' && (
             <OnchainActivityForm nodeId={selectedNode.id} config={selectedNode.config} />
           )}
+
+          {/* AIXBT nodes */}
+          {(selectedNode.type === 'aixbt-momentum' ||
+            selectedNode.type === 'aixbt-signals' ||
+            selectedNode.type === 'aixbt-indigo' ||
+            selectedNode.type === 'aixbt-observer') && (
+              <AIXBTForm nodeId={selectedNode.id} type={selectedNode.type} config={selectedNode.config} />
+            )}
         </motion.div>
       </AnimatePresence>
     </aside>
