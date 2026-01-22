@@ -39,6 +39,11 @@ const nodeTypes: NodeTypes = {
   'chain-abstraction': ForgeNode,
   'zk-primitives': ForgeNode,
   'ostium-trading': ForgeNode,
+  'erc20-stylus': ForgeNode,
+  'erc721-stylus': ForgeNode,
+  'telegram-notifications': ForgeNode,
+  'telegram-commands': ForgeNode,
+  'telegram-wallet-link': ForgeNode,
 };
 
 // Custom edge types

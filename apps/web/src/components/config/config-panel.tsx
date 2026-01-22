@@ -27,6 +27,10 @@ import { TelegramCommandsForm } from './forms/telegram-commands-form';
 import { TelegramWalletLinkForm } from './forms/telegram-wallet-link-form';
 import { OstiumTradingForm } from './forms/ostium-trading-form';
 
+// ERC-20/ERC-721 Stylus forms
+import { ERC20StylusForm } from './forms/erc20-stylus-form';
+import { ERC721StylusForm } from './forms/erc721-stylus-form';
+
 export function ConfigPanel() {
   const { blueprint, selectedNodeId, selectNode } = useBlueprintStore();
 
@@ -182,6 +186,14 @@ export function ConfigPanel() {
           )}
           {selectedNode.type === 'ostium-trading' && (
             <OstiumTradingForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+
+          {/* ERC-20/ERC-721 Stylus nodes */}
+          {selectedNode.type === 'erc20-stylus' && (
+            <ERC20StylusForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+          {selectedNode.type === 'erc721-stylus' && (
+            <ERC721StylusForm nodeId={selectedNode.id} config={selectedNode.config} />
           )}
         </motion.div>
       </AnimatePresence>

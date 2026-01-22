@@ -47,6 +47,13 @@ export function nodeTypeToLabel(type: string): string {
     'zk-primitives': 'ZK Primitives',
     'maxxit': 'Maxxit Trading Agent',
     'ostium-trading': 'Ostium One-Click Trading',
+    // ERC-20/ERC-721 Stylus nodes
+    'erc20-stylus': 'ERC-20 Stylus Token',
+    'erc721-stylus': 'ERC-721 Stylus NFT',
+    // Telegram nodes
+    'telegram-notifications': 'Telegram Notifications',
+    'telegram-commands': 'Telegram Commands',
+    'telegram-wallet-link': 'Telegram Wallet Link',
   };
   return labels[type] || type;
 }
@@ -72,6 +79,13 @@ export function nodeTypeToColor(type: string): string {
     'zk-primitives': 'node-contracts',
     'maxxit': 'node-agents',
     'ostium-trading': 'node-agents',
+    // ERC-20/ERC-721 Stylus nodes
+    'erc20-stylus': 'node-contracts',
+    'erc721-stylus': 'node-contracts',
+    // Telegram nodes
+    'telegram-notifications': 'node-app',
+    'telegram-commands': 'node-app',
+    'telegram-wallet-link': 'node-app',
   };
   return colors[type] || 'node-contracts';
 }
