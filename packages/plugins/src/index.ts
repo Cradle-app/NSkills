@@ -19,6 +19,7 @@ export { TelegramCommandsPlugin } from './telegram-commands';
 export { TelegramWalletLinkPlugin } from './telegram-wallet-link';
 export { TelegramAIAgentPlugin } from './telegram-ai-agent';
 export { OstiumTradingPlugin } from './ostium-trading';
+export { MaxxitLazyTradingPlugin } from './maxxit';
 export { OnchainActivityPlugin } from './onchain-activity';
 export {
   AIXBTMomentumPlugin,
@@ -53,6 +54,7 @@ import { OstiumTradingPlugin } from './ostium-trading';
 import { ERC20StylusPlugin } from './erc20-stylus';
 import { ERC721StylusPlugin } from './erc721-stylus';
 import { ERC1155StylusPlugin } from './erc1155-stylus';
+import { MaxxitLazyTradingPlugin } from './maxxit';
 import { OnchainActivityPlugin } from './onchain-activity';
 import {
   AIXBTMomentumPlugin,
@@ -94,6 +96,7 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new ERC20StylusPlugin());
   targetRegistry.register(new ERC721StylusPlugin());
   targetRegistry.register(new ERC1155StylusPlugin());
+  targetRegistry.register(new MaxxitLazyTradingPlugin());
   targetRegistry.register(new OnchainActivityPlugin());
   targetRegistry.register(new AIXBTMomentumPlugin());
   targetRegistry.register(new AIXBTSignalsPlugin());
@@ -130,6 +133,7 @@ export function getOfficialPlugins() {
     new ERC20StylusPlugin(),
     new ERC721StylusPlugin(),
     new ERC1155StylusPlugin(),
+    new MaxxitLazyTradingPlugin(),
     new OnchainActivityPlugin(),
     new AIXBTMomentumPlugin(),
     new AIXBTSignalsPlugin(),

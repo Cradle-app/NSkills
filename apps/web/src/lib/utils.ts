@@ -61,11 +61,11 @@ export function nodeTypeToLabel(type: string): string {
     'aixbt-indigo': 'AIXBT Indigo',
     'aixbt-observer': 'AIXBT Market Observer',
     // Legacy
-    'maxxit': 'Maxxit Trading Agent',
     // ERC-20/ERC-721/ERC-1155 Stylus nodes
     'erc20-stylus': 'ERC-20 Stylus Token',
     'erc721-stylus': 'ERC-721 Stylus NFT',
     'erc1155-stylus': 'ERC-1155 Stylus Multi-Token',
+    'maxxit': 'Maxxit Lazy Trader',
   };
   return labels[type] || type;
 }
