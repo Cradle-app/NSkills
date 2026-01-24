@@ -132,6 +132,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'erc20-stylus',
       'erc721-stylus',
       'erc1155-stylus',
+      'maxxit',
       'onchain-activity',
       "aixbt-momentum",
       "aixbt-signals",
