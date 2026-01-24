@@ -1,0 +1,486 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { ethers } from 'ethers';
+import { 
+  Coins, 
+  Send, 
+  ArrowRightLeft, 
+  Shield, 
+  Flame, 
+  RefreshCw, 
+  Check,
+  Wallet,
+  TrendingUp,
+  AlertCircle,
+  ExternalLink,
+  Loader2,
+  Sparkles
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
+import { arbitrum, arbitrumSepolia } from 'wagmi/chains';
+
+// ERC20 ABI for the deployed Stylus contract (IStylusToken)
+const ERC20_ABI = [
+  // ERC20 Standard Interface
+  "function name() view returns (string)",
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)",
+  "function totalSupply() view returns (uint256)",
+  "function balanceOf(address account) view returns (uint256)",
+  "function transfer(address recipient, uint256 amount) returns (bool)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function transferFrom(address sender, address recipient, uint256 amount) returns (bool)",
+  // StylusToken Specific Functions (from lib.rs)
+  "function mint(uint256 value)",
+  "function mintTo(address to, uint256 value)",
+  "function burn(uint256 value)",
+];
+
+// Default deployed contract address
+const DEFAULT_CONTRACT_ADDRESS = '0x5af02ab1d47cc700c1ec4578618df15b8c9c565e';
+
+interface ERC20InteractionPanelProps {
+  contractAddress?: string;
+  rpcUrl?: string;
+  network?: 'arbitrum' | 'arbitrum-sepolia';
+}
+
+interface TxStatus {
+  status: 'idle' | 'pending' | 'success' | 'error';
+  message: string;
+  hash?: string;
+}
+
+export function ERC20InteractionPanel({
+  contractAddress: initialAddress = DEFAULT_CONTRACT_ADDRESS,
+  rpcUrl: initialRpcUrl = '',
+  network = 'arbitrum-sepolia',
+}: ERC20InteractionPanelProps) {
+  const [contractAddress, setContractAddress] = useState(initialAddress);
+  const [rpcUrl, setRpcUrl] = useState(initialRpcUrl || (network === 'arbitrum' ? 'https://arb1.arbitrum.io/rpc' : 'https://sepolia-rollup.arbitrum.io/rpc'));
+  const [isConnected, setIsConnected] = useState(false);
+
+  // Wagmi hooks for wallet connection
+  const { address: userAddress, isConnected: walletConnected } = useAccount();
+  const chainId = network === 'arbitrum' ? arbitrum.id : arbitrumSepolia.id;
+  const publicClient = usePublicClient({ chainId });
+  const { data: walletClient } = useWalletClient({ chainId });
+
+  // Token info
+  const [tokenName, setTokenName] = useState<string | null>(null);
+  const [tokenSymbol, setTokenSymbol] = useState<string | null>(null);
+  const [decimals, setDecimals] = useState<number>(18);
+  const [totalSupply, setTotalSupply] = useState<string | null>(null);
+  const [userBalance, setUserBalance] = useState<string | null>(null);
+
+  // Form inputs - Write operations
+  const [transferTo, setTransferTo] = useState('');
+  const [transferAmount, setTransferAmount] = useState('');
+  const [approveSpender, setApproveSpender] = useState('');
+  const [approveAmount, setApproveAmount] = useState('');
+  const [mintAmount, setMintAmount] = useState('');
+  const [mintToAddress, setMintToAddress] = useState('');
+  const [mintToAmount, setMintToAmount] = useState('');
+  const [burnAmount, setBurnAmount] = useState('');
+  
+  // Form inputs - Read operations
+  const [allowanceOwner, setAllowanceOwner] = useState('');
+  const [allowanceSpender, setAllowanceSpender] = useState('');
+  const [allowanceResult, setAllowanceResult] = useState<string | null>(null);
+  const [balanceCheckAddress, setBalanceCheckAddress] = useState('');
+  const [balanceCheckResult, setBalanceCheckResult] = useState<string | null>(null);
+
+  // Transaction status
+  const [txStatus, setTxStatus] = useState<TxStatus>({ status: 'idle', message: '' });
+
+  const explorerUrl = network === 'arbitrum' ? 'https://arbiscan.io' : 'https://sepolia.arbiscan.io';
+
+  const getReadContract = useCallback(() => {
+    if (!contractAddress || !rpcUrl) return null;
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    return new ethers.Contract(contractAddress, ERC20_ABI, provider);
+  }, [contractAddress, rpcUrl]);
+
+  const getWriteContract = useCallback(async () => {
+    if (!contractAddress || !walletClient) return null;
+    const provider = new ethers.BrowserProvider(walletClient as any);
+    const signer = await provider.getSigner();
+    return new ethers.Contract(contractAddress, ERC20_ABI, signer);
+  }, [contractAddress, walletClient]);
+
+  const fetchTokenInfo = useCallback(async () => {
+    const contract = getReadContract();
+    if (!contract) return;
+
+    try {
+      const [name, symbol, dec, supply] = await Promise.all([
+        contract.name().catch(() => null),
+        contract.symbol().catch(() => null),
+        contract.decimals().catch(() => 18),
+        contract.totalSupply().catch(() => 0),
+      ]);
+      
+      setTokenName(name);
+      setTokenSymbol(symbol);
+      setDecimals(Number(dec));
+      setTotalSupply(ethers.formatUnits(supply, dec));
+      
+      if (userAddress) {
+        const balance = await contract.balanceOf(userAddress);
+        setUserBalance(ethers.formatUnits(balance, dec));
+      }
+      setIsConnected(true);
+    } catch (error) {
+      console.error('Error fetching token info:', error);
+      setIsConnected(false);
+    }
+  }, [getReadContract, userAddress]);
+
+  useEffect(() => {
+    if (contractAddress && rpcUrl) {
+      fetchTokenInfo();
+    }
+  }, [contractAddress, rpcUrl, fetchTokenInfo, userAddress]);
+
+  const handleTransaction = async (
+    operation: () => Promise<ethers.TransactionResponse>,
+    successMessage: string
+  ) => {
+    if (txStatus.status === 'pending' || !walletConnected) return;
+    
+    try {
+      setTxStatus({ status: 'pending', message: 'Confirming...' });
+      const tx = await operation();
+      setTxStatus({ status: 'pending', message: 'Waiting...', hash: tx.hash });
+      await tx.wait();
+      setTxStatus({ status: 'success', message: successMessage, hash: tx.hash });
+      fetchTokenInfo();
+    } catch (error: any) {
+      setTxStatus({ 
+        status: 'error', 
+        message: error.reason || error.message || 'Failed' 
+      });
+    }
+    setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 5000);
+  };
+
+  const handleTransfer = async () => {
+    const contract = await getWriteContract();
+    if (!contract || !transferTo || !transferAmount) return;
+    handleTransaction(
+      () => contract.transfer(transferTo, ethers.parseUnits(transferAmount, decimals)),
+      `Transferred ${transferAmount} ${tokenSymbol || 'tokens'}!`
+    );
+  };
+
+  const handleApprove = async () => {
+    const contract = await getWriteContract();
+    if (!contract || !approveSpender || !approveAmount) return;
+    handleTransaction(
+      () => contract.approve(approveSpender, ethers.parseUnits(approveAmount, decimals)),
+      `Approved ${approveAmount} ${tokenSymbol || 'tokens'}!`
+    );
+  };
+
+  const handleMint = async () => {
+    const contract = await getWriteContract();
+    if (!contract || !mintAmount) return;
+    handleTransaction(
+      () => contract.mint(ethers.parseUnits(mintAmount, decimals)),
+      `Minted ${mintAmount} ${tokenSymbol || 'tokens'} to yourself!`
+    );
+  };
+
+  const handleMintTo = async () => {
+    const contract = await getWriteContract();
+    if (!contract || !mintToAddress || !mintToAmount) return;
+    handleTransaction(
+      () => contract.mintTo(mintToAddress, ethers.parseUnits(mintToAmount, decimals)),
+      `Minted ${mintToAmount} ${tokenSymbol || 'tokens'}!`
+    );
+  };
+
+  const handleBurn = async () => {
+    const contract = await getWriteContract();
+    if (!contract || !burnAmount) return;
+    handleTransaction(
+      () => contract.burn(ethers.parseUnits(burnAmount, decimals)),
+      `Burned ${burnAmount} ${tokenSymbol || 'tokens'}!`
+    );
+  };
+
+  const checkAllowance = async () => {
+    const contract = getReadContract();
+    if (!contract || !allowanceOwner || !allowanceSpender) return;
+    try {
+      const allowance = await contract.allowance(allowanceOwner, allowanceSpender);
+      setAllowanceResult(ethers.formatUnits(allowance, decimals));
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const checkBalance = async () => {
+    const contract = getReadContract();
+    if (!contract || !balanceCheckAddress) return;
+    try {
+      const balance = await contract.balanceOf(balanceCheckAddress);
+      setBalanceCheckResult(ethers.formatUnits(balance, decimals));
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="p-3 rounded-lg border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-transparent">
+        <div className="flex items-center gap-2 mb-1">
+          <Coins className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-medium text-white">
+            {tokenName || 'ERC-20'} {tokenSymbol ? `(${tokenSymbol})` : 'Token'}
+          </span>
+        </div>
+        <p className="text-[10px] text-forge-muted">Stylus Contract Interaction</p>
+      </div>
+
+      {/* Wallet Status */}
+      <div className={cn(
+        'p-2.5 rounded-lg border',
+        walletConnected ? 'border-green-500/30 bg-green-500/5' : 'border-amber-500/30 bg-amber-500/5'
+      )}>
+        <div className="flex items-center gap-2">
+          <Wallet className={cn('w-3.5 h-3.5', walletConnected ? 'text-green-400' : 'text-amber-400')} />
+          {walletConnected ? (
+            <span className="text-[10px] text-green-300">
+              Connected: <code className="text-green-400">{userAddress?.slice(0, 6)}...{userAddress?.slice(-4)}</code>
+            </span>
+          ) : (
+            <span className="text-[10px] text-amber-300">Connect wallet via Wallet Auth node for write ops</span>
+          )}
+        </div>
+      </div>
+
+      {/* Connection */}
+      <div className="space-y-2">
+        <label className="text-xs text-forge-muted mb-1 block">Contract Address</label>
+        <input
+          type="text"
+          value={contractAddress}
+          onChange={(e) => setContractAddress(e.target.value)}
+          placeholder="0x..."
+          className="w-full px-3 py-2 bg-forge-bg border border-forge-border/50 rounded-lg text-xs text-white placeholder-forge-muted focus:outline-none focus:border-emerald-500/50"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-xs text-forge-muted mb-1 block">RPC URL</label>
+        <input
+          type="text"
+          value={rpcUrl}
+          onChange={(e) => setRpcUrl(e.target.value)}
+          placeholder="https://..."
+          className="w-full px-3 py-2 bg-forge-bg border border-forge-border/50 rounded-lg text-xs text-white placeholder-forge-muted focus:outline-none focus:border-emerald-500/50"
+        />
+      </div>
+
+      <button
+        onClick={fetchTokenInfo}
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-medium transition-colors"
+      >
+        <RefreshCw className="w-3.5 h-3.5" /> Refresh
+      </button>
+
+      {/* Transaction Status */}
+      {txStatus.status !== 'idle' && (
+        <div className={cn(
+          'rounded-lg p-2.5 border flex items-start gap-2',
+          txStatus.status === 'pending' && 'bg-blue-500/10 border-blue-500/30',
+          txStatus.status === 'success' && 'bg-emerald-500/10 border-emerald-500/30',
+          txStatus.status === 'error' && 'bg-red-500/10 border-red-500/30'
+        )}>
+          {txStatus.status === 'pending' && <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin shrink-0" />}
+          {txStatus.status === 'success' && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+          {txStatus.status === 'error' && <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />}
+          <div className="flex-1 min-w-0">
+            <p className={cn(
+              'text-[10px] font-medium truncate',
+              txStatus.status === 'pending' && 'text-blue-300',
+              txStatus.status === 'success' && 'text-emerald-300',
+              txStatus.status === 'error' && 'text-red-300'
+            )}>{txStatus.message}</p>
+            {txStatus.hash && (
+              <a href={`${explorerUrl}/tx/${txStatus.hash}`} target="_blank" rel="noopener noreferrer"
+                className="text-[9px] text-forge-muted hover:text-white flex items-center gap-1">
+                Explorer <ExternalLink className="w-2.5 h-2.5" />
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Token Stats */}
+      {isConnected && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+            <div className="flex items-center gap-1.5">
+              <TrendingUp className="w-3 h-3 text-emerald-400" />
+              <span className="text-[10px] text-forge-muted">Total Supply</span>
+            </div>
+            <span className="text-xs font-medium text-white">{totalSupply ? Number(totalSupply).toLocaleString() : '—'}</span>
+          </div>
+          {walletConnected && (
+            <div className="flex items-center justify-between p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+              <div className="flex items-center gap-1.5">
+                <Wallet className="w-3 h-3 text-teal-400" />
+                <span className="text-[10px] text-forge-muted">Your Balance</span>
+              </div>
+              <span className="text-xs font-medium text-white">{userBalance ? Number(userBalance).toLocaleString() : '—'}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Write Operations */}
+      {isConnected && walletConnected && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Send className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-xs font-medium text-white">Write Operations</span>
+          </div>
+
+          {/* Transfer */}
+          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+            <span className="text-[10px] font-medium text-emerald-400">Transfer</span>
+            <input type="text" value={transferTo} onChange={(e) => setTransferTo(e.target.value)}
+              placeholder="Recipient (0x...)"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <input type="number" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)}
+              placeholder="Amount"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <button onClick={handleTransfer} disabled={txStatus.status === 'pending'}
+              className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              Transfer
+            </button>
+          </div>
+
+          {/* Approve */}
+          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Shield className="w-3 h-3 text-blue-400" />
+              <span className="text-[10px] font-medium text-blue-400">Approve Spender</span>
+            </div>
+            <input type="text" value={approveSpender} onChange={(e) => setApproveSpender(e.target.value)}
+              placeholder="Spender (0x...)"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <input type="number" value={approveAmount} onChange={(e) => setApproveAmount(e.target.value)}
+              placeholder="Amount"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <button onClick={handleApprove} disabled={txStatus.status === 'pending'}
+              className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              Approve
+            </button>
+          </div>
+
+          {/* Mint (to self) */}
+          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-violet-400" />
+              <span className="text-[10px] font-medium text-violet-400">Mint (to yourself)</span>
+            </div>
+            <input type="number" value={mintAmount} onChange={(e) => setMintAmount(e.target.value)}
+              placeholder="Amount"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <button onClick={handleMint} disabled={txStatus.status === 'pending'}
+              className="w-full py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              Mint
+            </button>
+          </div>
+
+          {/* Mint To */}
+          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-fuchsia-400" />
+              <span className="text-[10px] font-medium text-fuchsia-400">Mint To Address</span>
+            </div>
+            <input type="text" value={mintToAddress} onChange={(e) => setMintToAddress(e.target.value)}
+              placeholder="To Address (0x...)"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <input type="number" value={mintToAmount} onChange={(e) => setMintToAmount(e.target.value)}
+              placeholder="Amount"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <button onClick={handleMintTo} disabled={txStatus.status === 'pending'}
+              className="w-full py-1.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              Mint To
+            </button>
+          </div>
+
+          {/* Burn */}
+          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Flame className="w-3 h-3 text-orange-400" />
+              <span className="text-[10px] font-medium text-orange-400">Burn Tokens</span>
+            </div>
+            <input type="number" value={burnAmount} onChange={(e) => setBurnAmount(e.target.value)}
+              placeholder="Amount"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <button onClick={handleBurn} disabled={txStatus.status === 'pending'}
+              className="w-full py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              Burn
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Read Operations */}
+      {isConnected && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <ArrowRightLeft className="w-3.5 h-3.5 text-purple-400" />
+            <span className="text-xs font-medium text-white">Read Operations</span>
+          </div>
+
+          {/* Check Allowance */}
+          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+            <span className="text-[10px] font-medium text-purple-400">Check Allowance</span>
+            <input type="text" value={allowanceOwner} onChange={(e) => setAllowanceOwner(e.target.value)}
+              placeholder="Owner (0x...)"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <input type="text" value={allowanceSpender} onChange={(e) => setAllowanceSpender(e.target.value)}
+              placeholder="Spender (0x...)"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <button onClick={checkAllowance}
+              className="w-full py-1.5 bg-purple-600/50 hover:bg-purple-600 text-white rounded text-[10px] font-medium">
+              Check
+            </button>
+            {allowanceResult !== null && (
+              <div className="p-2 bg-purple-500/10 border border-purple-500/30 rounded">
+                <p className="text-[10px] text-purple-300">Allowance: <span className="font-medium text-white">{allowanceResult}</span></p>
+              </div>
+            )}
+          </div>
+
+          {/* Check Balance */}
+          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+            <span className="text-[10px] font-medium text-cyan-400">Check Balance</span>
+            <input type="text" value={balanceCheckAddress} onChange={(e) => setBalanceCheckAddress(e.target.value)}
+              placeholder="Address (0x...)"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <button onClick={checkBalance}
+              className="w-full py-1.5 bg-cyan-600/50 hover:bg-cyan-600 text-white rounded text-[10px] font-medium">
+              Check
+            </button>
+            {balanceCheckResult !== null && (
+              <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded">
+                <p className="text-[10px] text-cyan-300">Balance: <span className="font-medium text-white">{Number(balanceCheckResult).toLocaleString()}</span></p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
