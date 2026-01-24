@@ -56,6 +56,15 @@ const nodeTypes: NodeTypes = {
   'aixbt-signals': ForgeNode,
   'aixbt-indigo': ForgeNode,
   'aixbt-observer': ForgeNode,
+  // Superposition L3
+  'superposition-network': ForgeNode,
+  'superposition-bridge': ForgeNode,
+  'superposition-longtail': ForgeNode,
+  'superposition-super-assets': ForgeNode,
+  'superposition-thirdweb': ForgeNode,
+  'superposition-utility-mining': ForgeNode,
+  'superposition-faucet': ForgeNode,
+  'superposition-meow-domains': ForgeNode,
 };
 
 // Custom edge types

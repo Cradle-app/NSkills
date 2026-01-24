@@ -133,7 +133,15 @@ export function getDefaultRegistry(): PluginRegistry {
       "aixbt-momentum",
       "aixbt-signals",
       "aixbt-indigo",
-      "aixbt-observer"
+      "aixbt-observer",
+      "superposition-bridge",
+      "superposition-network",
+      "superposition-longtail",
+      "superposition-super-assets",
+      'superposition-thirdweb',
+      'superposition-utility-mining',
+      'superposition-faucet',
+      'superposition-meow-domains',
     ]);
   }
   return defaultRegistry;

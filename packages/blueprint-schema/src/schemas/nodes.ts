@@ -11,6 +11,7 @@ export const NodeCategory = z.enum([
   'quality',      // CI/test/lint/format scaffolding
   'telegram',     // Telegram-specific integrations
   'intelligence', // AIXBT Market Intelligence
+  'superposition', // Superposition L3 integrations
 ]);
 export type NodeCategory = z.infer<typeof NodeCategory>;
 
@@ -58,6 +59,16 @@ export const NodeType = z.enum([
   'aixbt-signals',
   'aixbt-indigo',
   'aixbt-observer',
+
+  // Superposition L3
+  'superposition-network',
+  'superposition-bridge',
+  'superposition-longtail',
+  'superposition-super-assets',
+  'superposition-thirdweb',
+  'superposition-utility-mining',
+  'superposition-faucet',
+  'superposition-meow-domains',
 ]);
 export type NodeType = z.infer<typeof NodeType>;
 
@@ -434,6 +445,150 @@ export const AIXBTObserverConfig = BaseNodeConfig.extend({
 });
 export type AIXBTObserverConfig = z.infer<typeof AIXBTObserverConfig>;
 
+// ============================================================================
+// SUPERPOSITION L3 CONFIGURATIONS
+// ============================================================================
+
+/**
+ * Superposition Network configuration
+ * Foundation for all Superposition apps - chain definitions, RPC config
+ */
+export const SuperpositionNetworkConfig = BaseNodeConfig.extend({
+  network: z.enum(['mainnet', 'testnet']).default('mainnet'),
+  includeTestnet: z.boolean().default(true),
+  generateChainConfig: z.boolean().default(true),
+  generateConstants: z.boolean().default(true),
+  customRpcUrl: z.string().url().optional(),
+  enableWebSocket: z.boolean().default(true),
+  generateNetworkSwitcher: z.boolean().default(true),
+});
+export type SuperpositionNetworkConfig = z.infer<typeof SuperpositionNetworkConfig>;
+
+/**
+ * Superposition Bridge configuration
+ * Bridge assets from Arbitrum to Superposition via Li.Fi/Stargate
+ */
+export const SuperpositionBridgeConfig = BaseNodeConfig.extend({
+  bridgeProvider: z.enum(['lifi', 'stargate', 'superbridge']).default('lifi'),
+  supportedTokens: z.array(z.enum(['ETH', 'USDC', 'USDT', 'WETH', 'ARB'])).default(['ETH', 'USDC']),
+  sourceChains: z.array(z.enum(['arbitrum', 'ethereum', 'optimism', 'base'])).default(['arbitrum']),
+  generateUI: z.boolean().default(true),
+  generateHooks: z.boolean().default(true),
+  enableWithdraw: z.boolean().default(true),
+  slippageTolerance: z.number().min(0.1).max(5).default(0.5),
+});
+export type SuperpositionBridgeConfig = z.infer<typeof SuperpositionBridgeConfig>;
+
+/**
+ * Superposition Longtail AMM configuration
+ * Interact with Superposition's native DEX for swaps and liquidity
+ */
+export const SuperpositionLongtailConfig = BaseNodeConfig.extend({
+  features: z.array(z.enum([
+    'swap',
+    'liquidity',
+    'pool-queries',
+    'price-feeds',
+  ])).default(['swap', 'pool-queries']),
+  generateSwapUI: z.boolean().default(true),
+  generateLiquidityUI: z.boolean().default(false),
+  generateHooks: z.boolean().default(true),
+  defaultSlippage: z.number().min(0.1).max(10).default(0.5),
+  includePoolAnalytics: z.boolean().default(true),
+});
+export type SuperpositionLongtailConfig = z.infer<typeof SuperpositionLongtailConfig>;
+
+/**
+ * Superposition Super Assets configuration
+ * Work with yield-bearing wrapped tokens
+ */
+export const SuperpositionSuperAssetsConfig = BaseNodeConfig.extend({
+  assets: z.array(z.enum(['sUSDC', 'sETH', 'sWETH', 'all'])).default(['sUSDC', 'sETH']),
+  generateWrapUnwrap: z.boolean().default(true),
+  generateYieldTracking: z.boolean().default(true),
+  generateBalanceDisplay: z.boolean().default(true),
+  generateHooks: z.boolean().default(true),
+  autoCompound: z.boolean().default(false),
+});
+export type SuperpositionSuperAssetsConfig = z.infer<typeof SuperpositionSuperAssetsConfig>;
+
+/**
+ * Superposition Thirdweb configuration
+ * Deploy and interact with contracts using Thirdweb SDK
+ */
+export const SuperpositionThirdwebConfig = BaseNodeConfig.extend({
+  features: z.array(z.enum([
+    'deploy-contract',
+    'deploy-published',
+    'contract-interaction',
+    'nft-drops',
+    'token-drops',
+  ])).default(['deploy-contract', 'contract-interaction']),
+  generateThirdwebProvider: z.boolean().default(true),
+  generateDeployHelpers: z.boolean().default(true),
+  generateContractHooks: z.boolean().default(true),
+  includePrebuiltContracts: z.boolean().default(true),
+  gasless: z.boolean().default(false),
+});
+export type SuperpositionThirdwebConfig = z.infer<typeof SuperpositionThirdwebConfig>;
+
+/**
+ * Superposition Utility Mining configuration
+ * Track and claim utility mining rewards from on-chain activity
+ */
+export const SuperpositionUtilityMiningConfig = BaseNodeConfig.extend({
+  generateRewardTracking: z.boolean().default(true),
+  generateClaimFunction: z.boolean().default(true),
+  generateRewardHistory: z.boolean().default(true),
+  generateUI: z.boolean().default(true),
+  trackTransactionTypes: z.array(z.enum([
+    'swap',
+    'transfer',
+    'nft-purchase',
+    'liquidity',
+    'all',
+  ])).default(['all']),
+  includeLeaderboard: z.boolean().default(false),
+});
+export type SuperpositionUtilityMiningConfig = z.infer<typeof SuperpositionUtilityMiningConfig>;
+
+/**
+ * Superposition Faucet configuration
+ * Request testnet tokens for development
+ */
+export const SuperpositionFaucetConfig = BaseNodeConfig.extend({
+  tokens: z.array(z.enum(['SPN', 'wSPN', 'CAT', 'fUSDC', 'all'])).default(['SPN', 'fUSDC']),
+  generateFaucetHook: z.boolean().default(true),
+  generateFaucetUI: z.boolean().default(true),
+  includeCooldownTimer: z.boolean().default(true),
+  includeBalanceCheck: z.boolean().default(true),
+});
+export type SuperpositionFaucetConfig = z.infer<typeof SuperpositionFaucetConfig>;
+
+/**
+ * Superposition Meow Domains configuration
+ * Web3 identity with .meow domain registration and resolution
+ */
+export const SuperpositionMeowDomainsConfig = BaseNodeConfig.extend({
+  features: z.array(z.enum([
+    'resolve',
+    'register',
+    'metadata',
+    'reverse-lookup',
+  ])).default(['resolve', 'metadata']),
+  generateResolverHook: z.boolean().default(true),
+  generateRegistrationHook: z.boolean().default(false),
+  generateDomainDisplay: z.boolean().default(true),
+  supportedMetadata: z.array(z.enum([
+    'twitter',
+    'url',
+    'email',
+    'avatar',
+    'description',
+  ])).default(['twitter', 'url', 'avatar']),
+});
+export type SuperpositionMeowDomainsConfig = z.infer<typeof SuperpositionMeowDomainsConfig>;
+
 /**
  * Union of all node configurations
  */
@@ -464,6 +619,15 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('aixbt-signals'), config: AIXBTSignalsConfig }),
   z.object({ type: z.literal('aixbt-indigo'), config: AIXBTIndigoConfig }),
   z.object({ type: z.literal('aixbt-observer'), config: AIXBTObserverConfig }),
+  // Superposition L3
+  z.object({ type: z.literal('superposition-network'), config: SuperpositionNetworkConfig }),
+  z.object({ type: z.literal('superposition-bridge'), config: SuperpositionBridgeConfig }),
+  z.object({ type: z.literal('superposition-longtail'), config: SuperpositionLongtailConfig }),
+  z.object({ type: z.literal('superposition-super-assets'), config: SuperpositionSuperAssetsConfig }),
+  z.object({ type: z.literal('superposition-thirdweb'), config: SuperpositionThirdwebConfig }),
+  z.object({ type: z.literal('superposition-utility-mining'), config: SuperpositionUtilityMiningConfig }),
+  z.object({ type: z.literal('superposition-faucet'), config: SuperpositionFaucetConfig }),
+  z.object({ type: z.literal('superposition-meow-domains'), config: SuperpositionMeowDomainsConfig }),
 ]);
 export type NodeConfig = z.infer<typeof NodeConfig>;
 
@@ -513,6 +677,15 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'aixbt-signals': 'intelligence',
     'aixbt-indigo': 'intelligence',
     'aixbt-observer': 'intelligence',
+    // Superposition L3
+    'superposition-network': 'superposition',
+    'superposition-bridge': 'superposition',
+    'superposition-longtail': 'superposition',
+    'superposition-super-assets': 'superposition',
+    'superposition-thirdweb': 'superposition',
+    'superposition-utility-mining': 'superposition',
+    'superposition-faucet': 'superposition',
+    'superposition-meow-domains': 'superposition',
   };
   return categoryMap[type];
 }
@@ -548,6 +721,15 @@ export function getConfigSchemaForType(type: NodeType) {
     'aixbt-signals': AIXBTSignalsConfig,
     'aixbt-indigo': AIXBTIndigoConfig,
     'aixbt-observer': AIXBTObserverConfig,
+    // Superposition L3
+    'superposition-network': SuperpositionNetworkConfig,
+    'superposition-bridge': SuperpositionBridgeConfig,
+    'superposition-longtail': SuperpositionLongtailConfig,
+    'superposition-super-assets': SuperpositionSuperAssetsConfig,
+    'superposition-thirdweb': SuperpositionThirdwebConfig,
+    'superposition-utility-mining': SuperpositionUtilityMiningConfig,
+    'superposition-faucet': SuperpositionFaucetConfig,
+    'superposition-meow-domains': SuperpositionMeowDomainsConfig,
   };
   return schemaMap[type];
 }

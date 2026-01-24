@@ -31,6 +31,16 @@ import { OnchainActivityForm } from './forms/onchain-activity-form';
 import { AIXBTForm } from './forms/aixbt-form';
 import { MaxxitLazyTradingForm } from './forms/maxxit-lazy-trading-form';
 
+// Superposition L3 forms
+import { SuperpositionNetworkForm } from './forms/superposition-network-form';
+import { SuperpositionBridgeForm } from './forms/superposition-bridge-form';
+import { SuperpositionLongtailForm } from './forms/superposition-longtail-form';
+import { SuperpositionSuperAssetsForm } from './forms/superposition-super-assets-form';
+import { SuperpositionThirdwebForm } from './forms/superposition-thirdweb-form';
+import { SuperpositionUtilityMiningForm } from './forms/superposition-utility-mining-form';
+import { SuperpositionFaucetForm } from './forms/superposition-faucet-form';
+import { SuperpositionMeowDomainsForm } from './forms/superposition-meow-domains-form';
+
 
 export function ConfigPanel() {
   const { blueprint, selectedNodeId, selectNode } = useBlueprintStore();
@@ -205,6 +215,32 @@ export function ConfigPanel() {
             selectedNode.type === 'aixbt-observer') && (
               <AIXBTForm nodeId={selectedNode.id} type={selectedNode.type} config={selectedNode.config} />
             )}
+
+          {/* Superposition L3 nodes */}
+          {selectedNode.type === 'superposition-network' && (
+            <SuperpositionNetworkForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+          {selectedNode.type === 'superposition-bridge' && (
+            <SuperpositionBridgeForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+          {selectedNode.type === 'superposition-longtail' && (
+            <SuperpositionLongtailForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+          {selectedNode.type === 'superposition-super-assets' && (
+            <SuperpositionSuperAssetsForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+          {selectedNode.type === 'superposition-thirdweb' && (
+            <SuperpositionThirdwebForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+          {selectedNode.type === 'superposition-utility-mining' && (
+            <SuperpositionUtilityMiningForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+          {selectedNode.type === 'superposition-faucet' && (
+            <SuperpositionFaucetForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
+          {selectedNode.type === 'superposition-meow-domains' && (
+            <SuperpositionMeowDomainsForm nodeId={selectedNode.id} config={selectedNode.config} />
+          )}
         </motion.div>
       </AnimatePresence>
     </aside>

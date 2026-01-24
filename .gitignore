@@ -21,6 +21,8 @@ build/
 .vscode/
 *.swp
 *.swo
+.cursor/
+references/
 
 # OS
 .DS_Store

@@ -280,6 +280,70 @@ const NODE_CATEGORIES: NodeCategory[] = [
       },
     ],
   },
+  {
+    id: 'superposition',
+    name: 'Superposition',
+    icon: Layers,
+    color: 'accent-cyan',
+    nodes: [
+      {
+        id: 'superposition-network',
+        name: 'Network Config',
+        description: 'Chain config, RPC, and contract addresses',
+        icon: Globe,
+        color: 'accent-cyan',
+      },
+      {
+        id: 'superposition-bridge',
+        name: 'Bridge',
+        description: 'Bridge assets from Arbitrum via Li.Fi',
+        icon: ArrowLeftRight,
+        color: 'accent-cyan',
+      },
+      {
+        id: 'superposition-longtail',
+        name: 'Longtail AMM',
+        description: 'Swap and liquidity on Longtail DEX',
+        icon: TrendingUp,
+        color: 'accent-cyan',
+      },
+      {
+        id: 'superposition-super-assets',
+        name: 'Super Assets',
+        description: 'Yield-bearing wrapped tokens',
+        icon: Sparkles,
+        color: 'accent-cyan',
+      },
+      {
+        id: 'superposition-thirdweb',
+        name: 'Thirdweb Deploy',
+        description: 'Deploy contracts using Thirdweb SDK',
+        icon: Box,
+        color: 'accent-cyan',
+      },
+      {
+        id: 'superposition-utility-mining',
+        name: 'Utility Mining',
+        description: 'Track and claim activity rewards',
+        icon: Zap,
+        color: 'accent-cyan',
+      },
+      {
+        id: 'superposition-faucet',
+        name: 'Testnet Faucet',
+        description: 'Request testnet tokens for development',
+        icon: Database,
+        color: 'accent-cyan',
+      },
+      {
+        id: 'superposition-meow-domains',
+        name: 'Meow Domains',
+        description: '.meow Web3 identity and resolution',
+        icon: Key,
+        color: 'accent-cyan',
+      },
+    ],
+  },
 ];
 
 export function NodePalette() {

@@ -62,6 +62,15 @@ export function nodeTypeToLabel(type: string): string {
     'aixbt-observer': 'AIXBT Market Observer',
     // Legacy
     'maxxit': 'Maxxit Lazy Trader',
+    // Superposition L3
+    'superposition-network': 'Superposition Network',
+    'superposition-bridge': 'Superposition Bridge',
+    'superposition-longtail': 'Longtail AMM',
+    'superposition-super-assets': 'Super Assets',
+    'superposition-thirdweb': 'Thirdweb Deploy',
+    'superposition-utility-mining': 'Utility Mining',
+    'superposition-faucet': 'Testnet Faucet',
+    'superposition-meow-domains': 'Meow Domains',
   };
   return labels[type] || type;
 }
@@ -102,6 +111,15 @@ export function nodeTypeToColor(type: string): string {
     'aixbt-observer': 'node-intelligence',
     // Legacy
     'maxxit': 'node-agents',
+    // Superposition L3
+    'superposition-network': 'accent-cyan',
+    'superposition-bridge': 'accent-cyan',
+    'superposition-longtail': 'accent-cyan',
+    'superposition-super-assets': 'accent-cyan',
+    'superposition-thirdweb': 'accent-cyan',
+    'superposition-utility-mining': 'accent-cyan',
+    'superposition-faucet': 'accent-cyan',
+    'superposition-meow-domains': 'accent-cyan',
   };
   return colors[type] || 'node-contracts';
 }

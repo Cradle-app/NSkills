@@ -57,7 +57,7 @@ export interface PluginPort {
   id: string;
   name: string;
   type: 'input' | 'output';
-  dataType: 'contract' | 'api' | 'types' | 'config' | 'any';
+  dataType: 'contract' | 'api' | 'types' | 'config' | 'code' | 'any';
   required?: boolean;
 }
 

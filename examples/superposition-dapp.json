@@ -1,0 +1,208 @@
+{
+  "id": "example-superposition-dapp",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "spn-network-1",
+      "type": "superposition-network",
+      "position": { "x": 100, "y": 100 },
+      "config": {
+        "network": "mainnet",
+        "includeTestnet": true,
+        "generateChainConfig": true,
+        "generateConstants": true,
+        "enableWebSocket": true,
+        "generateNetworkSwitcher": true
+      }
+    },
+    {
+      "id": "spn-bridge-1",
+      "type": "superposition-bridge",
+      "position": { "x": 400, "y": 100 },
+      "config": {
+        "bridgeProvider": "lifi",
+        "supportedTokens": ["ETH", "USDC", "WETH"],
+        "sourceChains": ["arbitrum", "ethereum"],
+        "generateUI": true,
+        "generateHooks": true,
+        "enableWithdraw": true,
+        "slippageTolerance": 0.5
+      }
+    },
+    {
+      "id": "spn-longtail-1",
+      "type": "superposition-longtail",
+      "position": { "x": 100, "y": 350 },
+      "config": {
+        "features": ["swap", "pool-queries", "liquidity"],
+        "generateSwapUI": true,
+        "generateLiquidityUI": false,
+        "generateHooks": true,
+        "defaultSlippage": 0.5,
+        "includePoolAnalytics": true
+      }
+    },
+    {
+      "id": "spn-super-assets-1",
+      "type": "superposition-super-assets",
+      "position": { "x": 400, "y": 350 },
+      "config": {
+        "assets": ["sUSDC", "sETH"],
+        "generateWrapUnwrap": true,
+        "generateYieldTracking": true,
+        "generateBalanceDisplay": true,
+        "generateHooks": true,
+        "autoCompound": false
+      }
+    },
+    {
+      "id": "spn-thirdweb-1",
+      "type": "superposition-thirdweb",
+      "position": { "x": 700, "y": 100 },
+      "config": {
+        "features": ["deploy-contract", "contract-interaction", "nft-drops"],
+        "generateThirdwebProvider": true,
+        "generateDeployHelpers": true,
+        "generateContractHooks": true,
+        "includePrebuiltContracts": true,
+        "gasless": false
+      }
+    },
+    {
+      "id": "spn-utility-mining-1",
+      "type": "superposition-utility-mining",
+      "position": { "x": 700, "y": 350 },
+      "config": {
+        "generateRewardTracking": true,
+        "generateClaimFunction": true,
+        "generateRewardHistory": true,
+        "generateUI": true,
+        "trackTransactionTypes": ["all"],
+        "includeLeaderboard": false
+      }
+    },
+    {
+      "id": "spn-faucet-1",
+      "type": "superposition-faucet",
+      "position": { "x": 100, "y": 600 },
+      "config": {
+        "tokens": ["SPN", "wSPN", "CAT", "fUSDC"],
+        "generateFaucetHook": true,
+        "generateFaucetUI": true,
+        "includeCooldownTimer": true,
+        "includeBalanceCheck": true
+      }
+    },
+    {
+      "id": "spn-meow-domains-1",
+      "type": "superposition-meow-domains",
+      "position": { "x": 400, "y": 600 },
+      "config": {
+        "features": ["resolve", "metadata", "reverse-lookup"],
+        "generateResolverHook": true,
+        "generateRegistrationHook": false,
+        "generateDomainDisplay": true,
+        "supportedMetadata": ["twitter", "url", "avatar", "description"]
+      }
+    },
+    {
+      "id": "wallet-1",
+      "type": "wallet-auth",
+      "position": { "x": 1000, "y": 100 },
+      "config": {
+        "provider": "rainbowkit",
+        "walletConnectEnabled": true,
+        "siweEnabled": true,
+        "socialLogins": [],
+        "sessionPersistence": true,
+        "appName": "Superposition DApp"
+      }
+    },
+    {
+      "id": "quality-1",
+      "type": "repo-quality-gates",
+      "position": { "x": 1000, "y": 350 },
+      "config": {
+        "ciProvider": "github-actions",
+        "testFramework": "vitest",
+        "linter": "biome",
+        "formatter": "biome",
+        "typecheck": true,
+        "preCommitHooks": true,
+        "coverageThreshold": 80,
+        "securityScanning": true,
+        "dependencyAudit": true
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-network-bridge",
+      "source": "spn-network-1",
+      "target": "spn-bridge-1",
+      "sourceHandle": "chain-config-out",
+      "targetHandle": "network-in"
+    },
+    {
+      "id": "edge-network-longtail",
+      "source": "spn-network-1",
+      "target": "spn-longtail-1",
+      "sourceHandle": "chain-config-out",
+      "targetHandle": "network-in"
+    },
+    {
+      "id": "edge-network-assets",
+      "source": "spn-network-1",
+      "target": "spn-super-assets-1",
+      "sourceHandle": "chain-config-out",
+      "targetHandle": "network-in"
+    },
+    {
+      "id": "edge-network-thirdweb",
+      "source": "spn-network-1",
+      "target": "spn-thirdweb-1",
+      "sourceHandle": "chain-config-out",
+      "targetHandle": "network-in"
+    },
+    {
+      "id": "edge-network-utility-mining",
+      "source": "spn-network-1",
+      "target": "spn-utility-mining-1",
+      "sourceHandle": "chain-config-out",
+      "targetHandle": "network-in"
+    },
+    {
+      "id": "edge-network-faucet",
+      "source": "spn-network-1",
+      "target": "spn-faucet-1",
+      "sourceHandle": "chain-config-out",
+      "targetHandle": "network-in"
+    },
+    {
+      "id": "edge-network-meow-domains",
+      "source": "spn-network-1",
+      "target": "spn-meow-domains-1",
+      "sourceHandle": "chain-config-out",
+      "targetHandle": "network-in"
+    }
+  ],
+  "config": {
+    "project": {
+      "name": "Superposition DeFi App",
+      "description": "A complete DeFi application on Superposition L3 with bridging, swapping, yield-bearing Super Assets, contract deployment, utility mining rewards, testnet faucet, and .meow domain integration",
+      "version": "0.1.0",
+      "license": "MIT",
+      "keywords": ["web3", "superposition", "defi", "bridge", "amm", "yield", "l3", "thirdweb", "utility-mining", "faucet", "meow-domains"]
+    },
+    "network": {
+      "chainId": 55244,
+      "name": "Superposition",
+      "isTestnet": false
+    },
+    "generateDocs": true,
+    "deployOnGenerate": false
+  },
+  "status": "draft",
+  "createdAt": "2026-01-23T00:00:00.000Z",
+  "updatedAt": "2026-01-23T00:00:00.000Z"
+}

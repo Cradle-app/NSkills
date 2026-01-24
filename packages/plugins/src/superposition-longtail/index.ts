@@ -1,0 +1,199 @@
+import { z } from 'zod';
+import {
+  BasePlugin,
+  type PluginMetadata,
+  type PluginPort,
+  type CodegenOutput,
+  type BlueprintNode,
+  type ExecutionContext,
+} from '@dapp-forge/plugin-sdk';
+import { SuperpositionLongtailConfig } from '@dapp-forge/blueprint-schema';
+import {
+  generateLongtailTypes,
+  generateLongtailABIs,
+  generateSwapHook,
+  generatePoolHook,
+  generateLiquidityHook,
+  generateSwapUI,
+  generateLongtailDocs,
+} from './templates';
+
+/**
+ * Superposition Longtail Plugin
+ * Generates integration for Longtail AMM on Superposition
+ */
+export class SuperpositionLongtailPlugin extends BasePlugin<z.infer<typeof SuperpositionLongtailConfig>> {
+  readonly metadata: PluginMetadata = {
+    id: 'superposition-longtail',
+    name: 'Longtail AMM',
+    version: '0.1.0',
+    description: 'Swap and liquidity integration for Longtail DEX on Superposition',
+    category: 'app',
+    tags: ['superposition', 'dex', 'amm', 'swap', 'liquidity', 'longtail'],
+  };
+
+  readonly configSchema = SuperpositionLongtailConfig as unknown as z.ZodType<z.infer<typeof SuperpositionLongtailConfig>>;
+
+  readonly ports: PluginPort[] = [
+    {
+      id: 'network-in',
+      name: 'Network Config',
+      type: 'input',
+      dataType: 'config',
+      required: false,
+    },
+    {
+      id: 'swap-hooks-out',
+      name: 'Swap Hooks',
+      type: 'output',
+      dataType: 'api',
+    },
+  ];
+
+  readonly dependencies = [
+    {
+      pluginId: 'superposition-network',
+      required: false,
+      dataMapping: {
+        chainConfig: 'chainConfig',
+      },
+    },
+  ];
+
+  getDefaultConfig(): Partial<z.infer<typeof SuperpositionLongtailConfig>> {
+    return {
+      features: ['swap', 'pool-queries'],
+      generateSwapUI: true,
+      generateLiquidityUI: false,
+      generateHooks: true,
+      defaultSlippage: 0.5,
+      includePoolAnalytics: true,
+    };
+  }
+
+  async generate(
+    node: BlueprintNode,
+    context: ExecutionContext
+  ): Promise<CodegenOutput> {
+    const config = this.configSchema.parse(node.config);
+    const output = this.createEmptyOutput();
+
+    const typesDir = 'src/types';
+    const abiDir = 'src/abi';
+    const hooksDir = 'src/hooks';
+    const componentsDir = 'src/components/longtail';
+
+    // Generate types
+    this.addFile(
+      output,
+      `${typesDir}/longtail.ts`,
+      generateLongtailTypes(config)
+    );
+
+    // Generate ABIs
+    this.addFile(
+      output,
+      `${abiDir}/longtail.ts`,
+      generateLongtailABIs()
+    );
+
+    // Generate hooks
+    if (config.generateHooks) {
+      // Swap hook (always included if swap feature enabled)
+      if (config.features.includes('swap')) {
+        this.addFile(
+          output,
+          `${hooksDir}/useLongtailSwap.ts`,
+          generateSwapHook(config)
+        );
+      }
+
+      // Pool queries hook
+      if (config.features.includes('pool-queries')) {
+        const poolHook = generatePoolHook(config);
+        if (poolHook) {
+          this.addFile(
+            output,
+            `${hooksDir}/useLongtailPool.ts`,
+            poolHook
+          );
+        }
+      }
+
+      // Liquidity hook
+      if (config.features.includes('liquidity')) {
+        const liquidityHook = generateLiquidityHook(config);
+        if (liquidityHook) {
+          this.addFile(
+            output,
+            `${hooksDir}/useLongtailLiquidity.ts`,
+            liquidityHook
+          );
+        }
+      }
+    }
+
+    // Generate UI components
+    if (config.generateSwapUI) {
+      const swapUI = generateSwapUI(config);
+      if (swapUI) {
+        this.addFile(
+          output,
+          `${componentsDir}/LongtailSwap.tsx`,
+          swapUI
+        );
+      }
+    }
+
+    // Generate index file
+    this.addFile(
+      output,
+      `${hooksDir}/longtail.ts`,
+      generateIndexFile(config)
+    );
+
+    // Add documentation
+    this.addDoc(
+      output,
+      'docs/superposition/longtail.md',
+      'Longtail AMM Integration',
+      generateLongtailDocs(config)
+    );
+
+    // Add scripts
+    this.addScript(output, 'longtail:test', 'echo "Longtail integration ready"', 'Test Longtail setup');
+
+    context.logger.info('Generated Longtail AMM integration', {
+      nodeId: node.id,
+      features: config.features,
+    });
+
+    return output;
+  }
+}
+
+/**
+ * Generate index file for Longtail exports
+ */
+function generateIndexFile(config: z.infer<typeof SuperpositionLongtailConfig>): string {
+  const exports: string[] = [
+    "export * from '../types/longtail';",
+    "export * from '../abi/longtail';",
+  ];
+
+  if (config.features.includes('swap')) {
+    exports.push("export * from './useLongtailSwap';");
+  }
+  if (config.features.includes('pool-queries')) {
+    exports.push("export * from './useLongtailPool';");
+  }
+  if (config.features.includes('liquidity')) {
+    exports.push("export * from './useLongtailLiquidity';");
+  }
+
+  return `// Longtail AMM Exports
+// Generated by Cradle - https://cradle.dev
+
+${exports.join('\n')}
+`;
+}

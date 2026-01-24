@@ -28,6 +28,16 @@ export {
   AIXBTObserverPlugin
 } from './aixbt-intelligence';
 
+// Superposition L3 plugins
+export { SuperpositionNetworkPlugin } from './superposition-network';
+export { SuperpositionBridgePlugin } from './superposition-bridge';
+export { SuperpositionLongtailPlugin } from './superposition-longtail';
+export { SuperpositionSuperAssetsPlugin } from './superposition-super-assets';
+export { SuperpositionThirdwebPlugin } from './superposition-thirdweb';
+export { SuperpositionUtilityMiningPlugin } from './superposition-utility-mining';
+export { SuperpositionFaucetPlugin } from './superposition-faucet';
+export { SuperpositionMeowDomainsPlugin } from './superposition-meow-domains';
+
 import { StylusContractPlugin } from './stylus-contract';
 import { StylusZKContractPlugin } from './stylus-zk-contract';
 import { X402PaywallPlugin } from './x402-paywall-api';
@@ -54,6 +64,17 @@ import {
   AIXBTIndigoPlugin,
   AIXBTObserverPlugin
 } from './aixbt-intelligence';
+
+// Superposition L3 plugins
+import { SuperpositionNetworkPlugin } from './superposition-network';
+import { SuperpositionBridgePlugin } from './superposition-bridge';
+import { SuperpositionLongtailPlugin } from './superposition-longtail';
+import { SuperpositionSuperAssetsPlugin } from './superposition-super-assets';
+import { SuperpositionThirdwebPlugin } from './superposition-thirdweb';
+import { SuperpositionUtilityMiningPlugin } from './superposition-utility-mining';
+import { SuperpositionFaucetPlugin } from './superposition-faucet';
+import { SuperpositionMeowDomainsPlugin } from './superposition-meow-domains';
+
 import { PluginRegistry, getDefaultRegistry } from '@dapp-forge/plugin-sdk';
 
 /**
@@ -89,6 +110,16 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new AIXBTSignalsPlugin());
   targetRegistry.register(new AIXBTIndigoPlugin());
   targetRegistry.register(new AIXBTObserverPlugin());
+
+  // Superposition L3 plugins
+  targetRegistry.register(new SuperpositionNetworkPlugin());
+  targetRegistry.register(new SuperpositionBridgePlugin());
+  targetRegistry.register(new SuperpositionLongtailPlugin());
+  targetRegistry.register(new SuperpositionSuperAssetsPlugin());
+  targetRegistry.register(new SuperpositionThirdwebPlugin());
+  targetRegistry.register(new SuperpositionUtilityMiningPlugin());
+  targetRegistry.register(new SuperpositionFaucetPlugin());
+  targetRegistry.register(new SuperpositionMeowDomainsPlugin());
 }
 
 /**
@@ -122,5 +153,14 @@ export function getOfficialPlugins() {
     new AIXBTSignalsPlugin(),
     new AIXBTIndigoPlugin(),
     new AIXBTObserverPlugin(),
+    // Superposition L3 plugins
+    new SuperpositionNetworkPlugin(),
+    new SuperpositionBridgePlugin(),
+    new SuperpositionLongtailPlugin(),
+    new SuperpositionSuperAssetsPlugin(),
+    new SuperpositionThirdwebPlugin(),
+    new SuperpositionUtilityMiningPlugin(),
+    new SuperpositionFaucetPlugin(),
+    new SuperpositionMeowDomainsPlugin(),
   ];
 }
