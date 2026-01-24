@@ -6,6 +6,17 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  webpack: (config, { isServer }) => {
+    // Ignore optional dependencies that cause warnings
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        '@react-native-async-storage/async-storage': false,
+        'pino-pretty': false,
+      };
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig;
