@@ -73,11 +73,7 @@ const DEFAULT_NODE_CONFIGS: Record<string, Record<string, unknown>> = {
     agentVersion: '0.1.0',
     capabilities: ['text-generation'],
     registryIntegration: true,
-    modelProvider: 'openai',
-    rateLimit: {
-      requestsPerMinute: 60,
-      tokensPerMinute: 100000,
-    },
+    selectedModel: 'openai/gpt-4o',
   },
   'repo-quality-gates': {
     ciProvider: 'github-actions',

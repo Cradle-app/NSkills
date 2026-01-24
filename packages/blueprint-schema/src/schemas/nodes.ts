@@ -131,7 +131,7 @@ export const ERC8004AgentConfig = BaseNodeConfig.extend({
   ])).min(1),
   registryIntegration: z.boolean().default(true),
   stakeAmount: z.string().regex(/^\d+$/).optional(),
-  modelProvider: z.enum(['openai', 'anthropic', 'local', 'custom']).default('openai'),
+  selectedModel: z.string().default('openai/gpt-4o'),
   rateLimit: z.object({
     requestsPerMinute: z.number().int().min(1).max(1000).default(60),
     tokensPerMinute: z.number().int().min(1000).max(1000000).default(100000),
@@ -215,8 +215,7 @@ export type EIP7702SmartEOAConfig = z.infer<typeof EIP7702SmartEOAConfig>;
  * Wallet Authentication configuration
  */
 export const WalletAuthConfig = BaseNodeConfig.extend({
-  provider: z.enum(['rainbowkit', 'web3modal', 'custom']).default('rainbowkit'),
-  walletConnectEnabled: z.boolean().default(true),
+  provider: z.enum(['rainbowkit', 'privy', 'custom']).default('rainbowkit'),
   siweEnabled: z.boolean().default(true),
   socialLogins: z.array(z.enum(['google', 'twitter', 'discord', 'github'])).default([]),
   sessionPersistence: z.boolean().default(true),
