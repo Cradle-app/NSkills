@@ -15,26 +15,45 @@ import {
   ExternalLink,
   Loader2,
   BarChart3,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles,
+  ArrowRightLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import { arbitrum, arbitrumSepolia } from 'wagmi/chains';
 
 // ERC1155 ABI for OpenZeppelin Stylus contracts
+// const ERC1155_ABI = [
+//   "function balanceOf(address account, uint256 id) view returns (uint256)",
+//   "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])",
+//   "function setApprovalForAll(address operator, bool approved)",
+//   "function isApprovedForAll(address account, address operator) view returns (bool)",
+//   "function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes data)",
+//   "function safeBatchTransferFrom(address from, address to, uint256[] ids, uint256[] values, bytes data)",
+//   "function burn(address account, uint256 tokenId, uint256 value)",
+//   "function burnBatch(address account, uint256[] tokenIds, uint256[] values)",
+//   "function totalSupply(uint256 id) view returns (uint256)",
+//   "function totalSupply() view returns (uint256)",
+//   "function exists(uint256 id) view returns (bool)",
+//   "function supportsInterface(bytes4 interfaceId) view returns (bool)",
+//   // StylusToken Specific Functions (from lib.rs)
+//   "function mint(uint256 id, uint256 value)",
+//   "function mintTo(address to, uint256 id, uint256 value)",
+// ];
+
 const ERC1155_ABI = [
-  "function balanceOf(address account, uint256 id) view returns (uint256)",
-  "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])",
-  "function setApprovalForAll(address operator, bool approved)",
-  "function isApprovedForAll(address account, address operator) view returns (bool)",
-  "function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes data)",
-  "function safeBatchTransferFrom(address from, address to, uint256[] ids, uint256[] values, bytes data)",
-  "function burn(address account, uint256 tokenId, uint256 value)",
-  "function burnBatch(address account, uint256[] tokenIds, uint256[] values)",
-  "function totalSupply(uint256 id) view returns (uint256)",
-  "function totalSupply() view returns (uint256)",
-  "function exists(uint256 id) view returns (bool)",
-  "function supportsInterface(bytes4 interfaceId) view returns (bool)",
+  "function balanceOf(address account, uint256 id) external view returns (uint256)",
+
+  "function balanceOfBatch(address[] memory accounts, uint256[] memory ids) external view returns (uint256[] memory)",
+
+  "function setApprovalForAll(address operator, bool approved) external;",
+
+  "function isApprovedForAll(address account, address operator) external view returns (bool);",
+
+  "function safeTransferFrom(address from, address to, uint256 id, uint256 value, uint8[] memory data) external;",
+
+  "function safeBatchTransferFrom(address from, address to, uint256[] memory ids, uint256[] memory values, uint8[] memory data) external;",
 ];
 
 interface ERC1155InteractionPanelProps {
@@ -50,7 +69,7 @@ interface TxStatus {
 }
 
 export function ERC1155InteractionPanel({
-  contractAddress: initialAddress = '',
+  contractAddress: initialAddress = "0xf5dfa3cc48b885fe7154e9877e6f2a805f723f29",
   rpcUrl: initialRpcUrl = '',
   network = 'arbitrum-sepolia',
 }: ERC1155InteractionPanelProps) {
@@ -66,6 +85,7 @@ export function ERC1155InteractionPanel({
 
   // Token info
   const [totalSupplyAll, setTotalSupplyAll] = useState<string | null>(null);
+  const [userBalances, setUserBalances] = useState<Map<string, string>>(new Map());
 
   // Form inputs - Single Transfer
   const [transferFrom, setTransferFrom] = useState('');
@@ -87,6 +107,13 @@ export function ERC1155InteractionPanel({
   const [burnAccount, setBurnAccount] = useState('');
   const [burnTokenId, setBurnTokenId] = useState('');
   const [burnAmount, setBurnAmount] = useState('');
+
+  // Form inputs - Mint
+  const [mintTokenId, setMintTokenId] = useState('');
+  const [mintAmount, setMintAmount] = useState('');
+  const [mintToAddress, setMintToAddress] = useState('');
+  const [mintToTokenId, setMintToTokenId] = useState('');
+  const [mintToAmount, setMintToAmount] = useState('');
 
   // Read operations
   const [balanceCheckAddress, setBalanceCheckAddress] = useState('');
@@ -132,18 +159,35 @@ export function ERC1155InteractionPanel({
       } catch {
         setTotalSupplyAll('N/A');
       }
+      
+      // Fetch user balances for common token IDs (0-10)
+      if (userAddress) {
+        const balances = new Map<string, string>();
+        for (let i = 0; i <= 10; i++) {
+          try {
+            const balance = await contract.balanceOf(userAddress, i);
+            if (balance > 0n) {
+              balances.set(i.toString(), balance.toString());
+            }
+          } catch {
+            // Token ID might not exist, skip
+          }
+        }
+        setUserBalances(balances);
+      }
+      
       setIsConnected(true);
     } catch (error) {
       console.error('Error:', error);
       setIsConnected(false);
     }
-  }, [getReadContract]);
+  }, [getReadContract, userAddress]);
 
   useEffect(() => {
     if (contractAddress && rpcUrl) {
       fetchTokenInfo();
     }
-  }, [contractAddress, rpcUrl, fetchTokenInfo]);
+  }, [contractAddress, rpcUrl, fetchTokenInfo, userAddress]);
 
   const handleTransaction = async (
     operation: () => Promise<ethers.TransactionResponse>,
@@ -198,6 +242,24 @@ export function ERC1155InteractionPanel({
     handleTransaction(
       () => contract.burn(burnAccount, burnTokenId, burnAmount),
       `Burned ${burnAmount} of ID #${burnTokenId}!`
+    );
+  };
+
+  const handleMint = async () => {
+    const contract = await getWriteContract();
+    if (!contract || !mintTokenId || !mintAmount) return;
+    handleTransaction(
+      () => contract.mint(mintTokenId, mintAmount),
+      `Minted ${mintAmount} of ID #${mintTokenId} to yourself!`
+    );
+  };
+
+  const handleMintTo = async () => {
+    const contract = await getWriteContract();
+    if (!contract || !mintToAddress || !mintToTokenId || !mintToAmount) return;
+    handleTransaction(
+      () => contract.mintTo(mintToAddress, mintToTokenId, mintToAmount),
+      `Minted ${mintToAmount} of ID #${mintToTokenId}!`
     );
   };
 
@@ -342,13 +404,31 @@ export function ERC1155InteractionPanel({
             <span className="text-xs font-medium text-white">{totalSupplyAll || '—'}</span>
           </div>
           {walletConnected && (
-            <div className="flex items-center justify-between p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
-              <div className="flex items-center gap-1.5">
-                <Wallet className="w-3 h-3 text-rose-400" />
-                <span className="text-[10px] text-forge-muted">Wallet</span>
+            <>
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+                <div className="flex items-center gap-1.5">
+                  <Wallet className="w-3 h-3 text-rose-400" />
+                  <span className="text-[10px] text-forge-muted">Wallet</span>
+                </div>
+                <span className="text-[9px] font-mono text-white truncate max-w-[100px]">{userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : '—'}</span>
               </div>
-              <span className="text-[9px] font-mono text-white truncate max-w-[100px]">{userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : '—'}</span>
-            </div>
+              {userBalances.size > 0 && (
+                <div className="p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Package className="w-3 h-3 text-teal-400" />
+                    <span className="text-[10px] text-forge-muted">Your Balances</span>
+                  </div>
+                  <div className="space-y-1">
+                    {Array.from(userBalances.entries()).map(([tokenId, balance]) => (
+                      <div key={tokenId} className="flex items-center justify-between text-[10px]">
+                        <span className="text-forge-muted">Token #{tokenId}:</span>
+                        <span className="text-white font-medium">{balance}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -426,6 +506,45 @@ export function ERC1155InteractionPanel({
             </button>
           </div>
 
+          {/* Mint (to self) */}
+          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-violet-400" />
+              <span className="text-[10px] font-medium text-violet-400">Mint (to yourself)</span>
+            </div>
+            <input type="number" value={mintTokenId} onChange={(e) => setMintTokenId(e.target.value)}
+              placeholder="Token ID"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <input type="number" value={mintAmount} onChange={(e) => setMintAmount(e.target.value)}
+              placeholder="Amount"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <button onClick={handleMint} disabled={txStatus.status === 'pending'}
+              className="w-full py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              Mint
+            </button>
+          </div>
+
+          {/* Mint To */}
+          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3 text-fuchsia-400" />
+              <span className="text-[10px] font-medium text-fuchsia-400">Mint To Address</span>
+            </div>
+            <input type="text" value={mintToAddress} onChange={(e) => setMintToAddress(e.target.value)}
+              placeholder="To Address (0x...)"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <input type="number" value={mintToTokenId} onChange={(e) => setMintToTokenId(e.target.value)}
+              placeholder="Token ID"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <input type="number" value={mintToAmount} onChange={(e) => setMintToAmount(e.target.value)}
+              placeholder="Amount"
+              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+            <button onClick={handleMintTo} disabled={txStatus.status === 'pending'}
+              className="w-full py-1.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              Mint To
+            </button>
+          </div>
+
           {/* Burn */}
           <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
             <div className="flex items-center gap-1.5">
@@ -453,7 +572,7 @@ export function ERC1155InteractionPanel({
       {isConnected && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-3.5 h-3.5 text-purple-400" />
+            <ArrowRightLeft className="w-3.5 h-3.5 text-purple-400" />
             <span className="text-xs font-medium text-white">Read Operations</span>
           </div>
 

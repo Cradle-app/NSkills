@@ -34,37 +34,15 @@ export function useERC1155Interactions(options: UseERC1155InteractionsOptions): 
     
     setContractInfo({ status: 'loading' });
     try {
-      const [owner, paused] = await Promise.all([
-        publicClient.readContract({
-          address: contractAddress,
-          abi: ERC1155_ABI,
-          functionName: 'owner',
-        }) as Promise<Address>,
-        publicClient.readContract({
-          address: contractAddress,
-          abi: ERC1155_ABI,
-          functionName: 'isPaused',
-        }) as Promise<boolean>,
-      ]);
-
-      // Get base URI by querying for token ID 0
-      const uri = await publicClient.readContract({
-        address: contractAddress,
-        abi: ERC1155_ABI,
-        functionName: 'uri',
-        args: [BigInt(0)],
-      }) as string;
-
-      // Extract base URI from full URI
-      const baseUri = uri.replace('0.json', '');
-
+      // Note: owner, paused, and uri functions are not available in this contract
+      // Return minimal contract info with default values
       setContractInfo({
         status: 'success',
         data: {
           address: contractAddress,
-          baseUri,
-          owner,
-          paused,
+          baseUri: '', // URI function not available in contract
+          owner: '0x0000000000000000000000000000000000000000' as Address, // Owner function not available
+          paused: false, // Paused function not available
         },
       });
     } catch (err) {
@@ -83,32 +61,27 @@ export function useERC1155Interactions(options: UseERC1155InteractionsOptions): 
       throw new Error('Public client is required');
     }
 
-    const [totalSupply, exists, uri] = await Promise.all([
-      publicClient.readContract({
+    // Note: totalSupply, exists, and uri functions are not available in this contract
+    // Return minimal token info with default values
+    // Check if token exists by checking balance of zero address (if balance > 0, token exists)
+    let exists = false;
+    try {
+      const balance = await publicClient.readContract({
         address: contractAddress,
         abi: ERC1155_ABI,
-        functionName: 'totalSupply',
-        args: [tokenId],
-      }) as Promise<bigint>,
-      publicClient.readContract({
-        address: contractAddress,
-        abi: ERC1155_ABI,
-        functionName: 'exists',
-        args: [tokenId],
-      }) as Promise<boolean>,
-      publicClient.readContract({
-        address: contractAddress,
-        abi: ERC1155_ABI,
-        functionName: 'uri',
-        args: [tokenId],
-      }) as Promise<string>,
-    ]);
+        functionName: 'balanceOf',
+        args: ['0x0000000000000000000000000000000000000000' as Address, tokenId],
+      }) as bigint;
+      exists = balance > BigInt(0);
+    } catch {
+      exists = false;
+    }
 
     return {
       id: tokenId,
-      totalSupply,
+      totalSupply: BigInt(0), // totalSupply function not available
       exists,
-      uri,
+      uri: '', // URI function not available
     };
   }, [publicClient, contractAddress]);
 
@@ -167,8 +140,11 @@ export function useERC1155Interactions(options: UseERC1155InteractionsOptions): 
 
   // Helper to execute a write transaction
   const executeTransaction = useCallback(async (
-    functionName: string,
-    args: readonly unknown[]
+    functionName: 'setApprovalForAll' | 'safeTransferFrom' | 'safeBatchTransferFrom',
+    args: 
+      | readonly [Address, boolean]
+      | readonly [Address, Address, bigint, bigint, readonly number[]]
+      | readonly [Address, Address, readonly bigint[], readonly bigint[], readonly number[]]
   ): Promise<Hash> => {
     if (!walletClient || !publicClient) {
       throw new Error('Wallet client is required for transactions');
@@ -178,16 +154,15 @@ export function useERC1155Interactions(options: UseERC1155InteractionsOptions): 
     setTxState({ status: 'pending' });
 
     try {
-      // Use type assertion to handle the strict ABI typing
       const { request } = await publicClient.simulateContract({
         address: contractAddress,
         abi: ERC1155_ABI,
-        functionName: functionName as 'pause',
-        args: args as readonly [],
+        functionName,
+        args,
         account: walletClient.account,
-      } as Parameters<typeof publicClient.simulateContract>[0]);
+      });
 
-      const hash = await walletClient.writeContract(request as Parameters<typeof walletClient.writeContract>[0]);
+      const hash = await walletClient.writeContract(request);
       setTxState({ status: 'confirming', hash });
 
       await publicClient.waitForTransactionReceipt({ hash });
@@ -211,7 +186,9 @@ export function useERC1155Interactions(options: UseERC1155InteractionsOptions): 
   const safeTransferFrom = useCallback(async (
     from: Address, to: Address, id: bigint, amount: bigint
   ): Promise<Hash> => {
-    const hash = await executeTransaction('safeTransferFrom', [from, to, id, amount, '0x']);
+    // Convert empty data to uint8[] (empty array)
+    const data: readonly number[] = [];
+    const hash = await executeTransaction('safeTransferFrom', [from, to, id, amount, data]);
     return hash;
   }, [executeTransaction]);
 
@@ -219,73 +196,56 @@ export function useERC1155Interactions(options: UseERC1155InteractionsOptions): 
   const safeBatchTransferFrom = useCallback(async (
     from: Address, to: Address, ids: bigint[], amounts: bigint[]
   ): Promise<Hash> => {
-    const hash = await executeTransaction('safeBatchTransferFrom', [from, to, ids, amounts, '0x']);
+    // Convert empty data to uint8[] (empty array)
+    const data: readonly number[] = [];
+    const hash = await executeTransaction('safeBatchTransferFrom', [from, to, ids, amounts, data]);
     return hash;
   }, [executeTransaction]);
 
-  // Mint
-  const mint = useCallback(async (to: Address, id: bigint, amount: bigint): Promise<Hash> => {
-    const hash = await executeTransaction('mint', [to, id, amount, '0x']);
-    refetchContractInfo();
-    return hash;
-  }, [executeTransaction, refetchContractInfo]);
+  // Mint - Not available in contract
+  const mint = useCallback(async (): Promise<Hash> => {
+    throw new Error('mint function is not available in this contract');
+  }, []);
 
-  // Mint new
-  const mintNew = useCallback(async (to: Address, amount: bigint): Promise<{ hash: Hash; tokenId: bigint }> => {
-    const hash = await executeTransaction('mintNew', [to, amount]);
-    refetchContractInfo();
-    // Note: In a real implementation, we'd parse the event logs to get the token ID
-    return { hash, tokenId: BigInt(0) };
-  }, [executeTransaction, refetchContractInfo]);
+  // Mint new - Not available in contract
+  const mintNew = useCallback(async (): Promise<{ hash: Hash; tokenId: bigint }> => {
+    throw new Error('mintNew function is not available in this contract');
+  }, []);
 
-  // Mint batch
-  const mintBatch = useCallback(async (to: Address, ids: bigint[], amounts: bigint[]): Promise<Hash> => {
-    const hash = await executeTransaction('mintBatch', [to, ids, amounts, '0x']);
-    refetchContractInfo();
-    return hash;
-  }, [executeTransaction, refetchContractInfo]);
+  // Mint batch - Not available in contract
+  const mintBatch = useCallback(async (): Promise<Hash> => {
+    throw new Error('mintBatch function is not available in this contract');
+  }, []);
 
-  // Burn
-  const burn = useCallback(async (id: bigint, amount: bigint): Promise<Hash> => {
-    const hash = await executeTransaction('burn', [id, amount]);
-    refetchContractInfo();
-    return hash;
-  }, [executeTransaction, refetchContractInfo]);
+  // Burn - Not available in contract
+  const burn = useCallback(async (): Promise<Hash> => {
+    throw new Error('burn function is not available in this contract');
+  }, []);
 
-  // Burn batch
-  const burnBatch = useCallback(async (ids: bigint[], amounts: bigint[]): Promise<Hash> => {
-    const hash = await executeTransaction('burnBatch', [ids, amounts]);
-    refetchContractInfo();
-    return hash;
-  }, [executeTransaction, refetchContractInfo]);
+  // Burn batch - Not available in contract
+  const burnBatch = useCallback(async (): Promise<Hash> => {
+    throw new Error('burnBatch function is not available in this contract');
+  }, []);
 
-  // Set URI
-  const setUri = useCallback(async (newUri: string): Promise<Hash> => {
-    const hash = await executeTransaction('setUri', [newUri]);
-    refetchContractInfo();
-    return hash;
-  }, [executeTransaction, refetchContractInfo]);
+  // Set URI - Not available in contract
+  const setUri = useCallback(async (): Promise<Hash> => {
+    throw new Error('setUri function is not available in this contract');
+  }, []);
 
-  // Pause
+  // Pause - Not available in contract
   const pause = useCallback(async (): Promise<Hash> => {
-    const hash = await executeTransaction('pause', []);
-    refetchContractInfo();
-    return hash;
-  }, [executeTransaction, refetchContractInfo]);
+    throw new Error('pause function is not available in this contract');
+  }, []);
 
-  // Unpause
+  // Unpause - Not available in contract
   const unpause = useCallback(async (): Promise<Hash> => {
-    const hash = await executeTransaction('unpause', []);
-    refetchContractInfo();
-    return hash;
-  }, [executeTransaction, refetchContractInfo]);
+    throw new Error('unpause function is not available in this contract');
+  }, []);
 
-  // Transfer ownership
-  const transferOwnership = useCallback(async (newOwner: Address): Promise<Hash> => {
-    const hash = await executeTransaction('transferOwnership', [newOwner]);
-    refetchContractInfo();
-    return hash;
-  }, [executeTransaction, refetchContractInfo]);
+  // Transfer ownership - Not available in contract
+  const transferOwnership = useCallback(async (): Promise<Hash> => {
+    throw new Error('transferOwnership function is not available in this contract');
+  }, []);
 
   return {
     contractInfo,

@@ -96,6 +96,8 @@ export type AsyncState<T> =
  */
 export interface UseERC1155DeployOptions {
   network: SupportedNetwork;
+  privateKey?: string;
+  rpcEndpoint?: string;
   publicClient?: PublicClient;
   walletClient?: WalletClient;
   userAddress?: Address;

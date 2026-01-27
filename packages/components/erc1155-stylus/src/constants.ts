@@ -24,31 +24,12 @@ export const FACTORY_ADDRESSES: Record<SupportedNetwork, Address> = {
 /**
  * Get RPC endpoint for network
  */
-export function getRpcEndpoint(network: SupportedNetwork): string {
-  return RPC_ENDPOINTS[network];
-}
+
 
 // ERC1155 Stylus Contract ABI
+// Only includes functions and events that are actually implemented in the contract
 export const ERC1155_ABI = [
-  // Initialization
-  {
-    type: 'function',
-    name: 'initialize',
-    inputs: [
-      { name: 'base_uri', type: 'string' },
-      { name: 'owner', type: 'address' },
-    ],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
   // View functions
-  {
-    type: 'function',
-    name: 'uri',
-    inputs: [{ name: 'id', type: 'uint256' }],
-    outputs: [{ name: '', type: 'string' }],
-    stateMutability: 'view',
-  },
   {
     type: 'function',
     name: 'balanceOf',
@@ -79,41 +60,6 @@ export const ERC1155_ABI = [
     outputs: [{ name: '', type: 'bool' }],
     stateMutability: 'view',
   },
-  {
-    type: 'function',
-    name: 'totalSupply',
-    inputs: [{ name: 'id', type: 'uint256' }],
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    name: 'exists',
-    inputs: [{ name: 'id', type: 'uint256' }],
-    outputs: [{ name: '', type: 'bool' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    name: 'owner',
-    inputs: [],
-    outputs: [{ name: '', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    name: 'isPaused',
-    inputs: [],
-    outputs: [{ name: '', type: 'bool' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    name: 'supportsInterface',
-    inputs: [{ name: 'interfaceId', type: 'bytes4' }],
-    outputs: [{ name: '', type: 'bool' }],
-    stateMutability: 'view',
-  },
   // State-changing functions
   {
     type: 'function',
@@ -132,8 +78,8 @@ export const ERC1155_ABI = [
       { name: 'from', type: 'address' },
       { name: 'to', type: 'address' },
       { name: 'id', type: 'uint256' },
-      { name: 'amount', type: 'uint256' },
-      { name: 'data', type: 'bytes' },
+      { name: 'value', type: 'uint256' },
+      { name: 'data', type: 'uint8[]' },
     ],
     outputs: [],
     stateMutability: 'nonpayable',
@@ -145,109 +91,9 @@ export const ERC1155_ABI = [
       { name: 'from', type: 'address' },
       { name: 'to', type: 'address' },
       { name: 'ids', type: 'uint256[]' },
-      { name: 'amounts', type: 'uint256[]' },
-      { name: 'data', type: 'bytes' },
+      { name: 'values', type: 'uint256[]' },
+      { name: 'data', type: 'uint8[]' },
     ],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'mint',
-    inputs: [
-      { name: 'to', type: 'address' },
-      { name: 'id', type: 'uint256' },
-      { name: 'amount', type: 'uint256' },
-      { name: 'data', type: 'bytes' },
-    ],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'mintNew',
-    inputs: [
-      { name: 'to', type: 'address' },
-      { name: 'amount', type: 'uint256' },
-    ],
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'mintBatch',
-    inputs: [
-      { name: 'to', type: 'address' },
-      { name: 'ids', type: 'uint256[]' },
-      { name: 'amounts', type: 'uint256[]' },
-      { name: 'data', type: 'bytes' },
-    ],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'burn',
-    inputs: [
-      { name: 'id', type: 'uint256' },
-      { name: 'amount', type: 'uint256' },
-    ],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'burnFrom',
-    inputs: [
-      { name: 'from', type: 'address' },
-      { name: 'id', type: 'uint256' },
-      { name: 'amount', type: 'uint256' },
-    ],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'burnBatch',
-    inputs: [
-      { name: 'ids', type: 'uint256[]' },
-      { name: 'amounts', type: 'uint256[]' },
-    ],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'setUri',
-    inputs: [{ name: 'new_uri', type: 'string' }],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'pause',
-    inputs: [],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'unpause',
-    inputs: [],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'transferOwnership',
-    inputs: [{ name: 'newOwner', type: 'address' }],
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'renounceOwnership',
-    inputs: [],
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -282,32 +128,6 @@ export const ERC1155_ABI = [
       { name: 'operator', type: 'address', indexed: true },
       { name: 'approved', type: 'bool', indexed: false },
     ],
-  },
-  {
-    type: 'event',
-    name: 'URI',
-    inputs: [
-      { name: 'value', type: 'string', indexed: false },
-      { name: 'id', type: 'uint256', indexed: true },
-    ],
-  },
-  {
-    type: 'event',
-    name: 'OwnershipTransferred',
-    inputs: [
-      { name: 'previousOwner', type: 'address', indexed: true },
-      { name: 'newOwner', type: 'address', indexed: true },
-    ],
-  },
-  {
-    type: 'event',
-    name: 'Paused',
-    inputs: [{ name: 'account', type: 'address', indexed: false }],
-  },
-  {
-    type: 'event',
-    name: 'Unpaused',
-    inputs: [{ name: 'account', type: 'address', indexed: false }],
   },
 ] as const;
 

@@ -30,7 +30,6 @@ export {
   FACTORY_ADDRESSES,
   ERC1155_ABI,
   TOKEN_FACTORY_ABI,
-  getRpcEndpoint,
   type SupportedNetwork,
 } from './constants';
 
@@ -74,7 +73,18 @@ export {
   transferOwnership,
 } from './interactions';
 
+// Deployment functions
+export {
+  deployERC1155CollectionViaAPI,
+  initializeMultiToken,
+  registerMultiTokenInFactory,
+  isMultiTokenRegistered,
+  getFactoryAddress,
+  getRpcEndpoint,
+} from './deployment';
+
 // React Hooks
 export {
+  useERC1155Deploy,
   useERC1155Interactions,
 } from './hooks';
