@@ -7,7 +7,7 @@ import {
   type BlueprintNode,
   type ExecutionContext,
 } from '@dapp-forge/plugin-sdk';
-import { ERC20StylusConfig } from '@dapp-forge/blueprint-schema';
+import { ERC20StylusConfig, type PathCategory } from '@dapp-forge/blueprint-schema';
 
 /**
  * ERC20 Stylus Token Plugin
@@ -36,6 +36,16 @@ export class ERC20StylusPlugin extends BasePlugin<z.infer<typeof ERC20StylusConf
    * Package name for the component
    */
   readonly componentPackage = '@cradle/erc20-stylus';
+
+  /**
+   * Path mappings for intelligent file routing when frontend-scaffold is present
+   * Routes frontend files to apps/web/src/ and contracts to contracts/
+   */
+  readonly componentPathMappings: Record<string, PathCategory> = {
+    'src/hooks/**': 'frontend-hooks',
+    'src/*.ts': 'frontend-lib',
+    'contract/**': 'contract-source',
+  };
 
   readonly ports: PluginPort[] = [
     {
@@ -74,22 +84,25 @@ export class ERC20StylusPlugin extends BasePlugin<z.infer<typeof ERC20StylusConf
     // Generate deployment script
     this.addFile(
       output,
-      'scripts/deploy-erc20.ts',
-      generateDeployScript(config)
+      'deploy-erc20.ts',
+      generateDeployScript(config),
+      'contract-scripts'
     );
 
     // Generate interaction utilities
     this.addFile(
       output,
-      'src/lib/erc20-token.ts',
-      generateTokenLib(config)
+      'erc20-token.ts',
+      generateTokenLib(config),
+      'frontend-lib'
     );
 
     // Generate React component for token interaction
     this.addFile(
       output,
-      'src/components/ERC20TokenPanel.tsx',
-      generateTokenPanel(config)
+      'ERC20TokenPanel.tsx',
+      generateTokenPanel(config),
+      'frontend-components'
     );
 
     // Add environment variables

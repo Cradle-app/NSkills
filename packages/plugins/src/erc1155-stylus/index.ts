@@ -7,7 +7,7 @@ import {
   type BlueprintNode,
   type ExecutionContext,
 } from '@dapp-forge/plugin-sdk';
-import { ERC1155StylusConfig } from '@dapp-forge/blueprint-schema';
+import { ERC1155StylusConfig, type PathCategory } from '@dapp-forge/blueprint-schema';
 
 /**
  * ERC1155 Stylus Multi-Token Plugin
@@ -36,6 +36,15 @@ export class ERC1155StylusPlugin extends BasePlugin<z.infer<typeof ERC1155Stylus
    * Package name for the component
    */
   readonly componentPackage = '@cradle/erc1155-stylus';
+
+  /**
+   * Path mappings for intelligent file routing when frontend-scaffold is present
+   */
+  readonly componentPathMappings: Record<string, PathCategory> = {
+    'src/hooks/**': 'frontend-hooks',
+    'src/*.ts': 'frontend-lib',
+    'contract/**': 'contract-source',
+  };
 
   readonly ports: PluginPort[] = [
     {
@@ -73,22 +82,25 @@ export class ERC1155StylusPlugin extends BasePlugin<z.infer<typeof ERC1155Stylus
     // Generate deployment script
     this.addFile(
       output,
-      'scripts/deploy-erc1155.ts',
-      generateDeployScript(config)
+      'deploy-erc1155.ts',
+      generateDeployScript(config),
+      'contract-scripts'
     );
 
     // Generate interaction utilities
     this.addFile(
       output,
-      'src/lib/erc1155-multitoken.ts',
-      generateMultiTokenLib(config)
+      'erc1155-multitoken.ts',
+      generateMultiTokenLib(config),
+      'frontend-lib'
     );
 
     // Generate React component for multi-token interaction
     this.addFile(
       output,
-      'src/components/ERC1155MultiTokenPanel.tsx',
-      generateMultiTokenPanel(config)
+      'ERC1155MultiTokenPanel.tsx',
+      generateMultiTokenPanel(config),
+      'frontend-components'
     );
 
     // Add environment variables

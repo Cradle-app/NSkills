@@ -338,14 +338,24 @@ export class ExecutionEngine {
         const category = this.findPathCategory(relativeItem, pathMappings);
 
         if (category) {
-          const resolvedPath = resolveOutputPath(item, category, pathContext);
-          const targetPath = `${outputPath}/${resolvedPath}`;
+          let targetPath: string;
+
+          if (category === 'contract-source') {
+            // For contract source files, preserve directory structure under contracts/
+            // e.g., contract/erc20/src/lib.rs -> contracts/erc20/src/lib.rs
+            const contractRelativePath = relativeItem.replace(/^contract\//, '');
+            targetPath = `${outputPath}/contracts/${contractRelativePath}`;
+          } else {
+            const resolvedPath = resolveOutputPath(item, category, pathContext);
+            targetPath = `${outputPath}/${resolvedPath}`;
+          }
+
           const targetDir = path.dirname(targetPath);
 
           targetFs.mkdirSync(targetDir, { recursive: true });
           const content = sourceFs.readFileSync(sourceItem);
           targetFs.writeFileSync(targetPath, content);
-          console.log(`  ${relativeItem} -> ${resolvedPath} (${category})`);
+          console.log(`  ${relativeItem} -> ${targetPath.replace(outputPath + '/', '')} (${category})`);
         } else {
           if (item === 'README.md' || item.endsWith('.md')) {
             const docsPath = `${outputPath}/docs`;
@@ -622,9 +632,9 @@ target/
 
     // Generate pnpm-workspace.yaml
     const pnpmWorkspace = `packages:
-  - "src/*"
-  - "contracts/*"
+  - "apps/*"
   - "packages/*"
+  - "contracts/*"
 `;
     fs.writeFileSync(`${basePath}/pnpm-workspace.yaml`, pnpmWorkspace);
   }

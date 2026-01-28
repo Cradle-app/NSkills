@@ -34,6 +34,7 @@ export type PathCategory =
     | 'contract'            // contracts/<name>/ - smart contract code
     | 'contract-test'       // contracts/<name>/tests/ - contract tests
     | 'contract-source'     // contracts/<name>/ - Stylus/Rust source files
+    | 'contract-scripts'    // scripts/ - deployment and utility scripts
 
     // Shared/Root categories
     | 'docs'                // docs/ - documentation
@@ -147,6 +148,7 @@ const CATEGORY_SUBDIRS: Record<PathCategory, string> = {
     'contract': '',
     'contract-test': 'tests',
     'contract-source': '',
+    'contract-scripts': 'scripts',
 
     // Shared
     'docs': '',
@@ -213,6 +215,9 @@ export function resolveOutputPath(
             // backend-lib, backend-services, etc go to frontend lib
             basePath = `${context.frontendPath}/${context.frontendSrcPath}/lib`;
         }
+    } else if (category === 'contract-scripts') {
+        // Scripts go to root scripts/
+        basePath = 'scripts';
     } else if (isContractCategory) {
         // Contracts stay in contracts/
         basePath = context.contractsPath;

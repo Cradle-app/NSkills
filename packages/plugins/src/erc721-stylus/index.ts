@@ -7,7 +7,7 @@ import {
   type BlueprintNode,
   type ExecutionContext,
 } from '@dapp-forge/plugin-sdk';
-import { ERC721StylusConfig } from '@dapp-forge/blueprint-schema';
+import { ERC721StylusConfig, type PathCategory } from '@dapp-forge/blueprint-schema';
 
 /**
  * ERC721 Stylus NFT Plugin
@@ -36,6 +36,15 @@ export class ERC721StylusPlugin extends BasePlugin<z.infer<typeof ERC721StylusCo
    * Package name for the component
    */
   readonly componentPackage = '@cradle/erc721-stylus';
+
+  /**
+   * Path mappings for intelligent file routing when frontend-scaffold is present
+   */
+  readonly componentPathMappings: Record<string, PathCategory> = {
+    'src/hooks/**': 'frontend-hooks',
+    'src/*.ts': 'frontend-lib',
+    'contract/**': 'contract-source',
+  };
 
   readonly ports: PluginPort[] = [
     {
@@ -74,22 +83,25 @@ export class ERC721StylusPlugin extends BasePlugin<z.infer<typeof ERC721StylusCo
     // Generate deployment script
     this.addFile(
       output,
-      'scripts/deploy-erc721.ts',
-      generateDeployScript(config)
+      'deploy-erc721.ts',
+      generateDeployScript(config),
+      'contract-scripts'
     );
 
     // Generate interaction utilities
     this.addFile(
       output,
-      'src/lib/erc721-nft.ts',
-      generateNFTLib(config)
+      'erc721-nft.ts',
+      generateNFTLib(config),
+      'frontend-lib'
     );
 
     // Generate React component for NFT interaction
     this.addFile(
       output,
-      'src/components/ERC721NFTPanel.tsx',
-      generateNFTPanel(config)
+      'ERC721NFTPanel.tsx',
+      generateNFTPanel(config),
+      'frontend-components'
     );
 
     // Add environment variables
@@ -344,7 +356,7 @@ export function ERC721NFTPanel() {
 
 function generateNFTDocs(config: z.infer<typeof ERC721StylusConfig>): string {
   const features = config.features || ['ownable', 'mintable', 'burnable', 'pausable', 'enumerable'];
-  
+
   return `# ${config.collectionName} (${config.collectionSymbol})
 
 An ERC-721 NFT collection for ${config.network === 'arbitrum' ? 'Arbitrum One' : 'Arbitrum Sepolia'} using Stylus.

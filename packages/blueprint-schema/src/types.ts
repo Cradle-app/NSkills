@@ -51,7 +51,7 @@ export type PathCategory =
   | 'frontend-lib' | 'frontend-types' | 'frontend-styles' | 'frontend-public'
   | 'backend-routes' | 'backend-services' | 'backend-middleware'
   | 'backend-lib' | 'backend-types'
-  | 'contract' | 'contract-test' | 'contract-source'
+  | 'contract' | 'contract-test' | 'contract-source' | 'contract-scripts'
   | 'docs' | 'root' | 'shared-types';
 
 /**
