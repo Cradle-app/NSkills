@@ -320,7 +320,7 @@ export class ExecutionEngine {
     const items = sourceFs.readdirSync(currentPath);
 
     for (const item of items) {
-      if (item === 'node_modules' || item === 'dist' || item.startsWith('.')) {
+      if (item === 'node_modules' || item === 'dist' || item === 'target' || item.startsWith('.')) {
         continue;
       }
 
@@ -455,7 +455,7 @@ export class ExecutionEngine {
     const items = sourceFs.readdirSync(sourcePath);
 
     for (const item of items) {
-      if (item === 'node_modules' || item === 'dist' || item.startsWith('.')) {
+      if (item === 'node_modules' || item === 'dist' || item === 'target' || item.startsWith('.')) {
         continue;
       }
 
