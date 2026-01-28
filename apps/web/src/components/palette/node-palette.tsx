@@ -465,8 +465,9 @@ const NODE_CATEGORIES: NodeCategory[] = [
 
 export function NodePalette() {
   const [searchQuery, setSearchQuery] = useState('');
+  // Start with all categories collapsed by default
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(NODE_CATEGORIES.map(c => c.id))
+    () => new Set()
   );
   const { isConnected } = useAccount();
   const { isWalletConnected, isFullyAuthenticated } = useAuthGuard();

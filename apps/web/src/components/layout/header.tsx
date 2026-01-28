@@ -126,7 +126,7 @@ export function Header() {
 
       {/* Center - Stats */}
       <motion.div
-        className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3 px-3 py-1.5 rounded-full bg-forge-elevated/40 border border-forge-border/30"
+        className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-forge-elevated/40 border border-forge-border/30"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
@@ -161,7 +161,7 @@ export function Header() {
           onClick={handleImport}
           className="h-8 px-2.5 text-forge-muted hover:text-white hover:bg-forge-elevated/50"
         >
-          <Upload className="w-3.5 h-3.5 mr-1.5" />
+          <Download className="w-3.5 h-3.5 mr-1.5" />
           Import
         </Button>
 
@@ -171,7 +171,7 @@ export function Header() {
           onClick={handleExport}
           className="h-8 px-2.5 text-forge-muted hover:text-white hover:bg-forge-elevated/50"
         >
-          <Download className="w-3.5 h-3.5 mr-1.5" />
+          <Upload className="w-3.5 h-3.5 mr-1.5" />
           Export
         </Button>
 
@@ -197,14 +197,14 @@ export function Header() {
 
         <GitHubConnect />
 
-        <Button
+        {/* <Button
           variant="ghost"
           size="sm"
           onClick={() => setShowSettings(true)}
           className="h-8 w-8 p-0 text-forge-muted hover:text-white hover:bg-forge-elevated/50"
         >
           <Settings className="w-3.5 h-3.5" />
-        </Button>
+        </Button> */}
 
         <AuthGuard onClick={() => setShowGenerate(true)} requireGitHub={true}>
           <Button
