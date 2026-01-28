@@ -11,7 +11,6 @@ const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   console.warn('⚠️  DATABASE_URL is not set. Database operations will fail.');
-  console.warn('   Please set DATABASE_URL in your .env file. See .env.example for reference.');
 }
 
 let prismaInstance: PrismaClient | null = null;

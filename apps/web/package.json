@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "next dev --port 3001",
     "clean": "rimraf .next",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "prisma generate"
   },
   "dependencies": {
     "@cradle/erc8004-agent": "workspace:*",
