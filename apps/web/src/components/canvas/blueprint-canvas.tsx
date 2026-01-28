@@ -16,10 +16,12 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { nodeTypeToColor } from '@/lib/utils';
+import { useAccount } from 'wagmi';
+import { useAuthStore } from '@/store/auth';
 import { useBlueprintStore } from '@/store/blueprint';
 import { ForgeNode } from './forge-node';
 import { ForgeEdge } from './forge-edge';
-import { nodeTypeToColor } from '@/lib/utils';
 
 // Custom node types
 const nodeTypes: NodeTypes = {
@@ -97,6 +99,8 @@ export function BlueprintCanvas() {
     updateNode,
     removeEdge,
   } = useBlueprintStore();
+  const { isConnected } = useAccount();
+  const { isWalletConnected, isFullyAuthenticated, showAuthModal, openAuthModal, closeAuthModal } = useAuthStore();
 
   // Convert blueprint nodes to ReactFlow nodes
   const blueprintNodes: Node[] = useMemo(() =>
@@ -162,6 +166,13 @@ export function BlueprintCanvas() {
       const type = event.dataTransfer.getData('application/reactflow');
       if (!type) return;
 
+      // Double check wallet connection on drop - use isConnected from wagmi for real-time status
+      const walletConnected = isConnected || isWalletConnected;
+      if (!walletConnected) {
+        openAuthModal();
+        return;
+      }
+
       const position = {
         x: event.clientX - 280, // Offset for sidebar
         y: event.clientY - 56,   // Offset for header
@@ -169,30 +180,37 @@ export function BlueprintCanvas() {
 
       const newNode = addNode(type, position);
 
-      setNodes((nds) => [
-        ...nds,
-        {
-          id: newNode.id,
-          type: newNode.type,
-          position: newNode.position,
-          data: {
-            ...newNode.config,
-            nodeType: newNode.type,
-            label: (newNode.config as Record<string, unknown>).contractName ||
-              (newNode.config as Record<string, unknown>).agentName ||
-              newNode.type,
+      if (newNode) {
+        setNodes((nds) => [
+          ...nds,
+          {
+            id: newNode.id,
+            type: newNode.type,
+            position: newNode.position,
+            data: {
+              ...newNode.config,
+              nodeType: newNode.type,
+              label: (newNode.config as Record<string, unknown>).contractName ||
+                (newNode.config as Record<string, unknown>).agentName ||
+                newNode.type,
+            },
           },
-        },
-      ]);
+        ]);
+      }
     },
-    [addNode, setNodes]
+    [addNode, setNodes, isConnected, isWalletConnected, openAuthModal]
   );
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
+      const walletConnected = isConnected || isWalletConnected;
+      if (!walletConnected) {
+        openAuthModal(() => selectNode(node.id));
+        return;
+      }
       selectNode(node.id);
     },
-    [selectNode]
+    [isConnected, isWalletConnected, openAuthModal, selectNode]
   );
 
   const onPaneClick = useCallback(() => {
