@@ -357,12 +357,12 @@ export function AuthFlowModal({
                           <ArrowRight className="w-4 h-4 ml-auto" />
                         </Button>
 
-                        <button
+                        {/* <button
                           onClick={handleSkipGitHub}
                           className="w-full text-center text-sm text-forge-muted hover:text-white transition-colors"
                         >
                           Skip for now
-                        </button>
+                        </button> */}
                       </div>
                     )}
                   </div>
