@@ -23,6 +23,7 @@ import {
     generateEnvTypes,
     generateTsConfig,
     generateUtils,
+    generatePostCSSConfig,
 } from './templates';
 import { generateContractHooks, extractConnectedContracts } from './contract-integration';
 
@@ -239,6 +240,13 @@ export class FrontendScaffoldPlugin extends BasePlugin<z.infer<typeof FrontendSc
                 output,
                 `${srcBase ? 'apps/web/' : ''}${appBase}/globals.css`,
                 generateGlobalStyles(config)
+            );
+
+            // postcss.config.js
+            this.addFile(
+                output,
+                `${srcBase ? 'apps/web/' : ''}/postcss.config.js`,
+                generatePostCSSConfig()
             );
         }
 

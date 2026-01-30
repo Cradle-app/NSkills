@@ -509,15 +509,14 @@ function generateRootFiles(
     description: project.description,
     private: true,
     scripts: {
-      dev: 'turbo run dev',
-      build: 'turbo run build',
-      test: 'turbo run test',
-      lint: 'turbo run lint',
+      dev: 'next dev',
+      build: 'next build',
+      start: 'next start',
+      lint: 'next lint',
       ...Object.fromEntries(scripts.map(s => [s.name, s.command])),
     },
     dependencies: {},
     devDependencies: {
-      turbo: '^2.0.0',
       typescript: '^5.3.0',
     },
     packageManager: 'pnpm@9.0.0',
@@ -539,7 +538,6 @@ function generateRootFiles(
     },
     dependencies: {},
     devDependencies: {
-      turbo: '^2.0.0',
       typescript: '^5.3.0',
     },
     packageManager: 'pnpm@9.0.0',
@@ -628,7 +626,7 @@ target/
         lint: {},
       },
     };
-    fs.writeFileSync(`${basePath}/turbo.json`, JSON.stringify(turboConfig, null, 2));
+    // fs.writeFileSync(`${basePath}/turbo.json`, JSON.stringify(turboConfig, null, 2));
 
     // Generate pnpm-workspace.yaml
     const pnpmWorkspace = `packages:

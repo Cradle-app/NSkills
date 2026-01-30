@@ -461,12 +461,12 @@ export function generateWalletButton(config: Config): string {
  */
 export function generateTailwindConfig(config: Config): string {
   return dedent(`
+    const path = require("path");
+
     /** @type {import('tailwindcss').Config} */
     module.exports = {
-      content: [
-        '${config.srcDirectory ? './src' : '.'}/**/*.{js,ts,jsx,tsx,mdx}',
-      ],
-      ${config.darkModeSupport ? `darkMode: 'class',` : ''}
+      content: [path.join(__dirname, "${config.srcDirectory ? 'src' : '.'}/**/*.{js,ts,jsx,tsx,mdx}")],
+      darkMode: "class",
       theme: {
         extend: {
           colors: {
@@ -487,6 +487,21 @@ export function generateTailwindConfig(config: Config): string {
         },
       },
       plugins: [],
+    };
+  `);
+}
+
+/**
+ * Generate postcss.config.js
+ */
+export function generatePostCSSConfig(): string {
+  return dedent(`
+    /** @type {import('postcss-load-config').Config} */
+    module.exports = {
+      plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+      },
     };
   `);
 }
