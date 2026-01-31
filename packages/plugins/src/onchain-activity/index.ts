@@ -37,6 +37,18 @@ export class OnchainActivityPlugin extends BasePlugin<z.infer<typeof OnchainActi
      */
     readonly componentPackage = '@cradle/onchain-activity';
 
+    /**
+     * Path mappings for component files to enable intelligent routing
+     * When frontend-scaffold is present, files are routed to apps/web/src/
+     */
+    readonly componentPathMappings = {
+        'src/hooks/**': 'frontend-hooks' as const,
+        'src/api.ts': 'frontend-lib' as const,
+        'src/constants.ts': 'frontend-lib' as const,
+        'src/types.ts': 'frontend-types' as const,
+        'src/index.ts': 'frontend-lib' as const,
+    };
+
     readonly ports: PluginPort[] = [
         {
             id: 'wallet-in',

@@ -10,7 +10,7 @@ import type {
   ExecutionContext,
 } from '@dapp-forge/blueprint-schema';
 import { topologicalSort } from '@dapp-forge/blueprint-schema';
-import { getDefaultRegistry, buildPathContext, rewriteOutputPaths, resolveOutputPath, type NodePlugin, type PathContext } from '@dapp-forge/plugin-sdk';
+import { getDefaultRegistry, buildPathContext, rewriteOutputPaths, resolveOutputPath, shouldMergeFile, mergeFileContents, type NodePlugin, type PathContext } from '@dapp-forge/plugin-sdk';
 import type { PathCategory } from '@dapp-forge/blueprint-schema';
 import { RunStore } from '../store/runs';
 import { createExecutionLogger } from '../utils/logger';
@@ -353,9 +353,44 @@ export class ExecutionEngine {
           const targetDir = path.dirname(targetPath);
 
           targetFs.mkdirSync(targetDir, { recursive: true });
-          const content = sourceFs.readFileSync(sourceItem);
-          targetFs.writeFileSync(targetPath, content);
-          console.log(`  ${relativeItem} -> ${targetPath.replace(outputPath + '/', '')} (${category})`);
+          const incomingContent = sourceFs.readFileSync(sourceItem, 'utf-8');
+
+          // Check if target file exists and needs merging
+          let finalContent: string;
+          let action = 'created';
+
+          try {
+            const existingContent = targetFs.readFileSync(targetPath, 'utf-8') as string;
+
+            // File exists - check if we should merge
+            if (shouldMergeFile(item)) {
+              const mergeResult = mergeFileContents(existingContent, incomingContent, item);
+
+              if (mergeResult.success) {
+                finalContent = mergeResult.content;
+                action = 'merged';
+
+                if (mergeResult.warnings.length > 0) {
+                  console.log(`    ⚠️ Merge warnings: ${mergeResult.warnings.join(', ')}`);
+                }
+              } else {
+                console.warn(`    ⚠️ Could not merge ${item}, keeping existing`);
+                finalContent = existingContent;
+                action = 'kept-existing';
+              }
+            } else {
+              // Not a mergeable file type - keep existing and warn
+              console.warn(`    ⚠️ File conflict: ${item} - keeping existing (consider using unique names)`);
+              finalContent = existingContent;
+              action = 'kept-existing';
+            }
+          } catch {
+            // File doesn't exist - write new content
+            finalContent = incomingContent;
+          }
+
+          targetFs.writeFileSync(targetPath, finalContent);
+          console.log(`  ${relativeItem} -> ${targetPath.replace(outputPath + '/', '')} (${category}) [${action}]`);
         } else {
           if (item === 'README.md' || item.endsWith('.md')) {
             const docsPath = `${outputPath}/docs`;
