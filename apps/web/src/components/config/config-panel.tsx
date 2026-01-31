@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useBlueprintStore } from '@/store/blueprint';
 import { nodeTypeToLabel, nodeTypeToColor } from '@/lib/utils';
 import { cn } from '@/lib/utils';
-import { X, Settings2, MousePointerClick } from 'lucide-react';
+import { X, Settings2, MousePointerClick, Trash2 } from 'lucide-react';
 import { AuthOverlay } from '@/components/auth/auth-guard';
 
 // Original forms
@@ -57,7 +57,7 @@ import { SmartCacheCachingForm } from './forms/smartcache-caching-form';
 import { AuditwareAnalyzingForm } from './forms/auditware-analyzing-form';
 
 export function ConfigPanel() {
-  const { blueprint, selectedNodeId, selectNode } = useBlueprintStore();
+  const { blueprint, selectedNodeId, selectNode, removeNode } = useBlueprintStore();
 
   const selectedNode = selectedNodeId
     ? blueprint.nodes.find(n => n.id === selectedNodeId)
@@ -129,14 +129,29 @@ export function ConfigPanel() {
               </p>
             </div>
           </div>
-          <motion.button
-            onClick={() => selectNode(null)}
-            className="p-2 rounded-lg hover:bg-forge-elevated/50 text-forge-muted hover:text-white transition-all duration-200"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <X className="w-4 h-4" />
-          </motion.button>
+          <div className="flex items-center gap-1">
+            <motion.button
+              onClick={() => {
+                removeNode(selectedNode.id);
+                selectNode(null);
+              }}
+              className="p-2 rounded-lg hover:bg-red-500/20 text-forge-muted hover:text-red-400 transition-all duration-200"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Delete node"
+            >
+              <Trash2 className="w-4 h-4" />
+            </motion.button>
+            <motion.button
+              onClick={() => selectNode(null)}
+              className="p-2 rounded-lg hover:bg-forge-elevated/50 text-forge-muted hover:text-white transition-all duration-200"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Close panel"
+            >
+              <X className="w-4 h-4" />
+            </motion.button>
+          </div>
         </div>
 
         {/* Color indicator bar */}

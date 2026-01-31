@@ -543,6 +543,7 @@ export const SmartCacheCachingConfig = BaseNodeConfig.extend({
   crateVersion: z.string().default('latest'),
   autoOptIn: z.boolean().default(true),
   contractCode: z.string().optional(),
+  exampleType: z.string().optional(), // counter, vending-machine, erc20, erc721, erc1155, storage, custom
 });
 export type SmartCacheCachingConfig = z.infer<typeof SmartCacheCachingConfig>;
 

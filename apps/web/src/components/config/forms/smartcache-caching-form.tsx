@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useBlueprintStore } from '@/store/blueprint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -614,6 +614,16 @@ export function SmartCacheCachingForm({ nodeId, config }: Props) {
         }
         return '';
     }, [connectedContract]);
+
+    // Persist contract code and exampleType to config so plugin can use them during generation
+    useEffect(() => {
+        if (connectedContract?.code) {
+            updateNodeConfig(nodeId, {
+                contractCode: connectedContract.code,
+                exampleType: connectedContract.exampleType,
+            });
+        }
+    }, [nodeId, connectedContract?.code, connectedContract?.exampleType]);
 
     // Generate deployment command based on selected network
     const deployCommand = `cargo stylus deploy \\

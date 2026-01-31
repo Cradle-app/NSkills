@@ -98,6 +98,8 @@ export function BlueprintCanvas() {
     selectNode,
     updateNode,
     removeEdge,
+    removeNode,
+    selectedNodeId,
   } = useBlueprintStore();
   const { isConnected } = useAccount();
   const { isWalletConnected, isFullyAuthenticated, showAuthModal, openAuthModal, closeAuthModal } = useAuthStore();
@@ -233,6 +235,19 @@ export function BlueprintCanvas() {
     [removeEdge]
   );
 
+  const onNodesDelete = useCallback(
+    (deletedNodes: Node[]) => {
+      deletedNodes.forEach(node => {
+        removeNode(node.id);
+      });
+      // Close config panel if deleted node was selected
+      if (deletedNodes.some(n => n.id === selectedNodeId)) {
+        selectNode(null);
+      }
+    },
+    [removeNode, selectedNodeId, selectNode]
+  );
+
   return (
     <div className="relative h-full w-full overflow-hidden rounded-2xl border border-forge-border/60 bg-gradient-to-b from-black/70 via-black/80 to-black/95">
       {/* Subtle canvas hint */}
@@ -258,6 +273,8 @@ export function BlueprintCanvas() {
         onPaneClick={onPaneClick}
         onNodeDragStop={onNodeDragStop}
         onEdgesDelete={onEdgesDelete}
+        onNodesDelete={onNodesDelete}
+        deleteKeyCode={['Delete', 'Backspace']}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView

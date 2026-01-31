@@ -149,7 +149,7 @@ export class ExecutionEngine {
       }
 
       // Generate root files
-      generateRootFiles(fs, '/output', blueprint, allEnvVars, allScripts, pathContext);
+      generateRootFiles(fs, '/output', blueprint, allEnvVars, allScripts, pathContext, sortedNodes);
 
       // Run format and lint
       logger.info('Running format and lint checks');
@@ -529,7 +529,8 @@ function generateRootFiles(
   blueprint: Blueprint,
   envVars: CodegenOutput['envVars'],
   scripts: CodegenOutput['scripts'],
-  pathContext?: PathContext
+  pathContext?: PathContext,
+  nodes?: BlueprintNode[]
 ): void {
   // Determine if we need monorepo structure
   // Only need monorepo if:
@@ -604,7 +605,7 @@ function generateRootFiles(
   fs.writeFileSync(envPath, envExample);
 
   // Generate README.md
-  const readme = generateReadme(project, scripts, envVars);
+  const readme = generateReadme(project, scripts, envVars, nodes);
   fs.writeFileSync(`${basePath}/README.md`, readme);
 
   // Generate .gitignore
@@ -681,35 +682,46 @@ target/
 function generateReadme(
   project: Blueprint['config']['project'],
   scripts: CodegenOutput['scripts'],
-  envVars: CodegenOutput['envVars']
+  envVars: CodegenOutput['envVars'],
+  nodes?: BlueprintNode[]
 ): string {
   const appSlug = project.name.toLowerCase().replace(/\s+/g, '-');
+  const nodeTypes = new Set((nodes || []).map(n => n.type));
+
+  // Build contracts section based on which plugins are present
+  let contractsStructure = '├── contracts/                  # Rust/Stylus smart contracts\n';
+  if (nodeTypes.has('smartcache-caching')) {
+    contractsStructure += `│   ├── mycontract/            # Original contract (no caching)\n`;
+    contractsStructure += `│   │   └── src/lib.rs\n`;
+    contractsStructure += `│   └── cached-contract/       # Contract with is_cacheable + opt_in_to_cache\n`;
+    contractsStructure += `│       └── src/lib.rs\n`;
+  } else if (nodeTypes.has('stylus-contract')) {
+    contractsStructure += `│   └── counter-contract/      # Stylus template (edit src/lib.rs per docs)\n`;
+    contractsStructure += `│       └── src/lib.rs\n`;
+  } else if (nodeTypes.has('erc20-stylus') || nodeTypes.has('erc721-stylus') || nodeTypes.has('erc1155-stylus')) {
+    const contracts: string[] = [];
+    if (nodeTypes.has('erc20-stylus')) contracts.push('erc20');
+    if (nodeTypes.has('erc721-stylus')) contracts.push('erc721');
+    if (nodeTypes.has('erc1155-stylus')) contracts.push('erc1155');
+    contracts.forEach(c => { contractsStructure += `│   └── ${c}/\n`; });
+  } else {
+    contractsStructure += `│   └── (contract source)\n`;
+  }
+
+  const hasFrontend = nodeTypes.has('frontend-scaffold');
+  let structureBlock = `\`\`\`\n${appSlug}/\n`;
+  if (hasFrontend) {
+    structureBlock += `├── apps/\n│   └── web/                    # Next.js frontend\n│       ├── src/\n│       ├── package.json\n│       └── ...\n`;
+  }
+  structureBlock += `${contractsStructure}├── docs/                       # Documentation\n├── scripts/                     # Deploy scripts\n├── .gitignore\n└── README.md\n\`\`\``;
 
   return `# ${project.name}
 
-${project.description || 'A Web3 dApp generated with [Cradle](https://cradle.dev) featuring smart contract interactions.'}
+${project.description || 'A Web3 dApp generated with [Cradle](https://cradle.dev).'}
 
 ## 📁 Project Structure
 
-\`\`\`
-${appSlug}/
-├── apps/
-│   └── web/                    # Next.js frontend application
-│       ├── src/
-│       │   ├── app/            # App Router pages
-│       │   ├── components/     # React components
-│       │   │   └── contract-interactions/
-│       │   │       └── ERC20InteractionPanel.tsx
-│       │   └── lib/            # Utilities & wagmi config
-│       ├── package.json
-│       ├── tailwind.config.js
-│       └── postcss.config.js
-├── contracts/                  # Rust/Stylus smart contracts
-│   └── erc20/                  # ERC-20 token contract source
-├── docs/                       # Documentation
-├── .gitignore
-└── README.md
-\`\`\`
+${structureBlock}
 
 ## 🚀 Quick Start
 
@@ -725,53 +737,36 @@ ${appSlug}/
    cd ${appSlug}
    \`\`\`
 
-2. **Navigate to the web app:**
-   \`\`\`bash
-   cd apps/web
-   \`\`\`
-
-3. **Install dependencies:**
+2. **Install dependencies:**
    \`\`\`bash
    npm install
    # or
    pnpm install
    \`\`\`
 
-4. **Set up environment variables:**
+3. **Set up environment variables:**
    \`\`\`bash
-   cp .env.example .env.local
+   cp .env.example .env
    \`\`\`
 
-   Edit \`.env.local\` and configure:
+   Edit \`.env\` and configure:
    ${envVars.filter(v => v.required).map(v => `   - \`${v.key}\`: ${v.description}`).join('\n') || '   - No required variables'}
 
-   > **Get a WalletConnect Project ID** at [WalletConnect Cloud](https://cloud.walletconnect.com/)
+4. **Deploy contracts** (from repo root): \`pnpm deploy:sepolia\` or \`pnpm deploy:mainnet\`
 
-5. **Start the development server:**
-   \`\`\`bash
-   npm run dev
-   \`\`\`
-
-6. **Open your browser:**
-   Visit [http://localhost:3000](http://localhost:3000)
+5. **Scripts (Windows):** Run \`pnpm fix-scripts\` or \`dos2unix scripts/*.sh\` if you see line-ending errors.
 
 ## 🔗 Smart Contracts
 
-The \`contracts/\` folder contains Rust/Stylus smart contract source code.
-
-**Default deployed contracts (Arbitrum Sepolia testnet):**
-- ERC-20: \`0x5af02ab1d47cc700c1ec4578618df15b8c9c565e\`
+The \`contracts/\` folder contains Rust/Stylus smart contract source code. See \`docs/\` for deployment and integration guides.
 
 ## 🛠 Available Scripts
 
-Run these from the \`apps/web\` directory:
-
 | Command | Description |
 |---------|-------------|
-| \`npm run dev\` | Start development server |
-| \`npm run build\` | Build for production |
-| \`npm run start\` | Start production server |
-| \`npm run lint\` | Run ESLint |
+| \`pnpm deploy:sepolia\` | Deploy to Arbitrum Sepolia |
+| \`pnpm deploy:mainnet\` | Deploy to Arbitrum One |
+| \`pnpm fix-scripts\` | Fix CRLF line endings (Windows) |
 
 ## 🌐 Supported Networks
 

@@ -62,31 +62,36 @@ export class AuditwareAnalyzingPlugin extends BasePlugin<z.infer<typeof Auditwar
             generateRadarGuide(config)
         );
 
+        const dos2unixNote = `# If you see "bad interpreter" or CRLF errors on Windows, run first: dos2unix scripts/*.sh
+# Or: pnpm fix-scripts
+
+`;
+
         // Generate install script
         this.addFile(
             output,
             'scripts/install-radar.sh',
-            generateInstallScript()
+            dos2unixNote + generateInstallScript()
         );
 
         // Generate analysis script
         this.addFile(
             output,
             'scripts/run-radar.sh',
-            generateAnalysisScript(config)
+            dos2unixNote + generateAnalysisScript(config)
         );
 
         // Generate deployment scripts
         this.addFile(
             output,
             'scripts/deploy-sepolia.sh',
-            generateDeployScript('sepolia')
+            dos2unixNote + generateDeployScript('sepolia')
         );
 
         this.addFile(
             output,
             'scripts/deploy-mainnet.sh',
-            generateDeployScript('mainnet')
+            dos2unixNote + generateDeployScript('mainnet')
         );
 
         // Add scripts to package.json
@@ -94,6 +99,7 @@ export class AuditwareAnalyzingPlugin extends BasePlugin<z.infer<typeof Auditwar
         this.addScript(output, 'security:analyze', 'bash scripts/run-radar.sh');
         this.addScript(output, 'deploy:sepolia', 'bash scripts/deploy-sepolia.sh');
         this.addScript(output, 'deploy:mainnet', 'bash scripts/deploy-mainnet.sh');
+        this.addScript(output, 'fix-scripts', 'command -v dos2unix >/dev/null && dos2unix scripts/*.sh 2>/dev/null || echo "Run: dos2unix scripts/*.sh (install: apt install dos2unix / brew install dos2unix)"');
 
         context.logger.info('Generated Auditware Radar analysis setup', {
             nodeId: node.id,
