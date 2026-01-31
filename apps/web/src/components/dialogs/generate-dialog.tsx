@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAccount } from 'wagmi';
 import { Play, Github, Loader2, Check, AlertCircle, LogIn } from 'lucide-react';
 import {
   Dialog,
@@ -32,6 +33,7 @@ interface GitHubSession {
 export function GenerateDialog({ open, onOpenChange }: Props) {
   const { blueprint } = useBlueprintStore();
   const { addToast } = useToast();
+  const { address: walletAddress } = useAccount();
 
   const [status, setStatus] = useState<GenerationStatus>('idle');
   const [createGitHubRepo, setCreateGitHubRepo] = useState(false);
@@ -152,6 +154,21 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
         repoUrl,
         fileCount,
       });
+
+      // Save repo to user_github_repos when created and wallet is connected
+      if (createGitHubRepo && repoUrl && walletAddress) {
+        const githubOwner = githubSession?.github?.username || repoOwner;
+        fetch('/api/user/repos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            walletAddress,
+            repo_owner: githubOwner,
+            repo_name: repoName,
+            repo_url: repoUrl,
+          }),
+        }).catch((err) => console.warn('Failed to save repo to profile:', err));
+      }
 
       if (createGitHubRepo && repoUrl) {
         addToast({

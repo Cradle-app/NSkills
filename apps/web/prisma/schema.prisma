@@ -11,13 +11,30 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(uuid())
-  wallet_address String   @unique
-  github_id      String?
+  id              String   @id @default(uuid())
+  wallet_address  String   @unique
+  github_id       String?
   github_username String?
   github_avatar   String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  githubRepos     UserGithubRepo[]
 
   @@map("users")
+}
+
+model UserGithubRepo {
+  id          String   @id @default(uuid())
+  userId      String
+  repo_owner  String
+  repo_name   String
+  repo_url    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, repo_owner, repo_name])
+  @@map("user_github_repos")
 }
