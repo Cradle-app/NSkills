@@ -17,12 +17,15 @@ import {
     generatePackageJson,
     generateNextConfig,
     generateTailwindConfig,
+    generatePostcssConfig,
     generateHomePage,
     generateWalletButton,
     generateGlobalStyles,
     generateEnvTypes,
     generateTsConfig,
     generateUtils,
+    generateViemTypes,
+    generateViemChainsTypes,
 } from './templates';
 import { generateContractHooks, extractConnectedContracts } from './contract-integration';
 
@@ -234,6 +237,13 @@ export class FrontendScaffoldPlugin extends BasePlugin<z.infer<typeof FrontendSc
                 generateTailwindConfig(config)
             );
 
+            // postcss.config.js - Required for Tailwind CSS to work
+            this.addFile(
+                output,
+                `${srcBase ? 'apps/web/' : ''}/postcss.config.js`,
+                generatePostcssConfig()
+            );
+
             // app/globals.css
             this.addFile(
                 output,
@@ -251,6 +261,20 @@ export class FrontendScaffoldPlugin extends BasePlugin<z.infer<typeof FrontendSc
             output,
             `${srcBase ? 'apps/web/' : ''}${srcBase}/types/env.d.ts`,
             generateEnvTypes(config)
+        );
+
+        // viem.d.ts - Type declarations for viem module (fallback if package types missing)
+        this.addFile(
+            output,
+            `${srcBase ? 'apps/web/' : ''}${srcBase}/types/viem.d.ts`,
+            generateViemTypes()
+        );
+
+        // viem-chains.d.ts - Type declarations for viem/chains module
+        this.addFile(
+            output,
+            `${srcBase ? 'apps/web/' : ''}${srcBase}/types/viem-chains.d.ts`,
+            generateViemChainsTypes()
         );
 
         // =========================================================================
