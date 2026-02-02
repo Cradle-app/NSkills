@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
 /**
+ * Helper to convert null to undefined for optional string fields
+ * This prevents "expected string, received null" Zod errors when blueprints
+ * have null values in optional string fields (from imports, localStorage, etc.)
+ */
+const nullableString = () => z.string().nullable().transform((val) => val ?? undefined);
+
+/**
  * Node categories for the DappForge canvas
  */
 export const NodeCategory = z.enum([
@@ -103,10 +110,11 @@ export type NodePosition = z.infer<typeof NodePosition>;
  * Base node configuration that all nodes share
  */
 export const BaseNodeConfig = z.object({
-  label: z.string().min(1).max(100).optional(),
-  description: z.string().max(500).optional(),
+  label: nullableString().optional(),
+  description: nullableString().optional(),
 });
 export type BaseNodeConfig = z.infer<typeof BaseNodeConfig>;
+
 
 /**
  * Stylus contract node configuration
@@ -123,7 +131,7 @@ export const StylusContractConfig = z.preprocess((raw) => {
   if (data.contractType && !data.contractInstructions) {
     const typeDesc = data.contractType === 'erc20' ? 'ERC-20 token' :
       data.contractType === 'erc721' ? 'ERC-721 NFT' :
-      data.contractType === 'erc1155' ? 'ERC-1155 Multi-Token' : 'custom contract';
+        data.contractType === 'erc1155' ? 'ERC-1155 Multi-Token' : 'custom contract';
     const features = (data.features || []).join(', ');
     return {
       ...data,

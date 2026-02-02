@@ -100,11 +100,32 @@ export class GitHubIntegration {
         repoName: config.repoName,
         owner: config.owner,
       });
+
+      // Provide user-friendly error messages for common issues
+      if (response.status === 422) {
+        // Check if repo already exists
+        const errorMessage = error.errors?.[0]?.message || error.message || '';
+        if (errorMessage.toLowerCase().includes('name already exists') ||
+          errorMessage.toLowerCase().includes('repository') && errorMessage.toLowerCase().includes('exists')) {
+          throw new Error(`Repository "${config.repoName}" already exists. Please choose a different name.`);
+        }
+        // Check for invalid repo name
+        if (errorMessage.toLowerCase().includes('name') && errorMessage.toLowerCase().includes('invalid')) {
+          throw new Error(`Invalid repository name "${config.repoName}". Repository names can only contain alphanumeric characters, hyphens, underscores, and dots.`);
+        }
+        throw new Error(`Failed to create repository: ${errorMessage || 'Repository creation failed. The name might be taken or invalid.'}`);
+      }
+
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('GitHub authentication failed. Please reconnect your GitHub account.');
+      }
+
       throw new Error(`Failed to create repository: ${error.message || error.errors?.[0]?.message || response.statusText}`);
     }
 
     return response.json();
   }
+
 
   /**
    * Commit files to repository using Git Data API

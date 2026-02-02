@@ -1,13 +1,20 @@
 import { z } from 'zod';
 
 /**
+ * Helper to convert null to undefined for optional string fields
+ * This prevents "expected string, received null" Zod errors when blueprints
+ * have null values in optional string fields (from imports, localStorage, etc.)
+ */
+const nullableString = () => z.string().nullable().transform((val) => val ?? undefined);
+
+/**
  * Target blockchain network
  */
 export const NetworkConfig = z.object({
   chainId: z.number().int().positive(),
   name: z.string(),
-  rpcUrl: z.string().url().optional(),
-  explorerUrl: z.string().url().optional(),
+  rpcUrl: nullableString().optional(),
+  explorerUrl: nullableString().optional(),
   isTestnet: z.boolean().default(false),
 });
 export type NetworkConfig = z.infer<typeof NetworkConfig>;
@@ -46,8 +53,8 @@ export const GitHubConfig = z.object({
   visibility: z.enum(['public', 'private']).default('private'),
   defaultBranch: z.string().default('main'),
   createPR: z.boolean().default(false),
-  prTitle: z.string().max(100).optional(),
-  prBody: z.string().max(5000).optional(),
+  prTitle: nullableString().optional(),
+  prBody: nullableString().optional(),
 });
 export type GitHubConfig = z.infer<typeof GitHubConfig>;
 
@@ -56,9 +63,9 @@ export type GitHubConfig = z.infer<typeof GitHubConfig>;
  */
 export const ProjectMetadata = z.object({
   name: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
+  description: nullableString().optional(),
   version: z.string().regex(/^\d+\.\d+\.\d+$/).default('0.1.0'),
-  author: z.string().max(100).optional(),
+  author: nullableString().optional(),
   license: z.enum(['MIT', 'Apache-2.0', 'GPL-3.0', 'UNLICENSED']).default('MIT'),
   keywords: z.array(z.string()).max(10).default([]),
 });
@@ -75,4 +82,5 @@ export const BlueprintConfig = z.object({
   generateDocs: z.boolean().default(true),
 });
 export type BlueprintConfig = z.infer<typeof BlueprintConfig>;
+
 
