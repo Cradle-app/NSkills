@@ -1,0 +1,16 @@
+{
+    "name": "Genesis Builder",
+    "description": "Awarded for building project on Cradle",
+    "image": "https://silver-manual-mammal-152.mypinata.cloud/ipfs/bafkreifg2kaeqmdylnqsp6n5ebdtcxc34yzuimguvu2ccdftvzkepc2kau",
+    "animation_url": "https://silver-manual-mammal-152.mypinata.cloud/ipfs/bafybeigk7kkrhxw7aa6gpiulas55e2daxueu2nj4uvunpimupr6sothlx4",
+    "attributes": [
+      {
+        "trait_type": "Award",
+        "value": "Cradle Builder"
+      },
+      {
+        "trait_type":  "Type",
+        "value": "Video"
+      }
+    ]
+  }

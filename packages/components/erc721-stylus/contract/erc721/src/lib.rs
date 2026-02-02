@@ -10,7 +10,7 @@ use stylus_sdk::{
     contract,
     msg,
     prelude::*,
-    alloy_primitives::{Address, U256}
+    alloy_primitives::{Address, U256},
 };
 use alloy_sol_types::sol;
 use crate::erc721::{Erc721, Erc721Params};
@@ -27,9 +27,14 @@ struct SuperPositionNFTParams;
 
 /// Immutable definitions
 impl Erc721Params for SuperPositionNFTParams {
-    const NAME: &'static str = "SuperPositionNFT";
-    const SYMBOL: &'static str = "SPTNFT";
+    const NAME: &'static str = "Cradle Genesis Builder";
+    const SYMBOL: &'static str = "CGB";
+    const BASE_TOKEN_URI: &'static str = "";
 }
+
+/// Same metadata for all tokens (achievement badge). Set after uploading metadata.json to IPFS.
+/// All 1000 mints point to this single metadata file.
+const SINGLE_METADATA_URI: &str = "ipfs://bafkreia3ktnze2mjrwrt3qrdzgws7olmoc2norvoxssktv2wda2upuavta";
 
 // Define the entrypoint as a Solidity storage object. The sol_storage! macro
 // will generate Rust-equivalent structs with all fields mapped to Solidity-equivalent
@@ -62,6 +67,37 @@ pub enum SuperPositionNFTError {
 #[public]
 #[inherit(Erc721<SuperPositionNFTParams>)]
 impl SuperPositionNFT {
+    /// Initialize the art contract address. Call once after deployment.
+    /// The art contract's generateArt(token_id, owner) returns the metadata URI.
+    /// For video NFTs, that metadata JSON must include "animation_url" (MP4/WEBM).
+    pub fn initialize(&mut self, art_contract: Address) -> Result<(), Vec<u8>> {
+        if !self.art_contract_address.get().is_zero() {
+            return Err(SuperPositionNFTError::AlreadyInitialized(AlreadyInitialized {}).into());
+        }
+        self.art_contract_address.set(art_contract);
+        Ok(())
+    }
+
+    /// Returns the metadata URI for a token. All tokens share the same metadata (achievement badge).
+    /// Set SINGLE_METADATA_URI to your metadata's IPFS CID after uploading metadata.json to Pinata.
+    pub fn token_uri(&self, token_id: U256) -> Result<String, Vec<u8>> {
+        let _ = self.erc721.owner_of(token_id).map_err(|_| vec![])?; // validate exists
+        if !SINGLE_METADATA_URI.is_empty() && !SINGLE_METADATA_URI.contains("REPLACE_WITH") {
+            return Ok(SINGLE_METADATA_URI.to_string());
+        }
+        let base = SuperPositionNFTParams::BASE_TOKEN_URI;
+        if base.is_empty() {
+            return Ok(String::new());
+        }
+        let mut uri = base.to_string();
+        if !uri.ends_with('/') {
+            uri.push('/');
+        }
+        uri.push_str(&token_id.to_string());
+        uri.push_str(".json");
+        Ok(uri)
+    }
+
     /// Mints an NFT, but does not call onErc712Received
     pub fn mint(&mut self) -> Result<(), Vec<u8>> {
         let minter = msg::sender();

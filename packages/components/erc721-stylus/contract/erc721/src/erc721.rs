@@ -25,6 +25,11 @@ pub trait Erc721Params {
 
     /// Immutable NFT symbol.
     const SYMBOL: &'static str;
+
+    /// Base URI for token metadata.
+    /// Example: "ipfs://QmXXX/" or "https://api.example.com/metadata/"
+    /// Metadata JSON must include: name, description, image for MetaMask display.
+    const BASE_TOKEN_URI: &'static str;
 }
 
 sol_storage! {

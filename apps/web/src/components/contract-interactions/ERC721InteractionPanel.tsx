@@ -85,7 +85,7 @@ const DEFAULT_CONTRACT_ADDRESSES: Record<string, string | undefined> = {
   'arbitrum-sepolia': '0xe2a8cd01354ecc63a8341a849e9b89f14ff9f08f',
   'arbitrum': undefined, // No default contract deployed on mainnet
   'superposition': undefined, // No default contract deployed on mainnet
-  'superposition-testnet': '0xa0cc35ec0ce975c28dacc797edb7808e882043c3',
+  'superposition-testnet': '0x00d55c0349ec0ce67e4f6eba8a24ce796ecabbbd',
 };
 
 // Network configurations

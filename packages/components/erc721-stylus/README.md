@@ -227,27 +227,28 @@ await transferFrom({
 
 ## Metadata Structure
 
-Your NFT metadata should follow the standard format. For token ID `1`, the URI would be:
-`{base_uri}1`
+Your NFT metadata should follow the standard format. Set `BASE_TOKEN_URI` in `contract/erc721/src/lib.rs` (SuperPositionNFTParams) to your base URL. For token ID `1`, the URI would be:
+`{base_uri}1.json`
 
-Example metadata JSON:
 ```json
 {
   "name": "NFT #1",
   "description": "Description of this NFT",
   "image": "https://example.com/images/1.png",
   "attributes": [
-    {
-      "trait_type": "Rarity",
-      "value": "Rare"
-    },
-    {
-      "trait_type": "Power",
-      "value": 100
-    }
+    { "trait_type": "Rarity", "value": "Rare" },
+    { "trait_type": "Power", "value": 100 }
   ]
 }
 ```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | NFT name |
+| `description` | Yes | NFT description |
+| `image` | Yes | Image URL for MetaMask/NFT display |
+
+Host your metadata JSON and images on IPFS, Arweave, or any HTTPS server.
 
 ## License
 
