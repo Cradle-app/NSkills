@@ -443,17 +443,18 @@ const MAXXIT_TELEGRAM_NAME_MAX = 128;
  * Maxxit Lazy Trader configuration
  */
 export const MaxxitLazyTradingConfig = BaseNodeConfig.extend({
-  agentId: z.string().max(MAXXIT_AGENT_ID_MAX).optional(),
-  agentName: z.string().max(MAXXIT_AGENT_NAME_MAX).optional(),
-  agentStatus: z.string().max(MAXXIT_STATUS_MAX).optional(),
-  venue: z.string().max(MAXXIT_VENUE_MAX).optional(),
-  userWallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/).optional(),
-  deploymentStatus: z.string().max(MAXXIT_STATUS_MAX).optional(),
+  agentId: nullableString().optional(),
+  agentName: nullableString().optional(),
+  agentStatus: nullableString().optional(),
+  venue: nullableString().optional(),
+  userWallet: z.string().regex(/^0x[a-fA-F0-9]{40}$/).nullable().optional(),
+  deploymentStatus: nullableString().optional(),
   enabledVenues: z.array(z.string().max(MAXXIT_VENUE_MAX)).optional(),
-  telegramUsername: z.string().max(MAXXIT_TELEGRAM_USERNAME_MAX).optional(),
-  telegramName: z.string().max(MAXXIT_TELEGRAM_NAME_MAX).optional(),
+  telegramUsername: nullableString().optional(),
+  telegramName: nullableString().optional(),
 });
 export type MaxxitLazyTradingConfig = z.infer<typeof MaxxitLazyTradingConfig>;
+
 
 /**
  * ERC20 Stylus Token configuration
