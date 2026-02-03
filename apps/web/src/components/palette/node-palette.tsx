@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Box,
@@ -23,445 +23,73 @@ import {
   TrendingUp,
   Zap,
   Coins,
+  type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAccount } from 'wagmi';
 import { useAuthGuard } from '@/components/auth/auth-guard';
 import { useAuthStore } from '@/store/auth';
+import {
+  CATEGORY_DEFINITIONS,
+  PLUGIN_REGISTRY,
+  getPluginsByCategory,
+  type PluginIcon,
+  type PluginRegistryEntry,
+} from '@cradle/plugin-config';
+import { useSuggestedPlugins } from '@/hooks/use-suggested-plugins';
+import { useBlueprintStore } from '@/store/blueprint';
 
-interface NodeTypeDefinition {
-  id: string;
-  name: string;
-  description: string;
-  icon: typeof Box;
-  color: string;
+/**
+ * Map icon names to Lucide components
+ */
+const ICON_MAP: Record<PluginIcon, LucideIcon> = {
+  Box,
+  CreditCard,
+  Bot,
+  Layout,
+  ShieldCheck,
+  Wallet,
+  Globe,
+  Database,
+  HardDrive,
+  Layers,
+  Lock,
+  ArrowLeftRight,
+  Key,
+  Sparkles,
+  TrendingUp,
+  Zap,
+  Coins,
+  Search,
+};
+
+/**
+ * Get Lucide icon component from icon name
+ */
+function getIconComponent(iconName: PluginIcon): LucideIcon {
+  return ICON_MAP[iconName] || Box;
 }
 
 interface NodeCategory {
   id: string;
   name: string;
-  icon: typeof Box;
+  icon: LucideIcon;
   color: string;
-  nodes: NodeTypeDefinition[];
+  plugins: PluginRegistryEntry[];
 }
 
-const NODE_CATEGORIES: NodeCategory[] = [
-  {
-    id: 'contracts',
-    name: 'Contracts',
-    icon: Box,
-    color: 'node-contracts',
-    nodes: [
-      {
-        id: 'erc20-stylus',
-        name: 'ERC-20 Token',
-        description: 'Deploy ERC-20 token on Arbitrum Stylus',
-        icon: Coins,
-        color: 'node-contracts',
-      },
-      {
-        id: 'erc721-stylus',
-        name: 'ERC-721 NFT',
-        description: 'Deploy NFT collection on Arbitrum Stylus',
-        icon: Sparkles,
-        color: 'node-contracts',
-      },
-      {
-        id: 'erc1155-stylus',
-        name: 'ERC-1155 Multi-Token',
-        description: 'Deploy multi-token contract on Arbitrum Stylus',
-        icon: Layers,
-        color: 'node-contracts',
-      },
-      {
-        id: 'stylus-contract',
-        name: 'Stylus Contract',
-        description: 'Rust/WASM smart contract for Arbitrum',
-        icon: Box,
-        color: 'node-contracts',
-      },
-      {
-        id: 'stylus-zk-contract',
-        name: 'Stylus ZK Contract',
-        description: 'Privacy-preserving contract with ZK proofs',
-        icon: Lock,
-        color: 'node-contracts',
-      },
-      {
-        id: 'eip7702-smart-eoa',
-        name: 'EIP-7702 Smart EOA',
-        description: 'Smart EOA delegation (trending)',
-        icon: Key,
-        color: 'node-contracts',
-      },
-      {
-        id: 'zk-primitives',
-        name: 'ZK Primitives',
-        description: 'Privacy proofs: membership, range, semaphore',
-        icon: Lock,
-        color: 'node-contracts',
-      },
-      {
-        id: 'stylus-rust-contract',
-        name: 'Stylus Rust Contract',
-        description: 'Build Rust smart contracts for Arbitrum',
-        icon: Box,
-        color: 'node-contracts',
-      },
-      {
-        id: 'smartcache-caching',
-        name: 'SmartCache Caching',
-        description: 'Enable contract caching for cheaper gas',
-        icon: Database,
-        color: 'node-contracts',
-      },
-      {
-        id: 'auditware-analyzing',
-        name: 'Auditware Analyzer',
-        description: 'Security analysis with Radar',
-        icon: ShieldCheck,
-        color: 'node-contracts',
-      },
-    ],
-  },
-  {
-    id: 'payments',
-    name: 'Payments',
-    icon: CreditCard,
-    color: 'node-payments',
-    nodes: [
-      {
-        id: 'x402-paywall-api',
-        name: 'x402 Paywall',
-        description: 'HTTP 402 payment endpoint',
-        icon: CreditCard,
-        color: 'node-payments',
-      },
-    ],
-  },
-  {
-    id: 'agents',
-    name: 'Agents',
-    icon: Bot,
-    color: 'node-agents',
-    nodes: [
-      {
-        id: 'erc8004-agent-runtime',
-        name: 'ERC-8004 Agent',
-        description: 'AI agent with on-chain registry',
-        icon: Bot,
-        color: 'node-agents',
-      },
-      {
-        id: 'ostium-trading',
-        name: 'Ostium Trading',
-        description: 'One-click trading setup for Ostium',
-        icon: Zap,
-        color: 'node-agents',
-      },
-      {
-        id: 'maxxit',
-        name: 'Maxxit Lazy Trader',
-        description: 'Connect and message Maxxit Lazy Trader agents',
-        icon: Bot,
-        color: 'node-agents',
-      },
-      {
-        id: 'onchain-activity',
-        name: 'Onchain Activity',
-        description: 'Fetch wallet transactions by category from Arbitrum',
-        icon: TrendingUp,
-        color: 'node-agents',
-      },
-    ],
-  },
-  {
-    id: 'app',
-    name: 'App',
-    icon: Layout,
-    color: 'node-app',
-    nodes: [
-      {
-        id: 'wallet-auth',
-        name: 'Wallet Auth',
-        description: 'WalletConnect, social login, SIWE',
-        icon: Wallet,
-        color: 'node-app',
-      },
-      {
-        id: 'rpc-provider',
-        name: 'RPC Provider',
-        description: 'Multi-provider RPC with failover',
-        icon: Globe,
-        color: 'node-app',
-      },
-      {
-        id: 'arbitrum-bridge',
-        name: 'Arbitrum Bridge',
-        description: 'L1-L2 bridging with @arbitrum/sdk',
-        icon: ArrowLeftRight,
-        color: 'node-app',
-      },
-      {
-        id: 'chain-data',
-        name: 'Chain Data',
-        description: 'Token/NFT data with Alchemy/Moralis',
-        icon: Database,
-        color: 'node-app',
-      },
-      {
-        id: 'ipfs-storage',
-        name: 'IPFS Storage',
-        description: 'Decentralized storage (Pinata/Web3.Storage)',
-        icon: HardDrive,
-        color: 'node-app',
-      },
-      {
-        id: 'chain-abstraction',
-        name: 'Chain Abstraction',
-        description: 'Unified multi-chain UX',
-        icon: Layers,
-        color: 'node-app',
-      },
-      {
-        id: 'frontend-scaffold',
-        name: 'Frontend',
-        description: 'Next.js/React frontend scaffold',
-        icon: Layout,
-        color: 'node-app',
-      },
-      {
-        id: 'sdk-generator',
-        name: 'SDK Generator',
-        description: 'TypeScript SDK from ABIs',
-        icon: Layout,
-        color: 'node-app',
-      },
-    ],
-  },
-  {
-    id: 'telegram',
-    name: 'Telegram',
-    icon: Bot,
-    color: 'node-app', // Reusing node-app color or could define 'node-telegram'
-    nodes: [
-      {
-        id: 'telegram-notifications',
-        name: 'Notifications',
-        description: 'Trigger alerts and updates to users',
-        icon: Sparkles,
-        color: 'node-app',
-      },
-      {
-        id: 'telegram-commands',
-        name: 'Commands',
-        description: 'Handle interactive commands via webhooks',
-        icon: Box,
-        color: 'node-app',
-      },
-      {
-        id: 'telegram-ai-agent',
-        name: 'AI Agent',
-        description: 'Conversational AI bot with LLM integration',
-        icon: Sparkles,
-        color: 'node-telegram',
-      },
-      {
-        id: 'telegram-wallet-link',
-        name: 'Wallet Link',
-        description: 'Link Telegram profiles with Web3 wallets',
-        icon: Lock,
-        color: 'node-app',
-      },
-    ],
-  },
-  {
-    id: 'quality',
-    name: 'Quality',
-    icon: ShieldCheck,
-    color: 'node-quality',
-    nodes: [
-      {
-        id: 'repo-quality-gates',
-        name: 'Quality Gates',
-        description: 'CI/CD, testing, linting',
-        icon: ShieldCheck,
-        color: 'node-quality',
-      },
-    ],
-  },
-  {
-    id: 'intelligence',
-    name: 'Intelligence',
-    icon: Sparkles,
-    color: 'node-intelligence',
-    nodes: [
-      {
-        id: 'aixbt-momentum',
-        name: 'Momentum',
-        description: 'Track social heat and project trends',
-        icon: TrendingUp,
-        color: 'node-intelligence',
-      },
-      {
-        id: 'aixbt-signals',
-        name: 'Signals',
-        description: 'Real-time project activity alerts',
-        icon: Zap,
-        color: 'node-intelligence',
-      },
-      {
-        id: 'aixbt-indigo',
-        name: 'Indigo',
-        description: 'Conversational market research',
-        icon: Sparkles,
-        color: 'node-intelligence',
-      },
-      {
-        id: 'aixbt-observer',
-        name: 'Observer',
-        description: 'Correlate on-chain activity',
-        icon: Search,
-        color: 'node-intelligence',
-      },
-    ],
-  },
-  {
-    id: 'superposition',
-    name: 'Superposition',
-    icon: Layers,
-    color: 'accent-cyan',
-    nodes: [
-      {
-        id: 'superposition-network',
-        name: 'Network Config',
-        description: 'Chain config, RPC, and contract addresses',
-        icon: Globe,
-        color: 'accent-cyan',
-      },
-      {
-        id: 'superposition-bridge',
-        name: 'Bridge',
-        description: 'Bridge assets from Arbitrum via Li.Fi',
-        icon: ArrowLeftRight,
-        color: 'accent-cyan',
-      },
-      {
-        id: 'superposition-longtail',
-        name: 'Longtail AMM',
-        description: 'Swap and liquidity on Longtail DEX',
-        icon: TrendingUp,
-        color: 'accent-cyan',
-      },
-      {
-        id: 'superposition-super-assets',
-        name: 'Super Assets',
-        description: 'Yield-bearing wrapped tokens',
-        icon: Sparkles,
-        color: 'accent-cyan',
-      },
-      {
-        id: 'superposition-thirdweb',
-        name: 'Thirdweb Deploy',
-        description: 'Deploy contracts using Thirdweb SDK',
-        icon: Box,
-        color: 'accent-cyan',
-      },
-      {
-        id: 'superposition-utility-mining',
-        name: 'Utility Mining',
-        description: 'Track and claim activity rewards',
-        icon: Zap,
-        color: 'accent-cyan',
-      },
-      {
-        id: 'superposition-faucet',
-        name: 'Testnet Faucet',
-        description: 'Request testnet tokens for development',
-        icon: Database,
-        color: 'accent-cyan',
-      },
-      {
-        id: 'superposition-meow-domains',
-        name: 'Meow Domains',
-        description: '.meow Web3 identity and resolution',
-        icon: Key,
-        color: 'accent-cyan',
-      },
-    ],
-  },
-  {
-    id: 'analytics',
-    name: 'Analytics',
-    icon: Database,
-    color: 'accent-purple',
-    nodes: [
-      {
-        id: 'dune-execute-sql',
-        name: 'Execute SQL',
-        description: 'Custom SQL queries on Dune blockchain data',
-        icon: Database,
-        color: 'accent-purple',
-      },
-      {
-        id: 'dune-token-price',
-        name: 'Token Price',
-        description: 'Fetch latest token prices across blockchains',
-        icon: TrendingUp,
-        color: 'accent-purple',
-      },
-      {
-        id: 'dune-wallet-balances',
-        name: 'Wallet Balances',
-        description: 'Token balances with USD valuations',
-        icon: Wallet,
-        color: 'accent-purple',
-      },
-      {
-        id: 'dune-dex-volume',
-        name: 'DEX Volume',
-        description: 'Trading volume and DEX statistics',
-        icon: TrendingUp,
-        color: 'accent-purple',
-      },
-      {
-        id: 'dune-nft-floor',
-        name: 'NFT Floor Price',
-        description: 'Collection floor prices and stats',
-        icon: Sparkles,
-        color: 'accent-purple',
-      },
-      {
-        id: 'dune-address-labels',
-        name: 'Address Labels',
-        description: 'Human-readable names for addresses',
-        icon: Key,
-        color: 'accent-purple',
-      },
-      {
-        id: 'dune-transaction-history',
-        name: 'Transaction History',
-        description: 'Wallet transaction history',
-        icon: Database,
-        color: 'accent-purple',
-      },
-      {
-        id: 'dune-gas-price',
-        name: 'Gas Price',
-        description: 'Gas price analytics and stats',
-        icon: Zap,
-        color: 'accent-purple',
-      },
-      {
-        id: 'dune-protocol-tvl',
-        name: 'Protocol TVL',
-        description: 'Total Value Locked for DeFi protocols',
-        icon: Lock,
-        color: 'accent-purple',
-      },
-    ],
-  },
-];
+/**
+ * Build categories from centralized registry
+ */
+function buildCategories(): NodeCategory[] {
+  return CATEGORY_DEFINITIONS.map((cat) => ({
+    id: cat.id,
+    name: cat.name,
+    icon: getIconComponent(cat.icon),
+    color: cat.color,
+    plugins: getPluginsByCategory(cat.id),
+  }));
+}
 
 export function NodePalette() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -469,9 +97,18 @@ export function NodePalette() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     () => new Set()
   );
+  // Suggestions section collapsed by default to save space
+  const [suggestionsExpanded, setSuggestionsExpanded] = useState(false);
   const { isConnected } = useAccount();
   const { isWalletConnected, isFullyAuthenticated } = useAuthGuard();
   const { showAuthModal, openAuthModal, closeAuthModal } = useAuthStore();
+
+  // Build categories from centralized registry
+  const categories = useMemo(() => buildCategories(), []);
+
+  // Get suggested plugins based on current canvas nodes
+  const { suggestions, hasSuggestions } = useSuggestedPlugins();
+  const addNode = useBlueprintStore((state) => state.addNode);
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => {
@@ -498,14 +135,17 @@ export function NodePalette() {
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  const filteredCategories = NODE_CATEGORIES.map(category => ({
-    ...category,
-    nodes: category.nodes.filter(
-      node =>
-        node.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        node.description.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-  })).filter(category => category.nodes.length > 0 || searchQuery === '');
+  const filteredCategories = useMemo(() => {
+    return categories.map(category => ({
+      ...category,
+      plugins: category.plugins.filter(
+        plugin =>
+          plugin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          plugin.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          plugin.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      ),
+    })).filter(category => category.plugins.length > 0 || searchQuery === '');
+  }, [categories, searchQuery]);
 
   return (
     <>
@@ -540,58 +180,35 @@ export function NodePalette() {
           </div>
         </div>
 
-        {/* Categories */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {filteredCategories.map((category, categoryIndex) => (
+        {/* Suggested Section - collapsible to save space */}
+        {hasSuggestions && searchQuery === '' && (
+          <div className="px-3 pb-2">
             <motion.div
-              key={category.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: categoryIndex * 0.05 }}
               className="rounded-xl overflow-hidden"
             >
-              {/* Category header */}
+              {/* Collapsible header */}
               <button
-                onClick={() => toggleCategory(category.id)}
-                className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200',
-                  'hover:bg-forge-elevated/50',
-                  expandedCategories.has(category.id) && 'bg-forge-elevated/30'
-                )}
+                onClick={() => setSuggestionsExpanded(!suggestionsExpanded)}
+                className="w-full flex items-center gap-2 px-3 py-2 hover:bg-forge-elevated/30 rounded-lg transition-colors"
               >
                 <motion.div
-                  animate={{ rotate: expandedCategories.has(category.id) ? 90 : 0 }}
+                  animate={{ rotate: suggestionsExpanded ? 90 : 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <ChevronRight className="w-4 h-4 text-forge-muted" />
+                  <ChevronRight className="w-3.5 h-3.5 text-accent-cyan" />
                 </motion.div>
-                <div className={cn(
-                  'w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200',
-                  expandedCategories.has(category.id)
-                    ? `bg-${category.color}/20`
-                    : 'bg-forge-elevated/50'
-                )}>
-                  <category.icon className={cn(
-                    'w-4 h-4 transition-colors duration-200',
-                    expandedCategories.has(category.id) ? `text-${category.color}` : 'text-forge-muted'
-                  )} />
-                </div>
-                <span className="text-sm font-medium text-white flex-1 text-left">
-                  {category.name}
-                </span>
-                <span className={cn(
-                  'text-xs font-mono px-2 py-0.5 rounded-full transition-colors duration-200',
-                  expandedCategories.has(category.id)
-                    ? `bg-${category.color}/20 text-${category.color}`
-                    : 'bg-forge-elevated/50 text-forge-muted'
-                )}>
-                  {category.nodes.length}
+                <Sparkles className="w-4 h-4 text-accent-cyan" />
+                <span className="text-xs font-semibold text-accent-cyan">Suggested</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent-cyan/10 text-accent-cyan">
+                  {suggestions.length}
                 </span>
               </button>
 
-              {/* Nodes */}
+              {/* Collapsible content */}
               <AnimatePresence>
-                {expandedCategories.has(category.id) && (
+                {suggestionsExpanded && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
@@ -599,55 +216,178 @@ export function NodePalette() {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="pl-6 pr-2 pb-2 pt-1 space-y-1.5">
-                      {category.nodes.map((node, nodeIndex) => (
-                        <motion.div
-                          key={node.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: nodeIndex * 0.03 }}
-                        >
-                          <div
-                            draggable
-                            onDragStart={(e) => onDragStart(e, node.id)}
-                            className={cn(
-                              'p-3 rounded-xl cursor-grab active:cursor-grabbing',
-                              'bg-forge-bg/50 border border-transparent',
-                              'hover:border-forge-border/50 hover:bg-forge-elevated/50',
-                              'hover:shadow-lg hover:shadow-black/20',
-                              'transition-all duration-200',
-                              'group'
-                            )}
+                    <div className="space-y-1.5 px-1 pt-1">
+                      {suggestions.slice(0, 5).map((plugin, idx) => {
+                        const SuggestedIcon = getIconComponent(plugin.icon);
+                        const reasonLabel = {
+                          required: 'Required',
+                          suggested: 'Recommended',
+                          compatible: 'Compatible',
+                        };
+                        const reasonColor = {
+                          required: 'bg-red-500/10 text-red-400 border-red-500/30',
+                          suggested: 'bg-accent-cyan/10 text-accent-cyan border-accent-cyan/30',
+                          compatible: 'bg-green-500/10 text-green-400 border-green-500/30',
+                        };
+                        return (
+                          <motion.div
+                            key={plugin.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
                           >
-                            <div className="flex items-start gap-3">
-                              <div
-                                className={cn(
-                                  'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
-                                  'bg-gradient-to-br transition-all duration-200',
-                                  `from-${node.color}/20 to-${node.color}/5`,
-                                  'group-hover:from-' + node.color + '/30 group-hover:to-' + node.color + '/10'
-                                )}
-                              >
-                                <node.icon className={cn('w-4.5 h-4.5', `text-${node.color}`)} />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate group-hover:text-accent-cyan transition-colors">
-                                  {node.name}
-                                </p>
-                                <p className="text-xs text-forge-muted truncate mt-0.5 leading-relaxed">
-                                  {node.description}
-                                </p>
+                            <div
+                              draggable
+                              onDragStart={(e) => onDragStart(e, plugin.id)}
+                              className={cn(
+                                'p-2 rounded-lg cursor-grab active:cursor-grabbing',
+                                'bg-accent-cyan/5 border border-accent-cyan/20',
+                                'hover:border-accent-cyan/40 hover:bg-accent-cyan/10',
+                                'transition-all duration-200 group'
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-md flex items-center justify-center bg-accent-cyan/10 shrink-0">
+                                  <SuggestedIcon className="w-3.5 h-3.5 text-accent-cyan" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1">
+                                    <p className="text-[11px] font-medium text-white truncate">{plugin.name}</p>
+                                    <span className={cn(
+                                      'text-[8px] px-1 py-0.5 rounded border shrink-0',
+                                      reasonColor[plugin.reason]
+                                    )}>
+                                      {reasonLabel[plugin.reason]}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      ))}
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </motion.div>
-          ))}
+          </div>
+        )}
+
+        {/* Categories */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          {filteredCategories.map((category, categoryIndex) => {
+            const CategoryIcon = category.icon;
+            return (
+              <motion.div
+                key={category.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: categoryIndex * 0.05 }}
+                className="rounded-xl overflow-hidden"
+              >
+                {/* Category header */}
+                <button
+                  onClick={() => toggleCategory(category.id)}
+                  className={cn(
+                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200',
+                    'hover:bg-forge-elevated/50',
+                    expandedCategories.has(category.id) && 'bg-forge-elevated/30'
+                  )}
+                >
+                  <motion.div
+                    animate={{ rotate: expandedCategories.has(category.id) ? 90 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronRight className="w-4 h-4 text-forge-muted" />
+                  </motion.div>
+                  <div className={cn(
+                    'w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200',
+                    expandedCategories.has(category.id)
+                      ? `bg-${category.color}/20`
+                      : 'bg-forge-elevated/50'
+                  )}>
+                    <CategoryIcon className={cn(
+                      'w-4 h-4 transition-colors duration-200',
+                      expandedCategories.has(category.id) ? `text-${category.color}` : 'text-forge-muted'
+                    )} />
+                  </div>
+                  <span className="text-sm font-medium text-white flex-1 text-left">
+                    {category.name}
+                  </span>
+                  <span className={cn(
+                    'text-xs font-mono px-2 py-0.5 rounded-full transition-colors duration-200',
+                    expandedCategories.has(category.id)
+                      ? `bg-${category.color}/20 text-${category.color}`
+                      : 'bg-forge-elevated/50 text-forge-muted'
+                  )}>
+                    {category.plugins.length}
+                  </span>
+                </button>
+
+                {/* Plugins */}
+                <AnimatePresence>
+                  {expandedCategories.has(category.id) && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pl-6 pr-2 pb-2 pt-1 space-y-1.5">
+                        {category.plugins.map((plugin, pluginIndex) => {
+                          const PluginIcon = getIconComponent(plugin.icon);
+                          return (
+                            <motion.div
+                              key={plugin.id}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: pluginIndex * 0.03 }}
+                            >
+                              <div
+                                draggable
+                                onDragStart={(e) => onDragStart(e, plugin.id)}
+                                className={cn(
+                                  'p-3 rounded-xl cursor-grab active:cursor-grabbing',
+                                  'bg-forge-bg/50 border border-transparent',
+                                  'hover:border-forge-border/50 hover:bg-forge-elevated/50',
+                                  'hover:shadow-lg hover:shadow-black/20',
+                                  'transition-all duration-200',
+                                  'group'
+                                )}
+                              >
+                                <div className="flex items-start gap-3">
+                                  <div
+                                    className={cn(
+                                      'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
+                                      'bg-gradient-to-br transition-all duration-200',
+                                      `from-${plugin.color}/20 to-${plugin.color}/5`,
+                                      'group-hover:from-' + plugin.color + '/30 group-hover:to-' + plugin.color + '/10'
+                                    )}
+                                  >
+                                    <PluginIcon className={cn('w-4.5 h-4.5', `text-${plugin.color}`)} />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-white truncate group-hover:text-accent-cyan transition-colors">
+                                      {plugin.name}
+                                    </p>
+                                    <p className="text-xs text-forge-muted truncate mt-0.5 leading-relaxed">
+                                      {plugin.description}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Footer hint */}
@@ -670,4 +410,3 @@ export function NodePalette() {
     </>
   );
 }
-
