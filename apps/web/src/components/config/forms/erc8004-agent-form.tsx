@@ -46,12 +46,12 @@ const CAPABILITY_LABELS: Record<string, string> = {
 const ENABLED_CAPABILITIES = ['text-generation'] as const;
 
 const MODEL_LABELS: Record<string, string> = {
-  'openai/gpt-4o': 'GPT-4o',
+  'openai/gpt-5.2': 'GPT-5.2',
   'openai/gpt-4o-mini': 'GPT-4o Mini',
-  'anthropic/claude-3.5-sonnet': 'Claude 3.5 Sonnet',
-  'anthropic/claude-3-haiku': 'Claude 3 Haiku',
-  'google/gemini-pro-1.5': 'Gemini Pro 1.5',
-  'meta-llama/llama-3.1-70b-instruct': 'Llama 3.1 70B',
+  'anthropic/claude-opus-4.5': 'Claude Opus 4.5',
+  'anthropic/claude-sonnet-4.5': 'Claude Sonnet 4.5',
+  'google/gemini-3-flash-preview': 'Gemini Flash 3',
+  'meta-llama/llama-3.3-70b-instruct': 'Llama 3.3 70B',
 };
 
 export function ERC8004AgentForm({ nodeId, config }: Props) {
@@ -553,14 +553,24 @@ export function ERC8004AgentForm({ nodeId, config }: Props) {
         <p className="text-xs font-medium text-forge-muted mb-2">Registry Contract ({network === 'arbitrum' ? 'Mainnet' : 'Testnet'})</p>
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-forge-muted">Address</span>
-          <code className="text-[10px] text-accent-cyan font-mono">
-            {registryAddress
-              ? `${registryAddress.slice(0, 6)}...${registryAddress.slice(-4)}`
-              : REGISTRY_CONTRACTS[network] === '0x0000000000000000000000000000000000000000'
-                ? 'Not deployed'
-                : `${REGISTRY_CONTRACTS[network].slice(0, 6)}...${REGISTRY_CONTRACTS[network].slice(-4)}`
+          {(() => {
+            const contractAddr = registryAddress ?? REGISTRY_CONTRACTS[network];
+            const isDeployed = contractAddr !== '0x0000000000000000000000000000000000000000';
+            if (!isDeployed) {
+              return <span className="text-[10px] text-forge-muted font-mono">Not deployed</span>;
             }
-          </code>
+            return (
+              <a
+                href={`${explorerUrl}/address/${contractAddr}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-[10px] text-accent-cyan font-mono hover:underline"
+              >
+                {`${contractAddr.slice(0, 6)}...${contractAddr.slice(-4)}`}
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            );
+          })()}
         </div>
       </div>
 
