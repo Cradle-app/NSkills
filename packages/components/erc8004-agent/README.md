@@ -203,6 +203,16 @@ The following models are pre-configured in the dropdown:
 | `google/gemini-pro-1.5` | Gemini Pro 1.5 |
 | `meta-llama/llama-3.1-70b-instruct` | Llama 3.1 70B |
 
+## Deployed Contracts
+
+A sample ERC-8004 registry contract is deployed on Arbitrum Sepolia for testing:
+
+| Network | Address | Explorer |
+|---------|---------|----------|
+| Arbitrum Sepolia | `0x517De4c9Afa737A46Dcba61e1548AB3807963094` | [View on Arbiscan](https://sepolia.arbiscan.io/address/0x517De4c9Afa737A46Dcba61e1548AB3807963094) |
+
+> **Note:** You can also specify a custom registry address if you've deployed your own contract.
+
 ## ERC-8004 Standard
 
 This package implements the ERC-8004 standard for on-chain AI agent registration. Key features:
