@@ -1,22 +1,34 @@
-import { Volume, createFsFromVolume } from 'memfs';
-import * as realFs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { Volume, createFsFromVolume } from "memfs";
+import * as realFs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 import type {
   Blueprint,
   BlueprintNode,
   CodegenOutput,
   ExecutionContext,
-} from '@dapp-forge/blueprint-schema';
-import { topologicalSort } from '@dapp-forge/blueprint-schema';
-import { getDefaultRegistry, buildPathContext, rewriteOutputPaths, resolveOutputPath, shouldMergeFile, mergeFileContents, type NodePlugin, type PathContext } from '@dapp-forge/plugin-sdk';
-import type { PathCategory } from '@dapp-forge/blueprint-schema';
-import { RunStore } from '../store/runs';
-import { createExecutionLogger } from '../utils/logger';
-import { applyCodegenOutput, formatAndLint, createManifest } from './filesystem';
-import { GitHubIntegration } from './github';
-
+} from "@dapp-forge/blueprint-schema";
+import { topologicalSort } from "@dapp-forge/blueprint-schema";
+import {
+  getDefaultRegistry,
+  buildPathContext,
+  rewriteOutputPaths,
+  resolveOutputPath,
+  shouldMergeFile,
+  mergeFileContents,
+  type NodePlugin,
+  type PathContext,
+} from "@dapp-forge/plugin-sdk";
+import type { PathCategory } from "@dapp-forge/blueprint-schema";
+import { RunStore } from "../store/runs";
+import { createExecutionLogger } from "../utils/logger";
+import {
+  applyCodegenOutput,
+  formatAndLint,
+  createManifest,
+} from "./filesystem";
+import { GitHubIntegration } from "./github";
 
 export interface ExecutionOptions {
   dryRun?: boolean;
@@ -51,7 +63,7 @@ export class ExecutionEngine {
     const logger = createExecutionLogger(runId);
     // Mark run as started
     this.runStore.start(runId);
-    logger.info('Starting blueprint execution', { blueprintId: blueprint.id });
+    logger.info("Starting blueprint execution", { blueprintId: blueprint.id });
 
     try {
       // Create in-memory filesystem
@@ -59,21 +71,23 @@ export class ExecutionEngine {
       const fs = createFsFromVolume(vol);
 
       // Initialize the filesystem with base structure
-      fs.mkdirSync('/output', { recursive: true });
-      fs.mkdirSync('/output/src', { recursive: true });
-      fs.mkdirSync('/output/docs', { recursive: true });
+      fs.mkdirSync("/output", { recursive: true });
+      fs.mkdirSync("/output/src", { recursive: true });
+      fs.mkdirSync("/output/docs", { recursive: true });
 
       // Get topological order of nodes
       const sortedNodes = topologicalSort(blueprint.nodes, blueprint.edges);
       if (!sortedNodes) {
-        throw new Error('Blueprint contains cycles - cannot determine execution order');
+        throw new Error(
+          "Blueprint contains cycles - cannot determine execution order"
+        );
       }
 
       logger.info(`Executing ${sortedNodes.length} nodes in topological order`);
 
       // Build path context for intelligent file routing
       const pathContext = buildPathContext(sortedNodes);
-      logger.info('Path context built', {
+      logger.info("Path context built", {
         hasFrontend: pathContext.hasFrontend,
         hasBackend: pathContext.hasBackend,
         hasContracts: pathContext.hasContracts,
@@ -81,14 +95,14 @@ export class ExecutionEngine {
 
       // Track outputs from each node
       const nodeOutputs = new Map<string, CodegenOutput>();
-      const allEnvVars: CodegenOutput['envVars'] = [];
-      const allScripts: CodegenOutput['scripts'] = [];
+      const allEnvVars: CodegenOutput["envVars"] = [];
+      const allScripts: CodegenOutput["scripts"] = [];
 
       // Execute each node in order
       for (const node of sortedNodes) {
         logger.info(`Processing node: ${node.type}`, { nodeId: node.id });
         this.runStore.addLog(runId, {
-          level: 'info',
+          level: "info",
           message: `Processing node: ${node.type}`,
           nodeId: node.id,
         });
@@ -112,7 +126,9 @@ export class ExecutionEngine {
         // Validate node config
         const validationResult = await plugin.validate(node.config, context);
         if (!validationResult.valid) {
-          const errors = validationResult.errors.map(e => `${e.field}: ${e.message}`).join(', ');
+          const errors = validationResult.errors
+            .map((e) => `${e.field}: ${e.message}`)
+            .join(", ");
           throw new Error(`Node ${node.id} validation failed: ${errors}`);
         }
 
@@ -125,54 +141,70 @@ export class ExecutionEngine {
         nodeOutputs.set(node.id, output);
 
         // Apply output to filesystem
-        applyCodegenOutput(fs, '/output', output);
+        applyCodegenOutput(fs, "/output", output);
 
         // Copy component package if plugin has one (pre-built component architecture)
         if (plugin.componentPath) {
-          logger.info(`Copying component package: ${plugin.componentPackage}`, { nodeId: node.id });
+          logger.info(`Copying component package: ${plugin.componentPackage}`, {
+            nodeId: node.id,
+          });
           this.copyComponentToOutput(
             fs,
-            '/output',
+            "/output",
             plugin.componentPath,
-            plugin.componentPackage || 'component',
+            plugin.componentPackage || "component",
             pathContext,
             plugin.componentPathMappings
           );
         }
 
-
         // Collect env vars and scripts
         allEnvVars.push(...output.envVars);
         allScripts.push(...output.scripts);
 
-        logger.info(`Node ${node.type} generated ${output.files.length} files`, { nodeId: node.id });
+        logger.info(
+          `Node ${node.type} generated ${output.files.length} files`,
+          { nodeId: node.id }
+        );
       }
 
       // Generate root files
-      generateRootFiles(fs, '/output', blueprint, allEnvVars, allScripts, pathContext, sortedNodes);
+      generateRootFiles(
+        fs,
+        "/output",
+        blueprint,
+        allEnvVars,
+        allScripts,
+        pathContext,
+        sortedNodes
+      );
 
       // Run format and lint
-      logger.info('Running format and lint checks');
+      logger.info("Running format and lint checks");
       this.runStore.addLog(runId, {
-        level: 'info',
-        message: 'Running format and lint checks',
+        level: "info",
+        message: "Running format and lint checks",
       });
 
-      const lintResult = await formatAndLint(fs, '/output');
+      const lintResult = await formatAndLint(fs, "/output");
       if (!lintResult.success) {
-        logger.warn('Lint/format warnings', { warnings: lintResult.warnings });
+        logger.warn("Lint/format warnings", { warnings: lintResult.warnings });
       }
 
       // Create manifest
-      const manifest = createManifest(fs, '/output');
+      const manifest = createManifest(fs, "/output");
 
       // Handle GitHub repo creation
       let repoUrl: string | undefined;
-      if (options.createGitHubRepo && blueprint.config.github && !options.dryRun) {
-        logger.info('Creating GitHub repository');
+      if (
+        options.createGitHubRepo &&
+        blueprint.config.github &&
+        !options.dryRun
+      ) {
+        logger.info("Creating GitHub repository");
         this.runStore.addLog(runId, {
-          level: 'info',
-          message: 'Creating GitHub repository',
+          level: "info",
+          message: "Creating GitHub repository",
         });
 
         // Set the user's OAuth token if provided
@@ -183,22 +215,22 @@ export class ExecutionEngine {
         const repoResult = await this.githubIntegration.createRepository(
           blueprint.config.github,
           fs,
-          '/output'
+          "/output"
         );
 
         repoUrl = repoResult.url;
 
         this.runStore.addArtifact(runId, {
-          name: 'GitHub Repository',
-          type: 'repo',
+          name: "GitHub Repository",
+          type: "repo",
           url: repoUrl,
         });
       }
 
       // Add file manifest as artifact
       this.runStore.addArtifact(runId, {
-        name: 'Generated Files',
-        type: 'report',
+        name: "Generated Files",
+        type: "report",
         content: JSON.stringify(manifest, null, 2),
       });
 
@@ -213,8 +245,8 @@ export class ExecutionEngine {
         repoUrl,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Execution failed', { error: message });
+      const message = error instanceof Error ? error.message : "Unknown error";
+      logger.error("Execution failed", { error: message });
       this.runStore.fail(runId, message);
       throw error;
     }
@@ -242,7 +274,7 @@ export class ExecutionEngine {
 
     if (!projectRoot) {
       let currentDir = currentFileDir;
-      const rootMarker = 'pnpm-workspace.yaml';
+      const rootMarker = "pnpm-workspace.yaml";
       while (currentDir !== path.parse(currentDir).root) {
         if (realFs.existsSync(path.join(currentDir, rootMarker))) {
           projectRoot = currentDir;
@@ -255,7 +287,10 @@ export class ExecutionEngine {
     if (!projectRoot) {
       // Fallback: This handles both src (../../../../) and dist (../../../)
       // but the recursive search above is much more reliable
-      projectRoot = path.resolve(currentFileDir, currentFileDir.includes('dist') ? '../../../' : '../../../../');
+      projectRoot = path.resolve(
+        currentFileDir,
+        currentFileDir.includes("dist") ? "../../../" : "../../../../"
+      );
     }
 
     const sourcePath = path.join(projectRoot, componentPath);
@@ -270,20 +305,29 @@ export class ExecutionEngine {
     // If path mappings are provided and we have a frontend scaffold, use intelligent routing
     if (pathMappings && pathContext.hasFrontend) {
       console.log(`Using path mappings for ${packageName}`);
-      this.copyWithPathMappings(realFs, memFs, sourcePath, outputPath, pathMappings, pathContext);
+      this.copyWithPathMappings(
+        realFs,
+        memFs,
+        sourcePath,
+        outputPath,
+        pathMappings,
+        pathContext
+      );
       return;
     }
 
     // Legacy: Special case for wallet-auth without path mappings
-    if (packageName === '@cradle/wallet-auth' && pathContext.hasFrontend) {
-      console.log('Merging wallet-auth into apps/web/src/ (frontend-scaffold detected)');
+    if (packageName === "@cradle/wallet-auth" && pathContext.hasFrontend) {
+      console.log(
+        "Merging wallet-auth into apps/web/src/ (frontend-scaffold detected)"
+      );
       this.copyWalletAuthMerged(realFs, memFs, sourcePath, outputPath);
       return;
     }
 
     // Default: Copy as separate package
-    const dirName = packageName.includes('/')
-      ? packageName.split('/').pop()!
+    const dirName = packageName.includes("/")
+      ? packageName.split("/").pop()!
       : packageName;
 
     const targetPath = `${outputPath}/packages/${dirName}`;
@@ -302,7 +346,15 @@ export class ExecutionEngine {
     pathMappings: Record<string, PathCategory>,
     pathContext: PathContext
   ): void {
-    this.copyDirectoryWithMappings(sourceFs, targetFs, sourcePath, outputPath, '', pathMappings, pathContext);
+    this.copyDirectoryWithMappings(
+      sourceFs,
+      targetFs,
+      sourcePath,
+      outputPath,
+      "",
+      pathMappings,
+      pathContext
+    );
   }
 
   /**
@@ -317,11 +369,18 @@ export class ExecutionEngine {
     pathMappings: Record<string, PathCategory>,
     pathContext: PathContext
   ): void {
-    const currentPath = relativePath ? path.join(sourcePath, relativePath) : sourcePath;
+    const currentPath = relativePath
+      ? path.join(sourcePath, relativePath)
+      : sourcePath;
     const items = sourceFs.readdirSync(currentPath);
 
     for (const item of items) {
-      if (item === 'node_modules' || item === 'dist' || item === 'target' || item.startsWith('.')) {
+      if (
+        item === "node_modules" ||
+        item === "dist" ||
+        item === "target" ||
+        item.startsWith(".")
+      ) {
         continue;
       }
 
@@ -331,8 +390,13 @@ export class ExecutionEngine {
 
       if (stat.isDirectory()) {
         this.copyDirectoryWithMappings(
-          sourceFs, targetFs, sourcePath, outputPath,
-          relativeItem, pathMappings, pathContext
+          sourceFs,
+          targetFs,
+          sourcePath,
+          outputPath,
+          relativeItem,
+          pathMappings,
+          pathContext
         );
       } else {
         const category = this.findPathCategory(relativeItem, pathMappings);
@@ -340,10 +404,13 @@ export class ExecutionEngine {
         if (category) {
           let targetPath: string;
 
-          if (category === 'contract-source') {
+          if (category === "contract-source") {
             // For contract source files, preserve directory structure under contracts/
             // e.g., contract/erc20/src/lib.rs -> contracts/erc20/src/lib.rs
-            const contractRelativePath = relativeItem.replace(/^contract\//, '');
+            const contractRelativePath = relativeItem.replace(
+              /^contract\//,
+              ""
+            );
             targetPath = `${outputPath}/contracts/${contractRelativePath}`;
           } else {
             const resolvedPath = resolveOutputPath(item, category, pathContext);
@@ -353,36 +420,49 @@ export class ExecutionEngine {
           const targetDir = path.dirname(targetPath);
 
           targetFs.mkdirSync(targetDir, { recursive: true });
-          const incomingContent = sourceFs.readFileSync(sourceItem, 'utf-8');
+          const incomingContent = sourceFs.readFileSync(sourceItem, "utf-8");
 
           // Check if target file exists and needs merging
           let finalContent: string;
-          let action = 'created';
+          let action = "created";
 
           try {
-            const existingContent = targetFs.readFileSync(targetPath, 'utf-8') as string;
+            const existingContent = targetFs.readFileSync(
+              targetPath,
+              "utf-8"
+            ) as string;
 
             // File exists - check if we should merge
             if (shouldMergeFile(item)) {
-              const mergeResult = mergeFileContents(existingContent, incomingContent, item);
+              const mergeResult = mergeFileContents(
+                existingContent,
+                incomingContent,
+                item
+              );
 
               if (mergeResult.success) {
                 finalContent = mergeResult.content;
-                action = 'merged';
+                action = "merged";
 
                 if (mergeResult.warnings.length > 0) {
-                  console.log(`    ⚠️ Merge warnings: ${mergeResult.warnings.join(', ')}`);
+                  console.log(
+                    `    ⚠️ Merge warnings: ${mergeResult.warnings.join(", ")}`
+                  );
                 }
               } else {
-                console.warn(`    ⚠️ Could not merge ${item}, keeping existing`);
+                console.warn(
+                  `    ⚠️ Could not merge ${item}, keeping existing`
+                );
                 finalContent = existingContent;
-                action = 'kept-existing';
+                action = "kept-existing";
               }
             } else {
               // Not a mergeable file type - keep existing and warn
-              console.warn(`    ⚠️ File conflict: ${item} - keeping existing (consider using unique names)`);
+              console.warn(
+                `    ⚠️ File conflict: ${item} - keeping existing (consider using unique names)`
+              );
               finalContent = existingContent;
-              action = 'kept-existing';
+              action = "kept-existing";
             }
           } catch {
             // File doesn't exist - write new content
@@ -390,9 +470,14 @@ export class ExecutionEngine {
           }
 
           targetFs.writeFileSync(targetPath, finalContent);
-          console.log(`  ${relativeItem} -> ${targetPath.replace(outputPath + '/', '')} (${category}) [${action}]`);
+          console.log(
+            `  ${relativeItem} -> ${targetPath.replace(
+              outputPath + "/",
+              ""
+            )} (${category}) [${action}]`
+          );
         } else {
-          if (item === 'README.md' || item.endsWith('.md')) {
+          if (item === "README.md" || item.endsWith(".md")) {
             const docsPath = `${outputPath}/docs`;
             targetFs.mkdirSync(docsPath, { recursive: true });
             const content = sourceFs.readFileSync(sourceItem);
@@ -412,7 +497,7 @@ export class ExecutionEngine {
     pathMappings: Record<string, PathCategory>
   ): PathCategory | undefined {
     // Normalize path separators
-    const normalizedPath = filePath.replace(/\\/g, '/');
+    const normalizedPath = filePath.replace(/\\/g, "/");
 
     for (const [pattern, category] of Object.entries(pathMappings)) {
       if (this.matchPattern(normalizedPath, pattern)) {
@@ -428,12 +513,12 @@ export class ExecutionEngine {
    * Supports: ** (any path), * (any filename without /)
    */
   private matchPattern(filePath: string, pattern: string): boolean {
-    // Escape regex special chars except * 
+    // Escape regex special chars except *
     let regexPattern = pattern
-      .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-      .replace(/\*\*/g, '<<<DOUBLE>>>') // Placeholder for **
-      .replace(/\*/g, '[^/]*')          // * matches anything except /
-      .replace(/<<<DOUBLE>>>/g, '.*');  // ** matches anything including /
+      .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
+      .replace(/\*\*/g, "<<<DOUBLE>>>") // Placeholder for **
+      .replace(/\*/g, "[^/]*") // * matches anything except /
+      .replace(/<<<DOUBLE>>>/g, ".*"); // ** matches anything including /
 
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(filePath);
@@ -448,7 +533,7 @@ export class ExecutionEngine {
     sourcePath: string,
     outputPath: string
   ): void {
-    const srcPath = path.join(sourcePath, 'src');
+    const srcPath = path.join(sourcePath, "src");
     if (!sourceFs.existsSync(srcPath)) {
       console.warn(`wallet-auth src/ not found: ${srcPath}`);
       return;
@@ -459,7 +544,7 @@ export class ExecutionEngine {
 
     const items = sourceFs.readdirSync(srcPath);
     for (const item of items) {
-      if (item === 'node_modules' || item.startsWith('.')) continue;
+      if (item === "node_modules" || item.startsWith(".")) continue;
 
       const sourceItem = path.join(srcPath, item);
       const stat = sourceFs.statSync(sourceItem);
@@ -478,7 +563,7 @@ export class ExecutionEngine {
     }
 
     // Also copy README.md to docs/wallet-auth/
-    const readmePath = path.join(sourcePath, 'README.md');
+    const readmePath = path.join(sourcePath, "README.md");
     if (sourceFs.existsSync(readmePath)) {
       const docsPath = `${outputPath}/docs/wallet-auth`;
       targetFs.mkdirSync(docsPath, { recursive: true });
@@ -501,7 +586,12 @@ export class ExecutionEngine {
     const items = sourceFs.readdirSync(sourcePath);
 
     for (const item of items) {
-      if (item === 'node_modules' || item === 'dist' || item === 'target' || item.startsWith('.')) {
+      if (
+        item === "node_modules" ||
+        item === "dist" ||
+        item === "target" ||
+        item.startsWith(".")
+      ) {
         continue;
       }
 
@@ -519,7 +609,6 @@ export class ExecutionEngine {
   }
 }
 
-
 /**
  * Generate root project files
  */
@@ -527,8 +616,8 @@ function generateRootFiles(
   fs: ReturnType<typeof createFsFromVolume>,
   basePath: string,
   blueprint: Blueprint,
-  envVars: CodegenOutput['envVars'],
-  scripts: CodegenOutput['scripts'],
+  envVars: CodegenOutput["envVars"],
+  scripts: CodegenOutput["scripts"],
   pathContext?: PathContext,
   nodes?: BlueprintNode[]
 ): void {
@@ -537,54 +626,57 @@ function generateRootFiles(
   // 1. Has backend (multiple apps need coordination), OR
   // 2. Has contracts WITHOUT frontend (standalone contract project needs different setup)
   // When frontend + ERC contracts, we don't need monorepo - frontend handles the interaction
-  const needsMonorepo = pathContext?.hasBackend ||
+  const needsMonorepo =
+    pathContext?.hasBackend ||
     (pathContext?.hasContracts && !pathContext?.hasFrontend) ||
     !pathContext?.hasFrontend;
   const { project } = blueprint.config;
 
   // Generate package.json
   // Adjust scripts based on whether we need monorepo structure
-  const packageJson = needsMonorepo ? {
-    name: project.name.toLowerCase().replace(/\s+/g, '-'),
-    version: project.version,
-    description: project.description,
-    private: true,
-    scripts: {
-      dev: 'next dev',
-      build: 'next build',
-      start: 'next start',
-      lint: 'next lint',
-      ...Object.fromEntries(scripts.map(s => [s.name, s.command])),
-    },
-    dependencies: {},
-    devDependencies: {
-      typescript: '^5.3.0',
-    },
-    packageManager: 'pnpm@9.0.0',
-    author: project.author,
-    license: project.license,
-    keywords: project.keywords,
-  } : {
-    // Standalone frontend - simpler package.json pointing to apps/web
-    name: project.name.toLowerCase().replace(/\s+/g, '-'),
-    version: project.version,
-    description: project.description,
-    private: true,
-    scripts: {
-      dev: 'next dev',
-      build: 'next build',
-      start: 'next start',
-      lint: 'next lint',
-      ...Object.fromEntries(scripts.map(s => [s.name, s.command])),
-    },
-    dependencies: {},
-    devDependencies: {
-      typescript: '^5.3.0',
-    },
-    packageManager: 'pnpm@9.0.0',
-    license: project.license,
-    keywords: project.keywords,
-  };
+  const packageJson = needsMonorepo
+    ? {
+        name: project.name.toLowerCase().replace(/\s+/g, "-"),
+        version: project.version,
+        description: project.description,
+        private: true,
+        scripts: {
+          dev: "next dev",
+          build: "next build",
+          start: "next start",
+          lint: "next lint",
+          ...Object.fromEntries(scripts.map((s) => [s.name, s.command])),
+        },
+        dependencies: {},
+        devDependencies: {
+          typescript: "^5.3.0",
+        },
+        packageManager: "pnpm@9.0.0",
+        author: project.author,
+        license: project.license,
+        keywords: project.keywords,
+      }
+    : {
+        // Standalone frontend - simpler package.json pointing to apps/web
+        name: project.name.toLowerCase().replace(/\s+/g, "-"),
+        version: project.version,
+        description: project.description,
+        private: true,
+        scripts: {
+          dev: "next dev",
+          build: "next build",
+          start: "next start",
+          lint: "next lint",
+          ...Object.fromEntries(scripts.map((s) => [s.name, s.command])),
+        },
+        dependencies: {},
+        devDependencies: {
+          typescript: "^5.3.0",
+        },
+        packageManager: "pnpm@9.0.0",
+        license: project.license,
+        keywords: project.keywords,
+      };
 
   fs.writeFileSync(
     `${basePath}/package.json`,
@@ -593,19 +685,29 @@ function generateRootFiles(
 
   // Generate .env.example
   // Put in apps/web for standalone frontend, root for monorepo
-  const envExampleHeader = '# Environment Variables\n# Copy this file to .env and fill in the values\n\n';
-  const envVarsContent = envVars
-    .map(v => `# ${v.description}${v.required ? ' (required)' : ''}${v.secret ? ' [secret]' : ''}\n${v.key}=${v.defaultValue || ''}`)
-    .join('\n\n');
-  const envExample = envExampleHeader + (envVarsContent || '# No environment variables required\n');
+  const envExampleHeader =
+    "# Environment Variables\n# Copy this file to .env and fill in the values\n\n";
+  const dedupedEnvVars = dedupeEnvVars(envVars);
+  const envVarsContent = dedupedEnvVars
+    .map(
+      (v) =>
+        `# ${v.description}${v.required ? " (required)" : ""}${
+          v.secret ? " [secret]" : ""
+        }\n${v.key}=${v.defaultValue || ""}`
+    )
+    .join("\n\n");
+  const envExample =
+    envExampleHeader +
+    (envVarsContent || "# No environment variables required\n");
 
-  const envPath = pathContext?.hasFrontend && !needsMonorepo
-    ? `${basePath}/apps/web/.env.example`
-    : `${basePath}/.env.example`;
+  const envPath =
+    pathContext?.hasFrontend && !needsMonorepo
+      ? `${basePath}/apps/web/.env.example`
+      : `${basePath}/.env.example`;
   fs.writeFileSync(envPath, envExample);
 
   // Generate README.md
-  const readme = generateReadme(project, scripts, envVars, nodes);
+  const readme = generateReadme(project, scripts, dedupedEnvVars, nodes);
   fs.writeFileSync(`${basePath}/README.md`, readme);
 
   // Generate .gitignore
@@ -651,18 +753,18 @@ target/
   if (needsMonorepo) {
     // Generate turbo.json
     const turboConfig = {
-      $schema: 'https://turbo.build/schema.json',
+      $schema: "https://turbo.build/schema.json",
       tasks: {
         build: {
-          dependsOn: ['^build'],
-          outputs: ['dist/**', '.next/**'],
+          dependsOn: ["^build"],
+          outputs: ["dist/**", ".next/**"],
         },
         dev: {
           cache: false,
           persistent: true,
         },
         test: {
-          dependsOn: ['^build'],
+          dependsOn: ["^build"],
         },
         lint: {},
       },
@@ -679,36 +781,81 @@ target/
   }
 }
 
+/**
+ * Dedupe environment variables by key while preserving important flags.
+ * If the same key appears multiple times, we:
+ * - keep the first description (if any)
+ * - OR flags (required/secret)
+ * - keep the first non-empty defaultValue
+ */
+function dedupeEnvVars(
+  envVars: CodegenOutput["envVars"]
+): CodegenOutput["envVars"] {
+  const byKey = new Map<string, CodegenOutput["envVars"][number]>();
+
+  for (const v of envVars) {
+    const existing = byKey.get(v.key);
+
+    if (!existing) {
+      byKey.set(v.key, { ...v });
+    } else {
+      existing.required = existing.required || v.required;
+      existing.secret = existing.secret || v.secret;
+
+      if (!existing.description && v.description) {
+        existing.description = v.description;
+      }
+
+      if (
+        (existing.defaultValue === undefined || existing.defaultValue === "") &&
+        v.defaultValue !== undefined &&
+        v.defaultValue !== ""
+      ) {
+        existing.defaultValue = v.defaultValue;
+      }
+    }
+  }
+
+  return Array.from(byKey.values());
+}
+
 function generateReadme(
-  project: Blueprint['config']['project'],
-  scripts: CodegenOutput['scripts'],
-  envVars: CodegenOutput['envVars'],
+  project: Blueprint["config"]["project"],
+  scripts: CodegenOutput["scripts"],
+  envVars: CodegenOutput["envVars"],
   nodes?: BlueprintNode[]
 ): string {
-  const appSlug = project.name.toLowerCase().replace(/\s+/g, '-');
-  const nodeTypes = new Set((nodes || []).map(n => n.type));
+  const appSlug = project.name.toLowerCase().replace(/\s+/g, "-");
+  const nodeTypes = new Set((nodes || []).map((n) => n.type));
 
   // Build contracts section based on which plugins are present
-  let contractsStructure = '├── contracts/                  # Rust/Stylus smart contracts\n';
-  if (nodeTypes.has('smartcache-caching')) {
+  let contractsStructure =
+    "├── contracts/                  # Rust/Stylus smart contracts\n";
+  if (nodeTypes.has("smartcache-caching")) {
     contractsStructure += `│   ├── mycontract/            # Original contract (no caching)\n`;
     contractsStructure += `│   │   └── src/lib.rs\n`;
     contractsStructure += `│   └── cached-contract/       # Contract with is_cacheable + opt_in_to_cache\n`;
     contractsStructure += `│       └── src/lib.rs\n`;
-  } else if (nodeTypes.has('stylus-contract')) {
+  } else if (nodeTypes.has("stylus-contract")) {
     contractsStructure += `│   └── counter-contract/      # Stylus template (edit src/lib.rs per docs)\n`;
     contractsStructure += `│       └── src/lib.rs\n`;
-  } else if (nodeTypes.has('erc20-stylus') || nodeTypes.has('erc721-stylus') || nodeTypes.has('erc1155-stylus')) {
+  } else if (
+    nodeTypes.has("erc20-stylus") ||
+    nodeTypes.has("erc721-stylus") ||
+    nodeTypes.has("erc1155-stylus")
+  ) {
     const contracts: string[] = [];
-    if (nodeTypes.has('erc20-stylus')) contracts.push('erc20');
-    if (nodeTypes.has('erc721-stylus')) contracts.push('erc721');
-    if (nodeTypes.has('erc1155-stylus')) contracts.push('erc1155');
-    contracts.forEach(c => { contractsStructure += `│   └── ${c}/\n`; });
+    if (nodeTypes.has("erc20-stylus")) contracts.push("erc20");
+    if (nodeTypes.has("erc721-stylus")) contracts.push("erc721");
+    if (nodeTypes.has("erc1155-stylus")) contracts.push("erc1155");
+    contracts.forEach((c) => {
+      contractsStructure += `│   └── ${c}/\n`;
+    });
   } else {
     contractsStructure += `│   └── (contract source)\n`;
   }
 
-  const hasFrontend = nodeTypes.has('frontend-scaffold');
+  const hasFrontend = nodeTypes.has("frontend-scaffold");
   let structureBlock = `\`\`\`\n${appSlug}/\n`;
   if (hasFrontend) {
     structureBlock += `├── apps/\n│   └── web/                    # Next.js frontend\n│       ├── src/\n│       ├── package.json\n│       └── ...\n`;
@@ -717,7 +864,10 @@ function generateReadme(
 
   return `# ${project.name}
 
-${project.description || 'A Web3 dApp generated with [Cradle](https://cradle.dev).'}
+${
+  project.description ||
+  "A Web3 dApp generated with [Cradle](https://cradle.dev)."
+}
 
 ## 📁 Project Structure
 
@@ -750,7 +900,12 @@ ${structureBlock}
    \`\`\`
 
    Edit \`.env\` and configure:
-   ${envVars.filter(v => v.required).map(v => `   - \`${v.key}\`: ${v.description}`).join('\n') || '   - No required variables'}
+   ${
+     envVars
+       .filter((v) => v.required)
+       .map((v) => `   - \`${v.key}\`: ${v.description}`)
+       .join("\n") || "   - No required variables"
+   }
 
 4. **Deploy contracts** (from repo root): \`pnpm deploy:sepolia\` or \`pnpm deploy:mainnet\`
 
@@ -798,4 +953,3 @@ ${project.license}
 Generated with ❤️ by [Cradle](https://cradle.dev)
 `;
 }
-

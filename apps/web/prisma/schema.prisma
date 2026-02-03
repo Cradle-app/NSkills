@@ -25,15 +25,16 @@ model User {
 }
 
 model UserGithubRepo {
-  id          String   @id @default(uuid())
-  userId      String
-  repo_owner  String
-  repo_name   String
-  repo_url    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(uuid())
+  userId        String
+  repo_owner    String
+  repo_name     String
+  repo_url      String?
+  selected_nodes String[]  @default([])  // Native array of node/plugin types (e.g. ['frontend-scaffold', 'erc20-stylus'])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, repo_owner, repo_name])
   @@map("user_github_repos")

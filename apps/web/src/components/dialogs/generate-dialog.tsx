@@ -155,9 +155,13 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
         fileCount,
       });
 
-      // Save repo to user_github_repos when created and wallet is connected
+      // Save repo and selected nodes/plugins to user_github_repos when created and wallet is connected
       if (createGitHubRepo && repoUrl && walletAddress) {
         const githubOwner = githubSession?.github?.username || repoOwner;
+        const selected_nodes = blueprint.nodes.map((n) => ({
+          type: n.type,
+          label: (n.config as { label?: string })?.label,
+        }));
         fetch('/api/user/repos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -166,6 +170,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
             repo_owner: githubOwner,
             repo_name: repoName,
             repo_url: repoUrl,
+            selected_nodes,
           }),
         }).catch((err) => console.warn('Failed to save repo to profile:', err));
       }
