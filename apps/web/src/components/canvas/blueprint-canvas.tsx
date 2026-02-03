@@ -22,68 +22,17 @@ import { useAuthStore } from '@/store/auth';
 import { useBlueprintStore } from '@/store/blueprint';
 import { ForgeNode } from './forge-node';
 import { ForgeEdge } from './forge-edge';
+import { CanvasSuggestions } from './canvas-suggestions';
+import { getPluginIds } from '@cradle/plugin-config';
 
-// Custom node types
-const nodeTypes: NodeTypes = {
-  // Contracts
-  'stylus-contract': ForgeNode,
-  'stylus-zk-contract': ForgeNode,
-  'eip7702-smart-eoa': ForgeNode,
-  'zk-primitives': ForgeNode,
-  'stylus-rust-contract': ForgeNode,
-  'smartcache-caching': ForgeNode,
-  'auditware-analyzing': ForgeNode,
-  // Payments
-  'x402-paywall-api': ForgeNode,
-  // Agents
-  'erc8004-agent-runtime': ForgeNode,
-  'ostium-trading': ForgeNode,
-  'maxxit': ForgeNode,
-  'onchain-activity': ForgeNode,
-  // App
-  'wallet-auth': ForgeNode,
-  'rpc-provider': ForgeNode,
-  'arbitrum-bridge': ForgeNode,
-  'chain-data': ForgeNode,
-  'ipfs-storage': ForgeNode,
-  'chain-abstraction': ForgeNode,
-  'erc20-stylus': ForgeNode,
-  'erc721-stylus': ForgeNode,
-  'erc1155-stylus': ForgeNode,
-  'frontend-scaffold': ForgeNode,
-  'sdk-generator': ForgeNode,
-  // Telegram
-  'telegram-notifications': ForgeNode,
-  'telegram-commands': ForgeNode,
-  'telegram-ai-agent': ForgeNode,
-  'telegram-wallet-link': ForgeNode,
-  // Quality
-  'repo-quality-gates': ForgeNode,
-  // Intelligence
-  'aixbt-momentum': ForgeNode,
-  'aixbt-signals': ForgeNode,
-  'aixbt-indigo': ForgeNode,
-  'aixbt-observer': ForgeNode,
-  // Superposition L3
-  'superposition-network': ForgeNode,
-  'superposition-bridge': ForgeNode,
-  'superposition-longtail': ForgeNode,
-  'superposition-super-assets': ForgeNode,
-  'superposition-thirdweb': ForgeNode,
-  'superposition-utility-mining': ForgeNode,
-  'superposition-faucet': ForgeNode,
-  'superposition-meow-domains': ForgeNode,
-  // Dune Analytics
-  'dune-execute-sql': ForgeNode,
-  'dune-token-price': ForgeNode,
-  'dune-wallet-balances': ForgeNode,
-  'dune-dex-volume': ForgeNode,
-  'dune-nft-floor': ForgeNode,
-  'dune-address-labels': ForgeNode,
-  'dune-transaction-history': ForgeNode,
-  'dune-gas-price': ForgeNode,
-  'dune-protocol-tvl': ForgeNode,
-};
+// Dynamically build node types from plugin registry
+const nodeTypes: NodeTypes = getPluginIds().reduce(
+  (acc, pluginId) => {
+    acc[pluginId] = ForgeNode;
+    return acc;
+  },
+  {} as NodeTypes
+);
 
 // Custom edge types
 const edgeTypes: EdgeTypes = {
@@ -342,6 +291,9 @@ export function BlueprintCanvas() {
           </div>
         </div>
       )}
+
+      {/* Canvas-based suggestions - appear near nodes */}
+      <CanvasSuggestions />
     </div>
   );
 }
