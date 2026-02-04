@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -46,6 +46,20 @@ export function AuthFlowModal({
   const [githubLoading, setGithubLoading] = useState(false);
   const [savingUser, setSavingUser] = useState(false);
 
+  // Derive the current step from actual connection states (wagmi for wallet, store for GitHub)
+  // This ensures we always show the correct step regardless of stale store values
+  const currentStep = useMemo(() => {
+    if (!isConnected) {
+      return 'wallet';
+    }
+    if (requireGitHub && !isGitHubConnected) {
+      return 'github';
+    }
+    return 'complete';
+  }, [isConnected, isGitHubConnected, requireGitHub]);
+
+  // console.log("all logs: ", currentStep, isWalletConnected, isGitHubConnected, session, address, isConnected);
+
   // Check for GitHub session on mount and handle OAuth callback
   useEffect(() => {
     if (open) {
@@ -61,32 +75,19 @@ export function AuthFlowModal({
     }
   }, [open]);
 
-  // Sync auth modal step with current state when modal opens
-  useEffect(() => {
-    if (open) {
-      if (!isWalletConnected) {
-        setAuthModalStep('wallet');
-      } else if (requireGitHub) {
-        // Stay on github step - it will show Finish button when connected
-        setAuthModalStep('github');
-      }
-    }
-  }, [open, isWalletConnected, requireGitHub, setAuthModalStep]);
-
   // Auto-advance steps and save wallet to database
   useEffect(() => {
-    if (isConnected && address && authModalStep === 'wallet') {
+    if (isConnected && address && currentStep === 'wallet') {
       // Save wallet to database immediately
       saveUserToDatabase().then(() => {
         if (requireGitHub) {
-          // Advance to GitHub step - user will click button to trigger OAuth
-          setAuthModalStep('github');
+          // Step will automatically advance via currentStep computation
         } else {
           handleComplete();
         }
       });
     }
-  }, [isConnected, address, authModalStep, requireGitHub]);
+  }, [isConnected, address, currentStep, requireGitHub]);
 
   // Check GitHub session from cookie (same flow as header GitHubConnect)
   const checkGitHubSession = async () => {
@@ -169,7 +170,7 @@ export function AuthFlowModal({
       title: 'Connect Wallet',
       description: 'Connect your wallet to access Cradle features',
       icon: Wallet,
-      completed: isWalletConnected,
+      completed: isConnected,
     },
     ...(requireGitHub
       ? [
@@ -185,7 +186,7 @@ export function AuthFlowModal({
   ];
 
   // Lower z-index when on wallet step to allow RainbowKit modal to appear above
-  const isWalletStep = authModalStep === 'wallet';
+  const isWalletStep = currentStep === 'wallet';
 
   if (!open) {
     return null;
@@ -249,7 +250,7 @@ export function AuthFlowModal({
                       'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
                       step.completed
                         ? 'bg-accent-cyan text-black'
-                        : authModalStep === step.id
+                        : currentStep === step.id
                           ? 'bg-accent-cyan/20 border-2 border-accent-cyan text-accent-cyan'
                           : 'bg-forge-elevated text-forge-muted'
                     )}
@@ -276,7 +277,7 @@ export function AuthFlowModal({
           {/* Content */}
           <div className="px-6 pb-6">
             <AnimatePresence mode="wait">
-              {authModalStep === 'wallet' && (
+              {currentStep === 'wallet' && (
                 <motion.div
                   key="wallet"
                   initial={{ opacity: 0, x: 20 }}
@@ -296,7 +297,7 @@ export function AuthFlowModal({
                 </motion.div>
               )}
 
-              {authModalStep === 'github' && (
+              {currentStep === 'github' && (
                 <motion.div
                   key="github"
                   initial={{ opacity: 0, x: 20 }}
@@ -411,13 +412,18 @@ export function useAuthFlow() {
     isFullyAuthenticated
   } = useAuthStore();
 
+  // requireAuth now delegates fully to openAuthModal which checks:
+  // 1. Wallet connection (wagmi)
+  // 2. Database records
+  // 3. Active GitHub session (cookie)
   const requireAuth = (action: () => void): boolean => {
-    if (!isWalletConnected) {
-      openAuthModal(action);
-      return false;
-    }
-    action();
-    return true;
+    // openAuthModal will check all conditions and either:
+    // - Execute the action immediately if fully authenticated
+    // - Show the modal if any auth is missing
+    openAuthModal(action);
+    // Return false since we can't know synchronously if auth succeeded
+    // The action will be executed via pendingAction if auth completes
+    return false;
   };
 
   return {

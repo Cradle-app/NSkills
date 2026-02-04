@@ -1,12 +1,14 @@
 'use client';
 
 import { Panel, Group as PanelGroup, Separator } from 'react-resizable-panels';
+import { motion } from 'framer-motion';
 import { BlueprintCanvas } from '@/components/canvas/blueprint-canvas';
 import { NodePalette } from '@/components/palette/node-palette';
 import { ConfigPanel } from '@/components/config/config-panel';
 import { Header } from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
 import { GripVertical } from 'lucide-react';
+import { useBlueprintStore } from '@/store/blueprint';
 
 function ResizeHandle({ className = '' }: { className?: string }) {
   return (
@@ -21,72 +23,85 @@ function ResizeHandle({ className = '' }: { className?: string }) {
 }
 
 export default function HomePage() {
+  const { selectedNodeId } = useBlueprintStore();
+  const hasSelection = selectedNodeId !== null;
+
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden relative">
       {/* Animated background */}
       <div className="absolute inset-0 bg-forge-bg">
         {/* Mesh gradient background */}
         <div className="absolute inset-0 bg-mesh-gradient opacity-50" />
-        
+
         {/* Subtle grid pattern */}
-        <div 
+        <div
           className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)`,
             backgroundSize: '32px 32px'
           }}
         />
-        
+
         {/* Animated gradient orbs */}
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-cyan/5 rounded-full blur-[120px] animate-pulse-slow" />
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-accent-magenta/5 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
         <div className="absolute top-1/2 right-1/3 w-[300px] h-[300px] bg-accent-lime/3 rounded-full blur-[80px] animate-pulse-slow" style={{ animationDelay: '4s' }} />
       </div>
-      
+
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
         {/* Header */}
         <Header />
-        
+
         {/* Main content with resizable panels */}
         <PanelGroup orientation="horizontal" className="flex-1">
           {/* Left sidebar - Node palette */}
-          <Panel 
+          <Panel
             defaultSize="18%" 
             minSize="180px" 
             maxSize="30%"
           >
             <NodePalette />
           </Panel>
-          
+
           <ResizeHandle />
-          
-          {/* Main canvas */}
-          <Panel 
-            defaultSize="54%" 
+
+          {/* Main canvas - expands when no selection */}
+          <Panel
+            defaultSize={hasSelection ? "54%" : "82%"}
             minSize="30%"
           >
             <main className="h-full relative">
               <BlueprintCanvas />
             </main>
           </Panel>
-          
-          <ResizeHandle />
-          
-          {/* Right sidebar - Configuration */}
-          <Panel 
-            defaultSize="28%" 
-            minSize="200px" 
-            maxSize="45%"
-          >
-            <ConfigPanel />
-          </Panel>
+
+          {/* Config panel - only shown when node is selected */}
+          {hasSelection && (
+            <>
+              <ResizeHandle />
+
+              <Panel
+                defaultSize="28%" 
+                minSize="200px" 
+                maxSize="45%"
+              >
+                <motion.div
+                  className="h-full"
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                >
+                  <ConfigPanel />
+                </motion.div>
+              </Panel>
+            </>
+          )}
         </PanelGroup>
       </div>
-      
+
       {/* Toast notifications */}
       <Toaster />
     </div>
   );
 }
-

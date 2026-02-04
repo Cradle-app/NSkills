@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo, useEffect, useState } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -8,6 +8,7 @@ import ReactFlow, {
   addEdge,
   useNodesState,
   useEdgesState,
+  ReactFlowProvider,
   type Connection,
   type Edge,
   type Node,
@@ -16,7 +17,9 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import { Trash2 } from 'lucide-react';
 import { nodeTypeToColor } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useAccount } from 'wagmi';
 import { useAuthStore } from '@/store/auth';
 import { useBlueprintStore } from '@/store/blueprint';
@@ -39,7 +42,7 @@ const edgeTypes: EdgeTypes = {
   default: ForgeEdge,
 };
 
-export function BlueprintCanvas() {
+function BlueprintCanvasInner() {
   const {
     blueprint,
     addNode,
@@ -124,6 +127,12 @@ export function BlueprintCanvas() {
         return;
       }
 
+      // Double check GitHub authentication on drop
+      if (!isFullyAuthenticated) {
+        openAuthModal();
+        return;
+      }
+
       const position = {
         x: event.clientX - 280, // Offset for sidebar
         y: event.clientY - 56,   // Offset for header
@@ -197,103 +206,159 @@ export function BlueprintCanvas() {
     [removeNode, selectedNodeId, selectNode]
   );
 
+  // State for delete all confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Delete all nodes handler
+  const handleDeleteAll = useCallback(() => {
+    if (!showDeleteConfirm) {
+      setShowDeleteConfirm(true);
+      // Auto-hide confirmation after 3 seconds
+      setTimeout(() => setShowDeleteConfirm(false), 3000);
+      return;
+    }
+
+    // Actually delete all nodes
+    blueprint.nodes.forEach(node => {
+      removeNode(node.id);
+    });
+    selectNode(null);
+    setShowDeleteConfirm(false);
+  }, [showDeleteConfirm, blueprint.nodes, removeNode, selectNode]);
+
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl border border-forge-border/60 bg-gradient-to-b from-black/70 via-black/80 to-black/95">
-      {/* Subtle canvas hint */}
-      <div className="pointer-events-none absolute inset-x-0 top-3 z-20 flex justify-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-white/5 backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan/80" />
-          <span>Drag to pan · Scroll to zoom · Drop nodes from the left</span>
+    <div className="relative h-full w-full">
+      {/* Canvas container with overflow hidden */}
+      <div className="absolute inset-0 overflow-hidden rounded-2xl border border-forge-border/60 bg-gradient-to-b from-black/70 via-black/80 to-black/95">
+        {/* Top bar with hint and actions */}
+        <div className="absolute inset-x-0 top-3 z-20 flex items-center justify-between px-3">
+          {/* Left spacer for balance */}
+          <div className="w-24" />
+
+          {/* Subtle canvas hint - centered */}
+          <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-white/5 backdrop-blur">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan/80" />
+            <span>Drag to pan · Scroll to zoom · Drop nodes from the left</span>
+          </div>
+
+          {/* Delete All button - only show when there are nodes */}
+          {nodes.length > 0 && (
+            <button
+              onClick={handleDeleteAll}
+              className={cn(
+                'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
+                'transition-all duration-200 backdrop-blur',
+                showDeleteConfirm
+                  ? 'bg-red-500/20 text-red-400 ring-1 ring-red-500/40 hover:bg-red-500/30'
+                  : 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
+              )}
+            >
+              <Trash2 className="h-3 w-3" />
+              <span>{showDeleteConfirm ? 'Click to confirm' : 'Delete All'}</span>
+              {showDeleteConfirm && (
+                <span className="ml-1 text-[9px] text-red-400/70">({nodes.length})</span>
+              )}
+            </button>
+          )}
+
+          {/* Right spacer when no nodes */}
+          {nodes.length === 0 && <div className="w-24" />}
         </div>
+
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+          onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
+          onNodeDragStop={onNodeDragStop}
+          onEdgesDelete={onEdgesDelete}
+          onNodesDelete={onNodesDelete}
+          deleteKeyCode={['Delete', 'Backspace']}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          fitView
+          snapToGrid
+          snapGrid={[20, 20]}
+          defaultEdgeOptions={{
+            animated: true,
+            style: { strokeWidth: 2 },
+          }}
+          className="z-10 rounded-2xl bg-black/60 backdrop-blur-sm"
+        >
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={20}
+            size={1}
+            color="rgba(255,255,255, 0.15)"
+          />
+          <Controls className="!bg-forge-surface/95 !border-forge-border !rounded-xl !shadow-sm !text-forge-muted" />
+          <MiniMap
+            nodeColor={(node) => {
+              const color = nodeTypeToColor(node.type || '');
+              const colorMap: Record<string, string> = {
+                'node-contracts': '#00d4ff',
+                'node-payments': '#ffaa00',
+                'node-agents': '#ff00ff',
+                'node-app': '#00ff88',
+                'node-quality': '#ff6b6b',
+                'node-telegram': '#0088cc',
+                'node-intelligence': '#a855f7',
+                'accent-cyan': '#00d4ff',
+                'accent-purple': '#8b5cf6',
+              };
+              return colorMap[color] || '#666';
+            }}
+            maskColor="rgba(0, 0, 0, 0.85)"
+            className="!bg-forge-surface/90 !border-forge-border !rounded-xl !shadow-sm"
+          />
+        </ReactFlow>
+
+        {/* Empty state */}
+        {nodes.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+            <div className="max-w-xs text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-forge-border/60 bg-black/60">
+                <svg
+                  className="h-6 w-6 text-forge-muted"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+              </div>
+              <h3 className="mb-1 text-sm font-semibold text-white">
+                Drop your first component
+              </h3>
+              <p className="text-xs text-forge-muted">
+                Drag a node from the left palette into the canvas to begin your blueprint.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Subtle grid / lighting */}
-      {/* <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16),transparent_55%),radial-gradient(circle_at_bottom,_rgba(147,51,234,0.10),transparent_55%)]" /> */}
-
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-        onNodeClick={onNodeClick}
-        onPaneClick={onPaneClick}
-        onNodeDragStop={onNodeDragStop}
-        onEdgesDelete={onEdgesDelete}
-        onNodesDelete={onNodesDelete}
-        deleteKeyCode={['Delete', 'Backspace']}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        fitView
-        snapToGrid
-        snapGrid={[20, 20]}
-        defaultEdgeOptions={{
-          animated: true,
-          style: { strokeWidth: 2 },
-        }}
-        className="z-10 rounded-2xl bg-black/60 backdrop-blur-sm"
-      >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={20}
-          size={1}
-          color="rgba(255,255,255, 0.15)"
-        />
-        <Controls className="!bg-forge-surface/95 !border-forge-border !rounded-xl !shadow-sm !text-forge-muted" />
-        <MiniMap
-          nodeColor={(node) => {
-            const color = nodeTypeToColor(node.type || '');
-            const colorMap: Record<string, string> = {
-              'node-contracts': '#00d4ff',
-              'node-payments': '#ffaa00',
-              'node-agents': '#ff00ff',
-              'node-app': '#00ff88',
-              'node-quality': '#ff6b6b',
-              'node-telegram': '#0088cc',
-              'node-intelligence': '#a855f7',
-              'accent-cyan': '#00d4ff',
-              'accent-purple': '#8b5cf6',
-            };
-            return colorMap[color] || '#666';
-          }}
-          maskColor="rgba(0, 0, 0, 0.85)"
-          className="!bg-forge-surface/90 !border-forge-border !rounded-xl !shadow-sm"
-        />
-      </ReactFlow>
-
-      {/* Empty state */}
-      {nodes.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-          <div className="max-w-xs text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-forge-border/60 bg-black/60">
-              <svg
-                className="h-6 w-6 text-forge-muted"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-            </div>
-            <h3 className="mb-1 text-sm font-semibold text-white">
-              Drop your first component
-            </h3>
-            <p className="text-xs text-forge-muted">
-              Drag a node from the left palette into the canvas to begin your blueprint.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Canvas-based suggestions - appear near nodes */}
+      {/* Canvas-based suggestions - rendered OUTSIDE overflow-hidden container */}
       <CanvasSuggestions />
     </div>
+  );
+}
+
+// Wrap with ReactFlowProvider so suggestions can access viewport hooks
+export function BlueprintCanvas() {
+  return (
+    <ReactFlowProvider>
+      <BlueprintCanvasInner />
+    </ReactFlowProvider>
   );
 }

@@ -14,6 +14,12 @@ interface AuthGuardProps {
   className?: string;
 }
 
+interface FullAuthStatus {
+  hasWallet: boolean;
+  hasGitHub: boolean;
+  hasActiveSession: boolean;
+}
+
 /**
  * AuthGuard component wraps interactive elements and requires authentication
  * before allowing the action to proceed.
@@ -31,50 +37,50 @@ export function AuthGuard({
   className,
 }: AuthGuardProps) {
   const { address, isConnected } = useAccount();
-  const { isWalletConnected, isFullyAuthenticated, openAuthModal, checkDatabaseAuth } = useAuthStore();
+  const { isWalletConnected, isFullyAuthenticated, openAuthModal, checkFullAuthStatus } = useAuthStore();
   const [isChecking, setIsChecking] = useState(false);
-  const [hasDatabaseAuth, setHasDatabaseAuth] = useState<{ hasWallet: boolean; hasGitHub: boolean } | null>(null);
+  const [fullAuthStatus, setFullAuthStatus] = useState<FullAuthStatus | null>(null);
 
-  // Check database when wallet is connected
+  // Check full auth status when wallet is connected
   useEffect(() => {
     if (isConnected && address) {
       setIsChecking(true);
-      checkDatabaseAuth(address).then((result) => {
-        setHasDatabaseAuth(result);
+      checkFullAuthStatus(address).then((result) => {
+        setFullAuthStatus(result);
         setIsChecking(false);
       });
     } else {
-      setHasDatabaseAuth(null);
+      setFullAuthStatus(null);
     }
-  }, [isConnected, address, checkDatabaseAuth]);
+  }, [isConnected, address, checkFullAuthStatus]);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // If checking database, wait a bit
+    // If checking auth status, wait
     if (isChecking) {
       return;
     }
 
-    // Check database first if wallet is connected
+    // Check full auth status if wallet is connected
     let shouldShowModal = false;
-    if (isConnected && address && hasDatabaseAuth) {
-      // Check database: modal should NOT open if wallet is connected AND GitHub is linked
+    if (isConnected && address && fullAuthStatus) {
       if (requireGitHub) {
-        shouldShowModal = !hasDatabaseAuth.hasGitHub;
+        // For GitHub requirement: need both GitHub in DB AND active session
+        shouldShowModal = !fullAuthStatus.hasGitHub || !fullAuthStatus.hasActiveSession;
       } else {
-        shouldShowModal = !hasDatabaseAuth.hasWallet;
+        // For wallet-only requirement: just need wallet
+        shouldShowModal = !fullAuthStatus.hasWallet;
       }
     } else {
-      // Fallback to local state if database check hasn't completed
+      // Fallback to local state if check hasn't completed
       const hasRequiredAuth = requireGitHub ? isFullyAuthenticated : isWalletConnected;
       shouldShowModal = !hasRequiredAuth;
     }
 
     if (shouldShowModal) {
       // Open the global auth flow modal and pass the intended action
-      // so it can be executed automatically once auth completes.
       openAuthModal(onClick);
       return;
     }
@@ -142,22 +148,22 @@ export function useAuthGuard() {
     isGitHubConnected,
     isFullyAuthenticated,
     openAuthModal,
-    checkDatabaseAuth,
+    checkFullAuthStatus,
   } = useAuthStore();
-  const [hasDatabaseAuth, setHasDatabaseAuth] = useState<{ hasWallet: boolean; hasGitHub: boolean } | null>(null);
+  const [fullAuthStatus, setFullAuthStatus] = useState<FullAuthStatus | null>(null);
 
-  // Check database when wallet is connected
+  // Check full auth status when wallet is connected
   useEffect(() => {
     if (isConnected && address) {
-      checkDatabaseAuth(address).then(setHasDatabaseAuth);
+      checkFullAuthStatus(address).then(setFullAuthStatus);
     } else {
-      setHasDatabaseAuth(null);
+      setFullAuthStatus(null);
     }
-  }, [isConnected, address, checkDatabaseAuth]);
+  }, [isConnected, address, checkFullAuthStatus]);
 
   const checkAuth = async (action?: () => void): Promise<boolean> => {
-    if (isConnected && address && hasDatabaseAuth) {
-      if (!hasDatabaseAuth.hasWallet) {
+    if (isConnected && address && fullAuthStatus) {
+      if (!fullAuthStatus.hasWallet) {
         openAuthModal(action);
         return false;
       }
@@ -170,8 +176,9 @@ export function useAuthGuard() {
   };
 
   const checkFullAuth = async (action?: () => void): Promise<boolean> => {
-    if (isConnected && address && hasDatabaseAuth) {
-      if (!hasDatabaseAuth.hasGitHub) {
+    if (isConnected && address && fullAuthStatus) {
+      // Require both GitHub in DB AND active session
+      if (!fullAuthStatus.hasGitHub || !fullAuthStatus.hasActiveSession) {
         openAuthModal(action);
         return false;
       }
@@ -189,6 +196,6 @@ export function useAuthGuard() {
     isFullyAuthenticated,
     checkAuth,
     checkFullAuth,
-    hasDatabaseAuth,
+    fullAuthStatus,
   };
 }

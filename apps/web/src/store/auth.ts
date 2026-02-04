@@ -34,6 +34,8 @@ interface AuthState {
   clearSession: () => void;
   syncWithDatabase: (walletAddress: string) => Promise<void>;
   checkDatabaseAuth: (walletAddress: string) => Promise<{ hasWallet: boolean; hasGitHub: boolean }>;
+  checkActiveGitHubSession: () => Promise<boolean>;
+  checkFullAuthStatus: (walletAddress: string) => Promise<{ hasWallet: boolean; hasGitHub: boolean; hasActiveSession: boolean }>;
   initializeFromDatabase: (walletAddress: string) => Promise<void>;
 }
 
@@ -74,19 +76,37 @@ export const useAuthStore = create<AuthState>()(
       openAuthModal: async (pendingAction) => {
         const { isWalletConnected, isGitHubConnected, session } = get();
         
-        // If wallet is connected, check database to see if GitHub is linked
+        // If wallet is connected, check BOTH database AND active session
         if (isWalletConnected && session.walletAddress) {
-          const dbAuth = await get().checkDatabaseAuth(session.walletAddress);
-          // Don't open modal if wallet is connected AND GitHub is linked in database
-          if (dbAuth.hasWallet && dbAuth.hasGitHub) {
-            // User is fully authenticated, execute action if provided
+          const fullAuth = await get().checkFullAuthStatus(session.walletAddress);
+          
+          // Only skip modal if: wallet exists in DB + GitHub in DB + active GitHub session
+          if (fullAuth.hasWallet && fullAuth.hasGitHub && fullAuth.hasActiveSession) {
+            // User is fully authenticated with active session, execute action if provided
             if (pendingAction) {
               pendingAction();
             }
             return;
           }
+          
+          // Determine which step to show based on what's missing
+          let step: 'wallet' | 'github' | 'complete' = 'complete';
+          if (!fullAuth.hasWallet) {
+            step = 'wallet';
+          } else if (!fullAuth.hasGitHub || !fullAuth.hasActiveSession) {
+            // Need GitHub connection (either not in DB or session expired)
+            step = 'github';
+          }
+          
+          set({
+            showAuthModal: true,
+            pendingAction: pendingAction || null,
+            authModalStep: step,
+          });
+          return;
         }
         
+        // Wallet not connected - show wallet step
         set({
           showAuthModal: true,
           pendingAction: pendingAction || null,
@@ -189,6 +209,49 @@ export const useAuthStore = create<AuthState>()(
           console.error('Error checking database auth:', error);
         }
         return { hasWallet: false, hasGitHub: false };
+      },
+
+      // Check if there's an active GitHub session (cookie-based)
+      checkActiveGitHubSession: async () => {
+        try {
+          const response = await fetch('/api/auth/session');
+          const data = await response.json();
+          return data.authenticated && !!data.github;
+        } catch (error) {
+          console.error('Error checking GitHub session:', error);
+          return false;
+        }
+      },
+
+      // Comprehensive auth check: database + active session
+      checkFullAuthStatus: async (walletAddress: string) => {
+        try {
+          // Check database for user record
+          const dbResponse = await fetch(`/api/auth/user?walletAddress=${encodeURIComponent(walletAddress)}`);
+          let hasWallet = false;
+          let hasGitHubInDb = false;
+          
+          if (dbResponse.ok) {
+            const data = await dbResponse.json();
+            const user = data.user;
+            hasWallet = !!user?.walletAddress;
+            hasGitHubInDb = !!user?.githubId;
+          }
+          
+          // Check for active GitHub session (cookie)
+          const sessionResponse = await fetch('/api/auth/session');
+          const sessionData = await sessionResponse.json();
+          const hasActiveSession = sessionData.authenticated && !!sessionData.github;
+          
+          return {
+            hasWallet,
+            hasGitHub: hasGitHubInDb,
+            hasActiveSession,
+          };
+        } catch (error) {
+          console.error('Error checking full auth status:', error);
+          return { hasWallet: false, hasGitHub: false, hasActiveSession: false };
+        }
       },
 
       // Initialize state from database on app load
