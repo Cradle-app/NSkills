@@ -20,9 +20,23 @@ const generateUUID = (): string => {
   });
 };
 
+// Maximum history stack size
+const MAX_HISTORY_SIZE = 50;
+
+interface HistoryEntry {
+  blueprint: Blueprint;
+  timestamp: number;
+}
+
 interface BlueprintState {
   blueprint: Blueprint;
   selectedNodeId: string | null;
+
+  // History for undo/redo
+  history: HistoryEntry[];
+  historyIndex: number;
+  canUndo: boolean;
+  canRedo: boolean;
 
   // Node operations
   addNode: (type: string, position: { x: number; y: number }) => BlueprintNode;
@@ -42,9 +56,11 @@ interface BlueprintState {
   exportBlueprint: () => string;
   importBlueprint: (json: string) => void;
   resetBlueprint: () => void;
-}
 
-// Default configs are now sourced from @cradle/plugin-config via getDefaultConfig()
+  // Undo/Redo
+  undo: () => void;
+  redo: () => void;
+}
 
 const createInitialBlueprint = (): Blueprint => ({
   id: generateUUID(),
@@ -74,11 +90,47 @@ const createInitialBlueprint = (): Blueprint => ({
   updatedAt: new Date().toISOString(),
 });
 
+// Helper to deep clone blueprint
+const cloneBlueprint = (bp: Blueprint): Blueprint => JSON.parse(JSON.stringify(bp));
+
 export const useBlueprintStore = create<BlueprintState>((set, get) => ({
   blueprint: createInitialBlueprint(),
   selectedNodeId: null,
+  history: [],
+  historyIndex: -1,
+  canUndo: false,
+  canRedo: false,
+
+  // Helper to save state to history (called before mutations)
+  _saveToHistory: () => {
+    const { blueprint, history, historyIndex } = get();
+
+    // Slice off any redo history (we're branching)
+    const newHistory = history.slice(0, historyIndex + 1);
+
+    // Add current state
+    newHistory.push({
+      blueprint: cloneBlueprint(blueprint),
+      timestamp: Date.now(),
+    });
+
+    // Limit history size
+    while (newHistory.length > MAX_HISTORY_SIZE) {
+      newHistory.shift();
+    }
+
+    set({
+      history: newHistory,
+      historyIndex: newHistory.length - 1,
+      canUndo: newHistory.length > 0,
+      canRedo: false,
+    });
+  },
 
   addNode: (type, position) => {
+    // Save current state before mutation
+    (get() as any)._saveToHistory();
+
     const node: BlueprintNode = {
       id: generateUUID(),
       type: type as BlueprintNode['type'],
@@ -92,12 +144,15 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
         nodes: [...state.blueprint.nodes, node],
         updatedAt: new Date().toISOString(),
       },
+      canUndo: true,
     }));
 
     return node;
   },
 
   updateNode: (nodeId, updates) => {
+    (get() as any)._saveToHistory();
+
     set((state) => ({
       blueprint: {
         ...state.blueprint,
@@ -110,6 +165,8 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
   },
 
   updateNodeConfig: (nodeId, config) => {
+    (get() as any)._saveToHistory();
+
     set((state) => ({
       blueprint: {
         ...state.blueprint,
@@ -124,6 +181,8 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
   },
 
   removeNode: (nodeId) => {
+    (get() as any)._saveToHistory();
+
     set((state) => ({
       blueprint: {
         ...state.blueprint,
@@ -148,6 +207,8 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
     // Check for self-loop
     if (source === target) return null;
 
+    (get() as any)._saveToHistory();
+
     const edge: BlueprintEdge = {
       id: generateUUID(),
       source,
@@ -167,6 +228,8 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
   },
 
   removeEdge: (edgeId) => {
+    (get() as any)._saveToHistory();
+
     set((state) => ({
       blueprint: {
         ...state.blueprint,
@@ -177,10 +240,13 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
   },
 
   selectNode: (nodeId) => {
+    // Don't save to history for selection changes
     set({ selectedNodeId: nodeId });
   },
 
   updateConfig: (config) => {
+    (get() as any)._saveToHistory();
+
     set((state) => ({
       blueprint: {
         ...state.blueprint,
@@ -207,6 +273,8 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
 
   importBlueprint: (json) => {
     try {
+      (get() as any)._saveToHistory();
+
       const imported = JSON.parse(json);
       set({
         blueprint: {
@@ -222,10 +290,57 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
   },
 
   resetBlueprint: () => {
+    (get() as any)._saveToHistory();
+
     set({
       blueprint: createInitialBlueprint(),
       selectedNodeId: null,
     });
   },
+
+  undo: () => {
+    const { history, historyIndex, blueprint } = get();
+
+    if (historyIndex < 0) return;
+
+    // If at the end of history, save current state for potential redo
+    if (historyIndex === history.length - 1) {
+      const newHistory = [...history, {
+        blueprint: cloneBlueprint(blueprint),
+        timestamp: Date.now(),
+      }];
+
+      set({
+        blueprint: cloneBlueprint(history[historyIndex].blueprint),
+        history: newHistory,
+        historyIndex: historyIndex - 1,
+        canUndo: historyIndex - 1 >= 0,
+        canRedo: true,
+      });
+    } else {
+      set({
+        blueprint: cloneBlueprint(history[historyIndex].blueprint),
+        historyIndex: historyIndex - 1,
+        canUndo: historyIndex - 1 >= 0,
+        canRedo: true,
+      });
+    }
+  },
+
+  redo: () => {
+    const { history, historyIndex } = get();
+
+    if (historyIndex >= history.length - 1) return;
+
+    const newIndex = historyIndex + 1;
+
+    set({
+      blueprint: cloneBlueprint(history[newIndex].blueprint),
+      historyIndex: newIndex,
+      canUndo: true,
+      canRedo: newIndex < history.length - 1,
+    });
+  },
 }));
+
 

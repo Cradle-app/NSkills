@@ -17,7 +17,7 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Undo2, Redo2 } from 'lucide-react';
 import { nodeTypeToColor } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { useAccount } from 'wagmi';
@@ -52,6 +52,10 @@ function BlueprintCanvasInner() {
     removeEdge,
     removeNode,
     selectedNodeId,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useBlueprintStore();
   const { isConnected } = useAccount();
   const { isWalletConnected, isFullyAuthenticated, showAuthModal, openAuthModal, closeAuthModal } = useAuthStore();
@@ -62,12 +66,13 @@ function BlueprintCanvasInner() {
       id: node.id,
       type: node.type,
       position: node.position,
+      selected: node.id === selectedNodeId, // Enable keyboard delete
       data: {
         ...node.config,
         nodeType: node.type,
         label: node.config.label || node.config.contractName || node.config.agentName || node.type,
       },
-    })), [blueprint.nodes]);
+    })), [blueprint.nodes, selectedNodeId]);
 
   // Convert blueprint edges to ReactFlow edges
   const blueprintEdges: Edge[] = useMemo(() =>
@@ -226,19 +231,72 @@ function BlueprintCanvasInner() {
     setShowDeleteConfirm(false);
   }, [showDeleteConfirm, blueprint.nodes, removeNode, selectNode]);
 
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Ctrl/Cmd + Z = Undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+      // Ctrl/Cmd + Y or Ctrl/Cmd + Shift + Z = Redo
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        redo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo]);
+
   return (
     <div className="relative h-full w-full">
       {/* Canvas container with overflow hidden */}
       <div className="absolute inset-0 overflow-hidden rounded-2xl border border-forge-border/60 bg-gradient-to-b from-black/70 via-black/80 to-black/95">
         {/* Top bar with hint and actions */}
         <div className="absolute inset-x-0 top-3 z-20 flex items-center justify-between px-3">
-          {/* Left spacer for balance */}
-          <div className="w-24" />
+          {/* Left side - Undo/Redo buttons */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={undo}
+              disabled={!canUndo}
+              title="Undo (Ctrl+Z)"
+              className={cn(
+                'flex items-center justify-center w-8 h-8 rounded-lg',
+                'transition-all duration-200 backdrop-blur',
+                canUndo
+                  ? 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
+                  : 'bg-black/30 text-forge-muted/30 cursor-not-allowed'
+              )}
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={redo}
+              disabled={!canRedo}
+              title="Redo (Ctrl+Y)"
+              className={cn(
+                'flex items-center justify-center w-8 h-8 rounded-lg',
+                'transition-all duration-200 backdrop-blur',
+                canRedo
+                  ? 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
+                  : 'bg-black/30 text-forge-muted/30 cursor-not-allowed'
+              )}
+            >
+              <Redo2 className="h-4 w-4" />
+            </button>
+          </div>
 
           {/* Subtle canvas hint - centered */}
           <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-white/5 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan/80" />
-            <span>Drag to pan · Scroll to zoom · Drop nodes from the left</span>
+            <span>Drag to pan · Scroll to zoom · Ctrl+Z undo</span>
           </div>
 
           {/* Delete All button - only show when there are nodes */}
