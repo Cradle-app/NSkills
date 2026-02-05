@@ -354,6 +354,23 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612', // ETH/USD Arbitrum One
         },
     },
+    'aave-lending': {
+        id: 'aave-lending',
+        name: 'Aave Lending',
+        description: 'Supply, borrow, withdraw, and repay on Aave V3',
+        icon: 'Coins',
+        color: 'node-agents',
+        category: 'agents',
+        tags: ['aave', 'lending', 'borrow', 'supply', 'defi', 'arbitrum'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
+            suggestedWith: ['chainlink-price-feed', 'pyth-oracle'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+        },
+    },
 
     // ============================================
     // APP CATEGORY

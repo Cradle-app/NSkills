@@ -24,6 +24,9 @@ const toolTypeMap: Record<string, string> = {
   'pyth_oracle': 'pyth-oracle',
   'chainlink_price_feed': 'chainlink-price-feed',
   'chainlink_price': 'chainlink-price-feed',
+  'aave_lending': 'aave-lending',
+  'aave': 'aave-lending',
+  'lending': 'aave-lending',
   // App
   'wallet_auth': 'wallet-auth',
   'rpc_provider': 'rpc-provider',
@@ -65,6 +68,7 @@ const validNodeTypes = [
   'onchain-activity',
   'pyth-oracle',
   'chainlink-price-feed',
+  'aave-lending',
   'wallet-auth',
   'rpc-provider',
   'arbitrum-bridge',
@@ -210,6 +214,9 @@ const DEFAULT_NODE_CONFIGS: Record<string, Record<string, unknown>> = {
   'chainlink-price-feed': {
     chain: 'arbitrum',
     feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612',
+  },
+  'aave-lending': {
+    chain: 'arbitrum',
   },
   'telegram-notifications': {
     webhookEnabled: true,

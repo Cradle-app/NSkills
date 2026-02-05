@@ -27,6 +27,7 @@ export { MaxxitLazyTradingPlugin } from './maxxit';
 export { OnchainActivityPlugin } from './onchain-activity';
 export { PythOraclePlugin } from './pyth-oracle';
 export { ChainlinkPriceFeedPlugin } from './chainlink-price-feed';
+export { AaveLendingPlugin } from './aave-lending';
 export {
   AIXBTMomentumPlugin,
   AIXBTSignalsPlugin,
@@ -90,6 +91,7 @@ import { MaxxitLazyTradingPlugin } from './maxxit';
 import { OnchainActivityPlugin } from './onchain-activity';
 import { PythOraclePlugin } from './pyth-oracle';
 import { ChainlinkPriceFeedPlugin } from './chainlink-price-feed';
+import { AaveLendingPlugin } from './aave-lending';
 import {
   AIXBTMomentumPlugin,
   AIXBTSignalsPlugin,
@@ -162,6 +164,7 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new OnchainActivityPlugin());
   targetRegistry.register(new PythOraclePlugin());
   targetRegistry.register(new ChainlinkPriceFeedPlugin());
+  targetRegistry.register(new AaveLendingPlugin());
   targetRegistry.register(new AIXBTMomentumPlugin());
   targetRegistry.register(new AIXBTSignalsPlugin());
   targetRegistry.register(new AIXBTIndigoPlugin());
@@ -226,6 +229,7 @@ export function getOfficialPlugins() {
     new OnchainActivityPlugin(),
     new PythOraclePlugin(),
     new ChainlinkPriceFeedPlugin(),
+    new AaveLendingPlugin(),
     new AIXBTMomentumPlugin(),
     new AIXBTSignalsPlugin(),
     new AIXBTIndigoPlugin(),
