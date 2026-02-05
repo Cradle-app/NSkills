@@ -30,6 +30,9 @@ import { ForgeEdge } from './forge-edge';
 import { CanvasSuggestions } from './canvas-suggestions';
 import { NodeSearchModal, useNodeSearchModal } from './node-search-modal';
 import { getPluginIds } from '@cradle/plugin-config';
+import { useSessionMonitor, useAuthState } from '@/hooks/useSessionMonitor';
+import { AuthStatusBadge } from '@/components/auth/auth-guard';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Dynamically build node types from plugin registry
 const nodeTypes: NodeTypes = getPluginIds().reduce(
@@ -60,8 +63,35 @@ function BlueprintCanvasInner() {
     canUndo,
     canRedo,
   } = useBlueprintStore();
-  const { isConnected } = useAccount();
-  const { isWalletConnected, isFullyAuthenticated, showAuthModal, openAuthModal, closeAuthModal } = useAuthStore();
+  const { isConnected, address } = useAccount();
+  const {
+    isWalletConnected,
+    isFullyAuthenticated,
+    showAuthModal,
+    openAuthModal,
+    closeAuthModal,
+    walletError,
+    githubError,
+    getConnectionState,
+  } = useAuthStore();
+
+  // Use session monitor for automatic session handling
+  const { checkSession } = useSessionMonitor({
+    showModalOnExpiry: true,
+    onWalletDisconnect: () => {
+      console.log('Wallet disconnected');
+    },
+    onGitHubExpiry: () => {
+      console.log('GitHub session expired');
+    },
+    onAccountChange: (newAddress, oldAddress) => {
+      console.log(`Account changed from ${oldAddress} to ${newAddress}`);
+    },
+  });
+
+  // Get comprehensive auth state
+  const authState = useAuthState();
+  const connectionState = getConnectionState();
 
   // Zoom controls
   const { fitView, zoomIn, zoomOut } = useReactFlow();
@@ -136,14 +166,14 @@ function BlueprintCanvasInner() {
       const type = event.dataTransfer.getData('application/reactflow');
       if (!type) return;
 
-      // Double check wallet connection on drop - use isConnected from wagmi for real-time status
+      // Check wallet connection - use isConnected from wagmi for real-time status
       const walletConnected = isConnected || isWalletConnected;
       if (!walletConnected) {
         openAuthModal();
         return;
       }
 
-      // Double check GitHub authentication on drop
+      // Check GitHub authentication
       if (!isFullyAuthenticated) {
         openAuthModal();
         return;
@@ -174,7 +204,7 @@ function BlueprintCanvasInner() {
         ]);
       }
     },
-    [addNode, setNodes, isConnected, isWalletConnected, openAuthModal]
+    [addNode, setNodes, isConnected, isWalletConnected, isFullyAuthenticated, openAuthModal]
   );
 
   const onNodeClick = useCallback(
@@ -242,6 +272,8 @@ function BlueprintCanvasInner() {
     setShowDeleteConfirm(false);
   }, [showDeleteConfirm, blueprint.nodes, removeNode, selectNode]);
 
+  // Show auth error notification
+  const hasAuthError = walletError || githubError;
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -272,36 +304,40 @@ function BlueprintCanvasInner() {
       <div className="absolute inset-0 overflow-hidden rounded-2xl border border-forge-border/60 bg-gradient-to-b from-black/70 via-black/80 to-black/95">
         {/* Top bar with hint and actions */}
         <div className="absolute inset-x-0 top-3 z-20 flex items-center justify-between px-3">
-          {/* Left side - Undo/Redo buttons */}
+          {/* Auth status badge */}
           <div className="flex items-center gap-1">
-            <button
-              onClick={undo}
-              disabled={!canUndo}
-              title="Undo (Ctrl+Z)"
-              className={cn(
-                'flex items-center justify-center w-8 h-8 rounded-lg',
-                'transition-all duration-200 backdrop-blur',
-                canUndo
-                  ? 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
-                  : 'bg-black/30 text-forge-muted/30 cursor-not-allowed'
-              )}
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-            <button
-              onClick={redo}
-              disabled={!canRedo}
-              title="Redo (Ctrl+Y)"
-              className={cn(
-                'flex items-center justify-center w-8 h-8 rounded-lg',
-                'transition-all duration-200 backdrop-blur',
-                canRedo
-                  ? 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
-                  : 'bg-black/30 text-forge-muted/30 cursor-not-allowed'
-              )}
-            >
-              <Redo2 className="h-4 w-4" />
-            </button>
+            <AuthStatusBadge className="min-w-[120px]" />
+            {/* Left side - Undo/Redo buttons */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={undo}
+                disabled={!canUndo}
+                title="Undo (Ctrl+Z)"
+                className={cn(
+                  'flex items-center justify-center w-8 h-8 rounded-lg',
+                  'transition-all duration-200 backdrop-blur',
+                  canUndo
+                    ? 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
+                    : 'bg-black/30 text-forge-muted/30 cursor-not-allowed'
+                )}
+              >
+                <Undo2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={redo}
+                disabled={!canRedo}
+                title="Redo (Ctrl+Y)"
+                className={cn(
+                  'flex items-center justify-center w-8 h-8 rounded-lg',
+                  'transition-all duration-200 backdrop-blur',
+                  canRedo
+                    ? 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
+                    : 'bg-black/30 text-forge-muted/30 cursor-not-allowed'
+                )}
+              >
+                <Redo2 className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Zoom Controls */}
@@ -464,6 +500,21 @@ function BlueprintCanvasInner() {
                   <span>Shortcuts</span>
                 </div>
               </div>
+
+              {/* Auth hint */}
+              {!isFullyAuthenticated && (
+                <button
+                  onClick={() => openAuthModal()}
+                  className="mt-4 text-xs text-accent-cyan hover:underline pointer-events-auto"
+                >
+                  {connectionState === 'none_connected'
+                    ? 'Connect wallet & GitHub to get started'
+                    : connectionState === 'wallet_only'
+                      ? 'Connect GitHub to unlock all features'
+                      : 'Connect wallet to get started'
+                  }
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -480,6 +531,17 @@ function BlueprintCanvasInner() {
 
 // Wrap with ReactFlowProvider so suggestions can access viewport hooks
 export function BlueprintCanvas() {
+  // Avoid hydration mismatches by only rendering on the client
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <ReactFlowProvider>
       <BlueprintCanvasInner />
