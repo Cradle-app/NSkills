@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Download,
@@ -8,10 +8,11 @@ import {
   Play,
   Settings,
   Hexagon,
-  ChevronDown,
   Sparkles,
   Wand2,
   LayoutTemplate,
+  Keyboard,
+  Clock,
 } from 'lucide-react';
 import { useBlueprintStore } from '@/store/blueprint';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,9 @@ import { WalletConnectButton } from '@/components/auth/wallet-connect-button';
 import { AuthGuard } from '@/components/auth/auth-guard';
 import { AIChatModal } from '@/components/dialogs/ai-chat-modal';
 import { BlueprintTemplatesModal } from '@/components/templates/blueprint-templates-modal';
+import { KeyboardShortcutsModal, useKeyboardShortcutsModal } from '@/components/dialogs/keyboard-shortcuts-modal';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { RecentBlueprintsDropdown, useRecentBlueprints } from '@/components/ui/recent-blueprints-dropdown';
 import type { BlueprintNode, BlueprintEdge } from '@dapp-forge/blueprint-schema';
 import { AuthFlowModal } from '../auth/auth-flow-modal';
 
@@ -30,11 +34,13 @@ export function Header() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const { isOpen: showShortcuts, open: openShortcuts, close: closeShortcuts } = useKeyboardShortcutsModal();
   const {
     blueprint,
     exportBlueprint,
     importBlueprint,
   } = useBlueprintStore();
+  const { addRecent } = useRecentBlueprints();
 
   // Handle applying AI-generated workflow to canvas
   const handleApplyWorkflow = useCallback((
@@ -55,6 +61,23 @@ export function Header() {
       },
     });
   }, []);
+
+  // Persist current blueprint into "Recent Blueprints"
+  useEffect(() => {
+    try {
+      const json = exportBlueprint();
+      addRecent({
+        id: blueprint.id,
+        name: blueprint.config.project.name || 'Untitled',
+        updatedAt: new Date(blueprint.updatedAt || Date.now()),
+        nodeCount: blueprint.nodes.length,
+        json,
+      });
+    } catch {
+      // ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blueprint.updatedAt]);
 
   const handleExport = () => {
     const json = exportBlueprint();
@@ -115,16 +138,16 @@ export function Header() {
 
         <div className="h-6 w-px bg-forge-border/40 mx-2" />
 
-        <button
-          onClick={() => setShowSettings(true)}
-          className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-forge-elevated/50 transition-colors group"
-        >
-          <span className="text-[10px] text-forge-muted uppercase tracking-wide">Project</span>
-          <span className="text-sm font-medium text-white group-hover:text-accent-cyan transition-colors">
-            {blueprint.config.project.name || 'Untitled'}
-          </span>
-          <ChevronDown className="w-3 h-3 text-forge-muted" />
-        </button>
+        <RecentBlueprintsDropdown
+          currentBlueprintName={blueprint.config.project.name || 'Untitled'}
+          onSelect={(bp) => {
+            if (bp.json) {
+              importBlueprint(bp.json);
+            } else {
+              setShowSettings(true);
+            }
+          }}
+        />
       </div>
 
       {/* Center - Stats */}
@@ -147,6 +170,15 @@ export function Header() {
           <span className="text-xs font-mono text-forge-text">
             <span className="text-accent-purple font-medium">{blueprint.edges.length}</span>
             <span className="text-forge-muted ml-1">edges</span>
+          </span>
+        </div>
+        <div className="w-px h-3 bg-forge-border/40" />
+        <div className="flex items-center gap-1.5" title="Last saved">
+          <Clock className="w-3 h-3 text-emerald-400" />
+          <span className="text-[10px] text-emerald-400/80" suppressHydrationWarning>
+            {blueprint.updatedAt
+              ? new Date(blueprint.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              : 'Not saved'}
           </span>
         </div>
       </motion.div>
@@ -210,6 +242,8 @@ export function Header() {
 
         <GitHubConnect />
 
+        {/* <ThemeToggle /> */}
+
         {/* <Button
           variant="ghost"
           size="sm"
@@ -222,6 +256,7 @@ export function Header() {
         <AuthGuard onClick={() => setShowGenerate(true)} requireGitHub={true}>
           <Button
             size="sm"
+            data-tour="generate"
             className="h-8 ml-1 bg-accent-cyan hover:bg-accent-cyan/90 text-black font-medium"
           >
             <Sparkles className="w-3.5 h-3.5 mr-1.5" />
@@ -242,6 +277,10 @@ export function Header() {
       <BlueprintTemplatesModal
         isOpen={showTemplates}
         onClose={() => setShowTemplates(false)}
+      />
+      <KeyboardShortcutsModal
+        open={showShortcuts}
+        onClose={closeShortcuts}
       />
       {/* <AuthFlowModal
         open={showAuthModal}

@@ -78,6 +78,24 @@ function ForgeEdgeComponent({
 
       {/* Delete button at edge center */}
       <EdgeLabelRenderer>
+        {/* Connection label */}
+        <div
+          style={{
+            position: 'absolute',
+            transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY - 20}px)`,
+            pointerEvents: 'none',
+          }}
+          className={cn(
+            'transition-opacity duration-200',
+            isHovered ? 'opacity-100' : 'opacity-0'
+          )}
+        >
+          <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-forge-surface/90 text-forge-muted border border-forge-border/50 backdrop-blur-sm whitespace-nowrap">
+            connects to
+          </span>
+        </div>
+
+        {/* Delete button */}
         <div
           style={{
             position: 'absolute',

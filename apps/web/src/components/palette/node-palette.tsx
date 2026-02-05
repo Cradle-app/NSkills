@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Box,
@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Zap,
   Coins,
+  Star,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -110,6 +111,34 @@ export function NodePalette() {
   const { suggestions, hasSuggestions } = useSuggestedPlugins();
   const addNode = useBlueprintStore((state) => state.addNode);
 
+  // Favorites stored in localStorage
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('cradle-favorite-nodes');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    }
+    return new Set();
+  });
+
+  // Persist favorites to localStorage
+  useEffect(() => {
+    localStorage.setItem('cradle-favorite-nodes', JSON.stringify([...favorites]));
+  }, [favorites]);
+
+  const toggleFavorite = useCallback((pluginId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (next.has(pluginId)) {
+        next.delete(pluginId);
+      } else {
+        next.add(pluginId);
+      }
+      return next;
+    });
+  }, []);
+
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev => {
       const next = new Set(prev);
@@ -149,7 +178,7 @@ export function NodePalette() {
 
   return (
     <>
-      <aside className="h-full border-r border-forge-border/50 bg-gradient-to-b from-forge-surface/80 to-forge-bg/50 flex flex-col overflow-hidden">
+      <aside data-tour="palette" className="h-full border-r border-forge-border/50 bg-gradient-to-b from-forge-surface/80 to-forge-bg/50 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="p-4 border-b border-forge-border/50">
           <div className="flex items-center gap-2 mb-4">
@@ -376,6 +405,18 @@ export function NodePalette() {
                                       {plugin.description}
                                     </p>
                                   </div>
+                                  <button
+                                    onClick={(e) => toggleFavorite(plugin.id, e)}
+                                    className={cn(
+                                      'p-1.5 rounded-lg shrink-0 transition-all opacity-0 group-hover:opacity-100',
+                                      favorites.has(plugin.id)
+                                        ? 'text-amber-400 opacity-100'
+                                        : 'text-forge-muted hover:text-amber-400'
+                                    )}
+                                    title={favorites.has(plugin.id) ? 'Remove from favorites' : 'Add to favorites'}
+                                  >
+                                    <Star className={cn('w-4 h-4', favorites.has(plugin.id) && 'fill-current')} />
+                                  </button>
                                 </div>
                               </div>
                             </motion.div>

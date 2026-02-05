@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactFlowProvider } from 'reactflow';
 import { useState, useEffect } from 'react';
 import { ToastProvider } from '@/components/ui/toaster';
+import { ThemeProvider } from '@/components/ui/theme-toggle';
+import { OnboardingTourProvider } from '@/components/ui/onboarding-tour';
 import { WagmiProvider, http, useAccount } from 'wagmi';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
 import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
@@ -129,11 +131,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
           <ReactFlowProvider>
-            <ToastProvider>
-              <AuthSync />
-              {children}
-              <GlobalAuthModal />
-            </ToastProvider>
+            <ThemeProvider>
+              <ToastProvider>
+                <AuthSync />
+                <OnboardingTourProvider>
+                  {children}
+                </OnboardingTourProvider>
+                <GlobalAuthModal />
+              </ToastProvider>
+            </ThemeProvider>
           </ReactFlowProvider>
         </RainbowKitProvider>
       </QueryClientProvider>

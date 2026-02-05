@@ -9,6 +9,8 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
+  useReactFlow,
+  useViewport,
   type Connection,
   type Edge,
   type Node,
@@ -17,7 +19,7 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Trash2, Undo2, Redo2 } from 'lucide-react';
+import { Trash2, Undo2, Redo2, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { nodeTypeToColor } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { useAccount } from 'wagmi';
@@ -26,6 +28,7 @@ import { useBlueprintStore } from '@/store/blueprint';
 import { ForgeNode } from './forge-node';
 import { ForgeEdge } from './forge-edge';
 import { CanvasSuggestions } from './canvas-suggestions';
+import { NodeSearchModal, useNodeSearchModal } from './node-search-modal';
 import { getPluginIds } from '@cradle/plugin-config';
 
 // Dynamically build node types from plugin registry
@@ -59,6 +62,14 @@ function BlueprintCanvasInner() {
   } = useBlueprintStore();
   const { isConnected } = useAccount();
   const { isWalletConnected, isFullyAuthenticated, showAuthModal, openAuthModal, closeAuthModal } = useAuthStore();
+
+  // Zoom controls
+  const { fitView, zoomIn, zoomOut } = useReactFlow();
+  const { zoom } = useViewport();
+  const zoomPercentage = Math.round(zoom * 100);
+
+  // Node search modal
+  const { isOpen: showNodeSearch, close: closeNodeSearch } = useNodeSearchModal();
 
   // Convert blueprint nodes to ReactFlow nodes
   const blueprintNodes: Node[] = useMemo(() =>
@@ -256,7 +267,7 @@ function BlueprintCanvasInner() {
   }, [undo, redo]);
 
   return (
-    <div className="relative h-full w-full">
+    <div data-tour="canvas" className="relative h-full w-full">
       {/* Canvas container with overflow hidden */}
       <div className="absolute inset-0 overflow-hidden rounded-2xl border border-forge-border/60 bg-gradient-to-b from-black/70 via-black/80 to-black/95">
         {/* Top bar with hint and actions */}
@@ -293,10 +304,39 @@ function BlueprintCanvasInner() {
             </button>
           </div>
 
+          {/* Zoom Controls */}
+          <div className="flex items-center gap-1 rounded-lg bg-black/60 p-1 ring-1 ring-white/5 backdrop-blur">
+            <button
+              onClick={() => zoomOut()}
+              className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
+              title="Zoom out"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-[11px] font-mono text-forge-muted min-w-[40px] text-center">
+              {zoomPercentage}%
+            </span>
+            <button
+              onClick={() => zoomIn()}
+              className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
+              title="Zoom in"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+            </button>
+            <div className="w-px h-4 bg-forge-border/50 mx-0.5" />
+            <button
+              onClick={() => fitView({ padding: 0.2 })}
+              className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
+              title="Fit to view"
+            >
+              <Maximize2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
           {/* Subtle canvas hint - centered */}
           <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-white/5 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan/80" />
-            <span>Drag to pan · Scroll to zoom · Ctrl+Z undo</span>
+            <span>Drag to pan · Scroll to zoom · ? shortcuts</span>
           </div>
 
           {/* Delete All button - only show when there are nodes */}
@@ -356,6 +396,8 @@ function BlueprintCanvasInner() {
           />
           <Controls className="!bg-forge-surface/95 !border-forge-border !rounded-xl !shadow-sm !text-forge-muted" />
           <MiniMap
+            pannable
+            zoomable
             nodeColor={(node) => {
               const color = nodeTypeToColor(node.type || '');
               const colorMap: Record<string, string> = {
@@ -372,35 +414,56 @@ function BlueprintCanvasInner() {
               return colorMap[color] || '#666';
             }}
             maskColor="rgba(0, 0, 0, 0.85)"
-            className="!bg-forge-surface/90 !border-forge-border !rounded-xl !shadow-sm"
+            className="!bg-forge-surface/90 !border-forge-border !rounded-xl !shadow-sm cursor-pointer"
           />
         </ReactFlow>
 
         {/* Empty state */}
         {nodes.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-            <div className="max-w-xs text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-dashed border-forge-border/60 bg-black/60">
-                <svg
-                  className="h-6 w-6 text-forge-muted"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
+            <div className="max-w-md text-center">
+              {/* Animated rings */}
+              <div className="relative mx-auto mb-6 w-24 h-24">
+                <div className="absolute inset-0 rounded-full border border-dashed border-accent-cyan/30 animate-[spin_20s_linear_infinite]" />
+                <div className="absolute inset-2 rounded-full border border-dashed border-accent-purple/20 animate-[spin_15s_linear_infinite_reverse]" />
+                <div className="absolute inset-4 rounded-full border border-forge-border/40" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-cyan/20 to-accent-purple/10 border border-accent-cyan/30 flex items-center justify-center backdrop-blur-sm">
+                    <svg
+                      className="w-6 h-6 text-accent-cyan"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
-              <h3 className="mb-1 text-sm font-semibold text-white">
-                Drop your first component
+
+              <h3 className="mb-2 text-lg font-semibold text-white">
+                Start building your dApp
               </h3>
-              <p className="text-xs text-forge-muted">
-                Drag a node from the left palette into the canvas to begin your blueprint.
+              <p className="text-sm text-forge-muted mb-6 max-w-xs mx-auto">
+                Drag components from the palette or use quick actions to begin
               </p>
+
+              {/* Quick hints */}
+              <div className="flex items-center justify-center gap-4 text-xs text-forge-muted">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-forge-elevated/30 border border-forge-border/30">
+                  <span className="text-accent-cyan">←</span>
+                  <span>Drag from palette</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-forge-elevated/30 border border-forge-border/30">
+                  <kbd className="px-1 py-0.5 text-[10px] bg-forge-bg rounded">?</kbd>
+                  <span>Shortcuts</span>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -408,6 +471,9 @@ function BlueprintCanvasInner() {
 
       {/* Canvas-based suggestions - rendered OUTSIDE overflow-hidden container */}
       <CanvasSuggestions />
+
+      {/* Node Search Modal (Cmd+K) */}
+      <NodeSearchModal open={showNodeSearch} onClose={closeNodeSearch} />
     </div>
   );
 }

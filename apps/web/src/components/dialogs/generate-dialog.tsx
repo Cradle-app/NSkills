@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAccount } from 'wagmi';
 import { Play, Github, Loader2, Check, AlertCircle, LogIn } from 'lucide-react';
 import {
@@ -17,6 +17,9 @@ import { Switch } from '@/components/ui/switch';
 import { useBlueprintStore } from '@/store/blueprint';
 import { useToast } from '@/components/ui/toaster';
 import { generateContractInstructions } from '@/lib/contract-instructions-generator';
+import { GenerationProgress, useGenerationProgress, type ProgressStep } from '@/components/ui/generation-progress';
+import { GeneratedFilesExplorer } from '@/components/ui/generated-files-explorer';
+import { SkeletonText } from '@/components/ui/skeleton';
 
 interface Props {
   open: boolean;
@@ -32,8 +35,10 @@ interface GitHubSession {
 
 export function GenerateDialog({ open, onOpenChange }: Props) {
   const { blueprint } = useBlueprintStore();
-  const { addToast } = useToast();
+  const toast = useToast();
   const { address: walletAddress } = useAccount();
+  const { defaultSteps } = useGenerationProgress();
+  const stableDefaultSteps = useMemo(() => defaultSteps, []); // ensure effect deps don't loop
 
   const [status, setStatus] = useState<GenerationStatus>('idle');
   const [createGitHubRepo, setCreateGitHubRepo] = useState(false);
@@ -44,13 +49,18 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
   const [result, setResult] = useState<{
     repoUrl?: string;
     fileCount?: number;
+    files?: Array<{ path: string; size?: number }>;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [githubSession, setGithubSession] = useState<GitHubSession | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [steps, setSteps] = useState<ProgressStep[]>(stableDefaultSteps);
+  const [currentStepId, setCurrentStepId] = useState<string | null>(null);
 
   // Fetch GitHub session status when dialog opens
   useEffect(() => {
     if (open) {
+      setSessionLoading(true);
       fetch('/api/auth/session')
         .then(res => res.json())
         .then(data => {
@@ -60,9 +70,80 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
             setRepoOwner(data.github.username);
           }
         })
-        .catch(() => setGithubSession({ authenticated: false, github: null }));
+        .catch(() => setGithubSession({ authenticated: false, github: null }))
+        .finally(() => setSessionLoading(false));
     }
   }, [open]);
+
+  // Drive progress UI from generation status
+  useEffect(() => {
+    const next = stableDefaultSteps.map((s) => ({ ...s }));
+    const setStep = (id: string, st: ProgressStep['status']) => {
+      const idx = next.findIndex((x) => x.id === id);
+      if (idx >= 0) next[idx].status = st;
+    };
+
+    if (status === 'idle') {
+      setSteps(stableDefaultSteps);
+      setCurrentStepId(null);
+      return;
+    }
+
+    if (status === 'validating') {
+      setStep('validate', 'active');
+      setCurrentStepId('validate');
+    } else if (status === 'generating') {
+      setStep('validate', 'completed');
+      setStep('prepare', 'completed');
+      setStep('generate', 'active');
+      setCurrentStepId('generate');
+    } else if (status === 'success') {
+      setStep('validate', 'completed');
+      setStep('prepare', 'completed');
+      setStep('generate', 'completed');
+      if (createGitHubRepo) setStep('push', 'completed');
+      setStep('complete', 'completed');
+      // No active step when fully complete
+      setCurrentStepId(null);
+    } else if (status === 'error' || status === 'needs_auth') {
+      setStep('generate', 'error');
+      setCurrentStepId('generate');
+    }
+
+    setSteps(next);
+  }, [status, stableDefaultSteps, createGitHubRepo]);
+
+  const fileTree = useMemo(() => {
+    const files = result?.files ?? [];
+    type Node = { name: string; type: 'file' | 'folder'; children?: Node[] };
+    const root: Node[] = [];
+
+    const ensureFolder = (children: Node[], name: string) => {
+      let folder = children.find((n) => n.type === 'folder' && n.name === name);
+      if (!folder) {
+        folder = { name, type: 'folder', children: [] };
+        children.push(folder);
+      }
+      return folder;
+    };
+
+    for (const f of files) {
+      const parts = f.path.split('/').filter(Boolean);
+      let cursor = root;
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        const isLast = i === parts.length - 1;
+        if (isLast) {
+          cursor.push({ name: part, type: 'file' });
+        } else {
+          const folder = ensureFolder(cursor, part);
+          cursor = folder.children!;
+        }
+      }
+    }
+
+    return root as any;
+  }, [result?.files]);
 
   const handleConnectGitHub = () => {
     // Save current dialog state to URL so we can restore after OAuth
@@ -71,11 +152,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
 
   const handleGenerate = async () => {
     if (blueprint.nodes.length === 0) {
-      addToast({
-        title: 'No nodes',
-        description: 'Add at least one node to generate a repository.',
-        variant: 'error',
-      });
+      toast.error('No nodes', 'Add at least one node to generate a repository.');
       return;
     }
 
@@ -147,12 +224,14 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
       }
 
       const repoUrl = generateResult.result?.repoUrl || generateResult.repoUrl;
-      const fileCount = generateResult.result?.files?.length || 0;
+      const files = (generateResult.result?.files || generateResult.files || []) as Array<{ path: string; size?: number }>;
+      const fileCount = files.length || 0;
 
       setStatus('success');
       setResult({
         repoUrl,
         fileCount,
+        files,
       });
 
       // Save repo and selected nodes/plugins to user_github_repos when created and wallet is connected
@@ -176,17 +255,9 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
       }
 
       if (createGitHubRepo && repoUrl) {
-        addToast({
-          title: 'Repository created!',
-          description: `Your repository is ready at ${repoUrl}`,
-          variant: 'success',
-        });
+        toast.success('Repository created!', `Your repository is ready at ${repoUrl}`);
       } else {
-        addToast({
-          title: 'Generation complete!',
-          description: `Generated ${fileCount} files.`,
-          variant: 'success',
-        });
+        toast.success('Generation complete!', `Generated ${fileCount} files.`);
       }
     } catch (err) {
       setStatus('error');
@@ -203,7 +274,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-lime flex items-center justify-center">
@@ -216,7 +287,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-4 py-4 flex-1 overflow-y-auto pr-1">
           {/* GitHub option */}
           <div className="flex items-center justify-between p-4 rounded-lg bg-forge-bg border border-forge-border">
             <div className="flex items-center gap-3">
@@ -285,6 +356,11 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
                   ? 'bg-accent-lime/10 border-accent-lime/30'
                   : 'bg-forge-elevated border-forge-border'
               }`}>
+              {/* Step-by-step progress */}
+              <div className="mb-4">
+                <GenerationProgress steps={steps} currentStepId={currentStepId} />
+              </div>
+
               {status === 'validating' && (
                 <div className="flex items-center gap-2 text-forge-muted">
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -308,6 +384,16 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
                       Generated {result.fileCount} files
                     </p>
                   )}
+
+                  {/* Generated Files Explorer */}
+                  {Boolean(fileTree?.length) && (
+                    <div className="mt-2 rounded-lg border border-forge-border bg-forge-bg overflow-hidden">
+                      <div className="max-h-64 overflow-y-auto">
+                        <GeneratedFilesExplorer files={fileTree as any} />
+                      </div>
+                    </div>
+                  )}
+
                   {result?.repoUrl && (
                     <div className="p-3 bg-forge-bg border border-forge-border rounded-lg">
                       <p className="text-xs text-forge-muted mb-2">GitHub Repository:</p>

@@ -61,7 +61,9 @@ export default function HomePage() {
             minSize="180px" 
             maxSize="30%"
           >
-            <NodePalette />
+            <div data-tour="palette" className="h-full">
+              <NodePalette />
+            </div>
           </Panel>
 
           <ResizeHandle />
@@ -72,7 +74,9 @@ export default function HomePage() {
             minSize="30%"
           >
             <main className="h-full relative">
-              <BlueprintCanvas />
+              <div data-tour="canvas" className="h-full">
+                <BlueprintCanvas />
+              </div>
             </main>
           </Panel>
 
@@ -92,7 +96,9 @@ export default function HomePage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.2, ease: 'easeOut' }}
                 >
-                  <ConfigPanel />
+                  <div data-tour="config" className="h-full">
+                    <ConfigPanel />
+                  </div>
                 </motion.div>
               </Panel>
             </>

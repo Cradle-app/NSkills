@@ -46,6 +46,8 @@ export function StylusContractForm({ nodeId, config }: Props) {
         value={contractName}
         onChange={(e) => handleChange('contractName', e.target.value)}
         placeholder="my-contract"
+        required
+        error={!contractName.trim() ? 'Required' : undefined}
       />
 
       {/* Instruction Panel */}

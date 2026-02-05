@@ -26,14 +26,20 @@ export function X402PaywallForm({ nodeId, config }: Props) {
     updateNodeConfig(nodeId, { [key]: value });
   };
 
+  const resourcePath = (config.resourcePath as string) || '';
+  const priceInWei = (config.priceInWei as string) || '';
+  const paymentTimeout = (config.paymentTimeout as number) || 300;
+
   return (
     <div className="space-y-4">
       {/* Resource Path */}
       <Input
         label="Resource Path"
-        value={(config.resourcePath as string) || ''}
+        value={resourcePath}
         onChange={(e) => handleChange('resourcePath', e.target.value)}
         placeholder="/api/premium/resource"
+        required
+        error={!resourcePath.trim() ? 'Required' : undefined}
       />
 
       {/* Currency */}
@@ -69,13 +75,15 @@ export function X402PaywallForm({ nodeId, config }: Props) {
       <div>
         <Input
           label="Price (wei)"
-          value={(config.priceInWei as string) || ''}
+          value={priceInWei}
           onChange={(e) => handleChange('priceInWei', e.target.value)}
           placeholder="1000000000000000"
+          required
+          error={!priceInWei.trim() ? 'Required' : undefined}
         />
-        {Boolean(config.priceInWei) && (
+        {Boolean(priceInWei) && (
           <p className="text-xs text-forge-muted mt-1">
-            ≈ {formatWei(config.priceInWei as string)}
+            ≈ {formatWei(priceInWei)}
           </p>
         )}
       </div>
@@ -85,8 +93,11 @@ export function X402PaywallForm({ nodeId, config }: Props) {
         <Input
           label="Payment Timeout (seconds)"
           type="number"
-          value={(config.paymentTimeout as number) || 300}
-          onChange={(e) => handleChange('paymentTimeout', parseInt(e.target.value))}
+          value={paymentTimeout}
+          onChange={(e) => {
+            const v = parseInt(e.target.value, 10);
+            handleChange('paymentTimeout', Number.isFinite(v) ? v : 0);
+          }}
           placeholder="300"
         />
       </div>

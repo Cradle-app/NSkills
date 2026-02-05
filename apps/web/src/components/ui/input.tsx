@@ -1,20 +1,31 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { ValidationIndicator } from '@/components/ui/validation-indicator';
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  validationMessage?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, label, error, ...props }, ref) => {
+  ({ className, type, label, error, validationMessage, required, ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (
-          <label className="text-sm font-medium text-white mb-1.5 block">
-            {label}
-          </label>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-sm font-medium text-white">
+              {label}
+              {required && <span className="text-red-400 ml-0.5">*</span>}
+            </label>
+            {(error || validationMessage) && (
+              <ValidationIndicator
+                status={error ? 'error' : 'warning'}
+                message={error || validationMessage}
+              />
+            )}
+          </div>
         )}
         <input
           type={type}
@@ -28,6 +39,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             className
           )}
           ref={ref}
+          required={required}
           {...props}
         />
         {error && (

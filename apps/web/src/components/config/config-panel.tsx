@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBlueprintStore } from '@/store/blueprint';
 import { nodeTypeToLabel, nodeTypeToColor } from '@/lib/utils';
 import { cn } from '@/lib/utils';
-import { X, Settings2, MousePointerClick, Trash2 } from 'lucide-react';
+import { X, Settings2, MousePointerClick, Trash2, Copy, Check } from 'lucide-react';
 import { AuthOverlay } from '@/components/auth/auth-guard';
+import { useToast } from '@/components/ui/toaster';
 
 // Original forms
 import { StylusContractForm } from './forms/stylus-contract-form';
@@ -58,6 +60,8 @@ import { AuditwareAnalyzingForm } from './forms/auditware-analyzing-form';
 
 export function ConfigPanel() {
   const { blueprint, selectedNodeId, selectNode, removeNode } = useBlueprintStore();
+  const [copied, setCopied] = useState(false);
+  const toast = useToast();
 
   const selectedNode = selectedNodeId
     ? blueprint.nodes.find(n => n.id === selectedNodeId)
@@ -65,7 +69,7 @@ export function ConfigPanel() {
 
   if (!selectedNode) {
     return (
-      <aside className="h-full border-l border-forge-border/50 bg-gradient-to-b from-forge-surface/80 to-forge-bg/50 flex flex-col overflow-hidden">
+      <aside data-tour="config" className="h-full border-l border-forge-border/50 bg-gradient-to-b from-forge-surface/80 to-forge-bg/50 flex flex-col overflow-hidden">
         <div className="p-4 border-b border-forge-border/50">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-forge-elevated/50">
@@ -102,7 +106,7 @@ export function ConfigPanel() {
   const colorClass = nodeTypeToColor(selectedNode.type);
 
   return (
-    <aside className="h-full border-l border-forge-border/50 bg-gradient-to-b from-forge-surface/80 to-forge-bg/50 flex flex-col overflow-hidden">
+    <aside data-tour="config" className="h-full border-l border-forge-border/50 bg-gradient-to-b from-forge-surface/80 to-forge-bg/50 flex flex-col overflow-hidden">
       {/* Header */}
       <motion.div
         className="p-4 border-b border-forge-border/50"
@@ -130,6 +134,20 @@ export function ConfigPanel() {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <motion.button
+              onClick={async () => {
+                await navigator.clipboard.writeText(JSON.stringify(selectedNode.config, null, 2));
+                setCopied(true);
+                toast.success('Config copied', 'Node configuration copied to clipboard');
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="p-2 rounded-lg hover:bg-forge-elevated/50 text-forge-muted hover:text-white transition-all duration-200"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Copy config as JSON"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            </motion.button>
             <motion.button
               onClick={() => {
                 removeNode(selectedNode.id);
