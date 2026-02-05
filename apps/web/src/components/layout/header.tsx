@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Sparkles,
   Wand2,
+  LayoutTemplate,
 } from 'lucide-react';
 import { useBlueprintStore } from '@/store/blueprint';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import { GitHubConnect } from '@/components/auth/github-connect';
 import { WalletConnectButton } from '@/components/auth/wallet-connect-button';
 import { AuthGuard } from '@/components/auth/auth-guard';
 import { AIChatModal } from '@/components/dialogs/ai-chat-modal';
+import { BlueprintTemplatesModal } from '@/components/templates/blueprint-templates-modal';
 import type { BlueprintNode, BlueprintEdge } from '@dapp-forge/blueprint-schema';
 import { AuthFlowModal } from '../auth/auth-flow-modal';
 
@@ -27,6 +29,7 @@ export function Header() {
   const [showGenerate, setShowGenerate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showAI, setShowAI] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const {
     blueprint,
     exportBlueprint,
@@ -158,6 +161,16 @@ export function Header() {
         <Button
           variant="ghost"
           size="sm"
+          onClick={() => setShowTemplates(true)}
+          className="h-8 px-2.5 text-accent-cyan hover:text-white hover:bg-accent-cyan/10"
+        >
+          <LayoutTemplate className="w-3.5 h-3.5 mr-1.5" />
+          Templates
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handleImport}
           className="h-8 px-2.5 text-forge-muted hover:text-white hover:bg-forge-elevated/50"
         >
@@ -225,6 +238,10 @@ export function Header() {
         open={showAI}
         onOpenChange={setShowAI}
         onApplyWorkflow={handleApplyWorkflow}
+      />
+      <BlueprintTemplatesModal
+        isOpen={showTemplates}
+        onClose={() => setShowTemplates(false)}
       />
       {/* <AuthFlowModal
         open={showAuthModal}
