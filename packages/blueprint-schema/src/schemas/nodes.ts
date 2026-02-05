@@ -48,6 +48,10 @@ export const NodeType = z.enum([
   'maxxit',
   'onchain-activity',
 
+  // Oracles / Analytics
+  'pyth-oracle',
+  'chainlink-price-feed',
+
   // App
   'frontend-scaffold',
   'sdk-generator',
@@ -533,6 +537,30 @@ export const OnchainActivityConfig = BaseNodeConfig.extend({
 export type OnchainActivityConfig = z.infer<typeof OnchainActivityConfig>;
 
 /**
+ * Pyth Price Oracle configuration
+ */
+export const PythOracleConfig = BaseNodeConfig.extend({
+  chain: z.enum(['arbitrum', 'arbitrum-sepolia']).default('arbitrum-sepolia'),
+  // Pyth price feed ID (32-byte hex string)
+  priceFeedId: z.string().regex(/^0x[0-9a-fA-F]{64}$/),
+  staleAfterSeconds: z.number().int().min(30).max(86400).optional(),
+});
+export type PythOracleConfig = z.infer<typeof PythOracleConfig>;
+
+/**
+ * Chainlink Price Feed configuration
+ * Uses AggregatorV3Interface contract addresses per chain
+ */
+export const ChainlinkPriceFeedConfig = BaseNodeConfig.extend({
+  chain: z.enum(['arbitrum', 'arbitrum-sepolia']).default('arbitrum'),
+  // Chainlink Data Feed contract address (AggregatorV3Interface)
+  feedAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
+  // Optional: max age in seconds before price is considered stale
+  staleAfterSeconds: z.number().int().min(30).max(86400).optional(),
+});
+export type ChainlinkPriceFeedConfig = z.infer<typeof ChainlinkPriceFeedConfig>;
+
+/**
  * Stylus Rust Contract configuration
  * Guides users on creating Stylus Rust contracts
  */
@@ -890,6 +918,9 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('telegram-ai-agent'), config: TelegramAIAgentConfig }),
   z.object({ type: z.literal('ostium-trading'), config: OstiumTradingConfig }),
   z.object({ type: z.literal('maxxit'), config: MaxxitLazyTradingConfig }),
+  z.object({ type: z.literal('onchain-activity'), config: OnchainActivityConfig }),
+  z.object({ type: z.literal('pyth-oracle'), config: PythOracleConfig }),
+  z.object({ type: z.literal('chainlink-price-feed'), config: ChainlinkPriceFeedConfig }),
   z.object({ type: z.literal('aixbt-momentum'), config: AIXBTMomentumConfig }),
   z.object({ type: z.literal('aixbt-signals'), config: AIXBTSignalsConfig }),
   z.object({ type: z.literal('aixbt-indigo'), config: AIXBTIndigoConfig }),
@@ -951,6 +982,8 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'ostium-trading': 'agents',
     'maxxit': 'agents',
     'onchain-activity': 'agents',
+    'pyth-oracle': 'analytics',
+    'chainlink-price-feed': 'analytics',
     'frontend-scaffold': 'app',
     'sdk-generator': 'app',
     'wallet-auth': 'app',
@@ -1024,6 +1057,8 @@ export function getConfigSchemaForType(type: NodeType) {
     'ostium-trading': OstiumTradingConfig,
     'maxxit': MaxxitLazyTradingConfig,
     'onchain-activity': OnchainActivityConfig,
+    'pyth-oracle': PythOracleConfig,
+    'chainlink-price-feed': ChainlinkPriceFeedConfig,
     'aixbt-momentum': AIXBTMomentumConfig,
     'aixbt-signals': AIXBTSignalsConfig,
     'aixbt-indigo': AIXBTIndigoConfig,

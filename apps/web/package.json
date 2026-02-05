@@ -17,6 +17,8 @@
     "@cradle/onchain-activity": "workspace:*",
     "@cradle/ostium-onect": "workspace:*",
     "@cradle/plugin-config": "workspace:*",
+    "@cradle/pyth-oracle": "workspace:*",
+    "@cradle/chainlink-price-feed": "workspace:*",
     "@dapp-forge/blueprint-schema": "workspace:*",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/space-grotesk": "^5.2.10",

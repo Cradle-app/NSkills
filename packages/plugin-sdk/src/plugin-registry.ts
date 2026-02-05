@@ -138,6 +138,8 @@ export function getDefaultRegistry(): PluginRegistry {
       'erc1155-stylus',
       'maxxit',
       'onchain-activity',
+      'pyth-oracle',
+      'chainlink-price-feed',
       "aixbt-momentum",
       "aixbt-signals",
       "aixbt-indigo",

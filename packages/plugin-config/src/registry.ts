@@ -317,6 +317,45 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     },
 
     // ============================================
+    // ORACLES / ANALYTICS (PYTH)
+    // ============================================
+    'pyth-oracle': {
+        id: 'pyth-oracle',
+        name: 'Pyth Price Oracle',
+        description: 'On-chain price feeds from Pyth Network',
+        icon: 'TrendingUp',
+        color: 'accent-purple',
+        category: 'analytics',
+        tags: ['pyth', 'oracle', 'prices', 'feeds', 'arbitrum'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'chain-data'],
+            suggestedWith: ['dune-token-price', 'dune-wallet-balances'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+        },
+    },
+    'chainlink-price-feed': {
+        id: 'chainlink-price-feed',
+        name: 'Chainlink Price Feed',
+        description: 'On-chain price feeds from Chainlink Data Feeds',
+        icon: 'Link',
+        color: 'accent-purple',
+        category: 'analytics',
+        tags: ['chainlink', 'oracle', 'prices', 'feeds', 'arbitrum', 'aggregator'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'chain-data', 'rpc-provider'],
+            suggestedWith: ['dune-token-price', 'pyth-oracle'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+            feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612', // ETH/USD Arbitrum One
+        },
+    },
+
+    // ============================================
     // APP CATEGORY
     // ============================================
     'wallet-auth': {
@@ -976,6 +1015,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             cacheDuration: 600000,
         },
     },
+
+    // Pyth Oracle entry is defined above under analytics
 };
 
 /**

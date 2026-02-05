@@ -69,6 +69,8 @@ export function nodeTypeToLabel(type: string): string {
     'erc721-stylus': 'ERC-721 Stylus NFT',
     'erc1155-stylus': 'ERC-1155 Stylus Multi-Token',
     'maxxit': 'Maxxit Lazy Trader',
+    'pyth-oracle': 'Pyth Price Oracle',
+    'chainlink-price-feed': 'Chainlink Price Feed',
     // Superposition L3
     'superposition-network': 'Superposition Network',
     'superposition-bridge': 'Superposition Bridge',
@@ -131,6 +133,8 @@ export function nodeTypeToColor(type: string): string {
     'aixbt-observer': 'node-intelligence',
     // Legacy
     'maxxit': 'node-agents',
+    'pyth-oracle': 'accent-purple',
+    'chainlink-price-feed': 'accent-purple',
     // Superposition L3
     'superposition-network': 'accent-cyan',
     'superposition-bridge': 'accent-cyan',
