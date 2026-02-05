@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useDisconnect } from 'wagmi';
-import { motion } from 'framer-motion';
-import { Wallet, ChevronDown, LogOut, Copy, Check, ExternalLink } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Wallet, ChevronDown, LogOut, Copy, Check, ExternalLink, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/store/auth';
+import { useAuthStore, createAuthError } from '@/store/auth';
 import { useState } from 'react';
 
 interface WalletConnectButtonProps {
@@ -23,23 +23,50 @@ export function WalletConnectButton({
   onDisconnect,
   className,
 }: WalletConnectButtonProps) {
-  const { address, isConnected, isConnecting } = useAccount();
+  const { address, isConnected, isConnecting, isReconnecting } = useAccount();
   const { disconnect } = useDisconnect();
-  const { setWalletConnected, initializeFromDatabase } = useAuthStore();
+  const {
+    setWalletConnected,
+    initializeFromDatabase,
+    handleWalletAccountChange,
+    handleWalletDisconnect,
+    setWalletLoading,
+    setWalletError,
+    walletLoading,
+    walletError,
+    walletSuccess,
+    session,
+  } = useAuthStore();
   const [copied, setCopied] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const previousAddressRef = useRef<string | null>(null);
 
   // Sync wallet connection with auth store and initialize from database
   useEffect(() => {
     if (isConnected && address) {
-      setWalletConnected(address);
-      // Initialize auth state from database (will restore GitHub connection if exists)
-      initializeFromDatabase(address);
+      // Detect account switch
+      if (previousAddressRef.current && previousAddressRef.current !== address) {
+        handleWalletAccountChange(address);
+      } else {
+        setWalletConnected(address);
+        // Initialize auth state from database (will restore GitHub connection if exists)
+        initializeFromDatabase(address);
+      }
+      previousAddressRef.current = address;
       onConnect?.(address);
+    } else if (!isConnected && previousAddressRef.current) {
+      // Wallet was disconnected
+      handleWalletDisconnect();
+      previousAddressRef.current = null;
     } else {
       setWalletConnected(null);
     }
-  }, [isConnected, address, setWalletConnected, initializeFromDatabase, onConnect]);
+  }, [isConnected, address, setWalletConnected, initializeFromDatabase, onConnect, handleWalletAccountChange, handleWalletDisconnect]);
+
+  // Track loading state from wagmi
+  useEffect(() => {
+    setWalletLoading(isConnecting || isReconnecting);
+  }, [isConnecting, isReconnecting, setWalletLoading]);
 
   const handleCopy = async () => {
     if (address) {
@@ -77,6 +104,17 @@ export function WalletConnectButton({
           chain &&
           (!authenticationStatus || authenticationStatus === 'authenticated');
 
+        // Handle connection errors from RainbowKit
+        const handleConnectClick = () => {
+          setWalletError(null);
+          try {
+            openConnectModal();
+          } catch (error) {
+            console.error('Error opening connect modal:', error);
+            setWalletError(createAuthError('wallet_network_error'));
+          }
+        };
+
         return (
           <div
             {...(!ready && {
@@ -92,20 +130,33 @@ export function WalletConnectButton({
             {(() => {
               if (!connected) {
                 return (
-                  <Button
-                    onClick={openConnectModal}
-                    variant="outline"
-                    size="sm"
-                    className={cn(
-                      'gap-2 border-forge-border hover:border-accent-cyan hover:text-accent-cyan transition-all duration-200',
-                      'bg-gradient-to-r from-forge-surface/80 to-forge-elevated/50',
-                      'hover:from-accent-cyan/10 hover:to-accent-cyan/5',
-                      isConnecting && 'animate-pulse'
-                    )}
-                  >
-                    <Wallet className="w-4 h-4" />
-                    {variant === 'compact' ? 'Connect' : 'Connect Wallet'}
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      onClick={handleConnectClick}
+                      variant="outline"
+                      size="sm"
+                      disabled={walletLoading}
+                      className={cn(
+                        'gap-2 border-forge-border hover:border-accent-cyan hover:text-accent-cyan transition-all duration-200',
+                        'bg-gradient-to-r from-forge-surface/80 to-forge-elevated/50',
+                        'hover:from-accent-cyan/10 hover:to-accent-cyan/5',
+                        walletLoading && 'opacity-80',
+                        walletError && 'border-red-500/50'
+                      )}
+                    >
+                      {walletLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <Wallet className="w-4 h-4" />
+                          {variant === 'compact' ? 'Connect' : 'Connect Wallet'}
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 );
               }
 
@@ -125,13 +176,30 @@ export function WalletConnectButton({
 
               return (
                 <div className="relative">
+                  {/* Success indicator */}
+                  <AnimatePresence>
+                    {walletSuccess && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="absolute -top-1 -right-1 z-10"
+                      >
+                        <div className="w-5 h-5 rounded-full bg-accent-lime flex items-center justify-center">
+                          <CheckCircle2 className="w-3 h-3 text-black" />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <motion.button
                     onClick={() => setShowMenu(!showMenu)}
                     className={cn(
                       'flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-200',
                       'bg-gradient-to-r from-forge-surface/80 to-forge-elevated/50',
                       'border border-forge-border/50 hover:border-accent-cyan/50',
-                      'group'
+                      'group',
+                      walletSuccess && 'border-accent-lime/50'
                     )}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -168,70 +236,72 @@ export function WalletConnectButton({
                   </motion.button>
 
                   {/* Dropdown Menu */}
-                  {showMenu && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setShowMenu(false)}
-                      />
-                      <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        className={cn(
-                          'absolute right-0 top-full mt-2 z-50',
-                          'w-56 p-2 rounded-xl',
-                          'bg-forge-surface/95 backdrop-blur-xl',
-                          'border border-forge-border/50',
-                          'shadow-xl shadow-black/20'
-                        )}
-                      >
-                        {/* Account info */}
-                        <div className="px-3 py-2 mb-2 rounded-lg bg-forge-bg/50">
-                          <p className="text-xs text-forge-muted mb-1">Connected Wallet</p>
-                          <p className="text-sm font-mono text-white break-all">
-                            {formatAddress(account.address)}
-                          </p>
-                          {account.displayBalance && (
-                            <p className="text-xs text-accent-cyan mt-1">
-                              {account.displayBalance}
+                  <AnimatePresence>
+                    {showMenu && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setShowMenu(false)}
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                          className={cn(
+                            'absolute right-0 top-full mt-2 z-50',
+                            'w-56 p-2 rounded-xl',
+                            'bg-forge-surface/95 backdrop-blur-xl',
+                            'border border-forge-border/50',
+                            'shadow-xl shadow-black/20'
+                          )}
+                        >
+                          {/* Account info */}
+                          <div className="px-3 py-2 mb-2 rounded-lg bg-forge-bg/50">
+                            <p className="text-xs text-forge-muted mb-1">Connected Wallet</p>
+                            <p className="text-sm font-mono text-white break-all">
+                              {formatAddress(account.address)}
                             </p>
-                          )}
-                        </div>
+                            {account.displayBalance && (
+                              <p className="text-xs text-accent-cyan mt-1">
+                                {account.displayBalance}
+                              </p>
+                            )}
+                          </div>
 
-                        {/* Actions */}
-                        <button
-                          onClick={handleCopy}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-forge-text hover:bg-forge-elevated/50 transition-colors"
-                        >
-                          {copied ? (
-                            <Check className="w-4 h-4 text-accent-lime" />
-                          ) : (
-                            <Copy className="w-4 h-4" />
-                          )}
-                          {copied ? 'Copied!' : 'Copy Address'}
-                        </button>
+                          {/* Actions */}
+                          <button
+                            onClick={handleCopy}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-forge-text hover:bg-forge-elevated/50 transition-colors"
+                          >
+                            {copied ? (
+                              <Check className="w-4 h-4 text-accent-lime" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
+                            {copied ? 'Copied!' : 'Copy Address'}
+                          </button>
 
-                        <button
-                          onClick={openChainModal}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-forge-text hover:bg-forge-elevated/50 transition-colors"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Switch Network
-                        </button>
+                          <button
+                            onClick={openChainModal}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-forge-text hover:bg-forge-elevated/50 transition-colors"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            Switch Network
+                          </button>
 
-                        <div className="h-px bg-forge-border/30 my-2" />
+                          <div className="h-px bg-forge-border/30 my-2" />
 
-                        <button
-                          onClick={handleDisconnect}
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Disconnect
-                        </button>
-                      </motion.div>
-                    </>
-                  )}
+                          <button
+                            onClick={handleDisconnect}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            Disconnect
+                          </button>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             })()}
@@ -244,7 +314,7 @@ export function WalletConnectButton({
 
 // Hook to require wallet connection before an action
 export function useRequireWallet() {
-  const { isWalletConnected, openAuthModal } = useAuthStore();
+  const { isWalletConnected, openAuthModal, walletError, walletLoading } = useAuthStore();
 
   const requireWallet = (action: () => void): boolean => {
     if (!isWalletConnected) {
@@ -255,5 +325,41 @@ export function useRequireWallet() {
     return true;
   };
 
-  return { requireWallet, isWalletConnected };
+  return {
+    requireWallet,
+    isWalletConnected,
+    walletError,
+    walletLoading,
+  };
+}
+
+// Hook to detect and handle wallet events
+export function useWalletEvents() {
+  const { address, isConnected } = useAccount();
+  const {
+    handleWalletDisconnect,
+    handleWalletAccountChange,
+    session,
+  } = useAuthStore();
+  const previousAddressRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (isConnected && address) {
+      if (previousAddressRef.current && previousAddressRef.current !== address) {
+        // Account changed
+        handleWalletAccountChange(address);
+      }
+      previousAddressRef.current = address;
+    } else if (!isConnected && previousAddressRef.current) {
+      // Disconnected
+      handleWalletDisconnect();
+      previousAddressRef.current = null;
+    }
+  }, [isConnected, address, handleWalletDisconnect, handleWalletAccountChange]);
+
+  return {
+    currentAddress: address,
+    isConnected,
+    previousAddress: previousAddressRef.current,
+  };
 }

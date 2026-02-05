@@ -31,7 +31,6 @@ export default function HomePage() {
       {/* Animated background */}
       <div className="absolute inset-0 bg-forge-bg">
         {/* Mesh gradient background */}
-        <div className="absolute inset-0 bg-mesh-gradient opacity-50" />
 
         {/* Subtle grid pattern */}
         <div
@@ -41,11 +40,6 @@ export default function HomePage() {
             backgroundSize: '32px 32px'
           }}
         />
-
-        {/* Animated gradient orbs */}
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-cyan/5 rounded-full blur-[120px] animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-accent-magenta/5 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 right-1/3 w-[300px] h-[300px] bg-accent-lime/3 rounded-full blur-[80px] animate-pulse-slow" style={{ animationDelay: '4s' }} />
       </div>
 
       {/* Content */}

@@ -17,7 +17,7 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Trash2 } from 'lucide-react';
+import { Trash2, AlertCircle } from 'lucide-react';
 import { nodeTypeToColor } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { useAccount } from 'wagmi';
@@ -27,6 +27,9 @@ import { ForgeNode } from './forge-node';
 import { ForgeEdge } from './forge-edge';
 import { CanvasSuggestions } from './canvas-suggestions';
 import { getPluginIds } from '@cradle/plugin-config';
+import { useSessionMonitor, useAuthState } from '@/hooks/useSessionMonitor';
+import { AuthStatusBadge } from '@/components/auth/auth-guard';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Dynamically build node types from plugin registry
 const nodeTypes: NodeTypes = getPluginIds().reduce(
@@ -53,8 +56,35 @@ function BlueprintCanvasInner() {
     removeNode,
     selectedNodeId,
   } = useBlueprintStore();
-  const { isConnected } = useAccount();
-  const { isWalletConnected, isFullyAuthenticated, showAuthModal, openAuthModal, closeAuthModal } = useAuthStore();
+  const { isConnected, address } = useAccount();
+  const {
+    isWalletConnected,
+    isFullyAuthenticated,
+    showAuthModal,
+    openAuthModal,
+    closeAuthModal,
+    walletError,
+    githubError,
+    getConnectionState,
+  } = useAuthStore();
+
+  // Use session monitor for automatic session handling
+  const { checkSession } = useSessionMonitor({
+    showModalOnExpiry: true,
+    onWalletDisconnect: () => {
+      console.log('Wallet disconnected');
+    },
+    onGitHubExpiry: () => {
+      console.log('GitHub session expired');
+    },
+    onAccountChange: (newAddress, oldAddress) => {
+      console.log(`Account changed from ${oldAddress} to ${newAddress}`);
+    },
+  });
+
+  // Get comprehensive auth state
+  const authState = useAuthState();
+  const connectionState = getConnectionState();
 
   // Convert blueprint nodes to ReactFlow nodes
   const blueprintNodes: Node[] = useMemo(() =>
@@ -120,14 +150,14 @@ function BlueprintCanvasInner() {
       const type = event.dataTransfer.getData('application/reactflow');
       if (!type) return;
 
-      // Double check wallet connection on drop - use isConnected from wagmi for real-time status
+      // Check wallet connection - use isConnected from wagmi for real-time status
       const walletConnected = isConnected || isWalletConnected;
       if (!walletConnected) {
         openAuthModal();
         return;
       }
 
-      // Double check GitHub authentication on drop
+      // Check GitHub authentication
       if (!isFullyAuthenticated) {
         openAuthModal();
         return;
@@ -158,7 +188,7 @@ function BlueprintCanvasInner() {
         ]);
       }
     },
-    [addNode, setNodes, isConnected, isWalletConnected, openAuthModal]
+    [addNode, setNodes, isConnected, isWalletConnected, isFullyAuthenticated, openAuthModal]
   );
 
   const onNodeClick = useCallback(
@@ -226,14 +256,17 @@ function BlueprintCanvasInner() {
     setShowDeleteConfirm(false);
   }, [showDeleteConfirm, blueprint.nodes, removeNode, selectNode]);
 
+  // Show auth error notification
+  const hasAuthError = walletError || githubError;
+
   return (
     <div className="relative h-full w-full">
       {/* Canvas container with overflow hidden */}
       <div className="absolute inset-0 overflow-hidden rounded-2xl border border-forge-border/60 bg-gradient-to-b from-black/70 via-black/80 to-black/95">
         {/* Top bar with hint and actions */}
         <div className="absolute inset-x-0 top-3 z-20 flex items-center justify-between px-3">
-          {/* Left spacer for balance */}
-          <div className="w-24" />
+          {/* Auth status badge */}
+          <AuthStatusBadge className="min-w-[120px]" />
 
           {/* Subtle canvas hint - centered */}
           <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-white/5 backdrop-blur">
@@ -343,6 +376,21 @@ function BlueprintCanvasInner() {
               <p className="text-xs text-forge-muted">
                 Drag a node from the left palette into the canvas to begin your blueprint.
               </p>
+
+              {/* Auth hint */}
+              {!isFullyAuthenticated && (
+                <button
+                  onClick={() => openAuthModal()}
+                  className="mt-4 text-xs text-accent-cyan hover:underline pointer-events-auto"
+                >
+                  {connectionState === 'none_connected'
+                    ? 'Connect wallet & GitHub to get started'
+                    : connectionState === 'wallet_only'
+                      ? 'Connect GitHub to unlock all features'
+                      : 'Connect wallet to get started'
+                  }
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -356,6 +404,17 @@ function BlueprintCanvasInner() {
 
 // Wrap with ReactFlowProvider so suggestions can access viewport hooks
 export function BlueprintCanvas() {
+  // Avoid hydration mismatches by only rendering on the client
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <ReactFlowProvider>
       <BlueprintCanvasInner />

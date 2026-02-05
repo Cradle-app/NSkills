@@ -1,10 +1,12 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useCallback } from 'react';
 import { useAccount } from 'wagmi';
-import { useAuthStore } from '@/store/auth';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthStore, ConnectionState } from '@/store/auth';
 import { cn } from '@/lib/utils';
-import { Lock } from 'lucide-react';
+import { Lock, Wallet, Github, Loader2, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -12,6 +14,7 @@ interface AuthGuardProps {
   requireGitHub?: boolean;
   onClick?: () => void;
   className?: string;
+  showStatusIndicator?: boolean;
 }
 
 interface FullAuthStatus {
@@ -35,9 +38,19 @@ export function AuthGuard({
   requireGitHub = false,
   onClick,
   className,
+  showStatusIndicator = false,
 }: AuthGuardProps) {
   const { address, isConnected } = useAccount();
-  const { isWalletConnected, isFullyAuthenticated, openAuthModal, checkFullAuthStatus } = useAuthStore();
+  const {
+    isWalletConnected,
+    isFullyAuthenticated,
+    isGitHubConnected,
+    openAuthModal,
+    checkFullAuthStatus,
+    walletLoading,
+    githubLoading,
+    getConnectionState,
+  } = useAuthStore();
   const [isChecking, setIsChecking] = useState(false);
   const [fullAuthStatus, setFullAuthStatus] = useState<FullAuthStatus | null>(null);
 
@@ -54,12 +67,12 @@ export function AuthGuard({
     }
   }, [isConnected, address, checkFullAuthStatus]);
 
-  const handleClick = async (e: React.MouseEvent) => {
+  const handleClick = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     // If checking auth status, wait
-    if (isChecking) {
+    if (isChecking || walletLoading || githubLoading) {
       return;
     }
 
@@ -86,54 +99,267 @@ export function AuthGuard({
     }
 
     onClick?.();
-  };
+  }, [
+    isChecking,
+    walletLoading,
+    githubLoading,
+    isConnected,
+    address,
+    fullAuthStatus,
+    requireGitHub,
+    isFullyAuthenticated,
+    isWalletConnected,
+    openAuthModal,
+    onClick,
+  ]);
+
+  const connectionState = getConnectionState();
+  const isLoading = isChecking || walletLoading || githubLoading;
 
   return (
-    <div onClick={handleClick} className={cn('cursor-pointer', className)}>
+    <div
+      onClick={handleClick}
+      className={cn(
+        'cursor-pointer relative',
+        isLoading && 'opacity-70 pointer-events-none',
+        className
+      )}
+    >
       {children}
+
+      {/* Status indicator */}
+      {showStatusIndicator && (
+        <AnimatePresence>
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 flex items-center justify-center bg-black/20 rounded"
+            >
+              <Loader2 className="w-4 h-4 animate-spin text-accent-cyan" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   );
 }
 
 /**
  * AuthOverlay shows a lock overlay on elements when not authenticated
+ * Enhanced with connection state awareness
  */
 interface AuthOverlayProps {
   children: ReactNode;
   message?: string;
   className?: string;
+  requireGitHub?: boolean;
 }
 
 export function AuthOverlay({
   children,
-  message = 'Connect wallet to access',
+  message,
   className,
+  requireGitHub = false,
 }: AuthOverlayProps) {
-  const { isWalletConnected, openAuthModal } = useAuthStore();
+  const { address, isConnected } = useAccount();
+  const {
+    isWalletConnected,
+    isGitHubConnected,
+    isFullyAuthenticated,
+    openAuthModal,
+    getConnectionState,
+    walletLoading,
+    githubLoading,
+  } = useAuthStore();
 
-  if (isWalletConnected) {
+  const connectionState = getConnectionState();
+
+  // Determine if we should show the overlay
+  const shouldShowOverlay = requireGitHub
+    ? !isFullyAuthenticated
+    : !isWalletConnected && !isConnected;
+
+  if (!shouldShowOverlay) {
     return <>{children}</>;
   }
+
+  // Get appropriate message based on connection state
+  const getOverlayContent = () => {
+    switch (connectionState) {
+      case 'none_connected':
+        return {
+          icon: Lock,
+          title: message || 'Authentication Required',
+          description: 'Connect your wallet and GitHub to access this feature.',
+          buttonText: 'Connect',
+        };
+      case 'wallet_only':
+        return {
+          icon: Github,
+          title: 'GitHub Connection Required',
+          description: 'Connect your GitHub account to access this feature.',
+          buttonText: 'Connect GitHub',
+        };
+      case 'github_only':
+        return {
+          icon: Wallet,
+          title: 'Wallet Connection Required',
+          description: 'Connect your wallet to access this feature.',
+          buttonText: 'Connect Wallet',
+        };
+      default:
+        return {
+          icon: Lock,
+          title: message || 'Connect to access',
+          description: 'Authentication required.',
+          buttonText: 'Connect',
+        };
+    }
+  };
+
+  const content = getOverlayContent();
+  const Icon = content.icon;
+  const isLoading = walletLoading || githubLoading;
 
   return (
     <div className={cn('relative', className)}>
       {/* Content with reduced opacity */}
-      <div className="opacity-50 pointer-events-none select-none">
+      <div className="opacity-50 pointer-events-none select-none blur-[1px]">
         {children}
       </div>
 
       {/* Lock overlay */}
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         onClick={() => openAuthModal()}
-        className="absolute inset-0 flex flex-col items-center justify-center bg-forge-bg/60 backdrop-blur-sm cursor-pointer group"
+        className="absolute inset-0 flex flex-col items-center justify-center bg-forge-bg/70 backdrop-blur-sm cursor-pointer group rounded-xl"
       >
-        <div className="p-3 rounded-full bg-forge-elevated/50 border border-forge-border/50 mb-3 group-hover:border-accent-cyan/50 transition-colors">
-          <Lock className="w-6 h-6 text-forge-muted group-hover:text-accent-cyan transition-colors" />
+        <div className="text-center max-w-xs px-4">
+          <div className="p-3 rounded-full bg-forge-elevated/50 border border-forge-border/50 mb-3 mx-auto w-fit group-hover:border-accent-cyan/50 transition-colors">
+            {isLoading ? (
+              <Loader2 className="w-6 h-6 text-accent-cyan animate-spin" />
+            ) : (
+              <Icon className="w-6 h-6 text-forge-muted group-hover:text-accent-cyan transition-colors" />
+            )}
+          </div>
+          <p className="text-sm font-medium text-white mb-1">
+            {content.title}
+          </p>
+          <p className="text-xs text-forge-muted mb-3">
+            {content.description}
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={isLoading}
+            className="border-forge-border hover:border-accent-cyan hover:text-accent-cyan"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                Connecting...
+              </>
+            ) : (
+              content.buttonText
+            )}
+          </Button>
         </div>
-        <p className="text-sm text-forge-muted group-hover:text-white transition-colors">
-          {message}
-        </p>
+      </motion.div>
+    </div>
+  );
+}
+
+/**
+ * AuthStatusBadge shows the current authentication status
+ */
+interface AuthStatusBadgeProps {
+  className?: string;
+  compact?: boolean;
+}
+
+export function AuthStatusBadge({ className, compact = false }: AuthStatusBadgeProps) {
+  const { address, isConnected } = useAccount();
+  const {
+    isGitHubConnected,
+    session,
+    getConnectionState,
+  } = useAuthStore();
+
+  // Ensure we only render status based on client-side state
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    // Render a minimal, stable placeholder during SSR/first client render
+    if (compact) {
+      return (
+        <div className={cn('flex items-center gap-1.5', className)}>
+          <div className={cn('w-2 h-2 rounded-full', 'bg-forge-muted')} />
+        </div>
+      );
+    }
+
+    return (
+      <div className={cn('flex items-center gap-2 px-2 py-1 rounded-lg bg-forge-surface border border-forge-border', className)}>
+        <div className={cn('w-2 h-2 rounded-full', 'bg-forge-muted')} />
+        <span className="text-xs text-forge-muted">Checking status…</span>
       </div>
+    );
+  }
+
+  const connectionState = getConnectionState();
+
+  const getStatusInfo = () => {
+    switch (connectionState) {
+      case 'both_connected':
+        return {
+          color: 'bg-accent-lime',
+          text: 'Fully Connected',
+          icon: null,
+        };
+      case 'wallet_only':
+        return {
+          color: 'bg-yellow-500',
+          text: 'GitHub Required',
+          icon: Github,
+        };
+      case 'github_only':
+        return {
+          color: 'bg-yellow-500',
+          text: 'Wallet Required',
+          icon: Wallet,
+        };
+      default:
+        return {
+          color: 'bg-red-500',
+          text: 'Not Connected',
+          icon: AlertCircle,
+        };
+    }
+  };
+
+  const status = getStatusInfo();
+
+  if (compact) {
+    return (
+      <div className={cn('flex items-center gap-1.5', className)}>
+        <div className={cn('w-2 h-2 rounded-full', status.color)} />
+        {status.icon && <status.icon className="w-3 h-3 text-forge-muted" />}
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn('flex items-center gap-2 px-2 py-1 rounded-lg bg-forge-surface border border-forge-border', className)}>
+      <div className={cn('w-2 h-2 rounded-full', status.color)} />
+      <span className="text-xs text-forge-muted">{status.text}</span>
+      {status.icon && <status.icon className="w-3 h-3 text-forge-muted" />}
     </div>
   );
 }
@@ -149,19 +375,29 @@ export function useAuthGuard() {
     isFullyAuthenticated,
     openAuthModal,
     checkFullAuthStatus,
+    walletLoading,
+    githubLoading,
+    walletError,
+    githubError,
+    getConnectionState,
   } = useAuthStore();
   const [fullAuthStatus, setFullAuthStatus] = useState<FullAuthStatus | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
 
   // Check full auth status when wallet is connected
   useEffect(() => {
     if (isConnected && address) {
-      checkFullAuthStatus(address).then(setFullAuthStatus);
+      setIsChecking(true);
+      checkFullAuthStatus(address).then((result) => {
+        setFullAuthStatus(result);
+        setIsChecking(false);
+      });
     } else {
       setFullAuthStatus(null);
     }
   }, [isConnected, address, checkFullAuthStatus]);
 
-  const checkAuth = async (action?: () => void): Promise<boolean> => {
+  const checkAuth = useCallback(async (action?: () => void): Promise<boolean> => {
     if (isConnected && address && fullAuthStatus) {
       if (!fullAuthStatus.hasWallet) {
         openAuthModal(action);
@@ -173,9 +409,9 @@ export function useAuthGuard() {
     }
     action?.();
     return true;
-  };
+  }, [isConnected, address, fullAuthStatus, isWalletConnected, openAuthModal]);
 
-  const checkFullAuth = async (action?: () => void): Promise<boolean> => {
+  const checkFullAuth = useCallback(async (action?: () => void): Promise<boolean> => {
     if (isConnected && address && fullAuthStatus) {
       // Require both GitHub in DB AND active session
       if (!fullAuthStatus.hasGitHub || !fullAuthStatus.hasActiveSession) {
@@ -188,14 +424,78 @@ export function useAuthGuard() {
     }
     action?.();
     return true;
-  };
+  }, [isConnected, address, fullAuthStatus, isFullyAuthenticated, openAuthModal]);
+
+  const connectionState = getConnectionState();
 
   return {
-    isWalletConnected,
+    // Connection states
+    isWalletConnected: isConnected || isWalletConnected,
     isGitHubConnected,
     isFullyAuthenticated,
+    connectionState,
+    fullAuthStatus,
+
+    // Loading states
+    isChecking,
+    walletLoading,
+    githubLoading,
+    isLoading: isChecking || walletLoading || githubLoading,
+
+    // Error states
+    walletError,
+    githubError,
+    hasError: !!walletError || !!githubError,
+
+    // Actions
     checkAuth,
     checkFullAuth,
-    fullAuthStatus,
+    openAuthModal,
+  };
+}
+
+/**
+ * Higher-order component to protect routes/components
+ */
+export function withAuthGuard<P extends object>(
+  WrappedComponent: React.ComponentType<P>,
+  options?: {
+    requireGitHub?: boolean;
+    fallback?: ReactNode;
+  }
+) {
+  return function AuthGuardedComponent(props: P) {
+    const {
+      isWalletConnected,
+      isFullyAuthenticated,
+      isLoading,
+      connectionState,
+    } = useAuthGuard();
+
+    const isAuthenticated = options?.requireGitHub
+      ? isFullyAuthenticated
+      : isWalletConnected;
+
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="w-6 h-6 animate-spin text-accent-cyan" />
+        </div>
+      );
+    }
+
+    if (!isAuthenticated) {
+      if (options?.fallback) {
+        return <>{options.fallback}</>;
+      }
+
+      return (
+        <AuthOverlay requireGitHub={options?.requireGitHub}>
+          <WrappedComponent {...props} />
+        </AuthOverlay>
+      );
+    }
+
+    return <WrappedComponent {...props} />;
   };
 }
