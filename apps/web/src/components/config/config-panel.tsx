@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBlueprintStore } from '@/store/blueprint';
 import { nodeTypeToLabel, nodeTypeToColor } from '@/lib/utils';
 import { cn } from '@/lib/utils';
-import { X, Settings2, MousePointerClick, Trash2, Copy, Check } from 'lucide-react';
+import { X, Settings2, MousePointerClick, Trash2, Copy, Check, ChevronDown, Sparkles } from 'lucide-react';
 import { AuthOverlay } from '@/components/auth/auth-guard';
 import { useToast } from '@/components/ui/toaster';
 
@@ -62,6 +62,78 @@ import { DuneAnalyticsForm } from './forms/dune-analytics-form';
 import { StylusRustContractForm } from './forms/stylus-rust-contract-form';
 import { SmartCacheCachingForm } from './forms/smartcache-caching-form';
 import { AuditwareAnalyzingForm } from './forms/auditware-analyzing-form';
+
+/**
+ * Collapsible AI Prompt section -- shared across ALL node types.
+ * Lets users describe their intent for each block in free-text.
+ */
+function PromptSection({ nodeId, config }: { nodeId: string; config: Record<string, unknown> }) {
+  const { updateNodeConfig } = useBlueprintStore();
+  const [expanded, setExpanded] = useState(() => Boolean(config.prompt));
+  const prompt = (config.prompt as string) ?? '';
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      updateNodeConfig(nodeId, { prompt: e.target.value });
+    },
+    [nodeId, updateNodeConfig],
+  );
+
+  return (
+    <div className="mb-4">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className={cn(
+          'w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-left transition-all duration-150',
+          'border border-[hsl(var(--color-border-default))]',
+          expanded
+            ? 'bg-[hsl(var(--color-accent-primary)/0.06)] border-[hsl(var(--color-accent-primary)/0.25)]'
+            : 'bg-[hsl(var(--color-bg-elevated))] hover:bg-[hsl(var(--color-bg-hover))]',
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--color-accent-primary))]" />
+          <span className="text-xs font-semibold text-[hsl(var(--color-text-primary))]">AI Prompt</span>
+          {!expanded && prompt && (
+            <span className="text-xs text-[hsl(var(--color-text-muted))] truncate max-w-[140px]">
+              — {prompt.slice(0, 40)}{prompt.length > 40 ? '…' : ''}
+            </span>
+          )}
+        </div>
+        <ChevronDown
+          className={cn(
+            'w-3.5 h-3.5 text-[hsl(var(--color-text-muted))] transition-transform duration-150',
+            expanded && 'rotate-180',
+          )}
+        />
+      </button>
+
+      {expanded && (
+        <div className="mt-2">
+          <textarea
+            value={prompt}
+            onChange={handleChange}
+            maxLength={5000}
+            rows={4}
+            placeholder="Describe what you want for this component — e.g., 'The bridge UI should show a progress stepper with estimated time and support ETH + USDC'"
+            className={cn(
+              'w-full rounded-lg px-3 py-2.5 text-sm leading-relaxed resize-y',
+              'bg-[hsl(var(--color-bg-base))] text-[hsl(var(--color-text-primary))]',
+              'border border-[hsl(var(--color-border-default))]',
+              'placeholder:text-[hsl(var(--color-text-muted)/0.6)]',
+              'focus:outline-none focus:ring-1 focus:ring-[hsl(var(--color-accent-primary)/0.5)] focus:border-[hsl(var(--color-accent-primary)/0.5)]',
+              'transition-colors duration-150',
+            )}
+          />
+          <p className="mt-1 text-[10px] text-[hsl(var(--color-text-muted))]">
+            {prompt.length}/5000 — This prompt will be included in your generated skills repo for AI context.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function ConfigPanel() {
   const { blueprint, selectedNodeId, selectNode, removeNode } = useBlueprintStore();
@@ -208,6 +280,9 @@ export function ConfigPanel() {
           transition={{ duration: 0.15 }}
         >
           <AuthOverlay message="Connect wallet to configure properties">
+            {/* AI Prompt - shared across all node types */}
+            <PromptSection nodeId={selectedNode.id} config={selectedNode.config} />
+
             {/* Original nodes */}
             {selectedNode.type === 'stylus-contract' && (
               <StylusContractForm nodeId={selectedNode.id} config={selectedNode.config} />
