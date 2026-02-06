@@ -2,6 +2,7 @@ import type { FastifyPluginCallback } from 'fastify';
 import { z } from 'zod';
 import { Blueprint, validateBlueprint } from '@dapp-forge/blueprint-schema';
 import { ExecutionEngine } from '../engine/execution';
+import { SkillsRepoGenerator } from '../engine/skills-generator';
 import { RunStore } from '../store/runs';
 
 // Request/Response schemas
@@ -12,6 +13,7 @@ const ValidateRequestSchema = z.object({
 const GenerateOptionsSchema = z.object({
   dryRun: z.boolean().default(false),
   createGitHubRepo: z.boolean().default(false),
+  generateMode: z.enum(['codebase', 'skills', 'both']).default('codebase'),
 });
 
 const GenerateRequestSchema = z.object({
@@ -21,6 +23,7 @@ const GenerateRequestSchema = z.object({
 
 export const blueprintRoutes: FastifyPluginCallback = (fastify, _opts, done) => {
   const engine = new ExecutionEngine();
+  const skillsGenerator = new SkillsRepoGenerator();
   const runStore = new RunStore();
 
   /**
@@ -106,13 +109,38 @@ export const blueprintRoutes: FastifyPluginCallback = (fastify, _opts, done) => 
     // Create a run
     const run = runStore.create(blueprint.id);
 
+    const execOptions = {
+      dryRun: options.dryRun,
+      createGitHubRepo: options.createGitHubRepo,
+      githubToken, // Pass user's token to engine
+    };
+
     try {
-      // Execute synchronously
-      const result = await engine.execute(blueprint, run.id, {
-        dryRun: options.dryRun,
-        createGitHubRepo: options.createGitHubRepo,
-        githubToken, // Pass user's token to engine
-      });
+      let result;
+
+      if (options.generateMode === 'skills') {
+        // Skills repo only
+        result = await skillsGenerator.generate(blueprint, run.id, execOptions);
+      } else if (options.generateMode === 'both') {
+        // Run both: codegen + skills repo, merge file lists
+        const [codeResult, skillsResult] = await Promise.all([
+          engine.execute(blueprint, run.id, execOptions),
+          skillsGenerator.generate(blueprint, `${run.id}-skills`, {
+            ...execOptions,
+            createGitHubRepo: false, // Don't push skills separately in 'both' mode
+          }),
+        ]);
+
+        // Merge: code files + skills files, dedupe env vars / scripts
+        const allFiles = [...codeResult.files, ...skillsResult.files];
+        result = {
+          ...codeResult,
+          files: allFiles,
+        };
+      } else {
+        // Default: codebase only (existing behavior, unchanged)
+        result = await engine.execute(blueprint, run.id, execOptions);
+      }
 
       const completedRun = runStore.get(run.id);
 

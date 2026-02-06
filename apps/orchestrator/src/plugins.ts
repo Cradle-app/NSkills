@@ -15,4 +15,5 @@ export function initializePlugins(): void {
 }
 
 export { getDefaultRegistry };
+export { SkillsRepoGenerator } from './engine/skills-generator';
 
