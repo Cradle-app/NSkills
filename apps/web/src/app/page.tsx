@@ -51,9 +51,9 @@ export default function HomePage() {
         <PanelGroup orientation="horizontal" className="flex-1">
           {/* Left sidebar - Node palette */}
           <Panel
-            defaultSize="18%" 
-            minSize="180px" 
-            maxSize="30%"
+            defaultSize="24%" 
+            minSize="300px" 
+            maxSize="35%"
           >
             <div data-tour="palette" className="h-full">
               <NodePalette />

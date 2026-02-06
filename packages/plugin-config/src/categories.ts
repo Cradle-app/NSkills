@@ -12,16 +12,28 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
         color: 'node-contracts',
     },
     {
-        id: 'payments',
-        name: 'Payments',
-        icon: 'CreditCard',
-        color: 'node-payments',
-    },
-    {
         id: 'agents',
         name: 'Agents',
         icon: 'Bot',
         color: 'node-agents',
+    },
+    {
+        id: 'superposition',
+        name: 'Superposition',
+        icon: 'Layers',
+        color: 'accent-cyan',
+    },
+    {
+        id: 'analytics',
+        name: 'Analytics',
+        icon: 'Database',
+        color: 'accent-purple',
+    },
+    {
+        id: 'payments',
+        name: 'Payments',
+        icon: 'CreditCard',
+        color: 'node-payments',
     },
     {
         id: 'app',
@@ -46,18 +58,6 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
         name: 'Intelligence',
         icon: 'Sparkles',
         color: 'node-intelligence',
-    },
-    {
-        id: 'superposition',
-        name: 'Superposition',
-        icon: 'Layers',
-        color: 'accent-cyan',
-    },
-    {
-        id: 'analytics',
-        name: 'Analytics',
-        icon: 'Database',
-        color: 'accent-purple',
     },
 ];
 

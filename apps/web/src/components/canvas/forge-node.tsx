@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import Image from 'next/image';
 import { Handle, Position, type NodeProps } from 'reactflow';
 import {
   Box, CreditCard, Bot, Layout, ShieldCheck, Trash2,
@@ -11,6 +12,42 @@ import {
 import { cn } from '@/lib/utils';
 import { useBlueprintStore } from '@/store/blueprint';
 import { nodeTypeToLabel, nodeTypeToColor } from '@/lib/utils';
+
+import AaveLogo from '@/assets/blocks/Aave.svg';
+import CompoundLogo from '@/assets/blocks/Compound.svg';
+import ChainlinkLogo from '@/assets/blocks/Chainlink.svg';
+import PythLogo from '@/assets/blocks/Pyth.svg';
+import UniswapLogo from '@/assets/blocks/Uniswap.svg';
+import CSLogo from '@/assets/blocks/CS_logo.png';
+import AuditwareLogo from '@/assets/blocks/auditware.png';
+import StylusLogo from '@/assets/blocks/stylus.svg';
+import OstiumLogo from '@/assets/blocks/Ostium.svg';
+import MaxxitLogo from '@/assets/blocks/MaxxitLogo.png';
+import AIbotLogo from '@/assets/blocks/AIbot.png';
+import WalletLogo from '@/assets/blocks/Wallet.svg';
+import SuperpositionLogo from '@/assets/blocks/superposition.png';
+import DuneLogo from '@/assets/blocks/dune.png';
+
+/** Node types with custom logos (matches palette) */
+const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
+  'aave-lending': { src: AaveLogo, alt: 'Aave' },
+  'compound-lending': { src: CompoundLogo, alt: 'Compound' },
+  'chainlink-price-feed': { src: ChainlinkLogo, alt: 'Chainlink' },
+  'pyth-oracle': { src: PythLogo, alt: 'Pyth' },
+  'uniswap-swap': { src: UniswapLogo, alt: 'Uniswap' },
+  'smartcache-caching': { src: CSLogo, alt: 'SmartCache' },
+  'auditware-analyzing': { src: AuditwareLogo, alt: 'Auditware' },
+  'erc20-stylus': { src: StylusLogo, alt: 'Stylus' },
+  'erc721-stylus': { src: StylusLogo, alt: 'Stylus' },
+  'erc1155-stylus': { src: StylusLogo, alt: 'Stylus' },
+  'stylus-contract': { src: StylusLogo, alt: 'Stylus' },
+  'stylus-zk-contract': { src: StylusLogo, alt: 'Stylus' },
+  'stylus-rust-contract': { src: StylusLogo, alt: 'Stylus' },
+  'ostium-trading': { src: OstiumLogo, alt: 'Ostium' },
+  'maxxit': { src: MaxxitLogo, alt: 'Maxxit' },
+  'erc8004-agent-runtime': { src: AIbotLogo, alt: 'AIbot' },
+  'onchain-activity': { src: WalletLogo, alt: 'Wallet' },
+};
 
 const iconMap: Record<string, typeof Box> = {
   'stylus-contract': Box,
@@ -129,6 +166,7 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
   const colorClass = nodeTypeToColor(nodeType);
   const colors = colorMap[colorClass] || colorMap['node-contracts'];
   const Icon = iconMap[nodeType] || Box;
+  const logoInfo = NODE_LOGO_MAP[nodeType];
   const isSelected = selected || selectedNodeId === id;
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -184,15 +222,24 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
       {/* Node content */}
       <div className="relative p-2.5">
         <div className="flex items-center gap-2">
-          {/* Icon container */}
+          {/* Icon / Logo container */}
           <div
             className={cn(
-              'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
+              'relative w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden',
               'bg-forge-bg/70 border border-white/5',
               'group-hover:border-white/10 transition-colors duration-200'
             )}
           >
-            <Icon className={cn('w-4 h-4', colors.text)} />
+            {logoInfo ? (
+              <Image
+                src={logoInfo.src}
+                alt={logoInfo.alt}
+                fill
+                className="object-contain p-0.5"
+              />
+            ) : (
+              <Icon className={cn('w-4 h-4', colors.text)} />
+            )}
           </div>
 
           {/* Label */}
