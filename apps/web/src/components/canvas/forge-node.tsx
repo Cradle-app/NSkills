@@ -1,13 +1,13 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Handle, Position, type NodeProps } from 'reactflow';
 import { motion } from 'framer-motion';
 import {
   Box, CreditCard, Bot, Layout, ShieldCheck, Trash2,
   Lock, Key, Wallet, Globe, ArrowLeftRight, Database,
   HardDrive, Layers, TrendingUp, Zap, Sparkles, Search,
-  DollarSign, Fuel, Send
+  DollarSign, Fuel, Send, Plus, X as XIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBlueprintStore } from '@/store/blueprint';
@@ -175,17 +175,131 @@ const colorMap: Record<string, NodeColorScheme> = {
 };
 
 function ForgeNodeComponent({ id, data, selected }: NodeProps) {
-  const { selectedNodeId, removeNode } = useBlueprintStore();
+  const { selectedNodeId, removeNode, activateGhostNode, dismissGhostNode } = useBlueprintStore();
   const nodeType = data.nodeType as string;
   const colorClass = nodeTypeToColor(nodeType);
   const colors = colorMap[colorClass] || colorMap['node-contracts'];
   const Icon = iconMap[nodeType] || Box;
-  const isSelected = selected || selectedNodeId === id;
+  const isGhost = data.isGhost === true;
+  const isSelected = !isGhost && (selected || selectedNodeId === id);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     removeNode(id);
   };
+
+  const handleActivate = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      activateGhostNode(id);
+    },
+    [id, activateGhostNode],
+  );
+
+  const handleDismiss = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      dismissGhostNode(id);
+    },
+    [id, dismissGhostNode],
+  );
+
+  // ── Ghost node rendering ────────────────────────────────────────────
+  if (isGhost) {
+    return (
+      <div className="relative">
+        {/* Input handle */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          className="!w-3 !h-3 !-left-[6px] !border-2 !rounded-full !bg-transparent !border-[hsl(var(--color-border-default)/0.3)]"
+        />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          onClick={handleActivate}
+          className={cn(
+            'group relative w-[200px] rounded-xl border-[1.5px] border-dashed cursor-pointer',
+            'bg-[hsl(var(--color-bg-muted)/0.4)]',
+            'transition-all duration-200 ease-out',
+            colors.border,
+            'hover:border-[hsl(var(--color-accent-primary)/0.5)]',
+            'hover:bg-[hsl(var(--color-bg-muted)/0.6)]',
+            'animate-[ghostPulse_3s_ease-in-out_infinite]',
+          )}
+        >
+          {/* Shimmer overlay */}
+          <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[ghostShimmer_2.5s_ease-in-out_infinite]" />
+          </div>
+
+          {/* Dismiss button */}
+          <button
+            onClick={handleDismiss}
+            className={cn(
+              'absolute -top-2 -right-2 z-10 p-1 rounded-full',
+              'bg-[hsl(var(--color-bg-elevated))] border border-[hsl(var(--color-border-default)/0.5)]',
+              'text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-error))]',
+              'opacity-0 group-hover:opacity-100 transition-all duration-150',
+              'hover:bg-[hsl(var(--color-error)/0.1)]',
+            )}
+          >
+            <XIcon className="w-3 h-3" />
+          </button>
+
+          {/* Node content */}
+          <div className="relative p-3 opacity-50 group-hover:opacity-80 transition-opacity duration-200">
+            <div className="flex items-start gap-2.5">
+              {/* Icon */}
+              <div
+                className={cn(
+                  'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
+                  colors.iconBg,
+                  'border border-dashed border-[hsl(var(--color-border-subtle))]',
+                )}
+              >
+                <Icon className={cn('w-4.5 h-4.5', colors.text)} />
+              </div>
+
+              {/* Label */}
+              <div className="flex-1 min-w-0 pt-0.5">
+                <p className="text-[13px] font-semibold truncate leading-tight text-[hsl(var(--color-text-primary))]">
+                  {nodeTypeToLabel(nodeType)}
+                </p>
+                <p className={cn('text-[10px] mt-1 font-medium', 'text-[hsl(var(--color-accent-primary))]')}>
+                  Click to add
+                </p>
+              </div>
+
+              {/* Plus icon */}
+              <div
+                className={cn(
+                  'p-1.5 rounded-md',
+                  'bg-[hsl(var(--color-accent-primary)/0.1)]',
+                  'text-[hsl(var(--color-accent-primary))]',
+                  'group-hover:bg-[hsl(var(--color-accent-primary)/0.2)]',
+                  'transition-colors duration-150',
+                )}
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Output handle */}
+        <Handle
+          type="source"
+          position={Position.Right}
+          className="!w-3 !h-3 !-right-[6px] !border-2 !rounded-full !bg-transparent !border-[hsl(var(--color-border-default)/0.3)]"
+        />
+      </div>
+    );
+  }
+
+  // ── Regular node rendering ──────────────────────────────────────────
 
   // Check if there's extra context to show
   const hasExtraInfo = (

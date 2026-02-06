@@ -38,6 +38,10 @@ interface BlueprintState {
   canUndo: boolean;
   canRedo: boolean;
 
+  // Ghost nodes/edges — UI-only suggested blocks shown on template load
+  ghostNodes: BlueprintNode[];
+  ghostEdges: BlueprintEdge[];
+
   // Node operations
   addNode: (type: string, position: { x: number; y: number }) => BlueprintNode;
   updateNode: (nodeId: string, updates: Partial<BlueprintNode>) => void;
@@ -47,6 +51,13 @@ interface BlueprintState {
   // Edge operations
   addEdge: (source: string, target: string) => BlueprintEdge | null;
   removeEdge: (edgeId: string) => void;
+
+  // Ghost operations
+  addGhostNode: (type: string, position: { x: number; y: number }) => BlueprintNode;
+  addGhostEdge: (source: string, target: string) => BlueprintEdge | null;
+  activateGhostNode: (ghostNodeId: string) => void;
+  dismissGhostNode: (ghostNodeId: string) => void;
+  clearGhostNodes: () => void;
 
   // Selection
   selectNode: (nodeId: string | null) => void;
@@ -100,6 +111,8 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
   historyIndex: -1,
   canUndo: false,
   canRedo: false,
+  ghostNodes: [],
+  ghostEdges: [],
 
   // Helper to save state to history (called before mutations)
   _saveToHistory: () => {
@@ -239,6 +252,90 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
     }));
   },
 
+  // ── Ghost operations ──────────────────────────────────────────────────
+
+  addGhostNode: (type, position) => {
+    const node: BlueprintNode = {
+      id: generateUUID(),
+      type: type as BlueprintNode['type'],
+      position,
+      config: getDefaultConfig(type),
+    };
+    set((state) => ({ ghostNodes: [...state.ghostNodes, node] }));
+    return node;
+  },
+
+  addGhostEdge: (source, target) => {
+    if (source === target) return null;
+    const { ghostEdges } = get();
+    const exists = ghostEdges.some((e) => e.source === source && e.target === target);
+    if (exists) return null;
+
+    const edge: BlueprintEdge = {
+      id: generateUUID(),
+      source,
+      target,
+      type: 'dependency',
+    };
+    set((state) => ({ ghostEdges: [...state.ghostEdges, edge] }));
+    return edge;
+  },
+
+  activateGhostNode: (ghostNodeId) => {
+    const { ghostNodes, ghostEdges, blueprint } = get();
+    const ghostNode = ghostNodes.find((n) => n.id === ghostNodeId);
+    if (!ghostNode) return;
+
+    (get() as any)._saveToHistory();
+
+    // Collect all real node IDs (including the one being activated)
+    const realNodeIds = new Set(blueprint.nodes.map((n) => n.id));
+    realNodeIds.add(ghostNodeId);
+
+    // Move ghost edges that now connect two real nodes
+    const edgesToPromote: BlueprintEdge[] = [];
+    const remainingGhostEdges: BlueprintEdge[] = [];
+    for (const ge of ghostEdges) {
+      const srcReal = realNodeIds.has(ge.source);
+      const tgtReal = realNodeIds.has(ge.target);
+      if (srcReal && tgtReal) {
+        edgesToPromote.push(ge);
+      } else {
+        // Keep as ghost if the other endpoint is still a ghost
+        if (ge.source === ghostNodeId || ge.target === ghostNodeId) {
+          // Edge involves activated node but other end is still ghost — keep as ghost
+          remainingGhostEdges.push(ge);
+        } else {
+          remainingGhostEdges.push(ge);
+        }
+      }
+    }
+
+    set((state) => ({
+      blueprint: {
+        ...state.blueprint,
+        nodes: [...state.blueprint.nodes, ghostNode],
+        edges: [...state.blueprint.edges, ...edgesToPromote],
+        updatedAt: new Date().toISOString(),
+      },
+      ghostNodes: state.ghostNodes.filter((n) => n.id !== ghostNodeId),
+      ghostEdges: remainingGhostEdges,
+    }));
+  },
+
+  dismissGhostNode: (ghostNodeId) => {
+    set((state) => ({
+      ghostNodes: state.ghostNodes.filter((n) => n.id !== ghostNodeId),
+      ghostEdges: state.ghostEdges.filter(
+        (e) => e.source !== ghostNodeId && e.target !== ghostNodeId,
+      ),
+    }));
+  },
+
+  clearGhostNodes: () => {
+    set({ ghostNodes: [], ghostEdges: [] });
+  },
+
   selectNode: (nodeId) => {
     // Don't save to history for selection changes
     set({ selectedNodeId: nodeId });
@@ -295,6 +392,8 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
     set({
       blueprint: createInitialBlueprint(),
       selectedNodeId: null,
+      ghostNodes: [],
+      ghostEdges: [],
     });
   },
 

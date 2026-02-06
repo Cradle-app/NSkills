@@ -151,6 +151,8 @@ const config: Config = {
         'scale-in': 'scale-in 0.2s ease-out',
         'shimmer': 'shimmer 2s linear infinite',
         'float': 'float 6s ease-in-out infinite',
+        'ghost-pulse': 'ghostPulse 3s ease-in-out infinite',
+        'ghost-shimmer': 'ghostShimmer 2.5s ease-in-out infinite',
       },
 
       keyframes: {
@@ -189,6 +191,14 @@ const config: Config = {
         'float': {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-4px)' },
+        },
+        'ghostPulse': {
+          '0%, 100%': { opacity: '0.45' },
+          '50%': { opacity: '0.65' },
+        },
+        'ghostShimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
         },
       },
 

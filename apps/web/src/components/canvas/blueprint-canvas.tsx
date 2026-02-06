@@ -62,6 +62,9 @@ function BlueprintCanvasInner() {
     redo,
     canUndo,
     canRedo,
+    ghostNodes,
+    ghostEdges,
+    activateGhostNode,
   } = useBlueprintStore();
   const { isConnected, address } = useAccount();
   const {
@@ -101,29 +104,57 @@ function BlueprintCanvasInner() {
   // Node search modal
   const { isOpen: showNodeSearch, close: closeNodeSearch } = useNodeSearchModal();
 
-  // Convert blueprint nodes to ReactFlow nodes
-  const blueprintNodes: Node[] = useMemo(() =>
-    blueprint.nodes.map(node => ({
+  // Convert blueprint nodes to ReactFlow nodes (including ghost nodes)
+  const blueprintNodes: Node[] = useMemo(() => {
+    const real = blueprint.nodes.map(node => ({
       id: node.id,
       type: node.type,
       position: node.position,
-      selected: node.id === selectedNodeId, // Enable keyboard delete
+      selected: node.id === selectedNodeId,
       data: {
         ...node.config,
         nodeType: node.type,
         label: node.config.label || node.config.contractName || node.config.agentName || node.type,
+        isGhost: false,
       },
-    })), [blueprint.nodes, selectedNodeId]);
+    }));
+    const ghosts = ghostNodes.map(node => ({
+      id: node.id,
+      type: node.type,
+      position: node.position,
+      selected: false,
+      draggable: false,
+      selectable: false,
+      data: {
+        ...node.config,
+        nodeType: node.type,
+        label: node.config.label || node.config.contractName || node.config.agentName || node.type,
+        isGhost: true,
+      },
+    }));
+    return [...real, ...ghosts];
+  }, [blueprint.nodes, ghostNodes, selectedNodeId]);
 
-  // Convert blueprint edges to ReactFlow edges
-  const blueprintEdges: Edge[] = useMemo(() =>
-    blueprint.edges.map(edge => ({
+  // Convert blueprint edges to ReactFlow edges (including ghost edges)
+  const blueprintEdges: Edge[] = useMemo(() => {
+    const real = blueprint.edges.map(edge => ({
       id: edge.id,
       source: edge.source,
       target: edge.target,
       type: 'default',
       animated: true,
-    })), [blueprint.edges]);
+      data: { isGhost: false },
+    }));
+    const ghosts = ghostEdges.map(edge => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      type: 'default',
+      animated: false,
+      data: { isGhost: true },
+    }));
+    return [...real, ...ghosts];
+  }, [blueprint.edges, ghostEdges]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(blueprintNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(blueprintEdges);
@@ -209,6 +240,11 @@ function BlueprintCanvasInner() {
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
+      // If this is a ghost node, activate it instead of selecting
+      if (node.data?.isGhost) {
+        activateGhostNode(node.id);
+        return;
+      }
       const walletConnected = isConnected || isWalletConnected;
       if (!walletConnected) {
         openAuthModal(() => selectNode(node.id));
@@ -216,7 +252,7 @@ function BlueprintCanvasInner() {
       }
       selectNode(node.id);
     },
-    [isConnected, isWalletConnected, openAuthModal, selectNode]
+    [isConnected, isWalletConnected, openAuthModal, selectNode, activateGhostNode]
   );
 
   const onPaneClick = useCallback(() => {
