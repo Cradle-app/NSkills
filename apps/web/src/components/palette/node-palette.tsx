@@ -183,6 +183,16 @@ export function NodePalette() {
     })).filter(category => category.plugins.length > 0 || searchQuery === '');
   }, [categories, searchQuery]);
 
+  const contractsCategory = useMemo(
+    () => filteredCategories.find((c) => c.id === 'contracts'),
+    [filteredCategories]
+  );
+
+  const otherCategories = useMemo(
+    () => filteredCategories.filter((c) => c.id !== 'contracts'),
+    [filteredCategories]
+  );
+
   return (
     <>
       <aside
@@ -229,9 +239,9 @@ export function NodePalette() {
           </div>
         </div>
 
-        {/* Suggested Section */}
-        {hasSuggestions && searchQuery === '' && (
-          <div className="px-3 py-2 border-b border-[hsl(var(--color-border-subtle))]">
+        {/* Suggested Section - collapsible to save space */}
+        {/* {hasSuggestions && searchQuery === '' && (
+          <div className="px-3 pb-2">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -319,15 +329,111 @@ export function NodePalette() {
               </AnimatePresence>
             </motion.div>
           </div>
-        )}
+        )} */}
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {/* Protocol plugins */}
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold text-forge-muted uppercase tracking-[0.18em] px-1">
-              Protocol Plugins
-            </p>
-            <div className="space-y-2">
+          {/* Contracts category first */}
+          {contractsCategory && (
+            <div className="space-y-2 mt-2">
+              <div
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl',
+                  'bg-forge-elevated/20'
+                )}
+              >
+                {/* <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-forge-elevated/60">
+                  {(() => {
+                    const CategoryIcon = contractsCategory.icon;
+                    return <CategoryIcon className="w-4 h-4 text-forge-muted" />;
+                  })()}
+                </div> */}
+                <span className="text-sm font-medium text-white flex-1 text-left">
+                  {contractsCategory.name}
+                </span>
+                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-forge-elevated/60 text-forge-muted">
+                  {contractsCategory.plugins.length}
+                </span>
+              </div>
+
+              <div className="pl-6 pr-2 pb-2 pt-1 space-y-1.5">
+                {contractsCategory.plugins.map((plugin, pluginIndex) => {
+                  const PluginIcon = getIconComponent(plugin.icon);
+                  return (
+                    <motion.div
+                      key={plugin.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: pluginIndex * 0.03 }}
+                    >
+                      <div
+                        draggable
+                        onDragStart={(e) => onDragStart(e, plugin.id)}
+                        className={cn(
+                          'p-3 rounded-xl cursor-grab active:cursor-grabbing',
+                          'bg-forge-bg/50 border border-transparent',
+                          'hover:border-forge-border/50 hover:bg-forge-elevated/50',
+                          'hover:shadow-lg hover:shadow-black/20',
+                          'transition-all duration-200',
+                          'group'
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={cn(
+                              'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
+                              'bg-gradient-to-br transition-all duration-200',
+                              `from-${plugin.color}/20 to-${plugin.color}/5`,
+                              'group-hover:from-' + plugin.color + '/30 group-hover:to-' + plugin.color + '/10'
+                            )}
+                          >
+                            <PluginIcon className={cn('w-4.5 h-4.5', `text-${plugin.color}`)} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-white truncate group-hover:text-accent-cyan transition-colors">
+                              {plugin.name}
+                            </p>
+                            <p className="text-xs text-forge-muted truncate mt-0.5 leading-relaxed">
+                              {plugin.description}
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => toggleFavorite(plugin.id, e)}
+                            className={cn(
+                              'p-1.5 rounded-lg shrink-0 transition-all opacity-0 group-hover:opacity-100',
+                              favorites.has(plugin.id)
+                                ? 'text-amber-400 opacity-100'
+                                : 'text-forge-muted hover:text-amber-400'
+                            )}
+                            title={favorites.has(plugin.id) ? 'Remove from favorites' : 'Add to favorites'}
+                          >
+                            <Star className={cn('w-4 h-4', favorites.has(plugin.id) && 'fill-current')} />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Protocol plugins second */}
+          <div className="space-y-3 mt-6">
+            <div
+              className={cn(
+                'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl',
+                'bg-forge-elevated/20'
+              )}
+            >
+              <span className="text-sm font-medium text-white flex-1 text-left">
+                Protocol Plugins
+              </span>
+              <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-forge-elevated/60 text-forge-muted">
+                {PROTOCOL_PLUGIN_IDS.length}
+              </span>
+            </div>
+
+            <div className="space-y-3 pt-1">
               {/* Row 1: Aave, Compound */}
               <div className="grid grid-cols-2 gap-2">
                 {(['aave', 'compound'] as ProtocolPluginId[]).map((id) => {
@@ -431,9 +537,9 @@ export function NodePalette() {
             </div>
           </div>
 
-          {/* Categories */}
-          <div className="space-y-2 mt-4">
-            {filteredCategories.map((category, categoryIndex) => {
+          {/* Remaining categories */}
+          <div className="space-y-4 mt-6">
+            {otherCategories.map((category, categoryIndex) => {
               const CategoryIcon = category.icon;
               return (
                 <motion.div
@@ -450,9 +556,9 @@ export function NodePalette() {
                       'bg-forge-elevated/20'
                     )}
                   >
-                    <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-forge-elevated/60">
+                    {/* <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-forge-elevated/60">
                       <CategoryIcon className="w-4 h-4 text-forge-muted" />
-                    </div>
+                    </div> */}
                     <span className="text-sm font-medium text-white flex-1 text-left">
                       {category.name}
                     </span>

@@ -133,26 +133,27 @@ const SuggestionGhostNode = memo(function SuggestionGhostNode({
                 top: screenPosition.y,
                 width: SUGGESTION_NODE_WIDTH,
             }}
-        >
-
+            >
             {/* Ghost node card */}
             <div
                 onClick={handleClick}
                 className={cn(
-                    'relative cursor-pointer rounded-lg border border-dashed backdrop-blur-sm',
-                    'border-white/20 bg-forge-surface/25',
+                    'relative cursor-pointer rounded-xl border backdrop-blur-md',
+                    'border-white/15 bg-forge-surface/40',
                     'transition-all duration-200 ease-out',
-                    'hover:border-white/50 hover:border-solid hover:bg-forge-surface/50 hover:scale-[1.03]',
-                    'hover:shadow-[0_0_20px_-4px_rgba(255,255,255,0.2)]',
-                    // Greyscale filter that removes on hover
-                    'grayscale hover:grayscale-0'
+                    'hover:border-accent-cyan/60 hover:bg-forge-surface/70 hover:scale-[1.03]',
+                    'hover:shadow-[0_0_30px_rgba(0,242,254,0.35)]',
+                    // Dimmed / desaturated by default but still readable
+                    'opacity-80 grayscale-[45%]',
+                    // On hover, fully vivid
+                    'hover:opacity-100 hover:grayscale-0'
                 )}
             >
                 {/* Gradient overlay - subtle in greyscale */}
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-40 group-hover:opacity-60" />
 
-                {/* Top accent line - white/grey by default */}
-                <div className="absolute top-0 left-2.5 right-2.5 h-[1px] rounded-full bg-white/20 group-hover:bg-accent-cyan/50 transition-colors duration-200" />
+                {/* Top accent line - white by default, cyan on hover */}
+                <div className="absolute top-0 left-2.5 right-2.5 h-[1px] rounded-full bg-white/15 group-hover:bg-accent-cyan/60 transition-colors duration-200" />
 
                 {/* Node content */}
                 <div className="relative p-2">
@@ -418,6 +419,11 @@ function CanvasSuggestionsInner() {
         }));
     }, [suggestionFlowPositions, viewport]);
 
+    const sourceScreenPosition = useMemo(() => {
+        if (!sourceNodePosition) return null;
+        return flowToScreen(sourceNodePosition, viewport);
+    }, [sourceNodePosition, viewport]);
+
     // Handle adding node AND auto-connecting to source - with auth check!
     // Uses the suggestion's flow position for proper placement
     const handleAdd = useCallback(
@@ -449,6 +455,35 @@ function CanvasSuggestionsInner() {
 
     return (
         <div className="pointer-events-none absolute inset-0 z-10">
+            {/* Animated connector lines from source node to ghost suggestions */}
+            {sourceScreenPosition && (
+                <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                    {visibleSuggestions.map((suggestion, idx) => {
+                        const posData = suggestionScreenPositions[idx];
+                        if (!posData) return null;
+
+                        const startX = sourceScreenPosition.x + SOURCE_NODE_WIDTH * viewport.zoom / 2;
+                        const startY = sourceScreenPosition.y + SOURCE_NODE_HEIGHT * viewport.zoom / 2;
+                        const endX = posData.screenPosition.x + SUGGESTION_NODE_WIDTH / 2;
+                        const endY = posData.screenPosition.y + SUGGESTION_NODE_HEIGHT / 2;
+                        const controlX = (startX + endX) / 2;
+                        const controlY = startY - 60;
+                        const d = `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`;
+
+                        return (
+                            <path
+                                key={`${suggestion.id}-connector`}
+                                d={d}
+                                className="suggestion-connector-line"
+                                stroke="rgba(0, 242, 254, 0.65)"
+                                strokeWidth={1.5}
+                                fill="none"
+                            />
+                        );
+                    })}
+                </svg>
+            )}
+
             <AnimatePresence mode="popLayout">
                 {visibleSuggestions.map((suggestion, idx) => {
                     const posData = suggestionScreenPositions[idx];

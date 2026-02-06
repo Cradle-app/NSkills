@@ -836,6 +836,20 @@
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
+
+  .suggestion-connector-line {
+    stroke-dasharray: 4 8;
+    animation: suggestion-dash 1.4s linear infinite;
+  }
+}
+
+@keyframes suggestion-dash {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -48;
+  }
 }
 
 /* ===========================================
