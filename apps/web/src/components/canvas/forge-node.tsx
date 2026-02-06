@@ -236,6 +236,7 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
                 alt={logoInfo.alt}
                 fill
                 className="object-contain p-0.5"
+                unoptimized
               />
             ) : (
               <Icon className={cn('w-4 h-4', colors.text)} />

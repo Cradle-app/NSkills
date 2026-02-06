@@ -18,6 +18,8 @@ const nextConfig = {
     return config;
   },
   images: {
+    // Bypass Squoosh - CS_logo.png has format Squoosh can't decode
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

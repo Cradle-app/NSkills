@@ -440,6 +440,7 @@ export function NodePalette() {
                                 alt={logoInfo.alt}
                                 fill
                                 className="object-contain"
+                                unoptimized
                               />
                             ) : (
                               <PluginIcon
@@ -451,9 +452,9 @@ export function NodePalette() {
                             <p className="text-xs font-medium text-white truncate">
                               {plugin.name}
                             </p>
-                            <p className="text-[10px] text-forge-muted truncate">
+                            {/* <p className="text-[10px] text-forge-muted truncate">
                               {plugin.description}
-                            </p>
+                            </p> */}
                           </div>
                           <button
                             onClick={(e) => toggleFavorite(plugin.id, e)}
@@ -512,15 +513,15 @@ export function NodePalette() {
                       )}
                     >
                       <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" />
+                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" unoptimized />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-white truncate">
                           {PROTOCOL_PLUGIN_DISPLAY_NAMES[id]}
                         </p>
-                        <p className="text-[10px] text-forge-muted truncate">
+                        {/* <p className="text-[10px] text-forge-muted truncate">
                           {plugin.description}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   );
@@ -545,15 +546,15 @@ export function NodePalette() {
                       )}
                     >
                       <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" />
+                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" unoptimized />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-white truncate">
                           {PROTOCOL_PLUGIN_DISPLAY_NAMES[id]}
                         </p>
-                        <p className="text-[10px] text-forge-muted truncate">
+                        {/* <p className="text-[10px] text-forge-muted truncate">
                           {plugin.description}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   );
@@ -579,15 +580,15 @@ export function NodePalette() {
                       )}
                     >
                       <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" />
+                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" unoptimized />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-white truncate">
                           {PROTOCOL_PLUGIN_DISPLAY_NAMES[id]}
                         </p>
-                        <p className="text-[10px] text-forge-muted truncate">
+                        {/* <p className="text-[10px] text-forge-muted truncate">
                           {plugin.description}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   );
@@ -660,7 +661,7 @@ export function NodePalette() {
                                 )}
                               >
                                 {logoInfo ? (
-                                  <Image src={logoInfo.src} alt={logoInfo.alt} fill className="object-contain" />
+                                  <Image src={logoInfo.src} alt={logoInfo.alt} fill className="object-contain" unoptimized />
                                 ) : (
                                   <PluginIcon className={cn('w-4 h-4', `text-${plugin.color}`)} />
                                 )}
@@ -669,9 +670,9 @@ export function NodePalette() {
                                 <p className="text-xs font-medium text-white truncate">
                                   {plugin.name}
                                 </p>
-                                <p className="text-[10px] text-forge-muted truncate">
+                                {/* <p className="text-[10px] text-forge-muted truncate">
                                   {plugin.description}
-                                </p>
+                                </p> */}
                               </div>
                               <button
                                 onClick={(e) => toggleFavorite(plugin.id, e)}
