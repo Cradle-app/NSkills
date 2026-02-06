@@ -317,6 +317,96 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     },
 
     // ============================================
+    // ORACLES / ANALYTICS (PYTH)
+    // ============================================
+    'pyth': {
+        id: 'pyth',
+        name: 'Pyth',
+        description: 'On-chain price feeds from Pyth Network',
+        icon: 'TrendingUp',
+        color: 'accent-purple',
+        category: 'analytics',
+        tags: ['pyth', 'oracle', 'prices', 'feeds', 'arbitrum'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'chain-data'],
+            suggestedWith: ['dune-token-price', 'dune-wallet-balances'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+        },
+    },
+    'chainlink': {
+        id: 'chainlink',
+        name: 'Chainlink',
+        description: 'On-chain price feeds from Chainlink Data Feeds',
+        icon: 'Link',
+        color: 'accent-purple',
+        category: 'analytics',
+        tags: ['chainlink', 'oracle', 'prices', 'feeds', 'arbitrum', 'aggregator'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'chain-data', 'rpc-provider'],
+            suggestedWith: ['dune-token-price', 'pyth'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+            feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612', // ETH/USD Arbitrum One
+        },
+    },
+    'aave': {
+        id: 'aave',
+        name: 'Aave',
+        description: 'Supply, borrow, withdraw, and repay on Aave V3',
+        icon: 'Coins',
+        color: 'node-agents',
+        category: 'agents',
+        tags: ['aave', 'lending', 'borrow', 'supply', 'defi', 'arbitrum'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
+            suggestedWith: ['chainlink', 'pyth'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+        },
+    },
+    'compound': {
+        id: 'compound',
+        name: 'Compound',
+        description: 'Supply, borrow, withdraw, and repay on Compound V3 (Comet)',
+        icon: 'Zap',
+        color: 'node-agents',
+        category: 'agents',
+        tags: ['compound', 'lending', 'borrow', 'supply', 'defi', 'arbitrum', 'comet'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
+            suggestedWith: ['aave', 'chainlink'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+        },
+    },
+    'uniswap': {
+        id: 'uniswap',
+        name: 'Uniswap',
+        description: 'Swap tokens via Uniswap V3 across Arbitrum and Sepolia',
+        icon: 'Coins',
+        color: 'node-agents',
+        category: 'agents',
+        tags: ['uniswap', 'swap', 'dex', 'defi', 'arbitrum', 'sepolia'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
+            suggestedWith: ['chainlink', 'pyth', 'onchain-activity'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+        },
+    },
+
+    // ============================================
     // APP CATEGORY
     // ============================================
     'wallet-auth': {
@@ -976,6 +1066,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             cacheDuration: 600000,
         },
     },
+
+    // Pyth Oracle entry is defined above under analytics
 };
 
 /**

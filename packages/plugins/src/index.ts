@@ -25,6 +25,11 @@ export { TelegramAIAgentPlugin } from './telegram-ai-agent';
 export { OstiumTradingPlugin } from './ostium-trading';
 export { MaxxitLazyTradingPlugin } from './maxxit';
 export { OnchainActivityPlugin } from './onchain-activity';
+export { PythOraclePlugin } from './pyth-oracle';
+export { ChainlinkPriceFeedPlugin } from './chainlink-price-feed';
+export { AaveLendingPlugin } from './aave-lending';
+export { CompoundLendingPlugin } from './compound-lending';
+export { UniswapSwapPlugin } from './uniswap-swap';
 export {
   AIXBTMomentumPlugin,
   AIXBTSignalsPlugin,
@@ -86,6 +91,11 @@ import { ERC721StylusPlugin } from './erc721-stylus';
 import { ERC1155StylusPlugin } from './erc1155-stylus';
 import { MaxxitLazyTradingPlugin } from './maxxit';
 import { OnchainActivityPlugin } from './onchain-activity';
+import { PythOraclePlugin } from './pyth-oracle';
+import { ChainlinkPriceFeedPlugin } from './chainlink-price-feed';
+import { AaveLendingPlugin } from './aave-lending';
+import { CompoundLendingPlugin } from './compound-lending';
+import { UniswapSwapPlugin } from './uniswap-swap';
 import {
   AIXBTMomentumPlugin,
   AIXBTSignalsPlugin,
@@ -156,6 +166,11 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new ERC1155StylusPlugin());
   targetRegistry.register(new MaxxitLazyTradingPlugin());
   targetRegistry.register(new OnchainActivityPlugin());
+  targetRegistry.register(new PythOraclePlugin());
+  targetRegistry.register(new ChainlinkPriceFeedPlugin());
+  targetRegistry.register(new AaveLendingPlugin());
+  targetRegistry.register(new CompoundLendingPlugin());
+  targetRegistry.register(new UniswapSwapPlugin());
   targetRegistry.register(new AIXBTMomentumPlugin());
   targetRegistry.register(new AIXBTSignalsPlugin());
   targetRegistry.register(new AIXBTIndigoPlugin());
@@ -218,6 +233,11 @@ export function getOfficialPlugins() {
     new ERC1155StylusPlugin(),
     new MaxxitLazyTradingPlugin(),
     new OnchainActivityPlugin(),
+    new PythOraclePlugin(),
+    new ChainlinkPriceFeedPlugin(),
+    new AaveLendingPlugin(),
+    new CompoundLendingPlugin(),
+    new UniswapSwapPlugin(),
     new AIXBTMomentumPlugin(),
     new AIXBTSignalsPlugin(),
     new AIXBTIndigoPlugin(),

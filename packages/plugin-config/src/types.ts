@@ -27,6 +27,7 @@ export type PluginIcon =
     | 'HardDrive'
     | 'Layers'
     | 'Lock'
+    | 'Link'
     | 'ArrowLeftRight'
     | 'Key'
     | 'Sparkles'

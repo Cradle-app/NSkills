@@ -48,6 +48,15 @@ export const NodeType = z.enum([
   'maxxit',
   'onchain-activity',
 
+  // Oracles / Analytics
+  'pyth-oracle',
+  'chainlink-price-feed',
+
+  // Lending (Aave V3, Compound V3)
+  'aave-lending',
+  'compound-lending',
+  'uniswap-swap',
+
   // App
   'frontend-scaffold',
   'sdk-generator',
@@ -533,6 +542,65 @@ export const OnchainActivityConfig = BaseNodeConfig.extend({
 export type OnchainActivityConfig = z.infer<typeof OnchainActivityConfig>;
 
 /**
+ * Pyth Price Oracle configuration
+ */
+export const PythOracleConfig = BaseNodeConfig.extend({
+  chain: z.enum(['arbitrum', 'arbitrum-sepolia']).default('arbitrum-sepolia'),
+  // Pyth price feed ID (32-byte hex string)
+  priceFeedId: z.string().regex(/^0x[0-9a-fA-F]{64}$/),
+  staleAfterSeconds: z.number().int().min(30).max(86400).optional(),
+});
+export type PythOracleConfig = z.infer<typeof PythOracleConfig>;
+
+/**
+ * Chainlink Price Feed configuration
+ * Uses AggregatorV3Interface contract addresses per chain
+ */
+export const ChainlinkPriceFeedConfig = BaseNodeConfig.extend({
+  chain: z.enum(['arbitrum', 'arbitrum-sepolia']).default('arbitrum'),
+  // Chainlink Data Feed contract address (AggregatorV3Interface)
+  feedAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
+  // Optional: max age in seconds before price is considered stale
+  staleAfterSeconds: z.number().int().min(30).max(86400).optional(),
+});
+export type ChainlinkPriceFeedConfig = z.infer<typeof ChainlinkPriceFeedConfig>;
+
+/**
+ * Aave V3 Lending configuration
+ * Supply, borrow, withdraw, repay on Aave V3 (Arbitrum, Ethereum Sepolia)
+ */
+export const AaveLendingConfig = BaseNodeConfig.extend({
+  chain: z.enum(['arbitrum', 'ethereum-sepolia', 'arbitrum-sepolia']).default('arbitrum'),
+  // Optional overrides; defaults from Aave V3 deployment per chain
+  poolAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/).optional(),
+  poolDataProviderAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/).optional(),
+});
+export type AaveLendingConfig = z.infer<typeof AaveLendingConfig>;
+
+/**
+ * Compound V3 Lending configuration
+ * Supply, borrow, withdraw, repay on Compound V3 Comet (Arbitrum cUSDCv3)
+ */
+export const CompoundLendingConfig = BaseNodeConfig.extend({
+  chain: z.enum(['arbitrum']).default('arbitrum'),
+  cometAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/).optional(),
+});
+export type CompoundLendingConfig = z.infer<typeof CompoundLendingConfig>;
+
+/**
+ * Uniswap V3 Swap configuration
+ * Exact-input swaps across Arbitrum and Sepolia testnets
+ */
+export const UniswapSwapConfig = BaseNodeConfig.extend({
+  chain: z.enum(['arbitrum', 'arbitrum-sepolia', 'ethereum-sepolia']).default('arbitrum-sepolia'),
+  /**
+   * Default slippage tolerance in basis points (e.g. 50 = 0.5%)
+   */
+  defaultSlippageBps: z.number().int().min(1).max(5000).default(50),
+});
+export type UniswapSwapConfig = z.infer<typeof UniswapSwapConfig>;
+
+/**
  * Stylus Rust Contract configuration
  * Guides users on creating Stylus Rust contracts
  */
@@ -890,6 +958,12 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('telegram-ai-agent'), config: TelegramAIAgentConfig }),
   z.object({ type: z.literal('ostium-trading'), config: OstiumTradingConfig }),
   z.object({ type: z.literal('maxxit'), config: MaxxitLazyTradingConfig }),
+  z.object({ type: z.literal('onchain-activity'), config: OnchainActivityConfig }),
+  z.object({ type: z.literal('pyth-oracle'), config: PythOracleConfig }),
+  z.object({ type: z.literal('chainlink-price-feed'), config: ChainlinkPriceFeedConfig }),
+  z.object({ type: z.literal('aave-lending'), config: AaveLendingConfig }),
+  z.object({ type: z.literal('compound-lending'), config: CompoundLendingConfig }),
+  z.object({ type: z.literal('uniswap-swap'), config: UniswapSwapConfig }),
   z.object({ type: z.literal('aixbt-momentum'), config: AIXBTMomentumConfig }),
   z.object({ type: z.literal('aixbt-signals'), config: AIXBTSignalsConfig }),
   z.object({ type: z.literal('aixbt-indigo'), config: AIXBTIndigoConfig }),
@@ -951,6 +1025,11 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'ostium-trading': 'agents',
     'maxxit': 'agents',
     'onchain-activity': 'agents',
+    'pyth-oracle': 'analytics',
+    'chainlink-price-feed': 'analytics',
+    'aave-lending': 'agents',
+    'compound-lending': 'agents',
+    'uniswap-swap': 'agents',
     'frontend-scaffold': 'app',
     'sdk-generator': 'app',
     'wallet-auth': 'app',
@@ -1024,6 +1103,11 @@ export function getConfigSchemaForType(type: NodeType) {
     'ostium-trading': OstiumTradingConfig,
     'maxxit': MaxxitLazyTradingConfig,
     'onchain-activity': OnchainActivityConfig,
+    'pyth-oracle': PythOracleConfig,
+    'chainlink-price-feed': ChainlinkPriceFeedConfig,
+    'aave-lending': AaveLendingConfig,
+    'compound-lending': CompoundLendingConfig,
+    'uniswap-swap': UniswapSwapConfig,
     'aixbt-momentum': AIXBTMomentumConfig,
     'aixbt-signals': AIXBTSignalsConfig,
     'aixbt-indigo': AIXBTIndigoConfig,

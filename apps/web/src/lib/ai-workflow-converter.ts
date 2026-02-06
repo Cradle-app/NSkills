@@ -21,6 +21,14 @@ const toolTypeMap: Record<string, string> = {
   'maxxit_trader': 'maxxit',
   'maxxit': 'maxxit',
   'onchain_activity': 'onchain-activity',
+  'pyth_oracle': 'pyth-oracle',
+  'chainlink_price_feed': 'chainlink-price-feed',
+  'chainlink_price': 'chainlink-price-feed',
+  'aave_lending': 'aave-lending',
+  'aave': 'aave-lending',
+  'lending': 'aave-lending',
+  'compound_lending': 'compound-lending',
+  'compound': 'compound-lending',
   // App
   'wallet_auth': 'wallet-auth',
   'rpc_provider': 'rpc-provider',
@@ -60,6 +68,10 @@ const validNodeTypes = [
   'ostium-trading',
   'maxxit',
   'onchain-activity',
+  'pyth-oracle',
+  'chainlink-price-feed',
+  'aave-lending',
+  'compound-lending',
   'wallet-auth',
   'rpc-provider',
   'arbitrum-bridge',
@@ -197,6 +209,20 @@ const DEFAULT_NODE_CONFIGS: Record<string, Record<string, unknown>> = {
     network: 'arbitrum',
     transactionLimit: '10',
     categories: ['erc20', 'external'],
+  },
+  'pyth-oracle': {
+    chain: 'arbitrum',
+    priceFeedId: '0xff61491a931112ddf1bd8147cd1a641aec071afd3d872d7f2118ca7f29d2d93e',
+  },
+  'chainlink-price-feed': {
+    chain: 'arbitrum',
+    feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612',
+  },
+  'aave-lending': {
+    chain: 'arbitrum',
+  },
+  'compound-lending': {
+    chain: 'arbitrum',
   },
   'telegram-notifications': {
     webhookEnabled: true,
