@@ -130,9 +130,9 @@ export function Header() {
             <span className="text-base font-semibold text-white leading-tight">
               Cradle
             </span>
-            <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
+            {/* <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
               Web3 Foundation Builder
-            </span>
+            </span> */}
           </div>
         </motion.div>
 
@@ -173,14 +173,14 @@ export function Header() {
           </span>
         </div>
         <div className="w-px h-3 bg-forge-border/40" />
-        <div className="flex items-center gap-1.5" title="Last saved">
+        {/* <div className="flex items-center gap-1.5" title="Last saved">
           <Clock className="w-3 h-3 text-emerald-400" />
           <span className="text-[10px] text-emerald-400/80" suppressHydrationWarning>
             {blueprint.updatedAt
               ? new Date(blueprint.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
               : 'Not saved'}
           </span>
-        </div>
+        </div> */}
       </motion.div>
 
       {/* Actions */}
