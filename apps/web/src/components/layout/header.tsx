@@ -12,7 +12,6 @@ import {
   Wand2,
   LayoutTemplate,
   Keyboard,
-  Clock,
 } from 'lucide-react';
 import { useBlueprintStore } from '@/store/blueprint';
 import { Button } from '@/components/ui/button';
@@ -131,9 +130,9 @@ export function Header() {
             <span className="text-base font-semibold text-[hsl(var(--color-text-primary))] leading-tight">
               Cradle
             </span>
-            {/* <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
-              Web3 Foundation Builder
-            </span> */}
+            <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
+              Web3 Skills Composer
+            </span>
           </div>
         </motion.div>
 
@@ -173,15 +172,6 @@ export function Header() {
             <span className="text-[hsl(var(--color-text-muted))] ml-1">edges</span>
           </span>
         </div>
-        <div className="w-px h-3 bg-forge-border/40" />
-        {/* <div className="flex items-center gap-1.5" title="Last saved">
-          <Clock className="w-3 h-3 text-emerald-400" />
-          <span className="text-[10px] text-emerald-400/80" suppressHydrationWarning>
-            {blueprint.updatedAt
-              ? new Date(blueprint.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              : 'Not saved'}
-          </span>
-        </div> */}
       </motion.div>
 
       {/* Actions */}
@@ -269,9 +259,8 @@ export function Header() {
               "text-white"
             )}
           >
-            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-            Generate
-            <Play className="w-2.5 h-2.5 ml-1 fill-current" />
+            <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
+            Build
           </Button>
         </AuthGuard>
       </motion.div>

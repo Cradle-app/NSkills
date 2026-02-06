@@ -180,10 +180,10 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
                                     </div>
                                     <div>
                                         <h2 className="text-lg font-semibold text-[hsl(var(--color-text-primary))]">
-                                            Blueprint Templates
+                                            Starter Templates
                                         </h2>
                                         <p className="text-xs text-[hsl(var(--color-text-muted))]">
-                                            Start with a pre-built foundation &mdash; {TEMPLATES.length} templates
+                                            Pre-composed blueprints across {TEMPLATES.length} real-world use cases
                                         </p>
                                     </div>
                                 </div>
@@ -313,7 +313,7 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
                             {/* Footer */}
                             <div className="p-4 border-t border-[hsl(var(--color-border-default)/0.5)] bg-[hsl(var(--color-bg-base)/0.3)]">
                                 <p className="text-xs text-[hsl(var(--color-text-muted))] text-center">
-                                    Templates will replace your current canvas. Make sure to save first!
+                                    Selecting a template replaces the current canvas. Shimmer blocks are optional suggestions you can activate later.
                                 </p>
                             </div>
                         </div>

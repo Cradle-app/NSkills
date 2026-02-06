@@ -10,7 +10,6 @@ import ReactFlow, {
   useEdgesState,
   ReactFlowProvider,
   useReactFlow,
-  useViewport,
   type Connection,
   type Edge,
   type Node,
@@ -19,7 +18,7 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Trash2, Undo2, Redo2, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { Trash2, Undo2, Redo2 } from 'lucide-react';
 import { nodeTypeToColor } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { useAccount } from 'wagmi';
@@ -32,7 +31,7 @@ import { NodeSearchModal, useNodeSearchModal } from './node-search-modal';
 import { getPluginIds } from '@cradle/plugin-config';
 import { useSessionMonitor, useAuthState } from '@/hooks/useSessionMonitor';
 import { AuthStatusBadge } from '@/components/auth/auth-guard';
-import { motion, AnimatePresence } from 'framer-motion';
+
 
 // Dynamically build node types from plugin registry
 const nodeTypes: NodeTypes = getPluginIds().reduce(
@@ -95,11 +94,6 @@ function BlueprintCanvasInner() {
   // Get comprehensive auth state
   const authState = useAuthState();
   const connectionState = getConnectionState();
-
-  // Zoom controls
-  const { fitView, zoomIn, zoomOut } = useReactFlow();
-  const { zoom } = useViewport();
-  const zoomPercentage = Math.round(zoom * 100);
 
   // Node search modal
   const { isOpen: showNodeSearch, close: closeNodeSearch } = useNodeSearchModal();
@@ -376,35 +370,6 @@ function BlueprintCanvasInner() {
             </div>
           </div>
 
-          {/* Zoom Controls */}
-          {/* <div className="flex items-center gap-1 rounded-lg bg-black/60 p-1 ring-1 ring-white/5 backdrop-blur">
-            <button
-              onClick={() => zoomOut()}
-              className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
-              title="Zoom out"
-            >
-              <ZoomOut className="h-3.5 w-3.5" />
-            </button>
-            <span className="text-[11px] font-mono text-forge-muted min-w-[40px] text-center">
-              {zoomPercentage}%
-            </span>
-            <button
-              onClick={() => zoomIn()}
-              className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
-              title="Zoom in"
-            >
-              <ZoomIn className="h-3.5 w-3.5" />
-            </button>
-            <div className="w-px h-4 bg-forge-border/50 mx-0.5" />
-            <button
-              onClick={() => fitView({ padding: 0.2 })}
-              className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
-              title="Fit to view"
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-            </button>
-          </div> */}
-
           {/* Subtle canvas hint - centered */}
           <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-white/5 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan/80" />
@@ -519,10 +484,10 @@ function BlueprintCanvasInner() {
               </div>
 
               <h3 className="mb-2 text-lg font-semibold text-white">
-                Start building your dApp
+                Compose your Web3 skills
               </h3>
               <p className="text-sm text-forge-muted mb-6 max-w-xs mx-auto">
-                Drag components from the palette or use quick actions to begin
+                Drag components from the palette, connect them, then build a skills repo that Claude Code can use to scaffold your project.
               </p>
 
               {/* Quick hints */}
@@ -532,7 +497,7 @@ function BlueprintCanvasInner() {
                   <span>Drag from palette</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-forge-elevated/30 border border-forge-border/30">
-                  <kbd className="px-1 py-0.5 text-[10px] bg-forge-bg rounded">?</kbd>
+                  <kbd className="px-1 py-0.5 text-[10px] bg-forge-bg rounded font-mono">?</kbd>
                   <span>Shortcuts</span>
                 </div>
               </div>

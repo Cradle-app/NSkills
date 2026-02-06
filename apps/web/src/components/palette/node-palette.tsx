@@ -2,14 +2,13 @@
 
 import Image from 'next/image';
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Box,
   CreditCard,
   Bot,
   Layout,
   ShieldCheck,
-  ChevronRight,
   Search,
   Wallet,
   Globe,
@@ -122,8 +121,6 @@ function buildCategories(): NodeCategory[] {
 
 export function NodePalette() {
   const [searchQuery, setSearchQuery] = useState('');
-  // Suggestions section collapsed by default to save space
-  const [suggestionsExpanded, setSuggestionsExpanded] = useState(false);
   const { isConnected } = useAccount();
   const { isWalletConnected, isFullyAuthenticated } = useAuthGuard();
   const { showAuthModal, openAuthModal, closeAuthModal } = useAuthStore();
@@ -239,98 +236,6 @@ export function NodePalette() {
           </div>
         </div>
 
-        {/* Suggested Section - collapsible to save space */}
-        {/* {hasSuggestions && searchQuery === '' && (
-          <div className="px-3 pb-2">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-lg overflow-hidden"
-            >
-              <button
-                onClick={() => setSuggestionsExpanded(!suggestionsExpanded)}
-                className="w-full flex items-center gap-2 px-2.5 py-2 hover:bg-[hsl(var(--color-bg-hover))] rounded-lg transition-colors"
-              >
-                <motion.div
-                  animate={{ rotate: suggestionsExpanded ? 90 : 0 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  <ChevronRight className="w-3.5 h-3.5 text-[hsl(var(--color-accent-primary))]" />
-                </motion.div>
-                <Sparkles className="w-4 h-4 text-[hsl(var(--color-accent-primary))]" />
-                <span className="text-xs font-semibold text-[hsl(var(--color-accent-primary))]">Suggested</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[hsl(var(--color-accent-primary)/0.1)] text-[hsl(var(--color-accent-primary))]">
-                  {suggestions.length}
-                </span>
-              </button>
-
-              <AnimatePresence>
-                {suggestionsExpanded && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="space-y-1.5 px-1 pt-1 pb-1">
-                      {suggestions.slice(0, 5).map((plugin, idx) => {
-                        const SuggestedIcon = getIconComponent(plugin.icon);
-                        const reasonLabel = {
-                          required: 'Required',
-                          suggested: 'Recommended',
-                          compatible: 'Compatible',
-                        };
-                        const reasonColor = {
-                          required: 'bg-[hsl(var(--color-error)/0.1)] text-[hsl(var(--color-error))] border-[hsl(var(--color-error)/0.25)]',
-                          suggested: 'bg-[hsl(var(--color-accent-primary)/0.1)] text-[hsl(var(--color-accent-primary))] border-[hsl(var(--color-accent-primary)/0.25)]',
-                          compatible: 'bg-[hsl(var(--color-success)/0.1)] text-[hsl(var(--color-success))] border-[hsl(var(--color-success)/0.25)]',
-                        };
-                        return (
-                          <motion.div
-                            key={plugin.id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.04 }}
-                          >
-                            <div
-                              draggable
-                              onDragStart={(e) => onDragStart(e, plugin.id)}
-                              className={cn(
-                                'p-2 rounded-lg cursor-grab active:cursor-grabbing',
-                                'bg-[hsl(var(--color-accent-primary)/0.05)] border border-[hsl(var(--color-accent-primary)/0.15)]',
-                                'hover:border-[hsl(var(--color-accent-primary)/0.3)] hover:bg-[hsl(var(--color-accent-primary)/0.08)]',
-                                'transition-all duration-150 group'
-                              )}
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-md flex items-center justify-center bg-[hsl(var(--color-accent-primary)/0.1)] shrink-0">
-                                  <SuggestedIcon className="w-3.5 h-3.5 text-[hsl(var(--color-accent-primary))]" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1.5">
-                                    <p className="text-[11px] font-medium text-[hsl(var(--color-text-primary))] truncate">{plugin.name}</p>
-                                    <span className={cn(
-                                      'text-[8px] px-1 py-0.5 rounded border shrink-0',
-                                      reasonColor[plugin.reason]
-                                    )}>
-                                      {reasonLabel[plugin.reason]}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          </div>
-        )} */}
-
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {/* Contracts category first */}
           {contractsCategory && (
@@ -341,12 +246,6 @@ export function NodePalette() {
                   'bg-forge-elevated/20'
                 )}
               >
-                {/* <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-forge-elevated/60">
-                  {(() => {
-                    const CategoryIcon = contractsCategory.icon;
-                    return <CategoryIcon className="w-4 h-4 text-forge-muted" />;
-                  })()}
-                </div> */}
                 <span className="text-sm font-medium text-white flex-1 text-left">
                   {contractsCategory.name}
                 </span>
@@ -556,9 +455,6 @@ export function NodePalette() {
                       'bg-forge-elevated/20'
                     )}
                   >
-                    {/* <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-forge-elevated/60">
-                      <CategoryIcon className="w-4 h-4 text-forge-muted" />
-                    </div> */}
                     <span className="text-sm font-medium text-white flex-1 text-left">
                       {category.name}
                     </span>
@@ -642,10 +538,10 @@ export function NodePalette() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
                 </svg>
               </div>
-              <span>Drag to build your foundation</span>
+              <span>Drag to compose your blueprint</span>
             </div>
             <p className="text-[10px] text-[hsl(var(--color-text-disabled))]">
-              Structure first, then refine ✨
+              Connect blocks, configure, then build
             </p>
           </div>
         </div>

@@ -283,10 +283,10 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(var(--color-accent-primary))] to-[hsl(var(--color-success))] flex items-center justify-center">
               <Play className="w-4 h-4 text-black" />
             </div>
-            Build Foundation
+            Build Your Project
           </DialogTitle>
           <DialogDescription>
-            Generate your project&apos;s foundation - clean, structured code ready for AI-assisted development.
+            Generate a skills repo that Claude Code can consume for full-context scaffolding, a production codebase, or both.
           </DialogDescription>
         </DialogHeader>
 
@@ -296,9 +296,9 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
             <p className="text-xs font-semibold text-[hsl(var(--color-text-muted))] uppercase tracking-wider">Output Mode</p>
             <div className="grid grid-cols-3 gap-2">
               {([
-                { value: 'codebase' as const, icon: Code, label: 'Codebase', desc: 'Scaffold code' },
-                { value: 'skills' as const, icon: Sparkles, label: 'Skills Repo', desc: 'AI context package' },
-                { value: 'both' as const, icon: Layers, label: 'Both', desc: 'Code + context' },
+                { value: 'codebase' as const, icon: Code, label: 'Codebase', desc: 'Production scaffold' },
+                { value: 'skills' as const, icon: Sparkles, label: 'Skills Repo', desc: 'For Claude Code' },
+                { value: 'both' as const, icon: Layers, label: 'Both', desc: 'Scaffold + skills' },
               ]).map(({ value, icon: Icon, label, desc }) => (
                 <button
                   key={value}
