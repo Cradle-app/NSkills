@@ -579,7 +579,6 @@ export type AaveLendingConfig = z.infer<typeof AaveLendingConfig>;
 /**
  * Compound V3 Lending configuration
  * Supply, borrow, withdraw, repay on Compound V3 Comet (Arbitrum cUSDCv3)
- * Reference: https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/CompoundProvider.ts
  */
 export const CompoundLendingConfig = BaseNodeConfig.extend({
   chain: z.enum(['arbitrum']).default('arbitrum'),

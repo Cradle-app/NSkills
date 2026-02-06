@@ -153,15 +153,6 @@ export function CompoundLendingForm({ nodeId, config }: Props) {
           <p className="text-[10px] text-forge-muted leading-relaxed">
             Compound V3 (Comet) on Arbitrum uses the cUSDCv3 market. Supply and borrow base asset (USDC); collateral is managed automatically.
           </p>
-          <a
-            href="https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/CompoundProvider.ts"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[10px] text-accent-cyan hover:underline mt-1 inline-flex items-center gap-1"
-          >
-            FlowForge CompoundProvider reference
-            <ExternalLink className="w-2.5 h-2.5" />
-          </a>
         </div>
       </div>
     </div>

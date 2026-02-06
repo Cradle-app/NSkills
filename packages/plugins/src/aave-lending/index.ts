@@ -14,7 +14,6 @@ import {
  * Aave V3 Lending Plugin
  *
  * Wires Aave V3 supply/borrow/withdraw/repay into generated projects.
- * Reference: https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/AaveProvider.ts
  */
 
 const AaveLendingSchema = z.object({
@@ -112,7 +111,6 @@ Operations: supply, withdraw, borrow, repay, enable/disable collateral.
 ## Reference
 
 - [Aave V3 Docs](https://docs.aave.com/developers/getting-started/readme)
-- [FlowForge AaveProvider](https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/AaveProvider.ts)
 `;
   }
 }

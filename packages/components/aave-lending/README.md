@@ -2,7 +2,6 @@
 
 Aave V3 lending integration for Cradle-generated projects. Supply, borrow, withdraw, and repay on Aave V3 (Arbitrum, Arbitrum Sepolia, Ethereum Sepolia).
 
-Reference: [FlowForge AaveProvider](https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/AaveProvider.ts)
 
 ## Installation
 

@@ -56,7 +56,6 @@ function rateToAPY(rate: string): string {
 
 /**
  * Get Compound V3 Comet account data (supply balance, borrow balance, rates).
- * Reference: https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/CompoundProvider.ts
  */
 export async function getCompoundAccountData(
   options: CompoundAccountDataOptions

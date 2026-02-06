@@ -14,7 +14,6 @@ import {
  * Compound V3 Lending Plugin
  *
  * Wires Compound V3 Comet (supply/borrow/withdraw/repay) into generated projects.
- * Reference: https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/CompoundProvider.ts
  */
 
 const CompoundLendingSchema = z.object({
@@ -101,7 +100,6 @@ Operations: supply, withdraw, borrow, repay (base asset USDC on Arbitrum).
 ## Reference
 
 - [Compound V3 Docs](https://docs.compound.finance/)
-- [FlowForge CompoundProvider](https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/CompoundProvider.ts)
 `;
   }
 }

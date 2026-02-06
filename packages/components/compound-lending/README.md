@@ -2,8 +2,6 @@
 
 Compound V3 (Comet) lending integration for Cradle-generated projects. Supply, borrow, withdraw, and repay on Compound V3 (Arbitrum cUSDCv3).
 
-Reference: [FlowForge CompoundProvider](https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/CompoundProvider.ts)
-
 ## Installation
 
 ```bash

@@ -144,8 +144,6 @@ ${config.staleAfterSeconds ? `- \`PYTH_STALE_AFTER_SECONDS\` – prices older th
 
 ## Example Usage (backend or serverless)
 
-You can follow the reference implementation from FlowForge's Pyth oracle processor and adapt it to this project.
-
 High level steps:
 
 1. Use your preferred RPC provider for the configured chain.
