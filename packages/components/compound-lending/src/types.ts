@@ -18,6 +18,24 @@ export interface CompoundAccountData {
   utilization: string;
 }
 
+export type CompoundOperation =
+  | 'supply'
+  | 'withdraw'
+  | 'borrow'
+  | 'repay'
+  | 'supply-to'
+  | 'withdraw-to'
+  | 'erc20-approve';
+
+export interface CompoundTransactionRequest {
+  /** Contract address to call */
+  to: string;
+  /** Encoded calldata */
+  data: `0x${string}`;
+  /** ETH value (usually 0 for Comet) */
+  value?: string;
+}
+
 export interface AsyncState<T> {
   data: T | null;
   loading: boolean;

@@ -6,6 +6,6 @@ import type { SupportedCompoundChain } from './types';
 export const COMPOUND_CONFIG: Record<SupportedCompoundChain, { cometAddress: string }> = {
   arbitrum: {
     // cUSDCv3 on Arbitrum
-    cometAddress: '0xA5EDBDD9646f8dFF606d7448e414884C7d905dCA',
+    cometAddress: '0x9c4ec768c28520B50860ea7a15bd7213a9fF58bf',
   },
 };

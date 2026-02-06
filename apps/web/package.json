@@ -21,6 +21,7 @@
     "@cradle/chainlink-price-feed": "workspace:*",
     "@cradle/aave-lending": "workspace:*",
     "@cradle/compound-lending": "workspace:*",
+    "@cradle/uniswap-swap": "workspace:*",
     "@dapp-forge/blueprint-schema": "workspace:*",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/space-grotesk": "^5.2.10",

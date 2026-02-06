@@ -142,6 +142,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'chainlink-price-feed',
       'aave-lending',
       'compound-lending',
+      'uniswap-swap',
       "aixbt-momentum",
       "aixbt-signals",
       "aixbt-indigo",

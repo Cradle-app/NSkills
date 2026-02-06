@@ -55,6 +55,7 @@ export const NodeType = z.enum([
   // Lending (Aave V3, Compound V3)
   'aave-lending',
   'compound-lending',
+  'uniswap-swap',
 
   // App
   'frontend-scaffold',
@@ -587,6 +588,19 @@ export const CompoundLendingConfig = BaseNodeConfig.extend({
 export type CompoundLendingConfig = z.infer<typeof CompoundLendingConfig>;
 
 /**
+ * Uniswap V3 Swap configuration
+ * Exact-input swaps across Arbitrum and Sepolia testnets
+ */
+export const UniswapSwapConfig = BaseNodeConfig.extend({
+  chain: z.enum(['arbitrum', 'arbitrum-sepolia', 'ethereum-sepolia']).default('arbitrum-sepolia'),
+  /**
+   * Default slippage tolerance in basis points (e.g. 50 = 0.5%)
+   */
+  defaultSlippageBps: z.number().int().min(1).max(5000).default(50),
+});
+export type UniswapSwapConfig = z.infer<typeof UniswapSwapConfig>;
+
+/**
  * Stylus Rust Contract configuration
  * Guides users on creating Stylus Rust contracts
  */
@@ -949,6 +963,7 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('chainlink-price-feed'), config: ChainlinkPriceFeedConfig }),
   z.object({ type: z.literal('aave-lending'), config: AaveLendingConfig }),
   z.object({ type: z.literal('compound-lending'), config: CompoundLendingConfig }),
+  z.object({ type: z.literal('uniswap-swap'), config: UniswapSwapConfig }),
   z.object({ type: z.literal('aixbt-momentum'), config: AIXBTMomentumConfig }),
   z.object({ type: z.literal('aixbt-signals'), config: AIXBTSignalsConfig }),
   z.object({ type: z.literal('aixbt-indigo'), config: AIXBTIndigoConfig }),
@@ -1014,6 +1029,7 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'chainlink-price-feed': 'analytics',
     'aave-lending': 'agents',
     'compound-lending': 'agents',
+    'uniswap-swap': 'agents',
     'frontend-scaffold': 'app',
     'sdk-generator': 'app',
     'wallet-auth': 'app',
@@ -1091,6 +1107,7 @@ export function getConfigSchemaForType(type: NodeType) {
     'chainlink-price-feed': ChainlinkPriceFeedConfig,
     'aave-lending': AaveLendingConfig,
     'compound-lending': CompoundLendingConfig,
+    'uniswap-swap': UniswapSwapConfig,
     'aixbt-momentum': AIXBTMomentumConfig,
     'aixbt-signals': AIXBTSignalsConfig,
     'aixbt-indigo': AIXBTIndigoConfig,

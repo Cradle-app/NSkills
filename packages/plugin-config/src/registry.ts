@@ -388,6 +388,23 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             chain: 'arbitrum',
         },
     },
+    'uniswap-swap': {
+        id: 'uniswap-swap',
+        name: 'Uniswap Swap',
+        description: 'Swap tokens via Uniswap V3 across Arbitrum and Sepolia',
+        icon: 'Coins',
+        color: 'node-agents',
+        category: 'agents',
+        tags: ['uniswap', 'swap', 'dex', 'defi', 'arbitrum', 'sepolia'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
+            suggestedWith: ['chainlink-price-feed', 'pyth-oracle', 'onchain-activity'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+        },
+    },
 
     // ============================================
     // APP CATEGORY

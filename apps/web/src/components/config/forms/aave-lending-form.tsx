@@ -58,7 +58,7 @@ export function AaveLendingForm({ nodeId, config }: Props) {
   };
 
   const chainRaw = (config.chain as string) ?? 'arbitrum';
-  const chain = (chainRaw === 'arbitrum' || chainRaw === 'arbitrum-sepolia' || chainRaw === 'ethereum-sepolia'
+  const chain = (chainRaw === 'arbitrum' || chainRaw === 'ethereum-sepolia'
     ? chainRaw
     : 'arbitrum') as SupportedAaveChain;
   const poolAddress = config.poolAddress as string | undefined;
@@ -255,7 +255,7 @@ export function AaveLendingForm({ nodeId, config }: Props) {
           <span className="text-sm font-medium text-white">Aave V3 Lending</span>
         </div>
         <p className="text-xs text-forge-muted">
-          Supply, borrow, withdraw, and repay on Aave V3. Supports Arbitrum, Arbitrum Sepolia, and Ethereum Sepolia.
+          Supply, borrow, withdraw, and repay on Aave V3. Supports Arbitrum and Ethereum Sepolia.
         </p>
       </div>
 
@@ -275,7 +275,7 @@ export function AaveLendingForm({ nodeId, config }: Props) {
           >
             Arbitrum
           </button>
-          <button
+          {/* <button
             type="button"
             onClick={() => updateConfig('chain', 'arbitrum-sepolia')}
             className={cn(
@@ -286,7 +286,7 @@ export function AaveLendingForm({ nodeId, config }: Props) {
             )}
           >
             Arbitrum Sepolia
-          </button>
+          </button> */}
           <button
             type="button"
             onClick={() => updateConfig('chain', 'ethereum-sepolia')}
@@ -666,7 +666,7 @@ export function AaveLendingForm({ nodeId, config }: Props) {
         <Info className="w-3 h-3 text-forge-muted shrink-0 mt-0.5" />
         <div className="flex-1">
           <p className="text-[10px] text-forge-muted leading-relaxed">
-            Aave V3 is deployed on Arbitrum, Arbitrum Sepolia, and Ethereum Sepolia. Use the generated app to supply, borrow, withdraw, and repay.
+            Aave V3 is deployed on Arbitrum and Ethereum Sepolia. Use the generated app to supply, borrow, withdraw, and repay.
           </p>
         </div>
       </div>
