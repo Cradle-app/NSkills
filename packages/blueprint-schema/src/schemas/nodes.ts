@@ -52,8 +52,9 @@ export const NodeType = z.enum([
   'pyth-oracle',
   'chainlink-price-feed',
 
-  // Lending (Aave V3)
+  // Lending (Aave V3, Compound V3)
   'aave-lending',
+  'compound-lending',
 
   // App
   'frontend-scaffold',
@@ -576,6 +577,17 @@ export const AaveLendingConfig = BaseNodeConfig.extend({
 export type AaveLendingConfig = z.infer<typeof AaveLendingConfig>;
 
 /**
+ * Compound V3 Lending configuration
+ * Supply, borrow, withdraw, repay on Compound V3 Comet (Arbitrum cUSDCv3)
+ * Reference: https://github.com/try-flowforge/backend/blob/main/src/services/lending/providers/CompoundProvider.ts
+ */
+export const CompoundLendingConfig = BaseNodeConfig.extend({
+  chain: z.enum(['arbitrum']).default('arbitrum'),
+  cometAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/).optional(),
+});
+export type CompoundLendingConfig = z.infer<typeof CompoundLendingConfig>;
+
+/**
  * Stylus Rust Contract configuration
  * Guides users on creating Stylus Rust contracts
  */
@@ -937,6 +949,7 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pyth-oracle'), config: PythOracleConfig }),
   z.object({ type: z.literal('chainlink-price-feed'), config: ChainlinkPriceFeedConfig }),
   z.object({ type: z.literal('aave-lending'), config: AaveLendingConfig }),
+  z.object({ type: z.literal('compound-lending'), config: CompoundLendingConfig }),
   z.object({ type: z.literal('aixbt-momentum'), config: AIXBTMomentumConfig }),
   z.object({ type: z.literal('aixbt-signals'), config: AIXBTSignalsConfig }),
   z.object({ type: z.literal('aixbt-indigo'), config: AIXBTIndigoConfig }),
@@ -1001,6 +1014,7 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'pyth-oracle': 'analytics',
     'chainlink-price-feed': 'analytics',
     'aave-lending': 'agents',
+    'compound-lending': 'agents',
     'frontend-scaffold': 'app',
     'sdk-generator': 'app',
     'wallet-auth': 'app',
@@ -1077,6 +1091,7 @@ export function getConfigSchemaForType(type: NodeType) {
     'pyth-oracle': PythOracleConfig,
     'chainlink-price-feed': ChainlinkPriceFeedConfig,
     'aave-lending': AaveLendingConfig,
+    'compound-lending': CompoundLendingConfig,
     'aixbt-momentum': AIXBTMomentumConfig,
     'aixbt-signals': AIXBTSignalsConfig,
     'aixbt-indigo': AIXBTIndigoConfig,

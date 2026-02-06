@@ -371,6 +371,23 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             chain: 'arbitrum',
         },
     },
+    'compound-lending': {
+        id: 'compound-lending',
+        name: 'Compound Lending',
+        description: 'Supply, borrow, withdraw, and repay on Compound V3 (Comet)',
+        icon: 'Zap',
+        color: 'node-agents',
+        category: 'agents',
+        tags: ['compound', 'lending', 'borrow', 'supply', 'defi', 'arbitrum', 'comet'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
+            suggestedWith: ['aave-lending', 'chainlink-price-feed'],
+            requires: [],
+        },
+        defaultConfig: {
+            chain: 'arbitrum',
+        },
+    },
 
     // ============================================
     // APP CATEGORY

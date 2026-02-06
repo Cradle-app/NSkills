@@ -28,6 +28,8 @@ const PRICE_FEED_PRESETS = [
     { label: 'TRX/USD - Tron / US Dollar', id: '0x67aed5a24fdad045475e7195c98a98aea119c763f272d4523f5bac93a4f33c2b' },
     { label: 'XRP/USD - Ripple / US Dollar', id: '0xec5d399846a9209f3fe5881d70aae9268c94339ff9817e8d18ff19fa05eea1c8' },
     { label: 'OP/USD - Optimism / US Dollar', id: '0x385f64d993f7b77d8182ed5003d97c60aa3361f3cecfe711544d2d59165e9bdf' },
+    { label: 'XAU/USD - Gold / US Dollar', id: '0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2' },
+    { label: 'XAG/USD - Silver / US Dollar', id: '0xf2fb02c32b055c805e7238d628e5e9dadef274376114eb1f012337cabe93871e' },
 
 ] as const;
 

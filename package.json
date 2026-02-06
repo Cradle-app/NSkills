@@ -4,7 +4,7 @@
   "private": true,
   "description": "Web3 Dapp Blueprint workflow engine and repo generator",
   "scripts": {
-    "dev": "turbo run dev --concurrency=20",
+    "dev": "turbo run dev --concurrency=30",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

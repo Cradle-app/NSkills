@@ -72,6 +72,7 @@ export function nodeTypeToLabel(type: string): string {
     'pyth-oracle': 'Pyth Price Oracle',
     'chainlink-price-feed': 'Chainlink Price Feed',
     'aave-lending': 'Aave Lending',
+    'compound-lending': 'Compound Lending',
     // Superposition L3
     'superposition-network': 'Superposition Network',
     'superposition-bridge': 'Superposition Bridge',
@@ -137,6 +138,7 @@ export function nodeTypeToColor(type: string): string {
     'pyth-oracle': 'accent-purple',
     'chainlink-price-feed': 'accent-purple',
     'aave-lending': 'node-agents',
+    'compound-lending': 'node-agents',
     // Superposition L3
     'superposition-network': 'accent-cyan',
     'superposition-bridge': 'accent-cyan',

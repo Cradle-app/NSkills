@@ -35,6 +35,7 @@ import { OnchainActivityForm } from './forms/onchain-activity-form';
 import { PythOracleForm } from './forms/pyth-oracle-form';
 import { ChainlinkPriceFeedForm } from './forms/chainlink-price-feed-form';
 import { AaveLendingForm } from './forms/aave-lending-form';
+import { CompoundLendingForm } from './forms/compound-lending-form';
 import { AIXBTForm } from './forms/aixbt-form';
 import { MaxxitLazyTradingForm } from './forms/maxxit-lazy-trading-form';
 
@@ -276,6 +277,9 @@ export function ConfigPanel() {
             )}
             {(selectedNode.type as string) === 'aave-lending' && (
               <AaveLendingForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {(selectedNode.type as string) === 'compound-lending' && (
+              <CompoundLendingForm nodeId={selectedNode.id} config={selectedNode.config} />
             )}
             {selectedNode.type === 'maxxit' && (
               <MaxxitLazyTradingForm nodeId={selectedNode.id} config={selectedNode.config} />

@@ -141,6 +141,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'pyth-oracle',
       'chainlink-price-feed',
       'aave-lending',
+      'compound-lending',
       "aixbt-momentum",
       "aixbt-signals",
       "aixbt-indigo",
