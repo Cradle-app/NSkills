@@ -128,10 +128,10 @@ export function Header() {
           </div>
           <div className="flex flex-col">
             <span className="text-base font-semibold text-[hsl(var(--color-text-primary))] leading-tight">
-              Cradle
+              <span className="text-[hsl(var(--color-accent-primary))]">[N]</span>skills
             </span>
             <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
-              Web3 Skills Composer
+              Compose N skills for your Web3 project
             </span>
           </div>
         </motion.div>

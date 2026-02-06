@@ -14,7 +14,7 @@ export const healthRoutes: FastifyPluginCallback = (fastify, _opts, done) => {
     const registry = getDefaultRegistry();
     
     return {
-      name: 'Cradle Orchestrator',
+      name: '[N]skills Orchestrator',
       version: '0.1.0',
       plugins: registry.getAllMetadata(),
     };

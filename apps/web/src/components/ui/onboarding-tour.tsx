@@ -41,8 +41,8 @@ const STORAGE_KEY = 'cradle-onboarding-completed';
 const DEFAULT_STEPS: TourStep[] = [
     {
         id: 'welcome',
-        title: 'Welcome to Cradle',
-        description: 'Cradle is a visual skills composer for Web3 projects. Lay out your architecture here, then generate a skills repo that Claude Code uses to scaffold the full project.',
+        title: 'Welcome to [N]skills',
+        description: '[N]skills is a visual skills composer for Web3 projects. Lay out your architecture here, then generate a skills repo that Claude Code uses to scaffold the full project.',
         icon: Sparkles,
     },
     {

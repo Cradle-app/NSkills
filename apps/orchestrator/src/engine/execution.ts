@@ -866,7 +866,7 @@ function generateReadme(
 
 ${
   project.description ||
-  "A Web3 dApp generated with [Cradle](https://cradle.dev)."
+  "A Web3 dApp composed with [[N]skills](https://cradle.dev)."
 }
 
 ## 📁 Project Structure
@@ -950,6 +950,6 @@ ${project.license}
 
 ---
 
-Generated with ❤️ by [Cradle](https://cradle.dev)
+Generated with ❤️ by [[N]skills](https://cradle.dev)
 `;
 }

@@ -81,7 +81,7 @@ const createInitialBlueprint = (): Blueprint => ({
   config: {
     project: {
       name: 'My Dapp',
-      description: 'A Web3 application - foundation built with Cradle',
+      description: 'A Web3 application - composed with [N]skills',
       version: '0.1.0',
       license: 'MIT',
       keywords: ['web3', 'dapp'],

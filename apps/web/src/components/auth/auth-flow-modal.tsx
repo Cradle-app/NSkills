@@ -243,7 +243,7 @@ export function AuthFlowModal({
     {
       id: 'wallet',
       title: 'Connect Wallet',
-      description: 'Connect your wallet to access Cradle features',
+      description: 'Connect your wallet to access [N]skills features',
       icon: Wallet,
       completed: isConnected,
       loading: walletLoading,
@@ -426,7 +426,7 @@ export function AuthFlowModal({
                           Connect Your Wallet
                         </h3>
                         <p className="text-sm text-forge-muted mb-4">
-                          Connect your Ethereum wallet to authenticate and access Cradle&apos;s features.
+                          Connect your Ethereum wallet to authenticate and access [N]skills&apos; features.
                         </p>
 
                         {/* Wallet Error */}

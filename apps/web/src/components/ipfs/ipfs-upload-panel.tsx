@@ -47,7 +47,7 @@ export function IPFSUploadPanel({ pinataApiKey, pinataSecretKey }: IPFSUploadPan
         const metadata = JSON.stringify({
             name: file.name,
             keyvalues: {
-                uploadedFrom: 'Cradle',
+                uploadedFrom: 'Nskills',
                 timestamp: new Date().toISOString(),
             }
         });

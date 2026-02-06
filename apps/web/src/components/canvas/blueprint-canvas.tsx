@@ -484,7 +484,7 @@ function BlueprintCanvasInner() {
               </div>
 
               <h3 className="mb-2 text-lg font-semibold text-white">
-                Compose your Web3 skills
+                Compose [N] skills for your project
               </h3>
               <p className="text-sm text-forge-muted mb-6 max-w-xs mx-auto">
                 Drag components from the palette, connect them, then build a skills repo that Claude Code can use to scaffold your project.

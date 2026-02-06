@@ -14,7 +14,7 @@ import { useAuthStore } from '@/store/auth';
 import { AuthFlowModal } from '@/components/auth/auth-flow-modal';
 
 const wagmiConfig = getDefaultConfig({
-  appName: 'Cradle',
+  appName: '[N]skills',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'dummy_id',
   chains: [arbitrum, arbitrumSepolia],
   transports: {

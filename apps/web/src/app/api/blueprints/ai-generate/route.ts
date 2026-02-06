@@ -4,7 +4,7 @@ import { getAvailableNodeTypesContext } from '@/lib/ai-workflow-converter';
 export const runtime = 'nodejs';
 
 // System prompt for the AI
-const SYSTEM_PROMPT = `You are a friendly Web3 application architect assistant for Cradle, a visual blueprint builder for Arbitrum dApps.
+const SYSTEM_PROMPT = `You are a friendly Web3 application architect assistant for [N]skills, a visual skills composer for Arbitrum dApps.
 
 Your job is to help users design application architectures OR have helpful conversations.
 

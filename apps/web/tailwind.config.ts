@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Cradle Design System v3.0 - Tailwind Configuration
+ * [N]skills Design System v3.0 - Tailwind Configuration
  * 
  * Modern, Claude Code-inspired design system with:
  * - Warm, soft dark palette
