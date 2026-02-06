@@ -4,6 +4,18 @@ import { useState, useCallback } from 'react';
 import { useBlueprintStore } from '@/store/blueprint';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { Droplets, Coins, Clock, RefreshCw, Info, ExternalLink, CheckCircle2, AlertTriangle, Wallet } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  toggleRowStyles,
+  cardStyles,
+  codeStyles,
+  statusStyles,
+  actionStyles,
+  FormHeader
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -131,7 +143,7 @@ export function SuperpositionFaucetForm({ nodeId, config }: Props) {
 
     // Remove 'all' if selecting individual tokens
     let currentTokens = tokens.filter((t) => t !== 'all');
-    
+
     if (currentTokens.includes(token)) {
       currentTokens = currentTokens.filter((t) => t !== token);
     } else {
@@ -147,193 +159,223 @@ export function SuperpositionFaucetForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className={formStyles.container}>
+      <FormHeader
+        icon={Droplets}
+        title="Testnet Faucet"
+        description="Configure automatic testnet token requests for development."
+      />
+
       {/* Token Selection */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-white mb-2">Supported Tokens</p>
-        {TOKENS.map((token) => (
-          <div
-            key={token.value}
-            className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border"
-          >
-            <div>
-              <p className="text-sm font-medium text-white">{token.label}</p>
-              <p className="text-xs text-forge-muted">{token.description}</p>
+      <div className={formStyles.section}>
+        <div className="flex items-center gap-2 mb-2">
+          <Coins className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
+          <span className="text-xs font-semibold text-[hsl(var(--color-text-secondary))] tracking-wide uppercase">Supported Tokens</span>
+        </div>
+        <div className="space-y-2">
+          {TOKENS.map((token) => (
+            <div
+              key={token.value}
+              className={toggleRowStyles.row}
+            >
+              <div>
+                <p className={toggleRowStyles.title}>{token.label}</p>
+                <p className={toggleRowStyles.description}>{token.description}</p>
+              </div>
+              <Switch
+                checked={tokens.includes(token.value) || (token.value !== 'all' && tokens.includes('all'))}
+                onCheckedChange={() => handleTokenToggle(token.value)}
+              />
             </div>
-            <Switch
-              checked={tokens.includes(token.value) || (token.value !== 'all' && tokens.includes('all'))}
-              onCheckedChange={() => handleTokenToggle(token.value)}
-            />
+          ))}
+        </div>
+      </div>
+
+      <div className={formStyles.section}>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Faucet Hook</p>
+            <p className={toggleRowStyles.description}>Generate useSuperpositionFaucet hook</p>
           </div>
-        ))}
-      </div>
-
-      {/* Generate Faucet Hook */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Faucet Hook</p>
-          <p className="text-xs text-forge-muted">Generate useSuperpositionFaucet hook</p>
+          <Switch
+            checked={(config.generateFaucetHook as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateFaucetHook', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.generateFaucetHook as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateFaucetHook', checked)}
-        />
-      </div>
 
-      {/* Generate Faucet UI */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Faucet UI</p>
-          <p className="text-xs text-forge-muted">Generate faucet request component</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Faucet UI</p>
+            <p className={toggleRowStyles.description}>Generate faucet request component</p>
+          </div>
+          <Switch
+            checked={(config.generateFaucetUI as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateFaucetUI', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.generateFaucetUI as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateFaucetUI', checked)}
-        />
-      </div>
 
-      {/* Include Cooldown Timer */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Cooldown Timer</p>
-          <p className="text-xs text-forge-muted">Show time until next request (5h)</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Cooldown Timer</p>
+            <p className={toggleRowStyles.description}>Show time until next request (5h)</p>
+          </div>
+          <Switch
+            checked={(config.includeCooldownTimer as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('includeCooldownTimer', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.includeCooldownTimer as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('includeCooldownTimer', checked)}
-        />
-      </div>
 
-      {/* Include Balance Check */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Balance Check</p>
-          <p className="text-xs text-forge-muted">Include testnet balance hooks</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Balance Check</p>
+            <p className={toggleRowStyles.description}>Include testnet balance hooks</p>
+          </div>
+          <Switch
+            checked={(config.includeBalanceCheck as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('includeBalanceCheck', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.includeBalanceCheck as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('includeBalanceCheck', checked)}
-        />
       </div>
 
       {/* Live Balance Check */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border space-y-3">
-        <div>
-          <p className="text-sm font-medium text-white">Check Testnet Balances</p>
-          <p className="text-xs text-forge-muted mb-2">Enter a wallet address to check testnet token balances</p>
-        </div>
-        
-        <div className="flex gap-2">
-          <Input
-            value={walletAddress}
-            onChange={(e) => setWalletAddress(e.target.value)}
-            placeholder="0x..."
-            className="flex-1 font-mono text-xs"
-          />
-          <button
-            onClick={checkBalances}
-            disabled={!walletAddress.trim() || balanceStatus.status === 'loading'}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent-cyan/20 text-accent-cyan hover:bg-accent-cyan/30 disabled:opacity-50 transition-colors whitespace-nowrap"
-          >
-            {balanceStatus.status === 'loading' ? 'Checking...' : 'Check'}
-          </button>
+      <div className={cardStyles.base}>
+        <div className={cardStyles.cardHeader}>
+          <Wallet className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-text-muted))]')} />
+          <span className={cardStyles.cardTitle}>Check Testnet Balances</span>
         </div>
 
-        {/* Balance Results */}
-        {balanceStatus.status === 'success' && balanceStatus.balances && (
-          <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-xs font-medium text-green-400">Testnet Balances</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-green-300/60">SPN:</span>
-                <span className="text-green-300 font-mono">{balanceStatus.balances.SPN}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-green-300/60">wSPN:</span>
-                <span className="text-green-300 font-mono">{balanceStatus.balances.wSPN}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-green-300/60">fUSDC:</span>
-                <span className="text-green-300 font-mono">{balanceStatus.balances.fUSDC}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-green-300/60">CATBUX:</span>
-                <span className="text-green-300 font-mono">{balanceStatus.balances.CATBUX}</span>
-              </div>
-            </div>
-          </div>
-        )}
+        <div className="space-y-4">
+          <p className={cardStyles.cardBody}>Enter a wallet address to check testnet token balances</p>
 
-        {balanceStatus.status === 'error' && (
-          <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full bg-red-500" />
-              <span className="text-xs font-medium text-red-400">Error</span>
-            </div>
-            <p className="text-xs text-red-300/80">{balanceStatus.error}</p>
+          <div className="flex gap-2">
+            <Input
+              value={walletAddress}
+              onChange={(e) => setWalletAddress(e.target.value)}
+              placeholder="0x..."
+              className="flex-1 font-mono text-xs"
+            />
+            <button
+              onClick={checkBalances}
+              disabled={!walletAddress.trim() || balanceStatus.status === 'loading'}
+              className={cn(actionStyles.primary, "mb-[1px]")}
+              style={{ padding: '0.625rem 1rem' }}
+            >
+              {balanceStatus.status === 'loading' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : 'Check'}
+            </button>
           </div>
-        )}
+
+          {/* Balance Results */}
+          {balanceStatus.status === 'success' && balanceStatus.balances && (
+            <div className={statusStyles.connected}>
+              <div className={statusStyles.statusHeader}>
+                <CheckCircle2 className={cn(statusStyles.statusIcon, statusStyles.statusIconConnected)} />
+                <span className={statusStyles.statusTitle}>Testnet Balances</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-[hsl(var(--color-text-muted))]">SPN:</span>
+                  <span className="text-[hsl(var(--color-success))] font-mono">{balanceStatus.balances.SPN}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[hsl(var(--color-text-muted))]">wSPN:</span>
+                  <span className="text-[hsl(var(--color-success))] font-mono">{balanceStatus.balances.wSPN}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[hsl(var(--color-text-muted))]">fUSDC:</span>
+                  <span className="text-[hsl(var(--color-success))] font-mono">{balanceStatus.balances.fUSDC}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[hsl(var(--color-text-muted))]">CATBUX:</span>
+                  <span className="text-[hsl(var(--color-success))] font-mono">{balanceStatus.balances.CATBUX}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {balanceStatus.status === 'error' && (
+            <div className={cn(cardStyles.base, "bg-[hsl(var(--color-error)/0.08)] border-[hsl(var(--color-error)/0.2)]")}>
+              <div className={statusStyles.statusHeader}>
+                <AlertTriangle className={cn(statusStyles.statusIcon, "text-[hsl(var(--color-error))]")} />
+                <span className={cn(statusStyles.statusTitle, "text-[hsl(var(--color-error))]")}>Error</span>
+              </div>
+              <p className={statusStyles.statusDetail}>{balanceStatus.error}</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Official Faucet Link */}
-      <div className="p-4 rounded-lg bg-gradient-to-r from-accent-cyan/20 to-accent-cyan/5 border border-accent-cyan/30">
-        <div className="flex items-center justify-between mb-3">
+      <div className={cn(cardStyles.primary, "bg-gradient-to-r from-[hsl(var(--color-accent-primary)/0.15)] to-transparent")}>
+        <div className="flex items-center justify-between mb-2">
           <div>
-            <p className="text-sm font-medium text-white">Superposition Testnet Faucet</p>
-            <p className="text-xs text-forge-muted">Get testnet tokens directly</p>
+            <p className={cardStyles.cardTitle}>Superposition Testnet Faucet</p>
+            <p className={cardStyles.cardBody}>Get testnet tokens directly</p>
           </div>
           <a
             href="https://faucet.superposition.so"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-accent-cyan text-black hover:bg-accent-cyan/90 transition-colors"
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg",
+              "text-xs font-medium",
+              "bg-[hsl(var(--color-accent-primary))]",
+              "text-black",
+              "hover:bg-[hsl(var(--color-accent-primary)/0.9)]",
+              "transition-colors"
+            )}
           >
-            Open Faucet
+            Open Faucet <ExternalLink className="w-3 h-3" />
           </a>
         </div>
-        <div className="text-xs text-accent-cyan/80 space-y-1">
-          <p>Request tokens once every 24 hours per wallet</p>
+        <div className="flex items-center gap-2">
+          <Clock className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+          <p className="text-[10px] text-[hsl(var(--color-accent-primary))]">
+            Request tokens once every 24 hours per wallet
+          </p>
         </div>
       </div>
 
       {/* Testnet Token Addresses */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <p className="text-sm font-medium text-white mb-2">Testnet Token Addresses</p>
+      <div className={cardStyles.base}>
+        <div className={cardStyles.cardHeader}>
+          <Coins className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-text-muted))]')} />
+          <span className={cardStyles.cardTitle}>Testnet Token Addresses</span>
+        </div>
         <div className="space-y-1.5 text-xs font-mono">
           <div className="flex justify-between items-center">
-            <span className="text-forge-muted">wSPN:</span>
-            <span className="text-forge-text">0x22b9...214c</span>
+            <span className="text-[hsl(var(--color-text-muted))]">wSPN:</span>
+            <span className={codeStyles.inline}>0x22b9...214c</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-forge-muted">fUSDC:</span>
-            <span className="text-forge-text">0xA8EA...0115</span>
+            <span className="text-[hsl(var(--color-text-muted))]">fUSDC:</span>
+            <span className={codeStyles.inline}>0xA8EA...0115</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-forge-muted">CATBUX:</span>
-            <span className="text-forge-text">0x36c1...B99</span>
+            <span className="text-[hsl(var(--color-text-muted))]">CATBUX:</span>
+            <span className={codeStyles.inline}>0x36c1...B99</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-forge-muted">Faucet:</span>
-            <span className="text-forge-text">0xD191...2B</span>
+            <span className="text-[hsl(var(--color-text-muted))]">Faucet:</span>
+            <span className={codeStyles.inline}>0xD191...2B</span>
           </div>
         </div>
       </div>
 
       {/* Info Box */}
-      <div className="p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20">
-        <p className="text-xs text-accent-cyan">
-          Testnet tokens are for development purposes only. The generated hook will handle
-          faucet requests and cooldown tracking automatically.
+      <div className={cardStyles.info}>
+        <div className={cardStyles.cardHeader}>
+          <Info className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-info))]')} />
+          <span className={cardStyles.cardTitle}>Documentation</span>
+        </div>
+        <p className={cardStyles.cardBody}>
+          Testnet tokens are for development purposes only.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           <a
             href="https://testnet-explorer.superposition.so"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Testnet Explorer
           </a>
@@ -341,7 +383,7 @@ export function SuperpositionFaucetForm({ nodeId, config }: Props) {
             href="https://docs.superposition.so/native-dapps/faucet"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Faucet Docs
           </a>

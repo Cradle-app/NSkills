@@ -69,13 +69,16 @@ export function ConfigPanel() {
 
   if (!selectedNode) {
     return (
-      <aside data-tour="config" className="h-full border-l border-forge-border/50 bg-gradient-to-b from-forge-surface/80 to-forge-bg/50 flex flex-col overflow-hidden">
-        <div className="p-4 border-b border-forge-border/50">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-forge-elevated/50">
-              <Settings2 className="w-4 h-4 text-forge-muted" />
+      <aside
+        data-tour="config"
+        className="h-full border-l border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-subtle))] flex flex-col overflow-hidden"
+      >
+        <div className="p-4 border-b border-[hsl(var(--color-border-default))]">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-[hsl(var(--color-bg-elevated))]">
+              <Settings2 className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
             </div>
-            <h2 className="text-sm font-semibold text-white tracking-wide">Properties</h2>
+            <h2 className="text-sm font-semibold text-[hsl(var(--color-text-primary))] tracking-wide">Properties</h2>
           </div>
         </div>
         <div className="flex-1 flex items-center justify-center p-8">
@@ -83,18 +86,18 @@ export function ConfigPanel() {
             className="text-center"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
           >
             <div className="relative mx-auto mb-4">
-              <div className="absolute inset-0 bg-accent-purple/10 blur-xl rounded-full" />
-              <div className="relative w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-forge-elevated to-forge-bg border border-forge-border/50 flex items-center justify-center">
-                <MousePointerClick className="w-7 h-7 text-forge-muted" />
+              <div className="absolute inset-0 bg-[hsl(var(--color-accent-secondary)/0.08)] blur-xl rounded-full" />
+              <div className="relative w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-[hsl(var(--color-bg-elevated))] to-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))] flex items-center justify-center">
+                <MousePointerClick className="w-7 h-7 text-[hsl(var(--color-text-muted))]" />
               </div>
             </div>
-            <p className="text-sm font-medium text-forge-text mb-1">
+            <p className="text-sm font-medium text-[hsl(var(--color-text-primary))] mb-1">
               Select a Component
             </p>
-            <p className="text-xs text-forge-muted max-w-[180px] leading-relaxed">
+            <p className="text-xs text-[hsl(var(--color-text-muted))] max-w-[180px] leading-relaxed">
               Click on any component to configure its properties and behavior
             </p>
           </motion.div>
@@ -106,29 +109,31 @@ export function ConfigPanel() {
   const colorClass = nodeTypeToColor(selectedNode.type);
 
   return (
-    <aside data-tour="config" className="h-full border-l border-forge-border/50 bg-gradient-to-b from-forge-surface/80 to-forge-bg/50 flex flex-col overflow-hidden">
+    <aside
+      data-tour="config"
+      className="h-full border-l border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-subtle))] flex flex-col overflow-hidden"
+    >
       {/* Header */}
       <motion.div
-        className="p-4 border-b border-forge-border/50"
+        className="p-4 border-b border-[hsl(var(--color-border-default))]"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.15 }}
       >
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
             <div className={cn(
               'w-10 h-10 rounded-xl flex items-center justify-center shrink-0',
-              'bg-gradient-to-br',
-              `from-${colorClass}/20 to-${colorClass}/5`,
-              'border border-' + colorClass + '/20'
+              'bg-[hsl(var(--color-accent-primary)/0.1)]',
+              'border border-[hsl(var(--color-accent-primary)/0.2)]'
             )}>
-              <Settings2 className={cn('w-5 h-5', `text-${colorClass}`)} />
+              <Settings2 className="w-5 h-5 text-[hsl(var(--color-accent-primary))]" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-white">
+              <h2 className="text-sm font-semibold text-[hsl(var(--color-text-primary))]">
                 {nodeTypeToLabel(selectedNode.type)}
               </h2>
-              <p className="text-xs text-forge-muted mt-0.5 font-mono">
+              <p className="text-xs text-[hsl(var(--color-text-muted))] mt-0.5 font-mono">
                 {selectedNode.id.slice(0, 8)}...
               </p>
             </div>
@@ -141,19 +146,27 @@ export function ConfigPanel() {
                 toast.success('Config copied', 'Node configuration copied to clipboard');
                 setTimeout(() => setCopied(false), 2000);
               }}
-              className="p-2 rounded-lg hover:bg-forge-elevated/50 text-forge-muted hover:text-white transition-all duration-200"
+              className={cn(
+                "p-2 rounded-lg transition-all duration-150",
+                "text-[hsl(var(--color-text-muted))]",
+                "hover:bg-[hsl(var(--color-bg-hover))] hover:text-[hsl(var(--color-text-primary))]"
+              )}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               title="Copy config as JSON"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+              {copied ? <Check className="w-4 h-4 text-[hsl(var(--color-success))]" /> : <Copy className="w-4 h-4" />}
             </motion.button>
             <motion.button
               onClick={() => {
                 removeNode(selectedNode.id);
                 selectNode(null);
               }}
-              className="p-2 rounded-lg hover:bg-red-500/20 text-forge-muted hover:text-red-400 transition-all duration-200"
+              className={cn(
+                "p-2 rounded-lg transition-all duration-150",
+                "text-[hsl(var(--color-text-muted))]",
+                "hover:bg-[hsl(var(--color-error)/0.15)] hover:text-[hsl(var(--color-error))]"
+              )}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               title="Delete node"
@@ -162,7 +175,11 @@ export function ConfigPanel() {
             </motion.button>
             <motion.button
               onClick={() => selectNode(null)}
-              className="p-2 rounded-lg hover:bg-forge-elevated/50 text-forge-muted hover:text-white transition-all duration-200"
+              className={cn(
+                "p-2 rounded-lg transition-all duration-150",
+                "text-[hsl(var(--color-text-muted))]",
+                "hover:bg-[hsl(var(--color-bg-hover))] hover:text-[hsl(var(--color-text-primary))]"
+              )}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               title="Close panel"
@@ -172,11 +189,8 @@ export function ConfigPanel() {
           </div>
         </div>
 
-        {/* Color indicator bar */}
-        <div className={cn(
-          'h-1 rounded-full mt-4',
-          `bg-gradient-to-r from-${colorClass} to-${colorClass}/30`
-        )} />
+        {/* Color indicator bar - subtle */}
+        <div className="h-0.5 rounded-full mt-4 bg-gradient-to-r from-[hsl(var(--color-accent-primary))] via-[hsl(var(--color-accent-primary)/0.5)] to-transparent" />
       </motion.div>
 
       <AnimatePresence mode="wait">
@@ -186,7 +200,7 @@ export function ConfigPanel() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.15 }}
         >
           <AuthOverlay message="Connect wallet to configure properties">
             {/* Original nodes */}

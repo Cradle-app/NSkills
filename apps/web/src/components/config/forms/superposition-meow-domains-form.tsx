@@ -5,6 +5,16 @@ import { encodeFunctionData } from 'viem';
 import { useBlueprintStore } from '@/store/blueprint';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { MousePointer2, AtSign, Loader2, Info, Search, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  toggleRowStyles,
+  cardStyles,
+  codeStyles,
+  FormHeader
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -26,9 +36,6 @@ const METADATA_FIELDS = [
   { value: 'description', label: 'Description', description: 'Bio/description' },
 ];
 
-// Punk Domains Resolver Contract on Superposition (verified)
-// Source: https://docs.punk.domains/how-to-integrate/
-// The getDomainHolder function is on the Resolver contract, not the TLD contract
 const RESOLVER_CONTRACT_ADDRESS = '0xC6c17896fa051083324f2aD0Ed4555dC46D96E7f';
 const RPC_URL = 'https://rpc.superposition.so';
 const TLD = '.meow';
@@ -50,13 +57,10 @@ export function SuperpositionMeowDomainsForm({ nodeId, config }: Props) {
 
     // Normalize domain name (remove .meow suffix if present)
     const normalizedDomain = testDomain.toLowerCase().replace('.meow', '').trim();
-    
+
     setResolveStatus({ status: 'resolving' });
 
     try {
-      // Encode the function call: getDomainHolder(string,string)
-      // According to Punk Domains docs: getDomainHolder(domainName, tld)
-      // Use viem to properly encode the function call with ABI
       const callData = encodeFunctionData({
         abi: [
           {
@@ -97,17 +101,15 @@ export function SuperpositionMeowDomainsForm({ nodeId, config }: Props) {
         throw new Error(data.error.message || 'Resolution failed');
       }
 
-      // Parse the result - it should be an address (20 bytes, padded to 32)
       const result = data.result;
-      
+
       if (!result || result === '0x' || result === '0x0000000000000000000000000000000000000000000000000000000000000000') {
         setResolveStatus({ status: 'not-found' });
         return;
       }
 
-      // Extract address from result (last 40 hex chars)
       const address = '0x' + result.slice(-40);
-      
+
       if (address === '0x0000000000000000000000000000000000000000') {
         setResolveStatus({ status: 'not-found' });
       } else {
@@ -143,18 +145,28 @@ export function SuperpositionMeowDomainsForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className={formStyles.container}>
+      <FormHeader
+        icon={AtSign}
+        title="Meow Domains"
+        description="Integrate decentralized identity with .meow domains."
+      />
+
       {/* Features */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-white mb-2">Features</p>
+      <div className={formStyles.section}>
+        <div className="flex items-center gap-2 mb-2">
+          <MousePointer2 className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
+          <span className="text-xs font-semibold text-[hsl(var(--color-text-secondary))] tracking-wide uppercase">Features</span>
+        </div>
+
         {FEATURES.map((feature) => (
           <div
             key={feature.value}
-            className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border"
+            className={toggleRowStyles.row}
           >
             <div>
-              <p className="text-sm font-medium text-white">{feature.label}</p>
-              <p className="text-xs text-forge-muted">{feature.description}</p>
+              <p className={toggleRowStyles.title}>{feature.label}</p>
+              <p className={toggleRowStyles.description}>{feature.description}</p>
             </div>
             <Switch
               checked={features.includes(feature.value)}
@@ -164,54 +176,53 @@ export function SuperpositionMeowDomainsForm({ nodeId, config }: Props) {
         ))}
       </div>
 
-      {/* Generate Resolver Hook */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Resolver Hook</p>
-          <p className="text-xs text-forge-muted">Generate useMeowDomain hook</p>
+      <div className={formStyles.section}>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Resolver Hook</p>
+            <p className={toggleRowStyles.description}>Generate useMeowDomain hook</p>
+          </div>
+          <Switch
+            checked={(config.generateResolverHook as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateResolverHook', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.generateResolverHook as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateResolverHook', checked)}
-        />
-      </div>
 
-      {/* Generate Registration Hook */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Registration Hook</p>
-          <p className="text-xs text-forge-muted">Generate useRegisterMeowDomain hook</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Registration Hook</p>
+            <p className={toggleRowStyles.description}>Generate useRegisterMeowDomain hook</p>
+          </div>
+          <Switch
+            checked={(config.generateRegistrationHook as boolean) ?? false}
+            onCheckedChange={(checked) => handleChange('generateRegistrationHook', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.generateRegistrationHook as boolean) ?? false}
-          onCheckedChange={(checked) => handleChange('generateRegistrationHook', checked)}
-        />
-      </div>
 
-      {/* Generate Domain Display */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Domain Display</p>
-          <p className="text-xs text-forge-muted">Generate MeowDomainDisplay component</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Domain Display</p>
+            <p className={toggleRowStyles.description}>Generate MeowDomainDisplay component</p>
+          </div>
+          <Switch
+            checked={(config.generateDomainDisplay as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateDomainDisplay', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.generateDomainDisplay as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateDomainDisplay', checked)}
-        />
       </div>
 
       {/* Supported Metadata Fields */}
       {features.includes('metadata') && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-white mb-2">Metadata Fields</p>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Metadata Fields</label>
           {METADATA_FIELDS.map((field) => (
             <div
               key={field.value}
-              className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border"
+              className={toggleRowStyles.row}
             >
               <div>
-                <p className="text-sm font-medium text-white">{field.label}</p>
-                <p className="text-xs text-forge-muted">{field.description}</p>
+                <p className={toggleRowStyles.title}>{field.label}</p>
+                <p className={toggleRowStyles.description}>{field.description}</p>
               </div>
               <Switch
                 checked={supportedMetadata.includes(field.value)}
@@ -223,84 +234,104 @@ export function SuperpositionMeowDomainsForm({ nodeId, config }: Props) {
       )}
 
       {/* Test Domain Resolution */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border space-y-3">
-        <div>
-          <p className="text-sm font-medium text-white">Test Domain Resolution</p>
-          <p className="text-xs text-forge-muted mb-2">Try resolving a .meow domain to verify the hook works</p>
-        </div>
-        
-        <div className="flex gap-2">
-          <Input
-            value={testDomain}
-            onChange={(e) => setTestDomain(e.target.value)}
-            placeholder="vitalik.meow"
-            className="flex-1"
-          />
-          <button
-            onClick={testResolution}
-            disabled={!testDomain.trim() || resolveStatus.status === 'resolving'}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent-cyan/20 text-accent-cyan hover:bg-accent-cyan/30 disabled:opacity-50 transition-colors whitespace-nowrap"
-          >
-            {resolveStatus.status === 'resolving' ? 'Resolving...' : 'Resolve'}
-          </button>
+      <div className={cardStyles.base}>
+        <div className={cardStyles.cardHeader}>
+          <Search className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-text-muted))]')} />
+          <span className={cardStyles.cardTitle}>Test Resolution</span>
         </div>
 
-        {/* Resolution Result */}
-        {resolveStatus.status === 'resolved' && resolveStatus.address && (
-          <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-xs font-medium text-green-400">Domain Found</span>
-            </div>
-            <p className="text-xs text-green-300/80 font-mono break-all">
-              {resolveStatus.address}
-            </p>
-          </div>
-        )}
+        <div className="space-y-3">
+          <p className={cardStyles.cardBody}>Try resolving a .meow domain to verify the hook works</p>
 
-        {resolveStatus.status === 'not-found' && (
-          <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-yellow-500" />
-              <span className="text-xs font-medium text-yellow-400">Domain Not Registered</span>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                value={testDomain}
+                onChange={(e) => setTestDomain(e.target.value)}
+                placeholder="vitalik.meow"
+                className="w-full"
+              />
+              {/* Could add .meow suffix automatically if not present in placeholder */}
             </div>
-            <p className="text-xs text-yellow-300/80 mt-1">
-              This domain is available for registration at{' '}
-              <a
-                href="https://meow.domains"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-yellow-200"
-              >
-                meow.domains
-              </a>
-            </p>
-          </div>
-        )}
 
-        {resolveStatus.status === 'error' && (
-          <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full bg-red-500" />
-              <span className="text-xs font-medium text-red-400">Resolution Failed</span>
-            </div>
-            <p className="text-xs text-red-300/80">{resolveStatus.error}</p>
+            <button
+              onClick={testResolution}
+              disabled={!testDomain.trim() || resolveStatus.status === 'resolving'}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5",
+                "bg-[hsl(var(--color-accent-primary)/0.15)] text-[hsl(var(--color-accent-primary))]",
+                "hover:bg-[hsl(var(--color-accent-primary)/0.25)]",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
+            >
+              {resolveStatus.status === 'resolving' && <Loader2 className="w-3 h-3 animate-spin" />}
+              {resolveStatus.status === 'resolving' ? 'Resolving...' : 'Resolve'}
+            </button>
           </div>
-        )}
+
+          {/* Resolution Result */}
+          {resolveStatus.status === 'resolved' && resolveStatus.address && (
+            <div className={cardStyles.success}>
+              <div className={cardStyles.cardHeader}>
+                <CheckCircle2 className={cn(cardStyles.cardIcon, "text-[hsl(var(--color-success))]")} />
+                <span className={cardStyles.cardTitle}>Domain Found</span>
+              </div>
+              <p className={cn(codeStyles.inline, "whitespace-nowrap overflow-hidden text-ellipsis block text-center")}>
+                {resolveStatus.address}
+              </p>
+            </div>
+          )}
+
+          {resolveStatus.status === 'not-found' && (
+            <div className={cardStyles.warning}>
+              <div className={cardStyles.cardHeader}>
+                <AlertTriangle className={cn(cardStyles.cardIcon, "text-[hsl(var(--color-warning))]")} />
+                <span className={cardStyles.cardTitle}>Domain Not Registered</span>
+              </div>
+              <p className={cardStyles.cardBody}>
+                This domain is available for registration at{' '}
+                <a
+                  href="https://meow.domains"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "text-[hsl(var(--color-warning))] hover:text-[hsl(var(--color-warning)/0.8)] underline",
+                    "font-medium"
+                  )}
+                >
+                  meow.domains
+                </a>
+              </p>
+            </div>
+          )}
+
+          {resolveStatus.status === 'error' && (
+            <div className={cn(cardStyles.base, "bg-[hsl(var(--color-error)/0.08)] border-[hsl(var(--color-error)/0.2)]")}>
+              <div className={cardStyles.cardHeader}>
+                <XCircle className={cn(cardStyles.cardIcon, "text-[hsl(var(--color-error))]")} />
+                <span className={cn(cardStyles.cardTitle, "text-[hsl(var(--color-error))]")}>Resolution Failed</span>
+              </div>
+              <p className={cn(cardStyles.cardBody, "text-[hsl(var(--color-error)/0.8)]")}>{resolveStatus.error}</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Info Box */}
-      <div className="p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20">
-        <p className="text-xs text-accent-cyan">
-          Meow Domains (.meow) provide Web3 identity on Superposition. Built on the
-          Punk Domains protocol for decentralized naming.
+      <div className={cardStyles.info}>
+        <div className={cardStyles.cardHeader}>
+          <Info className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-info))]')} />
+          <span className={cardStyles.cardTitle}>Documentation</span>
+        </div>
+        <p className={cardStyles.cardBody}>
+          Meow Domains (.meow) provide Web3 identity on Superposition.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           <a
             href="https://meow.domains"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             meow.domains
           </a>
@@ -308,7 +339,7 @@ export function SuperpositionMeowDomainsForm({ nodeId, config }: Props) {
             href="https://docs.punk.domains"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Punk Domains Docs
           </a>

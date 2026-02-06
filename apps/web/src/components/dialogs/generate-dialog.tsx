@@ -277,7 +277,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
       <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-lime flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(var(--color-accent-primary))] to-[hsl(var(--color-success))] flex items-center justify-center">
               <Play className="w-4 h-4 text-black" />
             </div>
             Build Foundation
@@ -289,12 +289,12 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
 
         <div className="space-y-4 py-4 flex-1 overflow-y-auto pr-1">
           {/* GitHub option */}
-          <div className="flex items-center justify-between p-4 rounded-lg bg-forge-bg border border-forge-border">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))]">
             <div className="flex items-center gap-3">
-              <Github className="w-5 h-5 text-forge-muted" />
+              <Github className="w-5 h-5 text-[hsl(var(--color-text-muted))]" />
               <div>
-                <p className="text-sm font-medium text-white">Create GitHub Repository</p>
-                <p className="text-xs text-forge-muted">
+                <p className="text-sm font-medium text-[hsl(var(--color-text-primary))]">Create GitHub Repository</p>
+                <p className="text-xs text-[hsl(var(--color-text-muted))]">
                   {githubSession?.authenticated
                     ? `Connected as ${githubSession.github?.username}`
                     : 'Push generated code to GitHub'}
@@ -309,10 +309,10 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
 
           {/* GitHub config */}
           {createGitHubRepo && (
-            <div className="space-y-3 pl-4 border-l-2 border-accent-cyan/30">
+            <div className="space-y-3 pl-4 border-l-2 border-[hsl(var(--color-accent-primary)/0.3)]">
               {!githubSession?.authenticated && (
-                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                  <p className="text-xs text-amber-400 mb-2">
+                <div className="p-3 bg-[hsl(var(--color-warning)/0.1)] border border-[hsl(var(--color-warning)/0.3)] rounded-lg">
+                  <p className="text-xs text-[hsl(var(--color-warning))] mb-2">
                     You&apos;ll need to connect your GitHub account to create repositories.
                   </p>
                   <Button
@@ -326,13 +326,13 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
                 </div>
               )}
               {githubSession?.authenticated && githubSession.github && (
-                <div className="flex items-center gap-2 p-2 bg-accent-lime/10 border border-accent-lime/30 rounded-lg">
+                <div className="flex items-center gap-2 p-2 bg-[hsl(var(--color-success)/0.1)] border border-[hsl(var(--color-success)/0.3)] rounded-lg">
                   <img
                     src={githubSession.github.avatar}
                     alt={githubSession.github.username}
                     className="w-5 h-5 rounded-full"
                   />
-                  <span className="text-xs text-accent-lime">
+                  <span className="text-xs text-[hsl(var(--color-success))]">
                     Creating as {githubSession.github.username}
                   </span>
                 </div>
@@ -349,12 +349,12 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
           {/* Status display */}
           {status !== 'idle' && (
             <div className={`p-4 rounded-lg border ${status === 'error'
-              ? 'bg-accent-coral/10 border-accent-coral/30'
+              ? 'bg-[hsl(var(--color-error)/0.1)] border-[hsl(var(--color-error)/0.3)]'
               : status === 'needs_auth'
-                ? 'bg-amber-500/10 border-amber-500/30'
+                ? 'bg-[hsl(var(--color-warning)/0.1)] border-[hsl(var(--color-warning)/0.3)]'
                 : status === 'success'
-                  ? 'bg-accent-lime/10 border-accent-lime/30'
-                  : 'bg-forge-elevated border-forge-border'
+                  ? 'bg-[hsl(var(--color-success)/0.1)] border-[hsl(var(--color-success)/0.3)]'
+                  : 'bg-[hsl(var(--color-bg-elevated))] border-[hsl(var(--color-border-default))]'
               }`}>
               {/* Step-by-step progress */}
               <div className="mb-4">
@@ -362,32 +362,32 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
               </div>
 
               {status === 'validating' && (
-                <div className="flex items-center gap-2 text-forge-muted">
+                <div className="flex items-center gap-2 text-[hsl(var(--color-text-muted))]">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Validating blueprint...</span>
                 </div>
               )}
               {status === 'generating' && (
-                <div className="flex items-center gap-2 text-accent-cyan">
+                <div className="flex items-center gap-2 text-[hsl(var(--color-accent-primary))]">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Generating code...</span>
                 </div>
               )}
               {status === 'success' && (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-accent-lime">
+                  <div className="flex items-center gap-2 text-[hsl(var(--color-success))]">
                     <Check className="w-4 h-4" />
                     <span className="text-sm font-medium">Generation complete!</span>
                   </div>
                   {result?.fileCount !== undefined && (
-                    <p className="text-xs text-forge-muted">
+                    <p className="text-xs text-[hsl(var(--color-text-muted))]">
                       Generated {result.fileCount} files
                     </p>
                   )}
 
                   {/* Generated Files Explorer */}
                   {Boolean(fileTree?.length) && (
-                    <div className="mt-2 rounded-lg border border-forge-border bg-forge-bg overflow-hidden">
+                    <div className="mt-2 rounded-lg border border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-base))] overflow-hidden">
                       <div className="max-h-64 overflow-y-auto">
                         <GeneratedFilesExplorer files={fileTree as any} />
                       </div>
@@ -395,19 +395,19 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
                   )}
 
                   {result?.repoUrl && (
-                    <div className="p-3 bg-forge-bg border border-forge-border rounded-lg">
-                      <p className="text-xs text-forge-muted mb-2">GitHub Repository:</p>
+                    <div className="p-3 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))] rounded-lg">
+                      <p className="text-xs text-[hsl(var(--color-text-muted))] mb-2">GitHub Repository:</p>
                       <a
                         href={result.repoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-accent-cyan hover:text-accent-lime transition-colors font-medium"
+                        className="flex items-center gap-2 text-sm text-[hsl(var(--color-accent-primary))] hover:text-[hsl(var(--color-success))] transition-colors font-medium"
                       >
                         <Github className="w-4 h-4" />
                         <span className="break-all">{result.repoUrl}</span>
                         <span className="flex-shrink-0">→</span>
                       </a>
-                      <p className="text-xs text-forge-muted mt-2">
+                      <p className="text-xs text-[hsl(var(--color-text-muted))] mt-2">
                         Click to open in a new tab
                       </p>
                     </div>
@@ -415,14 +415,14 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
                 </div>
               )}
               {status === 'error' && (
-                <div className="flex items-start gap-2 text-accent-coral">
+                <div className="flex items-start gap-2 text-[hsl(var(--color-error))]">
                   <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <span className="text-sm">{error}</span>
                 </div>
               )}
               {status === 'needs_auth' && (
                 <div className="space-y-3">
-                  <div className="flex items-start gap-2 text-amber-400">
+                  <div className="flex items-start gap-2 text-[hsl(var(--color-warning))]">
                     <LogIn className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{error}</span>
                   </div>
@@ -447,7 +447,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
             <Button
               onClick={handleGenerate}
               disabled={status === 'validating' || status === 'generating'}
-              className="bg-gradient-to-r from-accent-cyan to-accent-lime text-black"
+              className="bg-gradient-to-r from-[hsl(var(--color-accent-primary))] to-[hsl(var(--color-success))] text-black"
             >
               {(status === 'validating' || status === 'generating') && (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

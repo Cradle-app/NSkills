@@ -424,7 +424,7 @@ export function useAuthGuard() {
     }
     action?.();
     return true;
-  }, [isConnected, address, fullAuthStatus, isFullyAuthenticated, openAuthModal]);
+  }, [isConnected, address, fullAuthStatus, isFullyAuthenticated,  openAuthModal]);
 
   const connectionState = getConnectionState();
 

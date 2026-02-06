@@ -518,102 +518,72 @@ export function ERC20InteractionPanel({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-3">
       {/* Header */}
-      <div className="p-3 rounded-lg border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-transparent">
+      <div className="p-3 rounded-lg border border-[hsl(var(--color-accent-primary)/0.3)] bg-gradient-to-r from-[hsl(var(--color-accent-primary)/0.1)] to-transparent">
         <div className="flex items-center gap-2 mb-1">
-          <Coins className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm font-medium text-white">
+          <Coins className="w-4 h-4 text-[hsl(var(--color-accent-primary))]" />
+          <span className="text-sm font-medium text-[hsl(var(--color-text-primary))]">
             {tokenName || 'ERC-20'} {tokenSymbol ? `(${tokenSymbol})` : 'Token'}
           </span>
         </div>
-        <p className="text-[10px] text-forge-muted">Stylus Contract Interaction</p>
+        <p className="text-[10px] text-[hsl(var(--color-text-muted))]">Stylus Contract Interaction</p>
       </div>
 
       {/* Wallet Status */}
       <div className={cn(
         'p-2.5 rounded-lg border',
-        walletConnected ? 'border-green-500/30 bg-green-500/5' : 'border-amber-500/30 bg-amber-500/5'
+        walletConnected ? 'border-[hsl(var(--color-success)/0.3)] bg-[hsl(var(--color-success)/0.05)]' : 'border-[hsl(var(--color-warning)/0.3)] bg-[hsl(var(--color-warning)/0.05)]'
       )}>
         <div className="flex items-center gap-2">
-          <Wallet className={cn('w-3.5 h-3.5', walletConnected ? 'text-green-400' : 'text-amber-400')} />
+          <Wallet className={cn('w-3.5 h-3.5', walletConnected ? 'text-[hsl(var(--color-success))]' : 'text-[hsl(var(--color-warning))]')} />
           {walletConnected ? (
-            <span className="text-[10px] text-green-300">
-              Connected: <code className="text-green-400">{userAddress?.slice(0, 6)}...{userAddress?.slice(-4)}</code>
+            <span className="text-[10px] text-[hsl(var(--color-success)/0.8)]">
+              Connected: <code className="text-[hsl(var(--color-success))]">{userAddress?.slice(0, 6)}...{userAddress?.slice(-4)}</code>
             </span>
           ) : (
-            <span className="text-[10px] text-amber-300">Connect wallet via Wallet Auth node for write ops</span>
+            <span className="text-[10px] text-[hsl(var(--color-warning)/0.8)]">Connect wallet via Wallet Auth node for write ops</span>
           )}
         </div>
       </div>
 
       {/* Network Selector */}
       <div className="space-y-1.5">
-        <label className="text-xs text-forge-muted flex items-center gap-1.5">
+        <label className="text-xs text-[hsl(var(--color-text-muted))] flex items-center gap-1.5">
           <Globe className="w-3 h-3" /> Network
         </label>
         <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setSelectedNetwork('arbitrum-sepolia')}
-            className={cn(
-              'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-              selectedNetwork === 'arbitrum-sepolia'
-                ? 'bg-emerald-600 border-emerald-500 text-white'
-                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-emerald-500/50'
-            )}
-          >
-            Arbitrum Sepolia
-          </button>
-          <button
-            onClick={() => setSelectedNetwork('arbitrum')}
-            className={cn(
-              'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-              selectedNetwork === 'arbitrum'
-                ? 'bg-emerald-600 border-emerald-500 text-white'
-                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-emerald-500/50'
-            )}
-          >
-            Arbitrum One
-          </button>
-          <button
-            onClick={() => setSelectedNetwork('superposition')}
-            className={cn(
-              'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-              selectedNetwork === 'superposition'
-                ? 'bg-emerald-600 border-emerald-500 text-white'
-                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-emerald-500/50'
-            )}
-          >
-            Superposition
-          </button>
-          <button
-            onClick={() => setSelectedNetwork('superposition-testnet')}
-            className={cn(
-              'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-              selectedNetwork === 'superposition-testnet'
-                ? 'bg-emerald-600 border-emerald-500 text-white'
-                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-emerald-500/50'
-            )}
-          >
-            Superposition Testnet
-          </button>
+          {(['arbitrum-sepolia', 'arbitrum', 'superposition', 'superposition-testnet'] as const).map((net) => (
+            <button
+              key={net}
+              onClick={() => setSelectedNetwork(net)}
+              className={cn(
+                'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
+                selectedNetwork === net
+                  ? 'bg-[hsl(var(--color-accent-primary))] border-[hsl(var(--color-accent-primary))] text-black'
+                  : 'bg-[hsl(var(--color-bg-base))] border-[hsl(var(--color-border-default)/0.5)] text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] hover:border-[hsl(var(--color-accent-primary)/0.5)]'
+              )}
+            >
+              {NETWORKS[net].name}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Contract Info */}
-      <div className="p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+      <div className="p-2.5 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-forge-muted">Contract:</span>
+            <span className="text-[10px] text-[hsl(var(--color-text-muted))]">Contract:</span>
             {isUsingDefaultContract && (
-              <span className="text-[8px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">Default</span>
+              <span className="text-[8px] px-1.5 py-0.5 bg-[hsl(var(--color-success)/0.2)] text-[hsl(var(--color-success))] rounded">Default</span>
             )}
           </div>
           <a
             href={`${displayExplorerUrl}/address/${contractAddress}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[10px] font-mono text-emerald-400 hover:underline flex items-center gap-1"
+            className="text-[10px] font-mono text-[hsl(var(--color-accent-primary))] hover:underline flex items-center gap-1"
           >
             {contractAddress.slice(0, 6)}...{contractAddress.slice(-4)}
             <ExternalLink className="w-2.5 h-2.5" />
@@ -624,14 +594,14 @@ export function ERC20InteractionPanel({
       {/* Custom Contract Toggle */}
       <button
         onClick={() => setShowCustomContract(!showCustomContract)}
-        className="w-full flex items-center justify-between px-3 py-2 bg-forge-bg/50 border border-forge-border/30 rounded-lg text-xs text-forge-muted hover:text-white transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] rounded-lg text-xs text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] transition-colors"
       >
         <span>Use Custom Contract</span>
         {showCustomContract ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
       </button>
 
       {showCustomContract && (
-        <div className="p-3 rounded-lg bg-forge-bg/30 border border-forge-border/30 space-y-2">
+        <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.3)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
           <input
             type="text"
             value={customAddress}
@@ -641,12 +611,12 @@ export function ERC20InteractionPanel({
             }}
             placeholder="0x..."
             className={cn(
-              "w-full px-3 py-2 bg-forge-bg border rounded-lg text-xs text-white placeholder-forge-muted focus:outline-none",
-              customAddressError ? "border-red-500/50" : "border-forge-border/50 focus:border-emerald-500/50"
+              "w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none",
+              customAddressError ? "border-[hsl(var(--color-error)/0.5)]" : "border-[hsl(var(--color-border-default)/0.5)] focus:border-[hsl(var(--color-accent-primary)/0.5)]"
             )}
           />
           {customAddressError && (
-            <p className="text-[10px] text-red-400 flex items-center gap-1">
+            <p className="text-[10px] text-[hsl(var(--color-error))] flex items-center gap-1">
               <AlertCircle className="w-3 h-3" /> {customAddressError}
             </p>
           )}
@@ -654,7 +624,7 @@ export function ERC20InteractionPanel({
             <button
               onClick={handleUseCustomContract}
               disabled={!customAddress || isValidatingContract}
-              className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium disabled:opacity-50 flex items-center justify-center gap-1"
+              className="flex-1 py-1.5 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded text-[10px] font-medium disabled:opacity-50 flex items-center justify-center gap-1"
             >
               {isValidatingContract ? (
                 <>
@@ -666,7 +636,7 @@ export function ERC20InteractionPanel({
             </button>
             <button
               onClick={handleUseDefaultContract}
-              className="flex-1 py-1.5 bg-forge-border hover:bg-forge-muted/20 text-white rounded text-[10px] font-medium"
+              className="flex-1 py-1.5 bg-[hsl(var(--color-border-default))] hover:bg-[hsl(var(--color-text-muted)/0.2)] text-[hsl(var(--color-text-primary))] rounded text-[10px] font-medium"
             >
               Reset to Default
             </button>
@@ -676,51 +646,32 @@ export function ERC20InteractionPanel({
 
       <button
         onClick={fetchTokenInfo}
-        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-medium transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-xs font-medium transition-colors"
       >
         <RefreshCw className="w-3.5 h-3.5" /> Refresh
       </button>
-
-      {/* Contract Error Banner */}
-      {/* {contractError && (
-        <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-xs text-red-300 font-medium">Contract Error</p>
-              <p className="text-[10px] text-red-400/80 mt-1">{contractError}</p>
-            </div>
-            <button
-              onClick={() => setContractError(null)}
-              className="text-red-400/60 hover:text-red-400 text-xs"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )} */}
 
       {/* Transaction Status */}
       {txStatus.status !== 'idle' && (
         <div className={cn(
           'rounded-lg p-2.5 border flex items-start gap-2',
-          txStatus.status === 'pending' && 'bg-blue-500/10 border-blue-500/30',
-          txStatus.status === 'success' && 'bg-emerald-500/10 border-emerald-500/30',
-          txStatus.status === 'error' && 'bg-red-500/10 border-red-500/30'
+          txStatus.status === 'pending' && 'bg-[hsl(var(--color-info)/0.1)] border-[hsl(var(--color-info)/0.3)]',
+          txStatus.status === 'success' && 'bg-[hsl(var(--color-success)/0.1)] border-[hsl(var(--color-success)/0.3)]',
+          txStatus.status === 'error' && 'bg-[hsl(var(--color-error)/0.1)] border-[hsl(var(--color-error)/0.3)]'
         )}>
-          {txStatus.status === 'pending' && <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin shrink-0" />}
-          {txStatus.status === 'success' && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
-          {txStatus.status === 'error' && <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />}
+          {txStatus.status === 'pending' && <Loader2 className="w-3.5 h-3.5 text-[hsl(var(--color-info))] animate-spin shrink-0" />}
+          {txStatus.status === 'success' && <Check className="w-3.5 h-3.5 text-[hsl(var(--color-success))] shrink-0" />}
+          {txStatus.status === 'error' && <AlertCircle className="w-3.5 h-3.5 text-[hsl(var(--color-error))] shrink-0" />}
           <div className="flex-1 min-w-0">
             <p className={cn(
               'text-[10px] font-medium truncate',
-              txStatus.status === 'pending' && 'text-blue-300',
-              txStatus.status === 'success' && 'text-emerald-300',
-              txStatus.status === 'error' && 'text-red-300'
+              txStatus.status === 'pending' && 'text-[hsl(var(--color-info)/0.8)]',
+              txStatus.status === 'success' && 'text-[hsl(var(--color-success)/0.8)]',
+              txStatus.status === 'error' && 'text-[hsl(var(--color-error)/0.8)]'
             )}>{txStatus.message}</p>
             {txStatus.hash && (
               <a href={`${explorerUrl}/tx/${txStatus.hash}`} target="_blank" rel="noopener noreferrer"
-                className="text-[9px] text-forge-muted hover:text-white flex items-center gap-1">
+                className="text-[9px] text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] flex items-center gap-1">
                 Explorer <ExternalLink className="w-2.5 h-2.5" />
               </a>
             )}
@@ -731,20 +682,20 @@ export function ERC20InteractionPanel({
       {/* Token Stats */}
       {isConnected && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+          <div className="flex items-center justify-between p-2.5 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)]">
             <div className="flex items-center gap-1.5">
-              <Coins className="w-3 h-3 text-emerald-400" />
-              <span className="text-[10px] text-forge-muted">Total Supply</span>
+              <Coins className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] text-[hsl(var(--color-text-muted))]">Total Supply</span>
             </div>
-            <span className="text-xs font-medium text-white">{totalSupply ? Number(totalSupply).toLocaleString() : '—'}</span>
+            <span className="text-xs font-medium text-[hsl(var(--color-text-primary))]">{totalSupply ? Number(totalSupply).toLocaleString() : '—'}</span>
           </div>
           {walletConnected && (
-            <div className="flex items-center justify-between p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+            <div className="flex items-center justify-between p-2.5 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)]">
               <div className="flex items-center gap-1.5">
-                <Wallet className="w-3 h-3 text-teal-400" />
-                <span className="text-[10px] text-forge-muted">Your Balance</span>
+                <Wallet className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+                <span className="text-[10px] text-[hsl(var(--color-text-muted))]">Your Balance</span>
               </div>
-              <span className="text-xs font-medium text-white">{userBalance ? Number(userBalance).toLocaleString() : '—'}</span>
+              <span className="text-xs font-medium text-[hsl(var(--color-text-primary))]">{userBalance ? Number(userBalance).toLocaleString() : '—'}</span>
             </div>
           )}
         </div>
@@ -754,87 +705,87 @@ export function ERC20InteractionPanel({
       {isConnected && walletConnected && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Send className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="text-xs font-medium text-white">Write Operations</span>
+            <Send className="w-3.5 h-3.5 text-[hsl(var(--color-success))]" />
+            <span className="text-xs font-medium text-[hsl(var(--color-text-primary))]">Write Operations</span>
           </div>
 
           {/* Transfer */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <span className="text-[10px] font-medium text-emerald-400">Transfer</span>
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Transfer</span>
             <input type="text" value={transferTo} onChange={(e) => setTransferTo(e.target.value)}
               placeholder="Recipient (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <input type="number" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)}
               placeholder="Amount"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleTransfer} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Transfer
             </button>
           </div>
 
           {/* Approve */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <div className="flex items-center gap-1.5">
-              <Shield className="w-3 h-3 text-blue-400" />
-              <span className="text-[10px] font-medium text-blue-400">Approve Spender</span>
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <div className="flex items-center gap-1.5 text-[hsl(var(--color-accent-primary))]">
+              <Shield className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Approve Spender</span>
             </div>
             <input type="text" value={approveSpender} onChange={(e) => setApproveSpender(e.target.value)}
               placeholder="Spender (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <input type="number" value={approveAmount} onChange={(e) => setApproveAmount(e.target.value)}
               placeholder="Amount"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleApprove} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-info)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Approve
             </button>
           </div>
 
           {/* Mint (to self) */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <div className="flex items-center gap-1.5">
-              <Coins className="w-3 h-3 text-violet-400" />
-              <span className="text-[10px] font-medium text-violet-400">Mint (to yourself)</span>
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <div className="flex items-center gap-1.5 text-[hsl(var(--color-accent-primary))]">
+              <Coins className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Mint (to yourself)</span>
             </div>
             <input type="number" value={mintAmount} onChange={(e) => setMintAmount(e.target.value)}
               placeholder="Amount"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleMint} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Mint
             </button>
           </div>
 
           {/* Mint To */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
             <div className="flex items-center gap-1.5">
-              <Coins className="w-3 h-3 text-fuchsia-400" />
-              <span className="text-[10px] font-medium text-fuchsia-400">Mint To Address</span>
+              <Coins className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Mint To Address</span>
             </div>
             <input type="text" value={mintToAddress} onChange={(e) => setMintToAddress(e.target.value)}
               placeholder="To Address (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <input type="number" value={mintToAmount} onChange={(e) => setMintToAmount(e.target.value)}
               placeholder="Amount"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleMintTo} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Mint To
             </button>
           </div>
 
           {/* Burn */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <div className="flex items-center gap-1.5">
-              <Flame className="w-3 h-3 text-orange-400" />
-              <span className="text-[10px] font-medium text-orange-400">Burn Tokens</span>
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <div className="flex items-center gap-1.5 text-[hsl(var(--color-accent-primary))]">
+              <Flame className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Burn Tokens</span>
             </div>
             <input type="number" value={burnAmount} onChange={(e) => setBurnAmount(e.target.value)}
               placeholder="Amount"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleBurn} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Burn
             </button>
           </div>
@@ -845,43 +796,43 @@ export function ERC20InteractionPanel({
       {isConnected && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <ArrowRightLeft className="w-3.5 h-3.5 text-purple-400" />
-            <span className="text-xs font-medium text-white">Read Operations</span>
+            <ArrowRightLeft className="w-3.5 h-3.5 text-[hsl(var(--color-accent-secondary))]" />
+            <span className="text-xs font-medium text-[hsl(var(--color-text-primary))]">Read Operations</span>
           </div>
 
-          {/* Check Allowance */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <span className="text-[10px] font-medium text-purple-400">Check Allowance</span>
+          {/* Allowance */}
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Check Allowance</span>
             <input type="text" value={allowanceOwner} onChange={(e) => setAllowanceOwner(e.target.value)}
               placeholder="Owner (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <input type="text" value={allowanceSpender} onChange={(e) => setAllowanceSpender(e.target.value)}
               placeholder="Spender (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={checkAllowance}
-              className="w-full py-1.5 bg-purple-600/50 hover:bg-purple-600 text-white rounded text-[10px] font-medium">
-              Check
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary)/0.5)] hover:bg-[hsl(var(--color-accent-secondary))] text-black rounded-lg text-[10px] font-medium transition-colors">
+              Check Allowance
             </button>
-            {allowanceResult !== null && (
-              <div className="p-2 bg-purple-500/10 border border-purple-500/30 rounded">
-                <p className="text-[10px] text-purple-300">Allowance: <span className="font-medium text-white">{allowanceResult}</span></p>
+            {allowanceResult && (
+              <div className="p-2 bg-[hsl(var(--color-accent-primary)/0.1)] border border-[hsl(var(--color-accent-primary)/0.3)] rounded">
+                <p className="text-[10px] text-[hsl(var(--color-accent-primary)/0.8)]">Allowance: <span className="font-medium text-[hsl(var(--color-text-primary))]">{allowanceResult}</span></p>
               </div>
             )}
           </div>
 
-          {/* Check Balance */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <span className="text-[10px] font-medium text-cyan-400">Check Balance</span>
+          {/* Balance Of */}
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Check Balance</span>
             <input type="text" value={balanceCheckAddress} onChange={(e) => setBalanceCheckAddress(e.target.value)}
               placeholder="Address (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={checkBalance}
-              className="w-full py-1.5 bg-cyan-600/50 hover:bg-cyan-600 text-white rounded text-[10px] font-medium">
-              Check
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary)/0.5)] hover:bg-[hsl(var(--color-accent-secondary))] text-black rounded-lg text-[10px] font-medium transition-colors">
+              Check Balance
             </button>
-            {balanceCheckResult !== null && (
-              <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded">
-                <p className="text-[10px] text-cyan-300">Balance: <span className="font-medium text-white">{Number(balanceCheckResult).toLocaleString()}</span></p>
+            {balanceCheckResult && (
+              <div className="p-2 bg-[hsl(var(--color-accent-primary)/0.1)] border border-[hsl(var(--color-accent-primary)/0.3)] rounded">
+                <p className="text-[10px] text-[hsl(var(--color-accent-primary)/0.8)]">Balance: <span className="font-medium text-[hsl(var(--color-text-primary))]">{balanceCheckResult}</span></p>
               </div>
             )}
           </div>

@@ -83,8 +83,8 @@ const ERC721_ABI = [
 // Network-specific default contract addresses (only for networks where contracts are deployed)
 const DEFAULT_CONTRACT_ADDRESSES: Record<string, string | undefined> = {
   'arbitrum-sepolia': '0xe2a8cd01354ecc63a8341a849e9b89f14ff9f08f',
-  'arbitrum': undefined, // No default contract deployed on mainnet
-  'superposition': undefined, // No default contract deployed on mainnet
+  'arbitrum': undefined,
+  'superposition': undefined,
   'superposition-testnet': '0xa0cc35ec0ce975c28dacc797edb7808e882043c3',
 };
 
@@ -243,49 +243,27 @@ export function ERC721InteractionPanel({
 
   const getReadContract = useCallback(() => {
     if (!contractAddress || !rpcUrl) return null;
-    // Create a fresh provider with the current RPC URL
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     return new ethers.Contract(contractAddress, ERC721_ABI, provider);
   }, [contractAddress, rpcUrl, selectedNetwork]);
 
   const getWriteContract = useCallback(async () => {
-    console.log('[ERC721] getWriteContract called', { contractAddress, walletConnected, currentChainId: currentChain?.id, targetChainId: networkConfig.chainId });
+    if (!contractAddress) throw new Error('No contract address specified');
+    if (!walletConnected) throw new Error('Please connect your wallet first');
 
-    if (!contractAddress) {
-      console.error('[ERC721] No contract address');
-      throw new Error('No contract address specified');
-    }
-
-    if (!walletConnected) {
-      console.error('[ERC721] Wallet not connected');
-      throw new Error('Please connect your wallet first');
-    }
-
-    // Check if ethereum provider exists
     const ethereum = (window as any).ethereum;
-    if (!ethereum) {
-      console.error('[ERC721] No ethereum provider found');
-      throw new Error('No wallet detected. Please install MetaMask.');
-    }
+    if (!ethereum) throw new Error('No wallet detected. Please install MetaMask.');
 
-    // Switch chain if necessary
     const targetChainIdHex = `0x${networkConfig.chainId.toString(16)}`;
-    console.log('[ERC721] Current chain:', currentChain?.id, 'Target chain:', networkConfig.chainId);
 
     if (currentChain?.id !== networkConfig.chainId) {
-      console.log('[ERC721] Switching chain to', networkConfig.name);
       try {
-        // Try to switch to the chain
         await ethereum.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: targetChainIdHex }],
         });
-        console.log('[ERC721] Chain switched successfully');
       } catch (switchError: any) {
-        console.log('[ERC721] Switch error:', switchError.code, switchError.message);
-        // Chain doesn't exist, try to add it
         if (switchError.code === 4902 || switchError.message?.includes('Unrecognized chain') || switchError.message?.includes('wallet_addEthereumChain')) {
-          console.log('[ERC721] Chain not found, adding chain...');
           try {
             await ethereum.request({
               method: 'wallet_addEthereumChain',
@@ -297,9 +275,7 @@ export function ERC721InteractionPanel({
                 blockExplorerUrls: [networkConfig.explorerUrl],
               }],
             });
-            console.log('[ERC721] Chain added successfully');
           } catch (addError: any) {
-            console.error('[ERC721] Failed to add chain:', addError);
             throw new Error(`Failed to add ${networkConfig.name} to wallet: ${addError.message}`);
           }
         } else if (switchError.code === 4001) {
@@ -310,29 +286,22 @@ export function ERC721InteractionPanel({
       }
     }
 
-    // Use ethers with window.ethereum directly for better compatibility
-    console.log('[ERC721] Creating provider and signer...');
     const provider = new ethers.BrowserProvider(ethereum);
     const signer = await provider.getSigner();
-    console.log('[ERC721] Signer address:', await signer.getAddress());
-
-    const contract = new ethers.Contract(contractAddress, ERC721_ABI, signer);
-    console.log('[ERC721] Contract created at:', contractAddress);
-    return contract;
+    return new ethers.Contract(contractAddress, ERC721_ABI, signer);
   }, [contractAddress, walletConnected, currentChain?.id, networkConfig]);
 
-  // Helper to parse RPC/contract errors into user-friendly messages
   const parseContractError = useCallback((error: any): string => {
     const errorMessage = error?.message || error?.reason || String(error);
 
     if (errorMessage.includes('BAD_DATA') || errorMessage.includes('could not decode result data')) {
-      return `Contract not found or not deployed on ${networkConfig.name}. The contract may only exist on a different network.`;
+      return `Contract not found or not deployed on ${networkConfig.name}.`;
     }
     if (errorMessage.includes('call revert exception')) {
-      return `Contract call failed. The contract may not support this function or is not properly deployed on ${networkConfig.name}.`;
+      return `Contract call failed on ${networkConfig.name}.`;
     }
     if (errorMessage.includes('network') || errorMessage.includes('connection')) {
-      return `Network connection error. Please check your connection and try again.`;
+      return `Network connection error. Please try again.`;
     }
     if (errorMessage.includes('execution reverted')) {
       return `Transaction reverted: ${error?.reason || 'Unknown reason'}`;
@@ -353,9 +322,8 @@ export function ERC721InteractionPanel({
         contract.symbol().catch(() => null),
       ]);
 
-      // Check if we got valid data
       if (name === null && symbol === null) {
-        setContractError(`Unable to read contract data. The contract may not be deployed on ${networkConfig.name}.`);
+        setContractError(`Unable to read contract data on ${networkConfig.name}.`);
         setIsConnected(false);
         return;
       }
@@ -368,13 +336,11 @@ export function ERC721InteractionPanel({
           const balance = await contract.balanceOf(userAddress);
           setUserBalance(balance.toString());
         } catch (balanceError: any) {
-          console.error('Error fetching balance:', balanceError);
           setContractError(parseContractError(balanceError));
         }
       }
       setIsConnected(true);
     } catch (error: any) {
-      console.error('Error:', error);
       setContractError(parseContractError(error));
       setIsConnected(false);
     }
@@ -390,15 +356,8 @@ export function ERC721InteractionPanel({
     operation: () => Promise<ethers.TransactionResponse>,
     successMessage: string
   ) => {
-    console.log('[ERC721] handleTransaction called, walletConnected:', walletConnected, 'txStatus:', txStatus.status);
-
-    if (txStatus.status === 'pending') {
-      console.log('[ERC721] Transaction already pending, skipping');
-      return;
-    }
-
+    if (txStatus.status === 'pending') return;
     if (!walletConnected) {
-      console.log('[ERC721] Wallet not connected');
       setTxStatus({ status: 'error', message: 'Please connect your wallet first' });
       setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 5000);
       return;
@@ -406,16 +365,12 @@ export function ERC721InteractionPanel({
 
     try {
       setTxStatus({ status: 'pending', message: 'Confirming...' });
-      console.log('[ERC721] Executing operation...');
       const tx = await operation();
-      console.log('[ERC721] Transaction submitted:', tx.hash);
       setTxStatus({ status: 'pending', message: 'Waiting for confirmation...', hash: tx.hash });
       await tx.wait();
-      console.log('[ERC721] Transaction confirmed');
       setTxStatus({ status: 'success', message: successMessage, hash: tx.hash });
       fetchNFTInfo();
     } catch (error: any) {
-      console.error('[ERC721] Transaction error:', error);
       const errorMsg = error.reason || error.message || error.shortMessage || 'Transaction failed';
       setTxStatus({ status: 'error', message: errorMsg });
     }
@@ -423,59 +378,39 @@ export function ERC721InteractionPanel({
   };
 
   const handleMint = async () => {
-    console.log('[ERC721] handleMint called');
     try {
       const contract = await getWriteContract();
-      if (!contract) {
-        console.error('[ERC721] getWriteContract returned null');
-        return;
-      }
-      console.log('[ERC721] Got contract, calling mint()...');
-      handleTransaction(
-        () => contract.mint(),
-        'NFT minted to yourself!'
-      );
+      if (!contract) return;
+      handleTransaction(() => contract.mint(), 'NFT minted to yourself!');
     } catch (error: any) {
-      console.error('[ERC721] handleMint error:', error);
       setTxStatus({ status: 'error', message: error.message || 'Failed to prepare transaction' });
       setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 5000);
     }
   };
 
   const handleMintTo = async () => {
-    console.log('[ERC721] handleMintTo called');
     try {
       const contract = await getWriteContract();
       if (!contract || !mintToAddress) return;
-      handleTransaction(
-        () => contract.mintTo(mintToAddress),
-        'NFT minted successfully!'
-      );
+      handleTransaction(() => contract.mintTo(mintToAddress), 'NFT minted successfully!');
     } catch (error: any) {
-      console.error('[ERC721] handleMintTo error:', error);
       setTxStatus({ status: 'error', message: error.message || 'Failed to prepare transaction' });
       setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 5000);
     }
   };
 
   const handleSafeMint = async () => {
-    console.log('[ERC721] handleSafeMint called');
     try {
       const contract = await getWriteContract();
       if (!contract || !safeMintToAddress) return;
-      handleTransaction(
-        () => contract['safeMint(address)'](safeMintToAddress),
-        'NFT safely minted!'
-      );
+      handleTransaction(() => contract['safeMint(address)'](safeMintToAddress), 'NFT safely minted!');
     } catch (error: any) {
-      console.error('[ERC721] handleSafeMint error:', error);
       setTxStatus({ status: 'error', message: error.message || 'Failed to prepare transaction' });
       setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 5000);
     }
   };
 
   const handleTransfer = async () => {
-    console.log('[ERC721] handleTransfer called');
     try {
       const contract = await getWriteContract();
       if (!contract || !transferFrom || !transferTo || !transferTokenId) return;
@@ -484,30 +419,23 @@ export function ERC721InteractionPanel({
         `NFT #${transferTokenId} transferred!`
       );
     } catch (error: any) {
-      console.error('[ERC721] handleTransfer error:', error);
       setTxStatus({ status: 'error', message: error.message || 'Failed to prepare transaction' });
       setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 5000);
     }
   };
 
   const handleApprove = async () => {
-    console.log('[ERC721] handleApprove called');
     try {
       const contract = await getWriteContract();
       if (!contract || !approveAddress || !approveTokenId) return;
-      handleTransaction(
-        () => contract.approve(approveAddress, approveTokenId),
-        `Approval set for NFT #${approveTokenId}!`
-      );
+      handleTransaction(() => contract.approve(approveAddress, approveTokenId), `Approval set for NFT #${approveTokenId}!`);
     } catch (error: any) {
-      console.error('[ERC721] handleApprove error:', error);
       setTxStatus({ status: 'error', message: error.message || 'Failed to prepare transaction' });
       setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 5000);
     }
   };
 
   const handleSetApprovalForAll = async () => {
-    console.log('[ERC721] handleSetApprovalForAll called');
     try {
       const contract = await getWriteContract();
       if (!contract || !operatorAddress) return;
@@ -516,23 +444,17 @@ export function ERC721InteractionPanel({
         `Operator ${operatorApproved ? 'approved' : 'revoked'}!`
       );
     } catch (error: any) {
-      console.error('[ERC721] handleSetApprovalForAll error:', error);
       setTxStatus({ status: 'error', message: error.message || 'Failed to prepare transaction' });
       setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 5000);
     }
   };
 
   const handleBurn = async () => {
-    console.log('[ERC721] handleBurn called');
     try {
       const contract = await getWriteContract();
       if (!contract || !burnTokenId) return;
-      handleTransaction(
-        () => contract.burn(burnTokenId),
-        `NFT #${burnTokenId} burned!`
-      );
+      handleTransaction(() => contract.burn(burnTokenId), `NFT #${burnTokenId} burned!`);
     } catch (error: any) {
-      console.error('[ERC721] handleBurn error:', error);
       setTxStatus({ status: 'error', message: error.message || 'Failed to prepare transaction' });
       setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 5000);
     }
@@ -583,102 +505,72 @@ export function ERC721InteractionPanel({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-3">
       {/* Header */}
-      <div className="p-3 rounded-lg border border-violet-500/30 bg-gradient-to-r from-violet-500/10 to-transparent">
+      <div className="p-3 rounded-lg border border-[hsl(var(--color-accent-primary)/0.3)] bg-gradient-to-r from-[hsl(var(--color-accent-primary)/0.1)] to-transparent">
         <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="w-4 h-4 text-violet-400" />
-          <span className="text-sm font-medium text-white">
+          <Sparkles className="w-4 h-4 text-[hsl(var(--color-accent-primary))]" />
+          <span className="text-sm font-medium text-[hsl(var(--color-text-primary))]">
             {collectionName || 'ERC-721'} {collectionSymbol ? `(${collectionSymbol})` : 'NFT'}
           </span>
         </div>
-        <p className="text-[10px] text-forge-muted">Stylus NFT Contract Interaction</p>
+        <p className="text-[10px] text-[hsl(var(--color-text-muted))]">Stylus NFT Contract Interaction</p>
       </div>
 
       {/* Wallet Status */}
       <div className={cn(
         'p-2.5 rounded-lg border',
-        walletConnected ? 'border-green-500/30 bg-green-500/5' : 'border-amber-500/30 bg-amber-500/5'
+        walletConnected ? 'border-[hsl(var(--color-success)/0.3)] bg-[hsl(var(--color-success)/0.05)]' : 'border-[hsl(var(--color-warning)/0.3)] bg-[hsl(var(--color-warning)/0.05)]'
       )}>
         <div className="flex items-center gap-2">
-          <Wallet className={cn('w-3.5 h-3.5', walletConnected ? 'text-green-400' : 'text-amber-400')} />
+          <Wallet className={cn('w-3.5 h-3.5', walletConnected ? 'text-[hsl(var(--color-success))]' : 'text-[hsl(var(--color-warning))]')} />
           {walletConnected ? (
-            <span className="text-[10px] text-green-300">
-              Connected: <code className="text-green-400">{userAddress?.slice(0, 6)}...{userAddress?.slice(-4)}</code>
+            <span className="text-[10px] text-[hsl(var(--color-success)/0.8)]">
+              Connected: <code className="text-[hsl(var(--color-success))]">{userAddress?.slice(0, 6)}...{userAddress?.slice(-4)}</code>
             </span>
           ) : (
-            <span className="text-[10px] text-amber-300">Connect wallet via Wallet Auth node for write ops</span>
+            <span className="text-[10px] text-[hsl(var(--color-warning)/0.8)]">Connect wallet via Wallet Auth node for write ops</span>
           )}
         </div>
       </div>
 
       {/* Network Selector */}
       <div className="space-y-1.5">
-        <label className="text-xs text-forge-muted flex items-center gap-1.5">
+        <label className="text-xs text-[hsl(var(--color-text-muted))] flex items-center gap-1.5">
           <Globe className="w-3 h-3" /> Network
         </label>
         <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setSelectedNetwork('arbitrum-sepolia')}
-            className={cn(
-              'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-              selectedNetwork === 'arbitrum-sepolia'
-                ? 'bg-violet-600 border-violet-500 text-white'
-                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-violet-500/50'
-            )}
-          >
-            Arbitrum Sepolia
-          </button>
-          <button
-            onClick={() => setSelectedNetwork('arbitrum')}
-            className={cn(
-              'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-              selectedNetwork === 'arbitrum'
-                ? 'bg-violet-600 border-violet-500 text-white'
-                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-violet-500/50'
-            )}
-          >
-            Arbitrum One
-          </button>
-          <button
-            onClick={() => setSelectedNetwork('superposition')}
-            className={cn(
-              'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-              selectedNetwork === 'superposition'
-                ? 'bg-violet-600 border-violet-500 text-white'
-                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-violet-500/50'
-            )}
-          >
-            Superposition
-          </button>
-          <button
-            onClick={() => setSelectedNetwork('superposition-testnet')}
-            className={cn(
-              'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-              selectedNetwork === 'superposition-testnet'
-                ? 'bg-violet-600 border-violet-500 text-white'
-                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-violet-500/50'
-            )}
-          >
-            Superposition Testnet
-          </button>
+          {(['arbitrum-sepolia', 'arbitrum', 'superposition', 'superposition-testnet'] as const).map((net) => (
+            <button
+              key={net}
+              onClick={() => setSelectedNetwork(net)}
+              className={cn(
+                'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
+                selectedNetwork === net
+                  ? 'bg-[hsl(var(--color-accent-primary))] border-[hsl(var(--color-accent-primary))] text-black'
+                  : 'bg-[hsl(var(--color-bg-base))] border-[hsl(var(--color-border-default)/0.5)] text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] hover:border-[hsl(var(--color-accent-primary)/0.5)]'
+              )}
+            >
+              {NETWORKS[net].name}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Contract Info */}
-      <div className="p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+      <div className="p-2.5 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-forge-muted">Contract:</span>
+            <span className="text-[10px] text-[hsl(var(--color-text-muted))]">Contract:</span>
             {isUsingDefaultContract && (
-              <span className="text-[8px] px-1.5 py-0.5 bg-violet-500/20 text-violet-400 rounded">Default</span>
+              <span className="text-[8px] px-1.5 py-0.5 bg-[hsl(var(--color-success)/0.2)] text-[hsl(var(--color-success))] rounded">Default</span>
             )}
           </div>
           <a
             href={`${displayExplorerUrl}/address/${contractAddress}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[10px] font-mono text-violet-400 hover:underline flex items-center gap-1"
+            className="text-[10px] font-mono text-[hsl(var(--color-accent-primary))] hover:underline flex items-center gap-1"
           >
             {contractAddress.slice(0, 6)}...{contractAddress.slice(-4)}
             <ExternalLink className="w-2.5 h-2.5" />
@@ -689,14 +581,14 @@ export function ERC721InteractionPanel({
       {/* Custom Contract Toggle */}
       <button
         onClick={() => setShowCustomContract(!showCustomContract)}
-        className="w-full flex items-center justify-between px-3 py-2 bg-forge-bg/50 border border-forge-border/30 rounded-lg text-xs text-forge-muted hover:text-white transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] rounded-lg text-xs text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] transition-colors"
       >
         <span>Use Custom Contract</span>
         {showCustomContract ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
       </button>
 
       {showCustomContract && (
-        <div className="p-3 rounded-lg bg-forge-bg/30 border border-forge-border/30 space-y-2">
+        <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.3)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
           <input
             type="text"
             value={customAddress}
@@ -706,12 +598,12 @@ export function ERC721InteractionPanel({
             }}
             placeholder="0x..."
             className={cn(
-              "w-full px-3 py-2 bg-forge-bg border rounded-lg text-xs text-white placeholder-forge-muted focus:outline-none",
-              customAddressError ? "border-red-500/50" : "border-forge-border/50 focus:border-violet-500/50"
+              "w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none",
+              customAddressError ? "border-[hsl(var(--color-error)/0.5)]" : "border-[hsl(var(--color-border-default)/0.5)] focus:border-[hsl(var(--color-accent-primary)/0.5)]"
             )}
           />
           {customAddressError && (
-            <p className="text-[10px] text-red-400 flex items-center gap-1">
+            <p className="text-[10px] text-[hsl(var(--color-error))] flex items-center gap-1">
               <AlertCircle className="w-3 h-3" /> {customAddressError}
             </p>
           )}
@@ -719,7 +611,7 @@ export function ERC721InteractionPanel({
             <button
               onClick={handleUseCustomContract}
               disabled={!customAddress || isValidatingContract}
-              className="flex-1 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded text-[10px] font-medium disabled:opacity-50 flex items-center justify-center gap-1"
+              className="flex-1 py-1.5 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded text-[10px] font-medium disabled:opacity-50 flex items-center justify-center gap-1"
             >
               {isValidatingContract ? (
                 <>
@@ -731,7 +623,7 @@ export function ERC721InteractionPanel({
             </button>
             <button
               onClick={handleUseDefaultContract}
-              className="flex-1 py-1.5 bg-forge-border hover:bg-forge-muted/20 text-white rounded text-[10px] font-medium"
+              className="flex-1 py-1.5 bg-[hsl(var(--color-border-default))] hover:bg-[hsl(var(--color-text-muted)/0.2)] text-[hsl(var(--color-text-primary))] rounded text-[10px] font-medium"
             >
               Reset to Default
             </button>
@@ -741,51 +633,32 @@ export function ERC721InteractionPanel({
 
       <button
         onClick={fetchNFTInfo}
-        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-xs font-medium transition-colors"
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-xs font-medium transition-colors"
       >
         <RefreshCw className="w-3.5 h-3.5" /> Refresh
       </button>
-
-      {/* Contract Error Banner */}
-      {/* {contractError && (
-        <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-xs text-red-300 font-medium">Contract Error</p>
-              <p className="text-[10px] text-red-400/80 mt-1">{contractError}</p>
-            </div>
-            <button
-              onClick={() => setContractError(null)}
-              className="text-red-400/60 hover:text-red-400 text-xs"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )} */}
 
       {/* Transaction Status */}
       {txStatus.status !== 'idle' && (
         <div className={cn(
           'rounded-lg p-2.5 border flex items-start gap-2',
-          txStatus.status === 'pending' && 'bg-blue-500/10 border-blue-500/30',
-          txStatus.status === 'success' && 'bg-emerald-500/10 border-emerald-500/30',
-          txStatus.status === 'error' && 'bg-red-500/10 border-red-500/30'
+          txStatus.status === 'pending' && 'bg-[hsl(var(--color-info)/0.1)] border-[hsl(var(--color-info)/0.3)]',
+          txStatus.status === 'success' && 'bg-[hsl(var(--color-success)/0.1)] border-[hsl(var(--color-success)/0.3)]',
+          txStatus.status === 'error' && 'bg-[hsl(var(--color-error)/0.1)] border-[hsl(var(--color-error)/0.3)]'
         )}>
-          {txStatus.status === 'pending' && <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin shrink-0" />}
-          {txStatus.status === 'success' && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
-          {txStatus.status === 'error' && <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />}
+          {txStatus.status === 'pending' && <Loader2 className="w-3.5 h-3.5 text-[hsl(var(--color-info))] animate-spin shrink-0" />}
+          {txStatus.status === 'success' && <Check className="w-3.5 h-3.5 text-[hsl(var(--color-success))] shrink-0" />}
+          {txStatus.status === 'error' && <AlertCircle className="w-3.5 h-3.5 text-[hsl(var(--color-error))] shrink-0" />}
           <div className="flex-1 min-w-0">
             <p className={cn(
               'text-[10px] font-medium truncate',
-              txStatus.status === 'pending' && 'text-blue-300',
-              txStatus.status === 'success' && 'text-emerald-300',
-              txStatus.status === 'error' && 'text-red-300'
+              txStatus.status === 'pending' && 'text-[hsl(var(--color-info)/0.8)]',
+              txStatus.status === 'success' && 'text-[hsl(var(--color-success)/0.8)]',
+              txStatus.status === 'error' && 'text-[hsl(var(--color-error)/0.8)]'
             )}>{txStatus.message}</p>
             {txStatus.hash && (
               <a href={`${explorerUrl}/tx/${txStatus.hash}`} target="_blank" rel="noopener noreferrer"
-                className="text-[9px] text-forge-muted hover:text-white flex items-center gap-1">
+                className="text-[9px] text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] flex items-center gap-1">
                 Explorer <ExternalLink className="w-2.5 h-2.5" />
               </a>
             )}
@@ -796,12 +669,12 @@ export function ERC721InteractionPanel({
       {/* NFT Stats */}
       {isConnected && walletConnected && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+          <div className="flex items-center justify-between p-2.5 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)]">
             <div className="flex items-center gap-1.5">
-              <Image className="w-3 h-3 text-violet-400" />
-              <span className="text-[10px] text-forge-muted">Your NFTs</span>
+              <Image className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] text-[hsl(var(--color-text-muted))]">Your NFTs</span>
             </div>
-            <span className="text-xs font-medium text-white">{userBalance || '0'}</span>
+            <span className="text-xs font-medium text-[hsl(var(--color-text-primary))]">{userBalance || '0'}</span>
           </div>
         </div>
       )}
@@ -810,119 +683,122 @@ export function ERC721InteractionPanel({
       {isConnected && walletConnected && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Send className="w-3.5 h-3.5 text-violet-400" />
-            <span className="text-xs font-medium text-white">Write Operations</span>
+            <Send className="w-3.5 h-3.5 text-[hsl(var(--color-success))]" />
+            <span className="text-xs font-medium text-[hsl(var(--color-text-primary))]">Write Operations</span>
           </div>
 
           {/* Mint (to self) */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
             <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-violet-400" />
-              <span className="text-[10px] font-medium text-violet-400">Mint (to yourself)</span>
+              <Sparkles className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Mint (to yourself)</span>
             </div>
             <button onClick={handleMint} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Mint NFT
             </button>
           </div>
 
           {/* Mint To */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
             <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-fuchsia-400" />
-              <span className="text-[10px] font-medium text-fuchsia-400">Mint To Address</span>
+              <Sparkles className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Mint To Address</span>
             </div>
             <input type="text" value={mintToAddress} onChange={(e) => setMintToAddress(e.target.value)}
               placeholder="To Address (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleMintTo} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Mint To
             </button>
           </div>
 
           {/* Safe Mint */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
             <div className="flex items-center gap-1.5">
-              <Shield className="w-3 h-3 text-emerald-400" />
-              <span className="text-[10px] font-medium text-emerald-400">Safe Mint</span>
+              <Shield className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Safe Mint</span>
             </div>
             <input type="text" value={safeMintToAddress} onChange={(e) => setSafeMintToAddress(e.target.value)}
               placeholder="To Address (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleSafeMint} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Safe Mint
             </button>
           </div>
 
           {/* Safe Transfer */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <span className="text-[10px] font-medium text-cyan-400">Safe Transfer</span>
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Shield className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-accent-primary))]">Safe Transfer</span>
+            </div>
             <input type="text" value={transferFrom} onChange={(e) => setTransferFrom(e.target.value)}
               placeholder="From (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <input type="text" value={transferTo} onChange={(e) => setTransferTo(e.target.value)}
               placeholder="To (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <input type="number" value={transferTokenId} onChange={(e) => setTransferTokenId(e.target.value)}
               placeholder="Token ID"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleTransfer} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Transfer NFT
             </button>
           </div>
 
           {/* Approve */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
             <div className="flex items-center gap-1.5">
-              <Shield className="w-3 h-3 text-blue-400" />
-              <span className="text-[10px] font-medium text-blue-400">Approve Token</span>
+              <Shield className="w-3 h-3 text-[hsl(var(--color-info))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-info))]">Approve Token</span>
             </div>
             <input type="text" value={approveAddress} onChange={(e) => setApproveAddress(e.target.value)}
               placeholder="Approved Address (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <input type="number" value={approveTokenId} onChange={(e) => setApproveTokenId(e.target.value)}
               placeholder="Token ID"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleApprove} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Approve
             </button>
           </div>
 
           {/* Set Approval For All */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3 h-3 text-indigo-400" />
-              <span className="text-[10px] font-medium text-indigo-400">Set Approval For All</span>
+              <CheckCircle2 className="w-3 h-3 text-[hsl(var(--color-info))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-info))]">Set Approval For All</span>
             </div>
             <input type="text" value={operatorAddress} onChange={(e) => setOperatorAddress(e.target.value)}
               placeholder="Operator (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <label className="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" checked={operatorApproved} onChange={(e) => setOperatorApproved(e.target.checked)}
-                className="w-3.5 h-3.5 rounded bg-forge-bg border-forge-border" />
-              <span className="text-[10px] text-forge-muted">Grant Approval</span>
+                className="w-3.5 h-3.5 rounded bg-[hsl(var(--color-bg-base))] border-[hsl(var(--color-border-default))] accent-[hsl(var(--color-info))]" />
+              <span className="text-[10px] text-[hsl(var(--color-text-muted))]">Grant Approval</span>
             </label>
             <button onClick={handleSetApprovalForAll} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               {operatorApproved ? 'Grant' : 'Revoke'} Access
             </button>
           </div>
 
           {/* Burn */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
             <div className="flex items-center gap-1.5">
-              <Flame className="w-3 h-3 text-orange-400" />
-              <span className="text-[10px] font-medium text-orange-400">Burn NFT</span>
+              <Flame className="w-3 h-3 text-[hsl(var(--color-warning))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-warning))]">Burn NFT</span>
             </div>
             <input type="number" value={burnTokenId} onChange={(e) => setBurnTokenId(e.target.value)}
               placeholder="Token ID"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={handleBurn} disabled={txStatus.status === 'pending'}
-              className="w-full py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded text-[10px] font-medium disabled:opacity-50">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium disabled:opacity-50 transition-colors">
               Burn
             </button>
           </div>
@@ -933,85 +809,85 @@ export function ERC721InteractionPanel({
       {isConnected && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <User className="w-3.5 h-3.5 text-purple-400" />
-            <span className="text-xs font-medium text-white">Read Operations</span>
+            <User className="w-3.5 h-3.5 text-[hsl(var(--color-accent-secondary))]" />
+            <span className="text-xs font-medium text-[hsl(var(--color-text-primary))]">Read Operations</span>
           </div>
 
           {/* Owner Of */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <span className="text-[10px] font-medium text-violet-400">Owner Of</span>
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <span className="text-[10px] font-medium text-[hsl(var(--color-accent-secondary))]">Owner Of</span>
             <input type="number" value={ownerOfTokenId} onChange={(e) => setOwnerOfTokenId(e.target.value)}
               placeholder="Token ID"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={checkOwnerOf}
-              className="w-full py-1.5 bg-violet-600/50 hover:bg-violet-600 text-white rounded text-[10px] font-medium">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium transition-colors">
               Check Owner
             </button>
             {ownerOfResult && (
-              <div className="p-2 bg-violet-500/10 border border-violet-500/30 rounded">
-                <p className="text-[9px] text-violet-300 mb-0.5">Owner:</p>
-                <p className="text-[10px] font-mono text-white break-all">{ownerOfResult}</p>
+              <div className="p-2 bg-[hsl(var(--color-accent-primary)/0.1)] border border-[hsl(var(--color-accent-primary)/0.3)] rounded">
+                <p className="text-[9px] text-[hsl(var(--color-accent-primary)/0.8)] mb-0.5">Owner:</p>
+                <p className="text-[10px] font-mono text-[hsl(var(--color-text-primary))] break-all">{ownerOfResult}</p>
               </div>
             )}
           </div>
 
           {/* Balance Of */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <span className="text-[10px] font-medium text-fuchsia-400">Balance Of</span>
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <span className="text-[10px] font-medium text-[hsl(var(--color-accent-secondary))]">Balance Of</span>
             <input type="text" value={balanceCheckAddress} onChange={(e) => setBalanceCheckAddress(e.target.value)}
               placeholder="Address (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={checkBalance}
-              className="w-full py-1.5 bg-fuchsia-600/50 hover:bg-fuchsia-600 text-white rounded text-[10px] font-medium">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium transition-colors">
               Check Balance
             </button>
             {balanceCheckResult && (
-              <div className="p-2 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded">
-                <p className="text-[10px] text-fuchsia-300">NFTs owned: <span className="font-medium text-white">{balanceCheckResult}</span></p>
+              <div className="p-2 bg-[hsl(var(--color-accent-primary)/0.1)] border border-[hsl(var(--color-accent-primary)/0.3)] rounded">
+                <p className="text-[10px] text-[hsl(var(--color-accent-primary)/0.8)]">NFTs owned: <span className="font-medium text-[hsl(var(--color-text-primary))]">{balanceCheckResult}</span></p>
               </div>
             )}
           </div>
 
           {/* Get Approved */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
-            <span className="text-[10px] font-medium text-blue-400">Get Approved</span>
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
+            <span className="text-[10px] font-medium text-[hsl(var(--color-info))]">Get Approved</span>
             <input type="number" value={getApprovedTokenId} onChange={(e) => setGetApprovedTokenId(e.target.value)}
               placeholder="Token ID"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={checkGetApproved}
-              className="w-full py-1.5 bg-blue-600/50 hover:bg-blue-600 text-white rounded text-[10px] font-medium">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium transition-colors">
               Check Approved
             </button>
             {getApprovedResult && (
-              <div className="p-2 bg-blue-500/10 border border-blue-500/30 rounded">
-                <p className="text-[9px] text-blue-300 mb-0.5">Approved:</p>
-                <p className="text-[10px] font-mono text-white break-all">{getApprovedResult}</p>
+              <div className="p-2 bg-[hsl(var(--color-accent-primary)/0.1)] border border-[hsl(var(--color-accent-primary)/0.3)] rounded">
+                <p className="text-[9px] text-[hsl(var(--color-accent-primary)/0.8)] mb-0.5">Approved:</p>
+                <p className="text-[10px] font-mono text-[hsl(var(--color-text-primary))] break-all">{getApprovedResult}</p>
               </div>
             )}
           </div>
 
           {/* Is Approved For All */}
-          <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-2">
+          <div className="p-3 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)] space-y-2">
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3 h-3 text-indigo-400" />
-              <span className="text-[10px] font-medium text-indigo-400">Is Approved For All</span>
+              <CheckCircle2 className="w-3 h-3 text-[hsl(var(--color-info))]" />
+              <span className="text-[10px] font-medium text-[hsl(var(--color-info))]">Is Approved For All</span>
             </div>
             <input type="text" value={approvalCheckOwner} onChange={(e) => setApprovalCheckOwner(e.target.value)}
               placeholder="Owner (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <input type="text" value={approvalCheckOperator} onChange={(e) => setApprovalCheckOperator(e.target.value)}
               placeholder="Operator (0x...)"
-              className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-forge-muted focus:outline-none" />
+              className="w-full px-3 py-2 bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.5)] rounded-lg text-xs text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none" />
             <button onClick={checkApprovalForAll}
-              className="w-full py-1.5 bg-indigo-600/50 hover:bg-indigo-600 text-white rounded text-[10px] font-medium">
+              className="w-full py-2 bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)] text-black rounded-lg text-[10px] font-medium transition-colors">
               Check Approval
             </button>
             {approvalCheckResult !== null && (
               <div className={cn(
                 'p-2 rounded border',
-                approvalCheckResult ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'
+                approvalCheckResult ? 'bg-[hsl(var(--color-success)/0.1)] border-[hsl(var(--color-success)/0.3)]' : 'bg-[hsl(var(--color-error)/0.1)] border-[hsl(var(--color-error)/0.3)]'
               )}>
-                <p className={cn('text-[10px] font-medium', approvalCheckResult ? 'text-emerald-300' : 'text-red-300')}>
+                <p className={cn('text-[10px] font-medium', approvalCheckResult ? 'text-[hsl(var(--color-success)/0.8)]' : 'text-[hsl(var(--color-error)/0.8)]')}>
                   {approvalCheckResult ? '✓ Operator is approved' : '✗ Operator is not approved'}
                 </p>
               </div>

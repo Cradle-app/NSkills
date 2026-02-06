@@ -4,6 +4,12 @@ import { useBlueprintStore } from '@/store/blueprint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  toggleRowStyles,
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -40,9 +46,9 @@ export function QualityGatesForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className={formStyles.container}>
       {/* CI Provider */}
-      <div>
+      <div className={formStyles.section}>
         <Select
           value={(config.ciProvider as string) || 'github-actions'}
           onValueChange={(value) => handleChange('ciProvider', value)}
@@ -61,7 +67,7 @@ export function QualityGatesForm({ nodeId, config }: Props) {
       </div>
 
       {/* Test Framework */}
-      <div>
+      <div className={formStyles.section}>
         <Select
           value={(config.testFramework as string) || 'vitest'}
           onValueChange={(value) => handleChange('testFramework', value)}
@@ -80,7 +86,7 @@ export function QualityGatesForm({ nodeId, config }: Props) {
       </div>
 
       {/* Linter */}
-      <div>
+      <div className={formStyles.section}>
         <Select
           value={(config.linter as string) || 'biome'}
           onValueChange={(value) => handleChange('linter', value)}
@@ -99,7 +105,7 @@ export function QualityGatesForm({ nodeId, config }: Props) {
       </div>
 
       {/* Formatter */}
-      <div>
+      <div className={formStyles.section}>
         <Select
           value={(config.formatter as string) || 'biome'}
           onValueChange={(value) => handleChange('formatter', value)}
@@ -118,7 +124,7 @@ export function QualityGatesForm({ nodeId, config }: Props) {
       </div>
 
       {/* Coverage Threshold */}
-      <div>
+      <div className={formStyles.section}>
         <Input
           label="Coverage Threshold (%)"
           type="number"
@@ -131,10 +137,10 @@ export function QualityGatesForm({ nodeId, config }: Props) {
 
       {/* Options */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
+        <div className={toggleRowStyles.row}>
           <div>
-            <p className="text-sm font-medium text-white">Type Checking</p>
-            <p className="text-xs text-forge-muted">Enable TypeScript checks</p>
+            <p className={toggleRowStyles.title}>Type Checking</p>
+            <p className={toggleRowStyles.description}>Enable TypeScript checks</p>
           </div>
           <Switch
             checked={(config.typecheck as boolean) ?? true}
@@ -142,10 +148,10 @@ export function QualityGatesForm({ nodeId, config }: Props) {
           />
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
+        <div className={toggleRowStyles.row}>
           <div>
-            <p className="text-sm font-medium text-white">Pre-commit Hooks</p>
-            <p className="text-xs text-forge-muted">Husky + lint-staged</p>
+            <p className={toggleRowStyles.title}>Pre-commit Hooks</p>
+            <p className={toggleRowStyles.description}>Husky + lint-staged</p>
           </div>
           <Switch
             checked={(config.preCommitHooks as boolean) ?? true}
@@ -153,10 +159,10 @@ export function QualityGatesForm({ nodeId, config }: Props) {
           />
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
+        <div className={toggleRowStyles.row}>
           <div>
-            <p className="text-sm font-medium text-white">Security Scanning</p>
-            <p className="text-xs text-forge-muted">Vulnerability checks</p>
+            <p className={toggleRowStyles.title}>Security Scanning</p>
+            <p className={toggleRowStyles.description}>Vulnerability checks</p>
           </div>
           <Switch
             checked={(config.securityScanning as boolean) ?? true}
@@ -164,10 +170,10 @@ export function QualityGatesForm({ nodeId, config }: Props) {
           />
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
+        <div className={toggleRowStyles.row}>
           <div>
-            <p className="text-sm font-medium text-white">Dependency Audit</p>
-            <p className="text-xs text-forge-muted">npm audit integration</p>
+            <p className={toggleRowStyles.title}>Dependency Audit</p>
+            <p className={toggleRowStyles.description}>npm audit integration</p>
           </div>
           <Switch
             checked={(config.dependencyAudit as boolean) ?? true}
@@ -178,4 +184,3 @@ export function QualityGatesForm({ nodeId, config }: Props) {
     </div>
   );
 }
-

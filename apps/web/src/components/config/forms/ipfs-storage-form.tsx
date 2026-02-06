@@ -4,9 +4,16 @@ import { useState } from 'react';
 import { useBlueprintStore } from '@/store/blueprint';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { HardDrive, Info, ExternalLink, Eye, EyeOff, Key, ChevronDown, ChevronUp } from 'lucide-react';
+import { HardDrive, Info, ExternalLink, Eye, EyeOff, Key, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
 import { IPFSUploadPanel } from '@/components/ipfs/ipfs-upload-panel';
 import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  cardStyles,
+  codeStyles,
+  inputStyles,
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -29,18 +36,20 @@ export function IPFSStorageForm({ nodeId, config }: Props) {
   const hasApiKeys = pinataApiKey.length > 0 && pinataSecretKey.length > 0;
 
   return (
-    <div className="space-y-4">
+    <div className={formStyles.container}>
       {/* Info callout */}
-      <div className="flex items-start gap-2 p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20">
-        <Info className="w-4 h-4 text-accent-cyan shrink-0 mt-0.5" />
-        <div className="text-xs text-forge-muted">
-          <p className="text-accent-cyan font-medium mb-1">IPFS Storage</p>
-          <p>Upload files directly to IPFS via Pinata. Files are pinned and permanently available.</p>
+      <div className={cardStyles.info}>
+        <div className="flex items-start gap-2">
+          <Info className="w-4 h-4 text-[hsl(var(--color-info))] shrink-0 mt-0.5" />
+          <div className="text-xs">
+            <p className="text-[hsl(var(--color-info))] font-medium mb-1">IPFS Storage</p>
+            <p className="text-[hsl(var(--color-text-muted))]">Upload files directly to IPFS via Pinata. Files are pinned and permanently available.</p>
+          </div>
         </div>
       </div>
 
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Storage Provider</label>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Storage Provider</label>
         <Select
           value={provider}
           onValueChange={(v) => updateConfig('provider', v)}
@@ -65,81 +74,89 @@ export function IPFSStorageForm({ nodeId, config }: Props) {
 
       {/* Pinata API Keys */}
       {provider === 'pinata' && (
-        <div className="space-y-3 p-3 rounded-lg bg-forge-elevated/30 border border-forge-border/50">
-          <div className="flex items-center gap-2">
-            <Key className="w-3.5 h-3.5 text-accent-cyan" />
-            <span className="text-xs font-medium text-white">Pinata API Keys</span>
+        <div className={cardStyles.base}>
+          <div className="flex items-center gap-2 mb-3">
+            <Key className="w-3.5 h-3.5 text-[hsl(var(--color-accent-primary))]" />
+            <span className="text-xs font-semibold text-[hsl(var(--color-text-primary))]">Pinata API Keys</span>
             <a
               href="https://app.pinata.cloud/developers/api-keys"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-auto inline-flex items-center gap-1 text-[10px] text-accent-cyan hover:underline"
+              className="ml-auto inline-flex items-center gap-1 text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
             >
               Get keys <ExternalLink className="w-2.5 h-2.5" />
             </a>
           </div>
 
-          <div>
-            <label className="text-[10px] text-forge-muted mb-1 block">API Key</label>
-            <div className="relative">
-              <input
-                type={showApiKey ? 'text' : 'password'}
-                value={pinataApiKey}
-                onChange={(e) => updateConfig('pinataApiKey', e.target.value)}
-                placeholder="Enter your Pinata API key"
-                className="w-full h-8 px-2.5 pr-8 rounded-lg bg-forge-bg border border-forge-border/50 text-xs text-white placeholder:text-forge-muted/50 focus:outline-none focus:border-accent-cyan/50"
-              />
-              <button
-                type="button"
-                onClick={() => setShowApiKey(!showApiKey)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-forge-muted hover:text-white"
-              >
-                {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              </button>
+          <div className="space-y-3">
+            <div>
+              <label className="text-[10px] text-[hsl(var(--color-text-muted))] mb-1 block">API Key</label>
+              <div className="relative">
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  value={pinataApiKey}
+                  onChange={(e) => updateConfig('pinataApiKey', e.target.value)}
+                  placeholder="Enter your Pinata API key"
+                  className={cn(
+                    inputStyles.base,
+                    'h-8 pr-8'
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]"
+                >
+                  {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="text-[10px] text-forge-muted mb-1 block">Secret Key</label>
-            <div className="relative">
-              <input
-                type={showSecretKey ? 'text' : 'password'}
-                value={pinataSecretKey}
-                onChange={(e) => updateConfig('pinataSecretKey', e.target.value)}
-                placeholder="Enter your Pinata secret key"
-                className="w-full h-8 px-2.5 pr-8 rounded-lg bg-forge-bg border border-forge-border/50 text-xs text-white placeholder:text-forge-muted/50 focus:outline-none focus:border-accent-cyan/50"
-              />
-              <button
-                type="button"
-                onClick={() => setShowSecretKey(!showSecretKey)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-forge-muted hover:text-white"
-              >
-                {showSecretKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              </button>
+            <div>
+              <label className="text-[10px] text-[hsl(var(--color-text-muted))] mb-1 block">Secret Key</label>
+              <div className="relative">
+                <input
+                  type={showSecretKey ? 'text' : 'password'}
+                  value={pinataSecretKey}
+                  onChange={(e) => updateConfig('pinataSecretKey', e.target.value)}
+                  placeholder="Enter your Pinata secret key"
+                  className={cn(
+                    inputStyles.base,
+                    'h-8 pr-8'
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSecretKey(!showSecretKey)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]"
+                >
+                  {showSecretKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
             </div>
-          </div>
 
-          {hasApiKeys && (
-            <div className="flex items-center gap-1.5 text-[10px] text-emerald-400">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              API keys configured
-            </div>
-          )}
+            {hasApiKeys && (
+              <div className="flex items-center gap-1.5 text-[10px] text-[hsl(var(--color-success))]">
+                <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-success))]" />
+                API keys configured
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* Upload Section */}
       {provider === 'pinata' && (
-        <div className="border-t border-forge-border/50 pt-4">
+        <div className="border-t border-[hsl(var(--color-border-subtle))] pt-4">
           <button
             onClick={() => setShowUploader(!showUploader)}
             className="flex items-center justify-between w-full text-left mb-3"
           >
-            <span className="text-xs font-medium text-white">Upload to IPFS</span>
+            <span className="text-xs font-semibold text-[hsl(var(--color-text-primary))]">Upload to IPFS</span>
             {showUploader ? (
-              <ChevronUp className="w-4 h-4 text-forge-muted" />
+              <ChevronUp className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-forge-muted" />
+              <ChevronDown className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
             )}
           </button>
 
@@ -153,19 +170,19 @@ export function IPFSStorageForm({ nodeId, config }: Props) {
       )}
 
       {/* Code Generation Options */}
-      <div className="border-t border-forge-border/50 pt-4 space-y-3">
-        <p className="text-[10px] text-forge-muted uppercase tracking-wider">Code Generation</p>
+      <div className="border-t border-[hsl(var(--color-border-subtle))] pt-4 space-y-3">
+        <p className="text-[10px] text-[hsl(var(--color-text-muted))] uppercase tracking-wider font-medium">Code Generation</p>
 
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-white">Generate Metadata Schemas</span>
+        <div className="flex items-center justify-between py-1">
+          <span className="text-sm text-[hsl(var(--color-text-primary))]">Generate Metadata Schemas</span>
           <Switch
             checked={(config.generateMetadataSchemas as boolean) ?? true}
             onCheckedChange={(v) => updateConfig('generateMetadataSchemas', v)}
           />
         </div>
 
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-white">Generate Upload UI</span>
+        <div className="flex items-center justify-between py-1">
+          <span className="text-sm text-[hsl(var(--color-text-primary))]">Generate Upload UI</span>
           <Switch
             checked={(config.generateUI as boolean) ?? true}
             onCheckedChange={(v) => updateConfig('generateUI', v)}
@@ -174,21 +191,21 @@ export function IPFSStorageForm({ nodeId, config }: Props) {
       </div>
 
       {/* What will be generated */}
-      <div className="pt-2 border-t border-forge-border/50">
-        <p className="text-[10px] text-forge-muted mb-2 uppercase tracking-wider">Generated Files</p>
-        <ul className="space-y-1 text-xs text-white/70">
+      <div className="pt-2 border-t border-[hsl(var(--color-border-subtle))]">
+        <p className="text-[10px] text-[hsl(var(--color-text-muted))] mb-2 uppercase tracking-wider font-medium">Generated Files</p>
+        <ul className="space-y-1.5 text-xs text-[hsl(var(--color-text-secondary))]">
           <li className="flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-emerald-500" />
-            <code className="text-[11px] bg-forge-elevated/50 px-1 rounded">storage-client.ts</code>
+            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-success))]" />
+            <code className={codeStyles.inline}>storage-client.ts</code>
           </li>
           <li className="flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-emerald-500" />
-            <code className="text-[11px] bg-forge-elevated/50 px-1 rounded">useIPFS.ts</code>
+            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-success))]" />
+            <code className={codeStyles.inline}>useIPFS.ts</code>
           </li>
           {(config.generateUI as boolean) !== false && (
             <li className="flex items-center gap-2">
-              <div className="w-1 h-1 rounded-full bg-emerald-500" />
-              <code className="text-[11px] bg-forge-elevated/50 px-1 rounded">FileUpload.tsx</code>
+              <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-success))]" />
+              <code className={codeStyles.inline}>FileUpload.tsx</code>
             </li>
           )}
         </ul>

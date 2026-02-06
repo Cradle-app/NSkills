@@ -20,6 +20,14 @@ import {
 } from '@cradle/ostium-onect';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import { WalletDependencyNotice } from '@/components/config/wallet-dependency-notice';
+import {
+    formStyles,
+    labelStyles,
+    cardStyles,
+    statusStyles,
+    actionStyles,
+    codeStyles,
+} from './shared-styles';
 
 interface Props {
     nodeId: string;
@@ -110,27 +118,22 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
     }, [delegation.status?.isDelegated, approval.status?.hasApproval]);
 
     return (
-        <div className="space-y-4">
+        <div className={formStyles.container}>
             {/* Wallet Dependency Notice */}
             <WalletDependencyNotice nodeId={nodeId} />
 
             {/* Status Overview */}
-            <div className={cn(
-                'p-3 rounded-lg border',
-                isComplete
-                    ? 'border-green-500/30 bg-green-500/5'
-                    : 'border-forge-border/50 bg-forge-bg/50'
-            )}>
+            <div className={isComplete ? statusStyles.connected : statusStyles.disconnected}>
                 <div className="flex items-center gap-2 mb-2">
-                    <Zap className={cn('w-4 h-4', isComplete ? 'text-green-400' : 'text-accent-cyan')} />
-                    <span className="text-sm font-medium text-white">One-Click Trading</span>
+                    <Zap className={cn('w-4 h-4', isComplete ? 'text-[hsl(var(--color-success))]' : 'text-[hsl(var(--color-accent-primary))]')} />
+                    <span className="text-sm font-medium text-[hsl(var(--color-text-primary))]">One-Click Trading</span>
                     {isComplete && (
-                        <span className="text-[10px] px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded font-medium">
+                        <span className="text-[10px] px-1.5 py-0.5 bg-[hsl(var(--color-success)/0.2)] text-[hsl(var(--color-success))] rounded font-medium">
                             READY
                         </span>
                     )}
                 </div>
-                <p className="text-xs text-forge-muted">
+                <p className="text-xs text-[hsl(var(--color-text-muted))]">
                     {isComplete
                         ? 'Your wallet is configured for automated trading on Ostium.'
                         : 'Enable delegation and USDC approval to allow automated trading.'}
@@ -138,8 +141,8 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
             </div>
 
             {/* Network Selection */}
-            <div>
-                <label className="text-xs text-forge-muted mb-1.5 block">Network</label>
+            <div className={formStyles.section}>
+                <label className={labelStyles.base}>Network</label>
                 <Select
                     value={network}
                     onValueChange={(v) => updateConfig('network', v)}
@@ -156,55 +159,51 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
             <div className={cn(
                 'p-3 rounded-lg border transition-all',
                 delegation.status?.isDelegated
-                    ? 'border-green-500/30 bg-green-500/5'
-                    : 'border-forge-border/50 bg-forge-bg/50'
+                    ? 'border-[hsl(var(--color-success)/0.3)] bg-[hsl(var(--color-success)/0.05)]'
+                    : 'border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-muted))]'
             )}>
                 <div className="flex items-start gap-3">
                     <div className={cn(
                         'w-8 h-8 rounded-lg border-2 flex items-center justify-center shrink-0',
                         delegation.status?.isDelegated
-                            ? 'border-green-500 bg-green-500/10'
-                            : 'border-forge-border bg-forge-bg'
+                            ? 'border-[hsl(var(--color-success))] bg-[hsl(var(--color-success)/0.1)]'
+                            : 'border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-base))]'
                     )}>
                         {delegation.status?.isDelegated ? (
-                            <CheckCircle2 className="w-4 h-4 text-green-400" />
+                            <CheckCircle2 className="w-4 h-4 text-[hsl(var(--color-success))]" />
                         ) : delegation.txState.status === 'pending' ? (
-                            <Loader2 className="w-4 h-4 text-accent-cyan animate-spin" />
+                            <Loader2 className="w-4 h-4 text-[hsl(var(--color-accent-primary))] animate-spin" />
                         ) : (
-                            <Shield className="w-4 h-4 text-forge-muted" />
+                            <Shield className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
                         )}
                     </div>
                     <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                            <p className="text-sm font-medium text-white">Enable Delegation</p>
+                            <p className="text-sm font-medium text-[hsl(var(--color-text-primary))]">Enable Delegation</p>
                             {delegation.status?.isDelegated ? (
-                                <span className="text-[10px] px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded">
+                                <span className="text-[10px] px-1.5 py-0.5 bg-[hsl(var(--color-success)/0.2)] text-[hsl(var(--color-success))] rounded">
                                     Active
                                 </span>
                             ) : (
                                 <button
                                     onClick={() => delegation.enable()}
                                     disabled={!isConnected || delegation.txState.status === 'pending' || !isValidDelegateAddress}
-                                    className={cn(
-                                        'px-2 py-1 text-xs rounded font-medium transition-colors',
-                                        'bg-accent-cyan/20 text-accent-cyan hover:bg-accent-cyan/30',
-                                        'disabled:opacity-50 disabled:cursor-not-allowed'
-                                    )}
+                                    className={actionStyles.primary}
                                 >
                                     {delegation.txState.status === 'pending' ? 'Signing...' : 'Enable'}
                                 </button>
                             )}
                         </div>
-                        <p className="text-xs text-forge-muted mb-2">
+                        <p className="text-xs text-[hsl(var(--color-text-muted))] mb-2">
                             Delegate signatures to enable gasless transactions.
                         </p>
 
                         {!delegation.status?.isDelegated && (
                             <div className="mb-3">
-                                <label className="text-[10px] text-forge-muted mb-1 block">
+                                <label className="text-[10px] text-[hsl(var(--color-text-muted))] mb-1 block">
                                     Delegate Address
                                     {isAddressFromMaxxit && (
-                                        <span className="ml-2 text-cyan-400">(from Lazy Trader)</span>
+                                        <span className="ml-2 text-[hsl(var(--color-accent-primary))]">(from Lazy Trader)</span>
                                     )}
                                 </label>
                                 <Input
@@ -215,11 +214,11 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
                                     readOnly={isAddressFromMaxxit}
                                     className={cn(
                                         "text-xs h-8 font-mono",
-                                        isAddressFromMaxxit && "bg-forge-bg/50 cursor-not-allowed opacity-80"
+                                        isAddressFromMaxxit && "bg-[hsl(var(--color-bg-muted))] cursor-not-allowed opacity-80"
                                     )}
                                 />
                                 {configuredDelegateAddress && !isValidDelegateAddress && (
-                                    <p className="text-[10px] text-yellow-400 mt-1">
+                                    <p className="text-[10px] text-[hsl(var(--color-warning))] mt-1">
                                         Please enter a valid Ethereum address
                                     </p>
                                 )}
@@ -231,7 +230,7 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
                                 href={`${explorerUrl}/tx/${delegation.txState.hash}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-[10px] text-accent-cyan hover:underline"
+                                className="flex items-center gap-1 text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
                             >
                                 <ExternalLink className="w-3 h-3" />
                                 View transaction
@@ -239,17 +238,19 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
                         )}
 
                         {delegation.error && (
-                            <p className="text-[10px] text-red-400 mt-1">
+                            <p className="text-[10px] text-[hsl(var(--color-error))] mt-1">
                                 {delegation.error.message}
                             </p>
                         )}
 
                         {!delegation.status?.isDelegated && !delegation.isLoading && (
-                            <div className="flex items-start gap-1.5 p-2 rounded bg-forge-elevated/50 border border-forge-border/30">
-                                <Info className="w-3 h-3 text-forge-muted shrink-0 mt-0.5" />
-                                <p className="text-[10px] text-forge-muted leading-relaxed">
-                                    This calls <code className="text-accent-cyan">setDelegate()</code> on the Ostium trading contract.
-                                </p>
+                            <div className={cardStyles.info}>
+                                <div className="flex items-start gap-1.5">
+                                    <Info className="w-3 h-3 text-[hsl(var(--color-info))] shrink-0 mt-0.5" />
+                                    <p className="text-[10px] text-[hsl(var(--color-text-muted))] leading-relaxed">
+                                        This calls <code className={codeStyles.inline}>setDelegate()</code> on the Ostium trading contract.
+                                    </p>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -260,53 +261,49 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
             <div className={cn(
                 'p-3 rounded-lg border transition-all',
                 approval.status?.hasApproval
-                    ? 'border-green-500/30 bg-green-500/5'
-                    : 'border-forge-border/50 bg-forge-bg/50'
+                    ? 'border-[hsl(var(--color-success)/0.3)] bg-[hsl(var(--color-success)/0.05)]'
+                    : 'border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-muted))]'
             )}>
                 <div className="flex items-start gap-3">
                     <div className={cn(
                         'w-8 h-8 rounded-lg border-2 flex items-center justify-center shrink-0',
                         approval.status?.hasApproval
-                            ? 'border-green-500 bg-green-500/10'
-                            : 'border-forge-border bg-forge-bg'
+                            ? 'border-[hsl(var(--color-success))] bg-[hsl(var(--color-success)/0.1)]'
+                            : 'border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-base))]'
                     )}>
                         {approval.status?.hasApproval ? (
-                            <CheckCircle2 className="w-4 h-4 text-green-400" />
+                            <CheckCircle2 className="w-4 h-4 text-[hsl(var(--color-success))]" />
                         ) : approval.txState.status === 'pending' ? (
-                            <Loader2 className="w-4 h-4 text-accent-cyan animate-spin" />
+                            <Loader2 className="w-4 h-4 text-[hsl(var(--color-accent-primary))] animate-spin" />
                         ) : (
-                            <Wallet className="w-4 h-4 text-forge-muted" />
+                            <Wallet className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
                         )}
                     </div>
                     <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                            <p className="text-sm font-medium text-white">Approve USDC</p>
+                            <p className="text-sm font-medium text-[hsl(var(--color-text-primary))]">Approve USDC</p>
                             {approval.status?.hasApproval ? (
-                                <span className="text-[10px] px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded">
+                                <span className="text-[10px] px-1.5 py-0.5 bg-[hsl(var(--color-success)/0.2)] text-[hsl(var(--color-success))] rounded">
                                     {approval.status.formattedAllowance} USDC
                                 </span>
                             ) : (
                                 <button
                                     onClick={() => approval.approve()}
                                     disabled={!isConnected || approval.txState.status === 'pending'}
-                                    className={cn(
-                                        'px-2 py-1 text-xs rounded font-medium transition-colors',
-                                        'bg-accent-cyan/20 text-accent-cyan hover:bg-accent-cyan/30',
-                                        'disabled:opacity-50 disabled:cursor-not-allowed'
-                                    )}
+                                    className={actionStyles.primary}
                                 >
                                     {approval.txState.status === 'pending' ? 'Signing...' : 'Approve'}
                                 </button>
                             )}
                         </div>
-                        <p className="text-xs text-forge-muted mb-2">
+                        <p className="text-xs text-[hsl(var(--color-text-muted))] mb-2">
                             Set USDC allowance for the Ostium storage contract.
                         </p>
 
                         {/* USDC Approval Amount Input */}
                         {!approval.status?.hasApproval && (
                             <div className="mb-3">
-                                <label className="text-[10px] text-forge-muted mb-1 block">Approval Amount (USDC)</label>
+                                <label className="text-[10px] text-[hsl(var(--color-text-muted))] mb-1 block">Approval Amount (USDC)</label>
                                 <Input
                                     type="text"
                                     placeholder="1000000"
@@ -314,14 +311,14 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
                                     onChange={(e) => updateConfig('usdcApprovalAmount', e.target.value)}
                                     className="text-xs h-8"
                                 />
-                                <p className="text-[10px] text-forge-muted mt-1">
+                                <p className="text-[10px] text-[hsl(var(--color-text-muted))] mt-1">
                                     Leave empty for default (1,000,000 USDC)
                                 </p>
                             </div>
                         )}
 
                         {approval.balance && (
-                            <p className="text-[10px] text-forge-muted mb-2">
+                            <p className="text-[10px] text-[hsl(var(--color-text-muted))] mb-2">
                                 Balance: {approval.balance.formatted} USDC
                             </p>
                         )}
@@ -331,7 +328,7 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
                                 href={`${explorerUrl}/tx/${approval.txState.hash}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-[10px] text-accent-cyan hover:underline"
+                                className="flex items-center gap-1 text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
                             >
                                 <ExternalLink className="w-3 h-3" />
                                 View transaction
@@ -339,17 +336,19 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
                         )}
 
                         {approval.error && (
-                            <p className="text-[10px] text-red-400 mt-1">
+                            <p className="text-[10px] text-[hsl(var(--color-error))] mt-1">
                                 {approval.error.message}
                             </p>
                         )}
 
                         {!approval.status?.hasApproval && !approval.isLoading && (
-                            <div className="flex items-start gap-1.5 p-2 rounded bg-forge-elevated/50 border border-forge-border/30">
-                                <Info className="w-3 h-3 text-forge-muted shrink-0 mt-0.5" />
-                                <p className="text-[10px] text-forge-muted leading-relaxed">
-                                    This calls <code className="text-accent-cyan">approve()</code> on the USDC contract with a high allowance.
-                                </p>
+                            <div className={cardStyles.info}>
+                                <div className="flex items-start gap-1.5">
+                                    <Info className="w-3 h-3 text-[hsl(var(--color-info))] shrink-0 mt-0.5" />
+                                    <p className="text-[10px] text-[hsl(var(--color-text-muted))] leading-relaxed">
+                                        This calls <code className={codeStyles.inline}>approve()</code> on the USDC contract with a high allowance.
+                                    </p>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -357,24 +356,24 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
             </div>
 
             {/* Contract Info */}
-            <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/30">
-                <p className="text-xs font-medium text-forge-muted mb-2">Contract Addresses ({network === 'arbitrum' ? 'Mainnet' : 'Testnet'})</p>
+            <div className={cardStyles.base}>
+                <p className="text-xs font-semibold text-[hsl(var(--color-text-muted))] mb-2">Contract Addresses ({network === 'arbitrum' ? 'Mainnet' : 'Testnet'})</p>
                 <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-forge-muted">Trading Contract</span>
-                        <code className="text-[10px] text-accent-cyan font-mono">
+                        <span className="text-[10px] text-[hsl(var(--color-text-muted))]">Trading Contract</span>
+                        <code className={codeStyles.inline}>
                             {CONTRACTS[network].trading.slice(0, 6)}...{CONTRACTS[network].trading.slice(-4)}
                         </code>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-forge-muted">Storage Contract</span>
-                        <code className="text-[10px] text-accent-cyan font-mono">
+                        <span className="text-[10px] text-[hsl(var(--color-text-muted))]">Storage Contract</span>
+                        <code className={codeStyles.inline}>
                             {CONTRACTS[network].storage.slice(0, 6)}...{CONTRACTS[network].storage.slice(-4)}
                         </code>
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-forge-muted">USDC Token</span>
-                        <code className="text-[10px] text-accent-cyan font-mono">
+                        <span className="text-[10px] text-[hsl(var(--color-text-muted))]">USDC Token</span>
+                        <code className={codeStyles.inline}>
                             {CONTRACTS[network].usdc.slice(0, 6)}...{CONTRACTS[network].usdc.slice(-4)}
                         </code>
                     </div>
@@ -383,15 +382,15 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
 
             {/* Summary */}
             {isComplete && (
-                <div className="p-3 rounded-lg bg-gradient-to-br from-green-500/10 to-accent-cyan/5 border border-green-500/20">
+                <div className={cardStyles.success}>
                     <div className="flex items-center gap-2 mb-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-400" />
-                        <span className="text-sm font-medium text-white">Setup Complete</span>
+                        <CheckCircle2 className="w-4 h-4 text-[hsl(var(--color-success))]" />
+                        <span className="text-sm font-semibold text-[hsl(var(--color-text-primary))]">Setup Complete</span>
                     </div>
-                    <p className="text-xs text-forge-muted">
+                    <p className="text-xs text-[hsl(var(--color-text-muted))]">
                         Your wallet is configured for automated trading on Ostium. The same code powering this form will be included in your generated project.
                     </p>
-                    <div className="mt-2 flex items-center gap-1 text-[10px] text-accent-cyan">
+                    <div className="mt-2 flex items-center gap-1 text-[10px] text-[hsl(var(--color-accent-primary))]">
                         <ArrowRight className="w-3 h-3" />
                         <span>Ready for code generation</span>
                     </div>

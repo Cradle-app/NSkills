@@ -1,10 +1,24 @@
 'use client';
+
 import { useState, useCallback } from 'react';
 import { encodeFunctionData, parseUnits, formatUnits } from 'viem';
 import { useBlueprintStore } from '@/store/blueprint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { CandlestickChart, Info, RefreshCw, FileText, CheckCircle2, AlertTriangle, ExternalLink, Activity, ArrowRightLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  toggleRowStyles,
+  cardStyles,
+  codeStyles,
+  statusStyles,
+  actionStyles,
+  FormHeader
+} from './shared-styles';
+
 // Longtail contract addresses (verified from docs.long.so)
 const LONGTAIL_CONTRACTS = {
   AMM: '0xF3334049A3ce7e890bd4f8C6a0FBC70e38fd3746',
@@ -15,33 +29,40 @@ const LONGTAIL_CONTRACTS = {
   QUOTER_A: '0xcb937ecaf8cf29dd9bdb45418d17cfee74673535',
   QUOTER_B: '0x0314353a14099895d2510483b18b52e7bd1a2528',
 };
+
 const COMMON_TOKENS = {
   USDC: { address: '0x6c030c5CC283F791B26816f325b9C632d964F8A1', symbol: 'USDC', decimals: 6 },
   WETH: { address: '0x1fB719f10b56d7a85DCD32f27f897375fB21cfdd', symbol: 'WETH', decimals: 18 },
   ARB: { address: '0xA2555701754464d32D9624149E3fDb459F3c8DE4', symbol: 'ARB', decimals: 18 },
   FLY: { address: '0x80eFAD50D395671C13C4b1FA2969f7a7Aa9EF7b3', symbol: 'FLY', decimals: 18 },
 };
+
 const RPC_URL = 'https://rpc.superposition.so';
+
 interface ContractStatus {
   status: 'idle' | 'checking' | 'success' | 'error';
   blockNumber?: string;
   error?: string;
 }
+
 interface QuoteStatus {
   status: 'idle' | 'fetching' | 'success' | 'error';
   amountOut?: string;
   error?: string;
 }
+
 interface Props {
   nodeId: string;
   config: Record<string, unknown>;
 }
+
 const FEATURES = [
   { value: 'swap', label: 'Swap', description: 'Token swap functionality' },
   { value: 'liquidity', label: 'Liquidity', description: 'Provide/remove liquidity' },
   { value: 'pool-queries', label: 'Pool Queries', description: 'Query pool information' },
   { value: 'price-feeds', label: 'Price Feeds', description: 'Token price data' },
 ];
+
 const SLIPPAGE_OPTIONS = [
   { value: '0.1', label: '0.1%' },
   { value: '0.5', label: '0.5% (Default)' },
@@ -49,6 +70,7 @@ const SLIPPAGE_OPTIONS = [
   { value: '2', label: '2%' },
   { value: '5', label: '5%' },
 ];
+
 export function SuperpositionLongtailForm({ nodeId, config }: Props) {
   const { updateNodeConfig } = useBlueprintStore();
   const [contractStatus, setContractStatus] = useState<ContractStatus>({ status: 'idle' });
@@ -56,9 +78,11 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
   const [tokenIn, setTokenIn] = useState<string>('USDC');
   const [tokenOut, setTokenOut] = useState<string>('WETH');
   const [quoteStatus, setQuoteStatus] = useState<QuoteStatus>({ status: 'idle' });
+
   const handleChange = (key: string, value: unknown) => {
     updateNodeConfig(nodeId, { [key]: value });
   };
+
   // Verify Longtail AMM contract is deployed
   const verifyContracts = useCallback(async () => {
     setContractStatus({ status: 'checking' });
@@ -86,8 +110,10 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
           }),
         }),
       ]);
+
       const blockData = await blockResponse.json();
       const codeData = await codeResponse.json();
+
       if (codeData.result && codeData.result !== '0x' && codeData.result.length > 10) {
         const blockNumber = parseInt(blockData.result, 16).toLocaleString();
         setContractStatus({ status: 'success', blockNumber });
@@ -101,6 +127,7 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
       });
     }
   }, []);
+
   const toggleFeature = (feature: string) => {
     const currentFeatures = (config.features as string[]) || ['swap', 'pool-queries'];
     const newFeatures = currentFeatures.includes(feature)
@@ -108,31 +135,38 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
       : [...currentFeatures, feature];
     handleChange('features', newFeatures);
   };
+
   // Get swap quote using Longtail Quoter contract
   const getSwapQuote = useCallback(async () => {
     if (!quoteAmount || parseFloat(quoteAmount) <= 0) {
       setQuoteStatus({ status: 'error', error: 'Please enter a valid amount' });
       return;
     }
+
     const inToken = COMMON_TOKENS[tokenIn as keyof typeof COMMON_TOKENS];
     const outToken = COMMON_TOKENS[tokenOut as keyof typeof COMMON_TOKENS];
+
     if (!inToken || !outToken) {
       setQuoteStatus({ status: 'error', error: 'Invalid token selection' });
       return;
     }
+
     if (tokenIn === tokenOut) {
       setQuoteStatus({ status: 'error', error: 'Please select different tokens' });
       return;
     }
+
     setQuoteStatus({ status: 'fetching' });
+
     try {
       const fee = 3000; // 0.3% default fee tier
       const amountIn = parseUnits(quoteAmount, inToken.decimals);
       const sqrtPriceLimitX96 = BigInt(0); // No price limit
+
       // Try Quoter A first, then fallback to Quoter B
       const quoters = [LONGTAIL_CONTRACTS.QUOTER_A, LONGTAIL_CONTRACTS.QUOTER_B];
+
       // Encode quoteExactInputSingle function call
-      // Standard Uniswap V3-style quoter interface
       const quoteCallData = encodeFunctionData({
         abi: [
           {
@@ -158,7 +192,9 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
           sqrtPriceLimitX96,
         ],
       });
+
       let lastError: Error | null = null;
+
       // Try both quoter contracts
       for (const quoterAddress of quoters) {
         try {
@@ -178,24 +214,32 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
               id: 1,
             }),
           });
+
           const data = await response.json();
+
           if (data.error) {
             lastError = new Error(data.error.message || 'Quoter call failed');
             continue; // Try next quoter
           }
+
           // Parse the result - it's a uint256 (32 bytes)
           const result = data.result;
+
           if (!result || result === '0x') {
             lastError = new Error('No quote available - pool may not exist');
             continue;
           }
+
           const amountOut = BigInt(result);
+
           // Check if amountOut is 0 (pool might not exist or have liquidity)
           if (amountOut === BigInt(0)) {
             lastError = new Error('Pool has no liquidity or does not exist for this pair');
             continue;
           }
+
           const amountOutFormatted = formatUnits(amountOut, outToken.decimals);
+
           setQuoteStatus({
             status: 'success',
             amountOut: amountOutFormatted,
@@ -206,8 +250,10 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
           continue; // Try next quoter
         }
       }
+
       // If both quoters failed, throw the last error
       throw lastError || new Error('Both quoter contracts failed');
+
     } catch (err) {
       setQuoteStatus({
         status: 'error',
@@ -215,22 +261,30 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
       });
     }
   }, [quoteAmount, tokenIn, tokenOut]);
+
   return (
-    <div className="space-y-4">
+    <div className={formStyles.container}>
+      <FormHeader
+        icon={CandlestickChart}
+        title="Longtail DEX"
+        description="Integrate Longtail swaps, liquidity, and data using Arbitrum Stylus."
+      />
+
       {/* Features */}
-      <div>
-        <label className="text-sm font-medium text-white mb-2 block">
-          Features
-        </label>
+      <div className={formStyles.section}>
+        <div className="flex items-center gap-2 mb-2">
+          <Activity className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
+          <span className="text-xs font-semibold text-[hsl(var(--color-text-secondary))] tracking-wide uppercase">Features</span>
+        </div>
         <div className="space-y-2">
           {FEATURES.map((feature) => (
             <div
               key={feature.value}
-              className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border"
+              className={toggleRowStyles.row}
             >
               <div>
-                <p className="text-sm font-medium text-white">{feature.label}</p>
-                <p className="text-xs text-forge-muted">{feature.description}</p>
+                <p className={toggleRowStyles.title}>{feature.label}</p>
+                <p className={toggleRowStyles.description}>{feature.description}</p>
               </div>
               <Switch
                 checked={((config.features as string[]) || ['swap', 'pool-queries']).includes(feature.value)}
@@ -240,13 +294,14 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
           ))}
         </div>
       </div>
-      {/* Default Slippage */}
-      <div>
+
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Default Slippage</label>
         <Select
           value={String((config.defaultSlippage as number) || 0.5)}
           onValueChange={(value) => handleChange('defaultSlippage', parseFloat(value))}
         >
-          <SelectTrigger label="Default Slippage">
+          <SelectTrigger>
             <SelectValue placeholder="Select slippage" />
           </SelectTrigger>
           <SelectContent>
@@ -258,69 +313,65 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
           </SelectContent>
         </Select>
       </div>
-      {/* Generate Swap UI */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Swap UI Component</p>
-          <p className="text-xs text-forge-muted">Generate ready-to-use swap interface</p>
-        </div>
-        <Switch
-          checked={(config.generateSwapUI as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateSwapUI', checked)}
-        />
-      </div>
-      {/* Generate Liquidity UI */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Liquidity UI Component</p>
-          <p className="text-xs text-forge-muted">Generate LP management interface</p>
-        </div>
-        <Switch
-          checked={(config.generateLiquidityUI as boolean) ?? false}
-          onCheckedChange={(checked) => handleChange('generateLiquidityUI', checked)}
-        />
-      </div>
-      {/* Generate Hooks */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Generate Hooks</p>
-          <p className="text-xs text-forge-muted">useLongtailSwap, useLongtailPool, etc.</p>
-        </div>
-        <Switch
-          checked={(config.generateHooks as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateHooks', checked)}
-        />
-      </div>
-      {/* Pool Analytics */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Pool Analytics</p>
-          <p className="text-xs text-forge-muted">Include TVL, volume, APR queries</p>
-        </div>
-        <Switch
-          checked={(config.includePoolAnalytics as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('includePoolAnalytics', checked)}
-        />
-      </div>
-      {/* Swap Quote Preview */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border space-y-3">
-        <div>
-          <p className="text-sm font-medium text-white">Swap Quote Preview</p>
-          <p className="text-xs text-forge-muted mb-3">Get an accurate quote from Longtail Quoter contracts</p>
-        </div>
-        <div className="space-y-3">
-          {/* Amount Input */}
-          <Input
-            type="number"
-            value={quoteAmount}
-            onChange={(e) => setQuoteAmount(e.target.value)}
-            placeholder="0.0"
-            label="Amount"
+
+      <div className={formStyles.section}>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Swap UI Component</p>
+            <p className={toggleRowStyles.description}>Generate ready-to-use swap interface</p>
+          </div>
+          <Switch
+            checked={(config.generateSwapUI as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateSwapUI', checked)}
           />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Liquidity UI Component</p>
+            <p className={toggleRowStyles.description}>Generate LP management interface</p>
+          </div>
+          <Switch
+            checked={(config.generateLiquidityUI as boolean) ?? false}
+            onCheckedChange={(checked) => handleChange('generateLiquidityUI', checked)}
+          />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Generate Hooks</p>
+            <p className={toggleRowStyles.description}>useLongtailSwap, useLongtailPool, etc.</p>
+          </div>
+          <Switch
+            checked={(config.generateHooks as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateHooks', checked)}
+          />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Pool Analytics</p>
+            <p className={toggleRowStyles.description}>Include TVL, volume, APR queries</p>
+          </div>
+          <Switch
+            checked={(config.includePoolAnalytics as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('includePoolAnalytics', checked)}
+          />
+        </div>
+      </div>
+
+      {/* Swap Quote Preview */}
+      <div className={cardStyles.base}>
+        <div className={cardStyles.cardHeader}>
+          <ArrowRightLeft className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-text-muted))]')} />
+          <span className={cardStyles.cardTitle}>Swap Quote Preview</span>
+        </div>
+
+        <div className="space-y-4">
           {/* Token Pair Selection */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs text-forge-muted mb-1.5 block">From</label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className={labelStyles.base}>From</label>
               <Select value={tokenIn} onValueChange={setTokenIn}>
                 <SelectTrigger>
                   <SelectValue />
@@ -334,8 +385,8 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <label className="text-xs text-forge-muted mb-1.5 block">To</label>
+            <div className="space-y-1.5">
+              <label className={labelStyles.base}>To</label>
               <Select value={tokenOut} onValueChange={setTokenOut}>
                 <SelectTrigger>
                   <SelectValue />
@@ -350,148 +401,194 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
               </Select>
             </div>
           </div>
-          {/* Get Quote Button */}
-          <button
-            onClick={getSwapQuote}
-            disabled={!quoteAmount || quoteStatus.status === 'fetching'}
-            className="w-full px-3 py-2 text-sm font-medium rounded-lg bg-accent-cyan/20 text-accent-cyan hover:bg-accent-cyan/30 disabled:opacity-50 transition-colors"
-          >
-            {quoteStatus.status === 'fetching' ? 'Getting Quote...' : 'Get Quote'}
-          </button>
+
+          {/* Amount and Action */}
+          <div className="flex gap-2 items-end">
+            <div className="flex-1 space-y-1.5">
+              <label className={labelStyles.base}>Amount</label>
+              <Input
+                type="number"
+                value={quoteAmount}
+                onChange={(e) => setQuoteAmount(e.target.value)}
+                placeholder="0.0"
+              />
+            </div>
+            <button
+              onClick={getSwapQuote}
+              disabled={!quoteAmount || quoteStatus.status === 'fetching'}
+              className={cn(actionStyles.primary, "mb-[1px]")}
+              style={{ padding: '0.625rem 1rem' }}
+            >
+              {quoteStatus.status === 'fetching' ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : 'Get Quote'}
+            </button>
+          </div>
+
           {/* Quote Result */}
           {quoteStatus.status === 'success' && quoteStatus.amountOut && (
-            <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-xs font-medium text-green-400">Estimated Quote</span>
+            <div className={cardStyles.success}>
+              <div className={cardStyles.cardHeader}>
+                <CheckCircle2 className={cn(cardStyles.cardIcon, "text-[hsl(var(--color-success))]")} />
+                <span className={cardStyles.cardTitle}>Estimated Quote</span>
               </div>
-              <div className="space-y-1 text-xs">
+              <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-forge-muted">Estimated Output:</span>
-                  <span className="text-green-300 font-mono">
+                  <span className="text-[hsl(var(--color-text-muted))]">Estimated Output:</span>
+                  <span className="text-[hsl(var(--color-success))] font-mono">
                     {parseFloat(quoteStatus.amountOut).toFixed(6)} {COMMON_TOKENS[tokenOut as keyof typeof COMMON_TOKENS].symbol}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-forge-muted">Exchange Rate:</span>
-                  <span className="text-green-300/80 text-xs">
+                  <span className="text-[hsl(var(--color-text-muted))]">Exchange Rate:</span>
+                  <span className="text-[hsl(var(--color-text-muted))] text-xs">
                     1 {COMMON_TOKENS[tokenIn as keyof typeof COMMON_TOKENS].symbol} ≈ {quoteAmount && parseFloat(quoteAmount) > 0 ? (parseFloat(quoteStatus.amountOut) / parseFloat(quoteAmount)).toFixed(6) : '0'} {COMMON_TOKENS[tokenOut as keyof typeof COMMON_TOKENS].symbol}
                   </span>
                 </div>
-                <p className="text-xs text-green-400/80 mt-2 pt-2 border-t border-green-500/20">
-                  ✓ Quote from Longtail Quoter contract. Actual output may vary slightly based on slippage tolerance.
+                <p className="text-[10px] text-[hsl(var(--color-success)/0.8)] mt-2 pt-2 border-t border-[hsl(var(--color-success)/0.2)]">
+                  ✓ Quote from Longtail Quoter contract.
                 </p>
               </div>
             </div>
           )}
+
           {quoteStatus.status === 'error' && (
-            <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-red-500" />
-                <span className="text-xs font-medium text-red-400">Quote Failed</span>
+            <div className={cn(cardStyles.base, "bg-[hsl(var(--color-error)/0.08)] border-[hsl(var(--color-error)/0.2)]")}>
+              <div className={cardStyles.cardHeader}>
+                <AlertTriangle className={cn(cardStyles.cardIcon, "text-[hsl(var(--color-error))]")} />
+                <span className={cn(cardStyles.cardTitle, "text-[hsl(var(--color-error))]")}>Quote Failed</span>
               </div>
-              <p className="text-xs text-red-300/80">{quoteStatus.error}</p>
+              <p className={cn(cardStyles.cardBody, "text-[hsl(var(--color-error)/0.8)]")}>{quoteStatus.error}</p>
             </div>
           )}
         </div>
       </div>
+
       {/* Verify Contracts */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-white">Verify Longtail Contracts</p>
-            <p className="text-xs text-forge-muted">Check that contracts are deployed on mainnet</p>
+      <div className={cardStyles.base}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <FileText className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-text-muted))]')} />
+            <span className={cardStyles.cardTitle}>Verify Contracts</span>
           </div>
           <button
             onClick={verifyContracts}
             disabled={contractStatus.status === 'checking'}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent-cyan/20 text-accent-cyan hover:bg-accent-cyan/30 disabled:opacity-50 transition-colors whitespace-nowrap"
+            className={cn(
+              "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5",
+              "bg-[hsl(var(--color-accent-primary)/0.15)] text-[hsl(var(--color-accent-primary))]",
+              "hover:bg-[hsl(var(--color-accent-primary)/0.25)]",
+              "disabled:opacity-50 disabled:cursor-not-allowed"
+            )}
           >
+            {contractStatus.status === 'checking' && <RefreshCw className="w-3 h-3 animate-spin" />}
             {contractStatus.status === 'checking' ? 'Verifying...' : 'Verify'}
           </button>
         </div>
+
         {contractStatus.status === 'success' && (
-          <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-xs font-medium text-green-400">Contracts Verified</span>
+          <div className={statusStyles.connected}>
+            <div className={statusStyles.statusHeader}>
+              <CheckCircle2 className={cn(statusStyles.statusIcon, statusStyles.statusIconConnected)} />
+              <span className={statusStyles.statusTitle}>Contracts Verified</span>
             </div>
-            <p className="text-xs text-green-300/80">
-              Latest block: #{contractStatus.blockNumber}
-            </p>
+            <div className="flex justify-between">
+              <span className={statusStyles.statusDetail}>Latest Block</span>
+              <code className={statusStyles.statusCode}>#{contractStatus.blockNumber}</code>
+            </div>
           </div>
         )}
+
         {contractStatus.status === 'error' && (
-          <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full bg-red-500" />
-              <span className="text-xs font-medium text-red-400">Verification Failed</span>
+          <div className={cn(cardStyles.base, "bg-[hsl(var(--color-error)/0.08)] border-[hsl(var(--color-error)/0.2)]")}>
+            <div className={statusStyles.statusHeader}>
+              <AlertTriangle className={cn(statusStyles.statusIcon, "text-[hsl(var(--color-error))]")} />
+              <span className={cn(statusStyles.statusTitle, "text-[hsl(var(--color-error))]")}>Verification Failed</span>
             </div>
-            <p className="text-xs text-red-300/80">{contractStatus.error}</p>
+            <p className={statusStyles.statusDetail}>{contractStatus.error}</p>
           </div>
         )}
       </div>
+
       {/* Contract Addresses */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <p className="text-sm font-medium text-white mb-2">Contract Addresses</p>
+      <div className={cardStyles.base}>
+        <div className={cardStyles.cardHeader}>
+          <FileText className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-text-muted))]')} />
+          <span className={cardStyles.cardTitle}>Contract Addresses</span>
+        </div>
         <div className="space-y-1.5 text-xs font-mono">
           <div className="flex justify-between items-center">
-            <span className="text-forge-muted">AMM:</span>
-            <span className="text-forge-text">{LONGTAIL_CONTRACTS.AMM.slice(0, 6)}...{LONGTAIL_CONTRACTS.AMM.slice(-4)}</span>
+            <span className="text-[hsl(var(--color-text-muted))]">AMM:</span>
+            <span className={codeStyles.inline}>{LONGTAIL_CONTRACTS.AMM.slice(0, 6)}...{LONGTAIL_CONTRACTS.AMM.slice(-4)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-forge-muted">NFT Manager:</span>
-            <span className="text-forge-text">{LONGTAIL_CONTRACTS.NFT_MANAGER.slice(0, 6)}...{LONGTAIL_CONTRACTS.NFT_MANAGER.slice(-4)}</span>
+            <span className="text-[hsl(var(--color-text-muted))]">NFT Manager:</span>
+            <span className={codeStyles.inline}>{LONGTAIL_CONTRACTS.NFT_MANAGER.slice(0, 6)}...{LONGTAIL_CONTRACTS.NFT_MANAGER.slice(-4)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-forge-muted">Permit2:</span>
-            <span className="text-forge-text">{LONGTAIL_CONTRACTS.PERMIT2_ROUTER.slice(0, 6)}...{LONGTAIL_CONTRACTS.PERMIT2_ROUTER.slice(-4)}</span>
+            <span className="text-[hsl(var(--color-text-muted))]">Permit2:</span>
+            <span className={codeStyles.inline}>{LONGTAIL_CONTRACTS.PERMIT2_ROUTER.slice(0, 6)}...{LONGTAIL_CONTRACTS.PERMIT2_ROUTER.slice(-4)}</span>
           </div>
         </div>
       </div>
+
       {/* Common Tokens */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <p className="text-sm font-medium text-white mb-2">Supported Tokens</p>
+      <div className={cardStyles.base}>
+        <div className={cardStyles.cardHeader}>
+          <Info className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-text-muted))]')} />
+          <span className={cardStyles.cardTitle}>Supported Tokens</span>
+        </div>
         <div className="grid grid-cols-2 gap-2 text-xs">
           {Object.entries(COMMON_TOKENS).map(([key, token]) => (
             <div key={key} className="flex justify-between items-center">
-              <span className="text-forge-muted">{token.symbol}:</span>
-              <span className="text-forge-text font-mono">{token.address.slice(0, 6)}...{token.address.slice(-4)}</span>
+              <span className="text-[hsl(var(--color-text-muted))]">{token.symbol}:</span>
+              <span className={codeStyles.inline}>{token.address.slice(0, 6)}...{token.address.slice(-4)}</span>
             </div>
           ))}
         </div>
       </div>
+
       {/* Longtail App Link */}
-      <div className="p-4 rounded-lg bg-gradient-to-r from-accent-cyan/20 to-accent-cyan/5 border border-accent-cyan/30">
+      <div className={cn(cardStyles.primary, "bg-gradient-to-r from-[hsl(var(--color-accent-primary)/0.15)] to-transparent")}>
         <div className="flex items-center justify-between mb-2">
           <div>
-            <p className="text-sm font-medium text-white">Longtail DEX</p>
-            <p className="text-xs text-forge-muted">Trade directly on Longtail</p>
+            <p className={cardStyles.cardTitle}>Longtail DEX</p>
+            <p className={cardStyles.cardBody}>Trade directly on Longtail</p>
           </div>
           <a
             href="https://long.so"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-accent-cyan text-black hover:bg-accent-cyan/90 transition-colors"
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg",
+              "text-xs font-medium",
+              "bg-[hsl(var(--color-accent-primary))]",
+              "text-black", // Keep black text for contrast on primary color button
+              "hover:bg-[hsl(var(--color-accent-primary)/0.9)]",
+              "transition-colors"
+            )}
           >
-            Open App
+            Open App <ExternalLink className="w-3 h-3" />
           </a>
         </div>
-        <p className="text-xs text-accent-cyan/80">
+        <p className="text-[10px] text-[hsl(var(--color-accent-primary))]">
           4x cheaper than Uniswap V3, earn Utility Mining rewards on every swap
         </p>
       </div>
+
       {/* Info Box */}
-      <div className="p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20">
-        <p className="text-xs text-accent-cyan">
-          Longtail is Superposition's native DEX built with Arbitrum Stylus for maximum gas efficiency.
+      <div className={cardStyles.info}>
+        <div className={cardStyles.cardHeader}>
+          <Info className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-info))]')} />
+          <span className={cardStyles.cardTitle}>Documentation</span>
+        </div>
+        <p className={cardStyles.cardBody}>
+          Longtail is Superposition's native DEX built with Arbitrum Stylus.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           <a
             href="https://docs.long.so"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Documentation
           </a>
@@ -499,7 +596,7 @@ export function SuperpositionLongtailForm({ nodeId, config }: Props) {
             href="https://explorer.superposition.so"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Explorer
           </a>

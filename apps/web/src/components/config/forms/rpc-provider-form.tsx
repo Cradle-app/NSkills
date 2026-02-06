@@ -4,6 +4,11 @@ import { useBlueprintStore } from '@/store/blueprint';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -20,9 +25,9 @@ export function RPCProviderForm({ nodeId, config }: Props) {
   const providers = ['alchemy', 'quicknode', 'infura', 'ankr', '1rpc', 'public'];
 
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Primary Provider</label>
+    <div className={formStyles.container}>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Primary Provider</label>
         <Select
           value={(config.primaryProvider as string) ?? 'alchemy'}
           onValueChange={(v) => updateConfig('primaryProvider', v)}
@@ -36,12 +41,12 @@ export function RPCProviderForm({ nodeId, config }: Props) {
         </Select>
       </div>
 
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Fallback Providers</label>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Fallback Providers</label>
         <div className="space-y-2">
           {providers.filter(p => p !== config.primaryProvider).map((provider) => (
-            <div key={provider} className="flex items-center justify-between">
-              <span className="text-sm text-white capitalize">{provider}</span>
+            <div key={provider} className="flex items-center justify-between py-1">
+              <span className="text-sm text-[hsl(var(--color-text-primary))] capitalize">{provider}</span>
               <Switch
                 checked={((config.fallbackProviders as string[]) ?? ['public']).includes(provider)}
                 onCheckedChange={(checked) => {
@@ -54,16 +59,16 @@ export function RPCProviderForm({ nodeId, config }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-white">WebSocket Support</span>
+      <div className="flex items-center justify-between py-2">
+        <span className="text-sm text-[hsl(var(--color-text-primary))]">WebSocket Support</span>
         <Switch
           checked={(config.enableWebSocket as boolean) ?? true}
           onCheckedChange={(v) => updateConfig('enableWebSocket', v)}
         />
       </div>
 
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Health Check Interval (ms)</label>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Health Check Interval (ms)</label>
         <Input
           type="number"
           value={(config.healthCheckInterval as number) ?? 30000}
@@ -71,8 +76,8 @@ export function RPCProviderForm({ nodeId, config }: Props) {
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-white">Privacy Mode (1RPC)</span>
+      <div className="flex items-center justify-between py-2">
+        <span className="text-sm text-[hsl(var(--color-text-primary))]">Privacy Mode (1RPC)</span>
         <Switch
           checked={(config.privacyMode as boolean) ?? false}
           onCheckedChange={(v) => updateConfig('privacyMode', v)}
@@ -81,4 +86,3 @@ export function RPCProviderForm({ nodeId, config }: Props) {
     </div>
   );
 }
-

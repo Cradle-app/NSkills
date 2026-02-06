@@ -2,6 +2,11 @@
 
 import { useBlueprintStore } from '@/store/blueprint';
 import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -16,15 +21,15 @@ export function ZKPrimitivesForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Proof Types</label>
+    <div className={formStyles.container}>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Proof Types</label>
         <div className="space-y-2">
           {['membership', 'range', 'semaphore'].map((proofType) => (
-            <div key={proofType} className="flex items-center justify-between">
+            <div key={proofType} className="flex items-center justify-between py-1">
               <div>
-                <span className="text-sm text-white capitalize">{proofType}</span>
-                <p className="text-xs text-forge-muted">
+                <span className="text-sm text-[hsl(var(--color-text-primary))] capitalize">{proofType}</span>
+                <p className="text-xs text-[hsl(var(--color-text-muted))]">
                   {proofType === 'membership' && 'Prove membership in a set'}
                   {proofType === 'range' && 'Prove value is in a range'}
                   {proofType === 'semaphore' && 'Anonymous signaling'}
@@ -42,16 +47,16 @@ export function ZKPrimitivesForm({ nodeId, config }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-white">Client-side Proving</span>
+      <div className="flex items-center justify-between py-2">
+        <span className="text-sm text-[hsl(var(--color-text-primary))]">Client-side Proving</span>
         <Switch
           checked={(config.clientSideProving as boolean) ?? true}
           onCheckedChange={(v) => updateConfig('clientSideProving', v)}
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-white">Generate Verifier Contracts</span>
+      <div className="flex items-center justify-between py-2">
+        <span className="text-sm text-[hsl(var(--color-text-primary))]">Generate Verifier Contracts</span>
         <Switch
           checked={(config.generateVerifiers as boolean) ?? true}
           onCheckedChange={(v) => updateConfig('generateVerifiers', v)}
@@ -60,4 +65,3 @@ export function ZKPrimitivesForm({ nodeId, config }: Props) {
     </div>
   );
 }
-

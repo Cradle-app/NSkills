@@ -16,7 +16,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'ERC-20 Token',
         description: 'Deploy ERC-20 token on Arbitrum Stylus',
         icon: 'Coins',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['token', 'erc20', 'stylus', 'arbitrum', 'fungible'],
         compatibility: {
@@ -37,7 +37,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'ERC-721 NFT',
         description: 'Deploy NFT collection on Arbitrum Stylus',
         icon: 'Sparkles',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['nft', 'erc721', 'stylus', 'arbitrum', 'collectible'],
         compatibility: {
@@ -57,7 +57,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'ERC-1155 Multi-Token',
         description: 'Deploy multi-token contract on Arbitrum Stylus',
         icon: 'Layers',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['multi-token', 'erc1155', 'stylus', 'arbitrum', 'gaming'],
         compatibility: {
@@ -78,7 +78,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Stylus Contract',
         description: 'Rust/WASM smart contract for Arbitrum',
         icon: 'Box',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['rust', 'wasm', 'stylus', 'arbitrum', 'custom'],
         compatibility: {
@@ -96,7 +96,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Stylus ZK Contract',
         description: 'Privacy-preserving contract with ZK proofs',
         icon: 'Lock',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['zk', 'privacy', 'stylus', 'arbitrum', 'proof'],
         compatibility: {
@@ -119,7 +119,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'EIP-7702 Smart EOA',
         description: 'Smart EOA delegation (trending)',
         icon: 'Key',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['eip7702', 'eoa', 'delegation', 'account-abstraction'],
         compatibility: {
@@ -140,7 +140,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'ZK Primitives',
         description: 'Privacy proofs: membership, range, semaphore',
         icon: 'Lock',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['zk', 'privacy', 'semaphore', 'proof', 'membership'],
         compatibility: {
@@ -159,7 +159,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Stylus Rust Contract',
         description: 'Build Rust smart contracts for Arbitrum',
         icon: 'Box',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['rust', 'stylus', 'arbitrum', 'custom'],
         compatibility: {
@@ -179,7 +179,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'SmartCache Caching',
         description: 'Enable contract caching for cheaper gas',
         icon: 'Database',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['cache', 'gas', 'optimization', 'stylus'],
         compatibility: {
@@ -197,7 +197,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Auditware Analyzer',
         description: 'Security analysis with Radar',
         icon: 'ShieldCheck',
-        color: 'node-contracts',
+        color: 'node-primary',
         category: 'contracts',
         tags: ['security', 'audit', 'analysis', 'stylus'],
         compatibility: {
@@ -220,7 +220,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'x402 Paywall',
         description: 'HTTP 402 payment endpoint',
         icon: 'CreditCard',
-        color: 'node-payments',
+        color: 'node-accent',
         category: 'payments',
         tags: ['payment', 'api', 'monetization', '402'],
         compatibility: {
@@ -246,7 +246,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'ERC-8004 Agent',
         description: 'AI agent with on-chain registry',
         icon: 'Bot',
-        color: 'node-agents',
+        color: 'node-secondary',
         category: 'agents',
         tags: ['ai', 'agent', 'erc8004', 'llm', 'registry'],
         compatibility: {
@@ -267,7 +267,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Ostium Trading',
         description: 'One-click trading setup for Ostium',
         icon: 'Zap',
-        color: 'node-agents',
+        color: 'node-secondary',
         category: 'agents',
         tags: ['trading', 'defi', 'ostium', 'perpetuals'],
         compatibility: {
@@ -286,7 +286,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Maxxit Lazy Trader',
         description: 'Connect and message Maxxit Lazy Trader agents',
         icon: 'Bot',
-        color: 'node-agents',
+        color: 'node-secondary',
         category: 'agents',
         tags: ['trading', 'agent', 'maxxit', 'automation'],
         compatibility: {
@@ -301,7 +301,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Onchain Activity',
         description: 'Fetch wallet transactions by category from Arbitrum',
         icon: 'TrendingUp',
-        color: 'node-agents',
+        color: 'node-secondary',
         category: 'agents',
         tags: ['analytics', 'transactions', 'wallet', 'arbitrum'],
         compatibility: {
@@ -324,7 +324,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Wallet Auth',
         description: 'WalletConnect, social login, SIWE',
         icon: 'Wallet',
-        color: 'node-app',
+        color: 'node-tertiary',
         category: 'app',
         tags: ['auth', 'wallet', 'siwe', 'login', 'web3'],
         compatibility: {
@@ -345,7 +345,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'RPC Provider',
         description: 'Multi-provider RPC with failover',
         icon: 'Globe',
-        color: 'node-app',
+        color: 'node-tertiary',
         category: 'app',
         tags: ['rpc', 'provider', 'alchemy', 'infura', 'failover'],
         compatibility: {
@@ -367,7 +367,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Arbitrum Bridge',
         description: 'L1-L2 bridging with @arbitrum/sdk',
         icon: 'ArrowLeftRight',
-        color: 'node-app',
+        color: 'node-tertiary',
         category: 'app',
         tags: ['bridge', 'l1', 'l2', 'arbitrum', 'ethereum'],
         compatibility: {
@@ -388,7 +388,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Chain Data',
         description: 'Token/NFT data with Alchemy/Moralis',
         icon: 'Database',
-        color: 'node-app',
+        color: 'node-tertiary',
         category: 'app',
         tags: ['data', 'alchemy', 'moralis', 'tokens', 'nfts'],
         compatibility: {
@@ -408,7 +408,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'IPFS Storage',
         description: 'Decentralized storage (Pinata/Web3.Storage)',
         icon: 'HardDrive',
-        color: 'node-app',
+        color: 'node-tertiary',
         category: 'app',
         tags: ['ipfs', 'storage', 'pinata', 'decentralized', 'metadata'],
         compatibility: {
@@ -427,7 +427,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Chain Abstraction',
         description: 'Unified multi-chain UX',
         icon: 'Layers',
-        color: 'node-app',
+        color: 'node-tertiary',
         category: 'app',
         tags: ['multichain', 'abstraction', 'ux', 'unified'],
         compatibility: {
@@ -447,7 +447,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Frontend',
         description: 'Next.js/React frontend scaffold',
         icon: 'Layout',
-        color: 'node-app',
+        color: 'node-tertiary',
         category: 'app',
         tags: ['frontend', 'nextjs', 'react', 'web', 'ui'],
         compatibility: {
@@ -468,7 +468,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'SDK Generator',
         description: 'TypeScript SDK from ABIs',
         icon: 'Layout',
-        color: 'node-app',
+        color: 'node-tertiary',
         category: 'app',
         tags: ['sdk', 'typescript', 'abi', 'codegen'],
         compatibility: {
@@ -492,7 +492,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Notifications',
         description: 'Trigger alerts and updates to users',
         icon: 'Sparkles',
-        color: 'node-telegram',
+        color: 'node-accent',
         category: 'telegram',
         tags: ['telegram', 'notifications', 'alerts', 'bot'],
         compatibility: {
@@ -510,7 +510,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Commands',
         description: 'Handle interactive commands via webhooks',
         icon: 'Box',
-        color: 'node-telegram',
+        color: 'node-accent',
         category: 'telegram',
         tags: ['telegram', 'commands', 'bot', 'webhook'],
         compatibility: {
@@ -531,7 +531,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'AI Agent',
         description: 'Conversational AI bot with LLM integration',
         icon: 'Sparkles',
-        color: 'node-telegram',
+        color: 'node-accent',
         category: 'telegram',
         tags: ['telegram', 'ai', 'bot', 'llm', 'conversational'],
         compatibility: {
@@ -550,7 +550,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Wallet Link',
         description: 'Link Telegram profiles with Web3 wallets',
         icon: 'Lock',
-        color: 'node-telegram',
+        color: 'node-accent',
         category: 'telegram',
         tags: ['telegram', 'wallet', 'link', 'verification'],
         compatibility: {
@@ -572,7 +572,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Quality Gates',
         description: 'CI/CD, testing, linting',
         icon: 'ShieldCheck',
-        color: 'node-quality',
+        color: 'node-secondary',
         category: 'quality',
         tags: ['ci', 'cd', 'testing', 'linting', 'quality'],
         compatibility: {
@@ -601,7 +601,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Momentum',
         description: 'Track social heat and project trends',
         icon: 'TrendingUp',
-        color: 'node-intelligence',
+        color: 'node-secondary',
         category: 'intelligence',
         tags: ['aixbt', 'momentum', 'social', 'trends', 'analytics'],
         compatibility: {
@@ -621,7 +621,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Signals',
         description: 'Real-time project activity alerts',
         icon: 'Zap',
-        color: 'node-intelligence',
+        color: 'node-secondary',
         category: 'intelligence',
         tags: ['aixbt', 'signals', 'alerts', 'activity'],
         compatibility: {
@@ -640,7 +640,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Indigo',
         description: 'Conversational market research',
         icon: 'Sparkles',
-        color: 'node-intelligence',
+        color: 'node-secondary',
         category: 'intelligence',
         tags: ['aixbt', 'indigo', 'research', 'ai', 'market'],
         compatibility: {
@@ -660,7 +660,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Observer',
         description: 'Correlate on-chain activity',
         icon: 'Search',
-        color: 'node-intelligence',
+        color: 'node-secondary',
         category: 'intelligence',
         tags: ['aixbt', 'observer', 'onchain', 'correlation'],
         compatibility: {
@@ -684,7 +684,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Network Config',
         description: 'Chain config, RPC, and contract addresses',
         icon: 'Globe',
-        color: 'accent-cyan',
+        color: 'node-primary',
         category: 'superposition',
         tags: ['superposition', 'network', 'config', 'rpc'],
         compatibility: {
@@ -699,7 +699,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Bridge',
         description: 'Bridge assets from Arbitrum via Li.Fi',
         icon: 'ArrowLeftRight',
-        color: 'accent-cyan',
+        color: 'node-primary',
         category: 'superposition',
         tags: ['superposition', 'bridge', 'lifi', 'arbitrum'],
         compatibility: {
@@ -714,7 +714,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Longtail AMM',
         description: 'Swap and liquidity on Longtail DEX',
         icon: 'TrendingUp',
-        color: 'accent-cyan',
+        color: 'node-primary',
         category: 'superposition',
         tags: ['superposition', 'longtail', 'dex', 'amm', 'swap'],
         compatibility: {
@@ -729,7 +729,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Super Assets',
         description: 'Yield-bearing wrapped tokens',
         icon: 'Sparkles',
-        color: 'accent-cyan',
+        color: 'node-primary',
         category: 'superposition',
         tags: ['superposition', 'yield', 'wrapped', 'tokens'],
         compatibility: {
@@ -744,7 +744,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Thirdweb Deploy',
         description: 'Deploy contracts using Thirdweb SDK',
         icon: 'Box',
-        color: 'accent-cyan',
+        color: 'node-primary',
         category: 'superposition',
         tags: ['superposition', 'thirdweb', 'deploy', 'contracts'],
         compatibility: {
@@ -759,7 +759,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Utility Mining',
         description: 'Track and claim activity rewards',
         icon: 'Zap',
-        color: 'accent-cyan',
+        color: 'node-primary',
         category: 'superposition',
         tags: ['superposition', 'mining', 'rewards', 'activity'],
         compatibility: {
@@ -774,7 +774,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Testnet Faucet',
         description: 'Request testnet tokens for development',
         icon: 'Database',
-        color: 'accent-cyan',
+        color: 'node-primary',
         category: 'superposition',
         tags: ['superposition', 'faucet', 'testnet', 'tokens'],
         compatibility: {
@@ -789,7 +789,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Meow Domains',
         description: '.meow Web3 identity and resolution',
         icon: 'Key',
-        color: 'accent-cyan',
+        color: 'node-primary',
         category: 'superposition',
         tags: ['superposition', 'domains', 'identity', 'meow'],
         compatibility: {
@@ -808,7 +808,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Execute SQL',
         description: 'Custom SQL queries on Dune blockchain data',
         icon: 'Database',
-        color: 'accent-purple',
+        color: 'node-secondary',
         category: 'analytics',
         tags: ['dune', 'sql', 'analytics', 'query', 'data'],
         compatibility: {
@@ -827,7 +827,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Token Price',
         description: 'Fetch latest token prices across blockchains',
         icon: 'TrendingUp',
-        color: 'accent-purple',
+        color: 'node-secondary',
         category: 'analytics',
         tags: ['dune', 'price', 'tokens', 'analytics'],
         compatibility: {
@@ -847,7 +847,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Wallet Balances',
         description: 'Token balances with USD valuations',
         icon: 'Wallet',
-        color: 'accent-purple',
+        color: 'node-secondary',
         category: 'analytics',
         tags: ['dune', 'balances', 'wallet', 'portfolio'],
         compatibility: {
@@ -867,7 +867,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'DEX Volume',
         description: 'Trading volume and DEX statistics',
         icon: 'TrendingUp',
-        color: 'accent-purple',
+        color: 'node-secondary',
         category: 'analytics',
         tags: ['dune', 'dex', 'volume', 'trading', 'analytics'],
         compatibility: {
@@ -886,7 +886,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'NFT Floor Price',
         description: 'Collection floor prices and stats',
         icon: 'Sparkles',
-        color: 'accent-purple',
+        color: 'node-secondary',
         category: 'analytics',
         tags: ['dune', 'nft', 'floor', 'collections'],
         compatibility: {
@@ -905,7 +905,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Address Labels',
         description: 'Human-readable names for addresses',
         icon: 'Key',
-        color: 'accent-purple',
+        color: 'node-secondary',
         category: 'analytics',
         tags: ['dune', 'labels', 'ens', 'addresses'],
         compatibility: {
@@ -924,7 +924,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Transaction History',
         description: 'Wallet transaction history',
         icon: 'Database',
-        color: 'accent-purple',
+        color: 'node-secondary',
         category: 'analytics',
         tags: ['dune', 'transactions', 'history', 'wallet'],
         compatibility: {
@@ -943,7 +943,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Gas Price',
         description: 'Gas price analytics and stats',
         icon: 'Zap',
-        color: 'accent-purple',
+        color: 'node-secondary',
         category: 'analytics',
         tags: ['dune', 'gas', 'price', 'analytics'],
         compatibility: {
@@ -962,7 +962,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Protocol TVL',
         description: 'Total Value Locked for DeFi protocols',
         icon: 'Lock',
-        color: 'accent-purple',
+        color: 'node-secondary',
         category: 'analytics',
         tags: ['dune', 'tvl', 'defi', 'protocol'],
         compatibility: {
@@ -1054,3 +1054,4 @@ export function getRequiredPlugins(pluginId: string): PluginRegistryEntry[] {
 export function getDefaultConfig(pluginId: string): Record<string, unknown> {
     return PLUGIN_REGISTRY[pluginId]?.defaultConfig ?? {};
 }
+

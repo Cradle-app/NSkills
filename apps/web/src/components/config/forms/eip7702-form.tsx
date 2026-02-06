@@ -4,6 +4,11 @@ import { useBlueprintStore } from '@/store/blueprint';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -18,9 +23,9 @@ export function EIP7702Form({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Delegate Name</label>
+    <div className={formStyles.container}>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Delegate Name</label>
         <Input
           value={(config.delegateName as string) ?? 'BatchExecutor'}
           onChange={(e) => updateConfig('delegateName', e.target.value)}
@@ -28,8 +33,8 @@ export function EIP7702Form({ nodeId, config }: Props) {
         />
       </div>
 
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Delegate Type</label>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Delegate Type</label>
         <Select
           value={(config.delegateType as string) ?? 'batch-executor'}
           onValueChange={(v) => updateConfig('delegateType', v)}
@@ -44,12 +49,12 @@ export function EIP7702Form({ nodeId, config }: Props) {
         </Select>
       </div>
 
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Features</label>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Features</label>
         <div className="space-y-2">
           {['batch-calls', 'sponsored-tx', 'session-keys', 'permissions'].map((feature) => (
-            <div key={feature} className="flex items-center justify-between">
-              <span className="text-sm text-white capitalize">{feature.replace('-', ' ')}</span>
+            <div key={feature} className="flex items-center justify-between py-1">
+              <span className="text-sm text-[hsl(var(--color-text-primary))] capitalize">{feature.replace('-', ' ')}</span>
               <Switch
                 checked={((config.features as string[]) ?? ['batch-calls']).includes(feature)}
                 onCheckedChange={(checked) => {
@@ -62,16 +67,16 @@ export function EIP7702Form({ nodeId, config }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-white">Security Warnings</span>
+      <div className="flex items-center justify-between py-2">
+        <span className="text-sm text-[hsl(var(--color-text-primary))]">Security Warnings</span>
         <Switch
           checked={(config.securityWarnings as boolean) ?? true}
           onCheckedChange={(v) => updateConfig('securityWarnings', v)}
         />
       </div>
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-white">Generate UI Components</span>
+      <div className="flex items-center justify-between py-2">
+        <span className="text-sm text-[hsl(var(--color-text-primary))]">Generate UI Components</span>
         <Switch
           checked={(config.generateUI as boolean) ?? true}
           onCheckedChange={(v) => updateConfig('generateUI', v)}
@@ -80,4 +85,3 @@ export function EIP7702Form({ nodeId, config }: Props) {
     </div>
   );
 }
-

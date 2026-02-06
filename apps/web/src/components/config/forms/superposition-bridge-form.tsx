@@ -3,6 +3,16 @@
 import { useBlueprintStore } from '@/store/blueprint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Network, ArrowRightLeft, Coins, Settings2, Info, ExternalLink, Link2, ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  toggleRowStyles,
+  cardStyles,
+  codeStyles,
+  FormHeader
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -61,14 +71,21 @@ export function SuperpositionBridgeForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className={formStyles.container}>
+      <FormHeader
+        icon={ArrowRightLeft}
+        title="Superposition Bridge"
+        description="Configure cross-chain bridging via Li.Fi, Stargate, or Superbridge."
+      />
+
       {/* Bridge Provider */}
-      <div>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Bridge Provider</label>
         <Select
           value={(config.bridgeProvider as string) || 'lifi'}
           onValueChange={(value) => handleChange('bridgeProvider', value)}
         >
-          <SelectTrigger label="Bridge Provider">
+          <SelectTrigger>
             <SelectValue placeholder="Select provider" />
           </SelectTrigger>
           <SelectContent>
@@ -82,17 +99,18 @@ export function SuperpositionBridgeForm({ nodeId, config }: Props) {
       </div>
 
       {/* Supported Tokens */}
-      <div>
-        <label className="text-sm font-medium text-white mb-2 block">
-          Supported Tokens
-        </label>
-        <div className="grid grid-cols-3 gap-2">
+      <div className={formStyles.section}>
+        <div className="flex items-center gap-2 mb-2">
+          <Coins className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
+          <span className="text-xs font-semibold text-[hsl(var(--color-text-secondary))] tracking-wide uppercase">Supported Tokens</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
           {TOKENS.map((token) => (
             <div
               key={token.value}
-              className="flex items-center justify-between p-2 rounded-lg bg-forge-bg border border-forge-border"
+              className={cn(toggleRowStyles.row, "p-2")}
             >
-              <span className="text-sm text-white">{token.label}</span>
+              <span className={toggleRowStyles.title}>{token.label}</span>
               <Switch
                 checked={((config.supportedTokens as string[]) || ['ETH', 'USDC']).includes(token.value)}
                 onCheckedChange={() => toggleToken(token.value)}
@@ -103,17 +121,18 @@ export function SuperpositionBridgeForm({ nodeId, config }: Props) {
       </div>
 
       {/* Source Chains */}
-      <div>
-        <label className="text-sm font-medium text-white mb-2 block">
-          Source Chains
-        </label>
-        <div className="space-y-2">
+      <div className={formStyles.section}>
+        <div className="flex items-center gap-2 mb-2">
+          <Network className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
+          <span className="text-xs font-semibold text-[hsl(var(--color-text-secondary))] tracking-wide uppercase">Source Chains</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
           {SOURCE_CHAINS.map((chain) => (
             <div
               key={chain.value}
-              className="flex items-center justify-between p-2 rounded-lg bg-forge-bg border border-forge-border"
+              className={cn(toggleRowStyles.row, "p-2")}
             >
-              <span className="text-sm text-white">{chain.label}</span>
+              <span className={toggleRowStyles.title}>{chain.label}</span>
               <Switch
                 checked={((config.sourceChains as string[]) || ['arbitrum']).includes(chain.value)}
                 onCheckedChange={() => toggleChain(chain.value)}
@@ -123,121 +142,138 @@ export function SuperpositionBridgeForm({ nodeId, config }: Props) {
         </div>
       </div>
 
-      {/* Slippage Tolerance */}
-      <div>
-        <Select
-          value={String((config.slippageTolerance as number) || 0.5)}
-          onValueChange={(value) => handleChange('slippageTolerance', parseFloat(value))}
-        >
-          <SelectTrigger label="Slippage Tolerance">
-            <SelectValue placeholder="Select slippage" />
-          </SelectTrigger>
-          <SelectContent>
-            {SLIPPAGE_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Generate UI */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Bridge UI Component</p>
-          <p className="text-xs text-forge-muted">Generate ready-to-use bridge interface</p>
+      {/* Configuration */}
+      <div className={formStyles.section}>
+        <div className="flex items-center gap-2 mb-2">
+          <Settings2 className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
+          <span className="text-xs font-semibold text-[hsl(var(--color-text-secondary))] tracking-wide uppercase">Configuration</span>
         </div>
-        <Switch
-          checked={(config.generateUI as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateUI', checked)}
-        />
-      </div>
 
-      {/* Generate Hooks */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Bridge Hooks</p>
-          <p className="text-xs text-forge-muted">Generate useSuperpositionBridge hook</p>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Slippage Tolerance</label>
+          <Select
+            value={String((config.slippageTolerance as number) || 0.5)}
+            onValueChange={(value) => handleChange('slippageTolerance', parseFloat(value))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select slippage" />
+            </SelectTrigger>
+            <SelectContent>
+              {SLIPPAGE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <Switch
-          checked={(config.generateHooks as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateHooks', checked)}
-        />
-      </div>
 
-      {/* Enable Withdraw */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Enable Withdrawals</p>
-          <p className="text-xs text-forge-muted">Allow bridging back from Superposition</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Bridge UI Component</p>
+            <p className={toggleRowStyles.description}>Generate ready-to-use bridge interface</p>
+          </div>
+          <Switch
+            checked={(config.generateUI as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateUI', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.enableWithdraw as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('enableWithdraw', checked)}
-        />
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Bridge Hooks</p>
+            <p className={toggleRowStyles.description}>Generate useSuperpositionBridge hook</p>
+          </div>
+          <Switch
+            checked={(config.generateHooks as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateHooks', checked)}
+          />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Enable Withdrawals</p>
+            <p className={toggleRowStyles.description}>Allow bridging back from Superposition</p>
+          </div>
+          <Switch
+            checked={(config.enableWithdraw as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('enableWithdraw', checked)}
+          />
+        </div>
       </div>
 
       {/* Official Bridge Link */}
-      <div className="p-4 rounded-lg bg-gradient-to-r from-accent-cyan/20 to-accent-cyan/5 border border-accent-cyan/30">
+      <div className={cn(cardStyles.primary, "bg-gradient-to-r from-[hsl(var(--color-accent-primary)/0.15)] to-transparent")}>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-sm font-medium text-white">Superposition Bridge</p>
-            <p className="text-xs text-forge-muted">Bridge assets directly via the official bridge</p>
+            <p className={cardStyles.cardTitle}>Superposition Bridge</p>
+            <p className={cardStyles.cardBody}>Bridge assets directly via the official bridge</p>
           </div>
           <a
             href="https://bridge.superposition.so"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-accent-cyan text-black hover:bg-accent-cyan/90 transition-colors"
+            className={cn(
+              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg",
+              "text-xs font-medium",
+              "bg-[hsl(var(--color-accent-primary))]",
+              "text-black",
+              "hover:bg-[hsl(var(--color-accent-primary)/0.9)]",
+              "transition-colors"
+            )}
           >
-            Open Bridge
+            Open Bridge <ExternalLink className="w-3 h-3" />
           </a>
         </div>
-        <div className="text-xs text-accent-cyan/80 space-y-1">
+        <div className="text-[10px] text-[hsl(var(--color-accent-primary))] space-y-1">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-cyan/60" />
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-accent-primary))]" />
             <span>Bridging typically takes ~10 minutes</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-cyan/60" />
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-accent-primary))]" />
             <span>Powered by Stargate/Li.Fi cross-chain liquidity</span>
           </div>
         </div>
       </div>
 
       {/* Destination Chain Info */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <p className="text-sm font-medium text-white mb-2">Destination: Superposition L3</p>
+      <div className={cardStyles.base}>
+        <div className={cardStyles.cardHeader}>
+          <ArrowRight className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-text-muted))]')} />
+          <span className={cardStyles.cardTitle}>Destination: Superposition L3</span>
+        </div>
         <div className="space-y-1.5 text-xs">
           <div className="flex justify-between">
-            <span className="text-forge-muted">Chain ID:</span>
-            <span className="text-forge-text font-mono">55244</span>
+            <span className="text-[hsl(var(--color-text-muted))]">Chain ID:</span>
+            <span className={codeStyles.inline}>55244</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-forge-muted">WETH:</span>
-            <span className="text-forge-text font-mono">0x1fB7...cfdd</span>
+            <span className="text-[hsl(var(--color-text-muted))]">WETH:</span>
+            <span className={codeStyles.inline}>0x1fB7...cfdd</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-forge-muted">USDC:</span>
-            <span className="text-forge-text font-mono">0x6c03...8A1</span>
+            <span className="text-[hsl(var(--color-text-muted))]">USDC:</span>
+            <span className={codeStyles.inline}>0x6c03...8A1</span>
           </div>
         </div>
       </div>
 
       {/* Info Box */}
-      <div className="p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20">
-        <p className="text-xs text-accent-cyan">
-          The generated bridge integration uses Li.Fi SDK for optimal routing across multiple
-          liquidity sources. Users can bridge ETH, USDC, and other tokens from Arbitrum, Ethereum,
-          and other supported chains.
+      <div className={cardStyles.info}>
+        <div className={cardStyles.cardHeader}>
+          <Info className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-info))]')} />
+          <span className={cardStyles.cardTitle}>Documentation</span>
+        </div>
+        <p className={cardStyles.cardBody}>
+          The generated bridge integration uses Li.Fi SDK for optimal routing.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           <a
             href="https://docs.li.fi"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Li.Fi Docs
           </a>
@@ -245,7 +281,7 @@ export function SuperpositionBridgeForm({ nodeId, config }: Props) {
             href="https://docs.superposition.so/superposition-mainnet/bridging-to-superposition-mainnet"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Bridge Guide
           </a>

@@ -4,7 +4,12 @@ import { useBlueprintStore } from '@/store/blueprint';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { formatWei } from '@/lib/utils';
+import { formatWei, cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  toggleRowStyles,
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -31,19 +36,21 @@ export function X402PaywallForm({ nodeId, config }: Props) {
   const paymentTimeout = (config.paymentTimeout as number) || 300;
 
   return (
-    <div className="space-y-4">
+    <div className={formStyles.container}>
       {/* Resource Path */}
-      <Input
-        label="Resource Path"
-        value={resourcePath}
-        onChange={(e) => handleChange('resourcePath', e.target.value)}
-        placeholder="/api/premium/resource"
-        required
-        error={!resourcePath.trim() ? 'Required' : undefined}
-      />
+      <div className={formStyles.section}>
+        <Input
+          label="Resource Path"
+          value={resourcePath}
+          onChange={(e) => handleChange('resourcePath', e.target.value)}
+          placeholder="/api/premium/resource"
+          required
+          error={!resourcePath.trim() ? 'Required' : undefined}
+        />
+      </div>
 
       {/* Currency */}
-      <div>
+      <div className={formStyles.section}>
         <Select
           value={(config.currency as string) || 'ETH'}
           onValueChange={(value) => handleChange('currency', value)}
@@ -63,16 +70,18 @@ export function X402PaywallForm({ nodeId, config }: Props) {
 
       {/* Custom Token Address */}
       {config.currency === 'CUSTOM' && (
-        <Input
-          label="Token Address"
-          value={(config.customTokenAddress as string) || ''}
-          onChange={(e) => handleChange('customTokenAddress', e.target.value)}
-          placeholder="0x..."
-        />
+        <div className={formStyles.section}>
+          <Input
+            label="Token Address"
+            value={(config.customTokenAddress as string) || ''}
+            onChange={(e) => handleChange('customTokenAddress', e.target.value)}
+            placeholder="0x..."
+          />
+        </div>
       )}
 
       {/* Price */}
-      <div>
+      <div className={formStyles.section}>
         <Input
           label="Price (wei)"
           value={priceInWei}
@@ -82,14 +91,14 @@ export function X402PaywallForm({ nodeId, config }: Props) {
           error={!priceInWei.trim() ? 'Required' : undefined}
         />
         {Boolean(priceInWei) && (
-          <p className="text-xs text-forge-muted mt-1">
+          <p className="text-xs text-[hsl(var(--color-text-muted))] mt-1">
             ≈ {formatWei(priceInWei)}
           </p>
         )}
       </div>
 
       {/* Payment Timeout */}
-      <div>
+      <div className={formStyles.section}>
         <Input
           label="Payment Timeout (seconds)"
           type="number"
@@ -104,10 +113,10 @@ export function X402PaywallForm({ nodeId, config }: Props) {
 
       {/* Options */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
+        <div className={toggleRowStyles.row}>
           <div>
-            <p className="text-sm font-medium text-white">Receipt Validation</p>
-            <p className="text-xs text-forge-muted">Verify payments on-chain</p>
+            <p className={toggleRowStyles.title}>Receipt Validation</p>
+            <p className={toggleRowStyles.description}>Verify payments on-chain</p>
           </div>
           <Switch
             checked={(config.receiptValidation as boolean) ?? true}
@@ -115,10 +124,10 @@ export function X402PaywallForm({ nodeId, config }: Props) {
           />
         </div>
 
-        <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
+        <div className={toggleRowStyles.row}>
           <div>
-            <p className="text-sm font-medium text-white">OpenAPI Spec</p>
-            <p className="text-xs text-forge-muted">Generate API documentation</p>
+            <p className={toggleRowStyles.title}>OpenAPI Spec</p>
+            <p className={toggleRowStyles.description}>Generate API documentation</p>
           </div>
           <Switch
             checked={(config.openApiSpec as boolean) ?? true}
@@ -128,13 +137,14 @@ export function X402PaywallForm({ nodeId, config }: Props) {
       </div>
 
       {/* Webhook URL */}
-      <Input
-        label="Webhook URL (optional)"
-        value={(config.webhookUrl as string) || ''}
-        onChange={(e) => handleChange('webhookUrl', e.target.value)}
-        placeholder="https://your-app.com/webhook"
-      />
+      <div className={formStyles.section}>
+        <Input
+          label="Webhook URL (optional)"
+          value={(config.webhookUrl as string) || ''}
+          onChange={(e) => handleChange('webhookUrl', e.target.value)}
+          placeholder="https://your-app.com/webhook"
+        />
+      </div>
     </div>
   );
 }
-

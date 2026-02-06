@@ -6,6 +6,13 @@ import { ERC1155InteractionPanel } from '@/components/contract-interactions/ERC1
 import { useBlueprintStore } from '@/store/blueprint';
 import { getAvailableFunctions } from '@/lib/contract-instructions-generator';
 import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  cardStyles,
+  selectionStyles,
+  badgeStyles,
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -65,64 +72,73 @@ export function ERC1155StylusForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4 -mx-4 -mt-2">
+    <div className="space-y-0 -mx-4 -mt-2">
       {/* Function Selection Section */}
-      <div className="px-4 py-3 bg-forge-bg/50 border-b border-forge-border/30">
+      <div className="px-4 py-4 bg-[hsl(var(--color-bg-base)/0.5)] border-b border-[hsl(var(--color-border-subtle))]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <h4 className="text-xs font-medium text-white">Contract Functions</h4>
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">
+            <h4 className="text-xs font-semibold text-[hsl(var(--color-text-primary))]">Contract Functions</h4>
+            <span className={badgeStyles.warning}>
               {localSelectedFunctions.length}/{ALL_FUNCTIONS.length} selected
             </span>
           </div>
           <div className="flex items-center gap-1">
             <button
               onClick={selectAll}
-              className="text-[10px] px-2 py-1 rounded bg-forge-border/50 hover:bg-forge-border text-forge-muted hover:text-white transition-colors"
+              className={cn(
+                'text-[10px] px-2 py-1 rounded-md',
+                'bg-[hsl(var(--color-border-default)/0.5)]',
+                'text-[hsl(var(--color-text-muted))]',
+                'hover:bg-[hsl(var(--color-border-default))]',
+                'hover:text-[hsl(var(--color-text-primary))]',
+                'transition-colors duration-150'
+              )}
             >
               All
             </button>
             <button
               onClick={deselectAll}
-              className="text-[10px] px-2 py-1 rounded bg-forge-border/50 hover:bg-forge-border text-forge-muted hover:text-white transition-colors"
+              className={cn(
+                'text-[10px] px-2 py-1 rounded-md',
+                'bg-[hsl(var(--color-border-default)/0.5)]',
+                'text-[hsl(var(--color-text-muted))]',
+                'hover:bg-[hsl(var(--color-border-default))]',
+                'hover:text-[hsl(var(--color-text-primary))]',
+                'transition-colors duration-150'
+              )}
             >
               None
             </button>
           </div>
         </div>
 
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+        <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
           {functionMeta.map((func) => {
             const isSelected = localSelectedFunctions.includes(func.name);
             return (
               <div
                 key={func.name}
                 onClick={() => toggleFunction(func.name)}
-                className={cn(
-                  "flex items-start gap-3 p-2.5 rounded-lg border cursor-pointer transition-all",
-                  isSelected
-                    ? "bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/15"
-                    : "bg-forge-bg/30 border-forge-border/30 hover:bg-forge-bg/50 opacity-60"
-                )}
+                className={isSelected ? selectionStyles.itemSelected : selectionStyles.item}
               >
                 <div className={cn(
-                  "w-4 h-4 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors",
-                  isSelected
-                    ? "bg-amber-500 text-white"
-                    : "bg-forge-border/50 text-transparent"
+                  selectionStyles.checkbox,
+                  isSelected ? selectionStyles.checkboxChecked : selectionStyles.checkboxUnchecked
                 )}>
-                  <Check className="w-3 h-3" strokeWidth={3} />
+                  <Check className={selectionStyles.checkIcon} strokeWidth={3} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <code className={cn(
-                      "text-xs font-mono",
-                      isSelected ? "text-amber-400" : "text-forge-muted"
+                      selectionStyles.itemTitle,
+                      isSelected
+                        ? 'text-[hsl(var(--color-success))]'
+                        : 'text-[hsl(var(--color-text-muted))]'
                     )}>
                       {func.name}
                     </code>
                   </div>
-                  <p className="text-[10px] text-forge-muted mt-0.5 line-clamp-1">
+                  <p className={selectionStyles.itemDescription}>
                     {func.description}
                   </p>
                 </div>
@@ -132,11 +148,13 @@ export function ERC1155StylusForm({ nodeId, config }: Props) {
         </div>
 
         {/* Info about markdown generation */}
-        <div className="mt-3 flex items-start gap-2 p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <Info className="w-3.5 h-3.5 text-blue-400 flex-shrink-0 mt-0.5" />
-          <p className="text-[10px] text-blue-300">
-            Function selections will generate a markdown file with instructions for your LLM to modify the contract code.
-          </p>
+        <div className={cn(cardStyles.info, 'mt-3')}>
+          <div className="flex items-start gap-2">
+            <Info className="w-3.5 h-3.5 text-[hsl(var(--color-info))] flex-shrink-0 mt-0.5" />
+            <p className="text-[10px] text-[hsl(var(--color-info))] leading-relaxed">
+              Function selections will generate a markdown file with instructions for your LLM to modify the contract code.
+            </p>
+          </div>
         </div>
       </div>
 

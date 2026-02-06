@@ -2,11 +2,12 @@
 
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from 'reactflow';
+import { motion } from 'framer-motion';
 import {
   Box, CreditCard, Bot, Layout, ShieldCheck, Trash2,
   Lock, Key, Wallet, Globe, ArrowLeftRight, Database,
   HardDrive, Layers, TrendingUp, Zap, Sparkles, Search,
-  DollarSign, Fuel
+  DollarSign, Fuel, Send
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBlueprintStore } from '@/store/blueprint';
@@ -37,6 +38,11 @@ const iconMap: Record<string, typeof Box> = {
   'aixbt-signals': Zap,
   'aixbt-indigo': Sparkles,
   'aixbt-observer': Search,
+  // Telegram
+  'telegram-notifications': Send,
+  'telegram-commands': Send,
+  'telegram-wallet-link': Send,
+  'telegram-ai-agent': Send,
   // Dune Analytics
   'dune-execute-sql': Database,
   'dune-token-price': DollarSign,
@@ -49,77 +55,122 @@ const iconMap: Record<string, typeof Box> = {
   'dune-protocol-tvl': Lock,
 };
 
-const colorMap: Record<string, {
-  bg: string;
+/**
+ * Node color mapping - Modern, refined palette
+ * Each category has consistent, muted colors with enhanced selection states
+ */
+type NodeColorScheme = {
+  bgGradient: string;
+  iconBg: string;
   border: string;
+  borderHover: string;
   borderSelected: string;
   text: string;
   glow: string;
-  accent: string;
-}> = {
+  accentBar: string;
+  handleActive: string;
+};
+
+const colorMap: Record<string, NodeColorScheme> = {
   'node-contracts': {
-    bg: 'from-cyan-500/15 via-cyan-500/5 to-transparent',
-    border: 'border-cyan-500/20',
-    borderSelected: 'border-cyan-400/60',
-    text: 'text-cyan-400',
-    glow: 'shadow-[0_0_30px_-5px] shadow-cyan-500/30',
-    accent: 'bg-cyan-500',
+    bgGradient: 'from-[hsl(200_55%_50%/0.08)] via-transparent to-transparent',
+    iconBg: 'bg-[hsl(200_55%_50%/0.12)]',
+    border: 'border-[hsl(200_55%_50%/0.18)]',
+    borderHover: 'hover:border-[hsl(200_55%_50%/0.35)]',
+    borderSelected: 'border-[hsl(200_55%_50%/0.55)]',
+    text: 'text-[hsl(200_55%_55%)]',
+    glow: 'shadow-[0_0_20px_-4px_hsl(200_55%_50%/0.3),_0_0_6px_-1px_hsl(200_55%_50%/0.2)]',
+    accentBar: 'bg-gradient-to-r from-[hsl(200_55%_50%/0.6)] via-[hsl(200_55%_50%/0.3)] to-transparent',
+    handleActive: '!border-[hsl(200_55%_50%/0.6)]',
   },
   'node-payments': {
-    bg: 'from-amber-500/15 via-amber-500/5 to-transparent',
-    border: 'border-amber-500/20',
-    borderSelected: 'border-amber-400/60',
-    text: 'text-amber-400',
-    glow: 'shadow-[0_0_30px_-5px] shadow-amber-500/30',
-    accent: 'bg-amber-500',
+    bgGradient: 'from-[hsl(38_60%_50%/0.08)] via-transparent to-transparent',
+    iconBg: 'bg-[hsl(38_60%_50%/0.12)]',
+    border: 'border-[hsl(38_60%_50%/0.18)]',
+    borderHover: 'hover:border-[hsl(38_60%_50%/0.35)]',
+    borderSelected: 'border-[hsl(38_60%_50%/0.55)]',
+    text: 'text-[hsl(38_60%_55%)]',
+    glow: 'shadow-[0_0_20px_-4px_hsl(38_60%_50%/0.3),_0_0_6px_-1px_hsl(38_60%_50%/0.2)]',
+    accentBar: 'bg-gradient-to-r from-[hsl(38_60%_50%/0.6)] via-[hsl(38_60%_50%/0.3)] to-transparent',
+    handleActive: '!border-[hsl(38_60%_50%/0.6)]',
   },
   'node-agents': {
-    bg: 'from-fuchsia-500/15 via-fuchsia-500/5 to-transparent',
-    border: 'border-fuchsia-500/20',
-    borderSelected: 'border-fuchsia-400/60',
-    text: 'text-fuchsia-400',
-    glow: 'shadow-[0_0_30px_-5px] shadow-fuchsia-500/30',
-    accent: 'bg-fuchsia-500',
+    bgGradient: 'from-[hsl(285_45%_52%/0.08)] via-transparent to-transparent',
+    iconBg: 'bg-[hsl(285_45%_52%/0.12)]',
+    border: 'border-[hsl(285_45%_52%/0.18)]',
+    borderHover: 'hover:border-[hsl(285_45%_52%/0.35)]',
+    borderSelected: 'border-[hsl(285_45%_52%/0.55)]',
+    text: 'text-[hsl(285_45%_55%)]',
+    glow: 'shadow-[0_0_20px_-4px_hsl(285_45%_52%/0.3),_0_0_6px_-1px_hsl(285_45%_52%/0.2)]',
+    accentBar: 'bg-gradient-to-r from-[hsl(285_45%_52%/0.6)] via-[hsl(285_45%_52%/0.3)] to-transparent',
+    handleActive: '!border-[hsl(285_45%_52%/0.6)]',
   },
   'node-app': {
-    bg: 'from-emerald-500/15 via-emerald-500/5 to-transparent',
-    border: 'border-emerald-500/20',
-    borderSelected: 'border-emerald-400/60',
-    text: 'text-emerald-400',
-    glow: 'shadow-[0_0_30px_-5px] shadow-emerald-500/30',
-    accent: 'bg-emerald-500',
+    bgGradient: 'from-[hsl(152_45%_45%/0.08)] via-transparent to-transparent',
+    iconBg: 'bg-[hsl(152_45%_45%/0.12)]',
+    border: 'border-[hsl(152_45%_45%/0.18)]',
+    borderHover: 'hover:border-[hsl(152_45%_45%/0.35)]',
+    borderSelected: 'border-[hsl(152_45%_45%/0.55)]',
+    text: 'text-[hsl(152_45%_50%)]',
+    glow: 'shadow-[0_0_20px_-4px_hsl(152_45%_45%/0.3),_0_0_6px_-1px_hsl(152_45%_45%/0.2)]',
+    accentBar: 'bg-gradient-to-r from-[hsl(152_45%_45%/0.6)] via-[hsl(152_45%_45%/0.3)] to-transparent',
+    handleActive: '!border-[hsl(152_45%_45%/0.6)]',
   },
   'node-quality': {
-    bg: 'from-rose-500/15 via-rose-500/5 to-transparent',
-    border: 'border-rose-500/20',
-    borderSelected: 'border-rose-400/60',
-    text: 'text-rose-400',
-    glow: 'shadow-[0_0_30px_-5px] shadow-rose-500/30',
-    accent: 'bg-rose-500',
+    bgGradient: 'from-[hsl(0_50%_52%/0.08)] via-transparent to-transparent',
+    iconBg: 'bg-[hsl(0_50%_52%/0.12)]',
+    border: 'border-[hsl(0_50%_52%/0.18)]',
+    borderHover: 'hover:border-[hsl(0_50%_52%/0.35)]',
+    borderSelected: 'border-[hsl(0_50%_52%/0.55)]',
+    text: 'text-[hsl(0_50%_55%)]',
+    glow: 'shadow-[0_0_20px_-4px_hsl(0_50%_52%/0.3),_0_0_6px_-1px_hsl(0_50%_52%/0.2)]',
+    accentBar: 'bg-gradient-to-r from-[hsl(0_50%_52%/0.6)] via-[hsl(0_50%_52%/0.3)] to-transparent',
+    handleActive: '!border-[hsl(0_50%_52%/0.6)]',
   },
   'node-intelligence': {
-    bg: 'from-purple-500/15 via-purple-500/5 to-transparent',
-    border: 'border-purple-500/20',
-    borderSelected: 'border-purple-400/60',
-    text: 'text-purple-400',
-    glow: 'shadow-[0_0_30_px_-5px] shadow-purple-500/30',
-    accent: 'bg-purple-500',
+    bgGradient: 'from-[hsl(255_45%_55%/0.08)] via-transparent to-transparent',
+    iconBg: 'bg-[hsl(255_45%_55%/0.12)]',
+    border: 'border-[hsl(255_45%_55%/0.18)]',
+    borderHover: 'hover:border-[hsl(255_45%_55%/0.35)]',
+    borderSelected: 'border-[hsl(255_45%_55%/0.55)]',
+    text: 'text-[hsl(255_45%_58%)]',
+    glow: 'shadow-[0_0_20px_-4px_hsl(255_45%_55%/0.3),_0_0_6px_-1px_hsl(255_45%_55%/0.2)]',
+    accentBar: 'bg-gradient-to-r from-[hsl(255_45%_55%/0.6)] via-[hsl(255_45%_55%/0.3)] to-transparent',
+    handleActive: '!border-[hsl(255_45%_55%/0.6)]',
   },
+  'node-telegram': {
+    bgGradient: 'from-[hsl(200_70%_45%/0.08)] via-transparent to-transparent',
+    iconBg: 'bg-[hsl(200_70%_45%/0.12)]',
+    border: 'border-[hsl(200_70%_45%/0.18)]',
+    borderHover: 'hover:border-[hsl(200_70%_45%/0.35)]',
+    borderSelected: 'border-[hsl(200_70%_45%/0.55)]',
+    text: 'text-[hsl(200_70%_48%)]',
+    glow: 'shadow-[0_0_20px_-4px_hsl(200_70%_45%/0.3),_0_0_6px_-1px_hsl(200_70%_45%/0.2)]',
+    accentBar: 'bg-gradient-to-r from-[hsl(200_70%_45%/0.6)] via-[hsl(200_70%_45%/0.3)] to-transparent',
+    handleActive: '!border-[hsl(200_70%_45%/0.6)]',
+  },
+  // Fallback for legacy types
   'accent-purple': {
-    bg: 'from-violet-500/15 via-violet-500/5 to-transparent',
-    border: 'border-violet-500/20',
-    borderSelected: 'border-violet-400/60',
-    text: 'text-violet-400',
-    glow: 'shadow-[0_0_30px_-5px] shadow-violet-500/30',
-    accent: 'bg-violet-500',
+    bgGradient: 'from-[hsl(255_45%_55%/0.08)] via-transparent to-transparent',
+    iconBg: 'bg-[hsl(255_45%_55%/0.12)]',
+    border: 'border-[hsl(255_45%_55%/0.18)]',
+    borderHover: 'hover:border-[hsl(255_45%_55%/0.35)]',
+    borderSelected: 'border-[hsl(255_45%_55%/0.55)]',
+    text: 'text-[hsl(255_45%_58%)]',
+    glow: 'shadow-[0_0_20px_-4px_hsl(255_45%_55%/0.3),_0_0_6px_-1px_hsl(255_45%_55%/0.2)]',
+    accentBar: 'bg-gradient-to-r from-[hsl(255_45%_55%/0.6)] via-[hsl(255_45%_55%/0.3)] to-transparent',
+    handleActive: '!border-[hsl(255_45%_55%/0.6)]',
   },
   'accent-cyan': {
-    bg: 'from-cyan-500/15 via-cyan-500/5 to-transparent',
-    border: 'border-cyan-500/20',
-    borderSelected: 'border-cyan-400/60',
-    text: 'text-cyan-400',
-    glow: 'shadow-[0_0_30px_-5px] shadow-cyan-500/30',
-    accent: 'bg-cyan-500',
+    bgGradient: 'from-[hsl(18_76%_55%/0.08)] via-transparent to-transparent',
+    iconBg: 'bg-[hsl(18_76%_55%/0.12)]',
+    border: 'border-[hsl(18_76%_55%/0.18)]',
+    borderHover: 'hover:border-[hsl(18_76%_55%/0.35)]',
+    borderSelected: 'border-[hsl(18_76%_55%/0.55)]',
+    text: 'text-[hsl(18_76%_58%)]',
+    glow: 'shadow-[0_0_20px_-4px_hsl(18_76%_55%/0.3),_0_0_6px_-1px_hsl(18_76%_55%/0.2)]',
+    accentBar: 'bg-gradient-to-r from-[hsl(18_76%_55%/0.6)] via-[hsl(18_76%_55%/0.3)] to-transparent',
+    handleActive: '!border-[hsl(18_76%_55%/0.6)]',
   },
 };
 
@@ -146,61 +197,94 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
   );
 
   return (
-    <div
+    <motion.div
+      initial={false}
+      animate={{
+        scale: isSelected ? 1.02 : 1,
+        y: isSelected ? -2 : 0,
+      }}
+      transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        'group relative w-[180px] rounded-xl border backdrop-blur-md',
-        'bg-gradient-to-br bg-forge-surface/90',
+        'group relative w-[200px] rounded-xl border-[1.5px]',
+        'bg-[hsl(var(--color-bg-muted))]',
         'transition-all duration-200 ease-out',
-        isSelected ? cn(colors.borderSelected, 'border-2') : cn(colors.border, 'border'),
+        isSelected ? colors.borderSelected : colors.border,
         isSelected && colors.glow,
-        !isSelected && 'hover:scale-[1.01] hover:border-opacity-60'
+        !isSelected && colors.borderHover,
+        !isSelected && 'hover:shadow-md'
       )}
     >
-      {/* Gradient overlay */}
+      {/* Gradient overlay - stronger when selected */}
       <div className={cn(
-        'absolute inset-0 rounded-xl bg-gradient-to-br opacity-40',
-        colors.bg
+        'absolute inset-0 rounded-xl bg-gradient-to-br transition-opacity duration-200',
+        colors.bgGradient,
+        isSelected ? 'opacity-100' : 'opacity-60'
       )} />
 
-      {/* Top accent line */}
-      <div className={cn(
-        'absolute top-0 left-3 right-3 h-[1.5px] rounded-full',
-        colors.accent,
-        'opacity-50'
-      )} />
+      {/* Top accent bar - animated on selection */}
+      <motion.div
+        initial={false}
+        animate={{
+          scaleX: isSelected ? 1 : 0.6,
+          opacity: isSelected ? 1 : 0.5,
+        }}
+        transition={{ duration: 0.2 }}
+        className={cn(
+          'absolute top-0 left-4 right-4 h-[2px] rounded-full origin-left',
+          colors.accentBar
+        )}
+      />
 
       {/* Input handle */}
       <Handle
         type="target"
         position={Position.Left}
         className={cn(
-          '!w-3 !h-3 !-left-1.5 !border-2 !rounded-full',
-          '!bg-forge-bg !border-forge-border',
-          'hover:!border-white/50 transition-colors duration-200',
-          isSelected && '!border-white/40'
+          '!w-3.5 !h-3.5 !-left-[7px] !border-2 !rounded-full',
+          '!bg-[hsl(var(--color-bg-elevated))]',
+          '!border-[hsl(var(--color-border-default))]',
+          'hover:!border-[hsl(var(--color-border-strong))]',
+          'hover:!scale-110',
+          'transition-all duration-150',
+          isSelected && colors.handleActive
         )}
       />
 
       {/* Node content */}
-      <div className="relative p-2.5">
-        <div className="flex items-center gap-2">
-          {/* Icon container */}
-          <div
+      <div className="relative p-3">
+        <div className="flex items-start gap-2.5">
+          {/* Icon container - enhanced for selected state */}
+          <motion.div
+            initial={false}
+            animate={{
+              scale: isSelected ? 1.05 : 1,
+            }}
+            transition={{ duration: 0.15 }}
             className={cn(
-              'w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0',
-              'bg-forge-bg/70 border border-white/5',
-              'group-hover:border-white/10 transition-colors duration-200'
+              'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
+              colors.iconBg,
+              'border border-[hsl(var(--color-border-subtle))]',
+              'transition-all duration-200',
+              isSelected && 'border-transparent'
             )}
           >
-            <Icon className={cn('w-4 h-4', colors.text)} />
-          </div>
+            <Icon className={cn('w-4.5 h-4.5', colors.text)} />
+          </motion.div>
 
-          {/* Label */}
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-white truncate leading-tight">
+          {/* Label section */}
+          <div className="flex-1 min-w-0 pt-0.5">
+            <p className={cn(
+              'text-[13px] font-semibold truncate leading-tight',
+              'text-[hsl(var(--color-text-primary))]',
+              'transition-colors duration-200'
+            )}>
               {data.label || data.contractName || data.agentName || nodeTypeToLabel(nodeType)}
             </p>
-            <p className={cn('text-[10px] truncate mt-0.5 font-medium', colors.text, 'opacity-70')}>
+            <p className={cn(
+              'text-[10px] truncate mt-1 font-medium tracking-wide',
+              colors.text,
+              isSelected ? 'opacity-90' : 'opacity-65'
+            )}>
               {nodeTypeToLabel(nodeType)}
             </p>
           </div>
@@ -209,23 +293,24 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
           <button
             onClick={handleDelete}
             className={cn(
-              'p-1 rounded-md text-forge-muted transition-all duration-200',
-              'hover:bg-red-500/20 hover:text-red-400',
-              'opacity-0 group-hover:opacity-100',
-              isSelected && 'opacity-100'
+              'p-1.5 rounded-md transition-all duration-150',
+              'text-[hsl(var(--color-text-muted))]',
+              'hover:bg-[hsl(var(--color-error)/0.12)] hover:text-[hsl(var(--color-error))]',
+              'opacity-0 group-hover:opacity-100 -mt-0.5',
+              isSelected && 'opacity-80'
             )}
           >
-            <Trash2 className="w-3 h-3" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Tags - only show if there's relevant data */}
         {hasExtraInfo && (
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
             {nodeType === 'stylus-contract' && (data.contractName || data.contractInstructions) && (
               <span className={cn(
-                'text-[9px] px-1.5 py-0.5 rounded font-mono tracking-wide truncate max-w-[100px]',
-                'bg-forge-bg/50 border border-white/5',
+                'text-[9px] px-2 py-0.5 rounded-md font-mono tracking-wide truncate max-w-[120px]',
+                'bg-[hsl(var(--color-bg-base)/0.6)] border border-[hsl(var(--color-border-subtle))]',
                 colors.text
               )} title={data.contractInstructions as string}>
                 {String(data.contractName || 'Stylus')}
@@ -234,8 +319,8 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
 
             {nodeType === 'x402-paywall-api' && data.currency && (
               <span className={cn(
-                'text-[9px] px-1.5 py-0.5 rounded font-mono uppercase tracking-wide',
-                'bg-forge-bg/50 border border-white/5',
+                'text-[9px] px-2 py-0.5 rounded-md font-mono uppercase tracking-wider',
+                'bg-[hsl(var(--color-bg-base)/0.6)] border border-[hsl(var(--color-border-subtle))]',
                 colors.text
               )}>
                 {data.currency}
@@ -244,8 +329,8 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
 
             {nodeType === 'erc8004-agent-runtime' && data.modelProvider && (
               <span className={cn(
-                'text-[9px] px-1.5 py-0.5 rounded font-mono tracking-wide',
-                'bg-forge-bg/50 border border-white/5',
+                'text-[9px] px-2 py-0.5 rounded-md font-mono tracking-wide',
+                'bg-[hsl(var(--color-bg-base)/0.6)] border border-[hsl(var(--color-border-subtle))]',
                 colors.text
               )}>
                 {data.modelProvider}
@@ -254,8 +339,8 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
 
             {nodeType === 'ostium-trading' && (
               <span className={cn(
-                'text-[9px] px-1.5 py-0.5 rounded font-mono uppercase tracking-wide',
-                'bg-forge-bg/50 border border-white/5',
+                'text-[9px] px-2 py-0.5 rounded-md font-mono uppercase tracking-wider',
+                'bg-[hsl(var(--color-bg-base)/0.6)] border border-[hsl(var(--color-border-subtle))]',
                 colors.text
               )}>
                 {data.network || 'arbitrum'}
@@ -264,10 +349,10 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
 
             {nodeType === 'maxxit' && (
               <span className={cn(
-                'text-[9px] px-1.5 py-0.5 rounded font-mono uppercase tracking-wide',
-                'bg-forge-bg/50 border border-white/5',
+                'text-[9px] px-2 py-0.5 rounded-md font-mono uppercase tracking-wider',
+                'bg-[hsl(var(--color-bg-base)/0.6)] border border-[hsl(var(--color-border-subtle))]',
                 data.setupComplete || data.linkedStatus === 'LINKED'
-                  ? 'text-green-400'
+                  ? 'text-[hsl(var(--color-success))]'
                   : colors.text
               )}>
                 {data.setupComplete || data.linkedStatus === 'LINKED'
@@ -278,10 +363,14 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
           </div>
         )}
 
-        {/* Subtle ID indicator - now inline and smaller */}
-        <div className="mt-1.5 flex items-center">
-          <span className="text-[8px] px-1 py-0.5 rounded font-mono text-forge-muted/40 bg-forge-bg/20">
-            {id.slice(0, 6)}
+        {/* Node ID badge */}
+        <div className="mt-2 flex items-center justify-between">
+          <span className={cn(
+            'text-[9px] px-1.5 py-0.5 rounded-md font-mono',
+            'text-[hsl(var(--color-text-disabled))]',
+            'bg-[hsl(var(--color-bg-base)/0.4)]'
+          )}>
+            {id.slice(0, 8)}
           </span>
         </div>
       </div>
@@ -291,23 +380,30 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
         type="source"
         position={Position.Right}
         className={cn(
-          '!w-3 !h-3 !-right-1.5 !border-2 !rounded-full',
-          '!bg-forge-bg !border-forge-border',
-          'hover:!border-white/50 transition-colors duration-200',
-          isSelected && '!border-white/40'
+          '!w-3.5 !h-3.5 !-right-[7px] !border-2 !rounded-full',
+          '!bg-[hsl(var(--color-bg-elevated))]',
+          '!border-[hsl(var(--color-border-default))]',
+          'hover:!border-[hsl(var(--color-border-strong))]',
+          'hover:!scale-110',
+          'transition-all duration-150',
+          isSelected && colors.handleActive
         )}
       />
 
-      {/* Selection indicator ring - subtle glow effect */}
+      {/* Selection ring - subtle outer glow indicator */}
       {isSelected && (
-        <div className={cn(
-          'absolute -inset-0.5 rounded-[14px] border pointer-events-none',
-          'border-white/15'
-        )} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.15 }}
+          className={cn(
+            'absolute -inset-1 rounded-[16px] pointer-events-none',
+            'border border-[hsl(var(--color-border-focus)/0.3)]'
+          )}
+        />
       )}
-    </div>
+    </motion.div>
   );
 }
 
 export const ForgeNode = memo(ForgeNodeComponent);
-

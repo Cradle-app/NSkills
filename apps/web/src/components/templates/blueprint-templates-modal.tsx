@@ -21,7 +21,7 @@ interface Template {
     name: string;
     description: string;
     icon: typeof Image;
-    iconColor: string;
+    colorClass: string;
     tags: string[];
     nodes: Array<{
         type: string;
@@ -39,7 +39,7 @@ const TEMPLATES: Template[] = [
         name: 'NFT Collection',
         description: 'ERC-721 contract with frontend scaffold and IPFS storage for metadata',
         icon: Image,
-        iconColor: 'accent-purple',
+        colorClass: 'accent-secondary',
         tags: ['NFT', 'Stylus', 'IPFS'],
         nodes: [
             { type: 'erc721-stylus', position: { x: 250, y: 150 } },
@@ -58,7 +58,7 @@ const TEMPLATES: Template[] = [
         name: 'Token Launch',
         description: 'ERC-20 token with wallet auth and frontend for token interactions',
         icon: Coins,
-        iconColor: 'accent-yellow',
+        colorClass: 'warning',
         tags: ['Token', 'DeFi', 'Stylus'],
         nodes: [
             { type: 'erc20-stylus', position: { x: 250, y: 150 } },
@@ -75,7 +75,7 @@ const TEMPLATES: Template[] = [
         name: 'AI Agent + Telegram',
         description: 'ERC-8004 autonomous agent with Telegram bot integration',
         icon: Bot,
-        iconColor: 'accent-cyan',
+        colorClass: 'accent-primary',
         tags: ['AI', 'Telegram', 'Agent'],
         nodes: [
             { type: 'erc8004-agent-runtime', position: { x: 250, y: 150 } },
@@ -92,7 +92,7 @@ const TEMPLATES: Template[] = [
         name: 'Full Stack dApp',
         description: 'Complete setup with smart contract, frontend, auth, and RPC',
         icon: Layout,
-        iconColor: 'emerald',
+        colorClass: 'success',
         tags: ['Full Stack', 'Production'],
         nodes: [
             { type: 'stylus-contract', position: { x: 200, y: 150 } },
@@ -113,6 +113,19 @@ const TEMPLATES: Template[] = [
 interface BlueprintTemplatesModalProps {
     isOpen: boolean;
     onClose: () => void;
+}
+
+// Helper function to get color CSS variable for each template
+function getColorVar(colorClass: string): string {
+    const colorMap: Record<string, string> = {
+        'accent-primary': 'var(--color-accent-primary)',
+        'accent-secondary': 'var(--color-accent-secondary)',
+        'success': 'var(--color-success)',
+        'warning': 'var(--color-warning)',
+        'info': 'var(--color-info)',
+        'error': 'var(--color-error)',
+    };
+    return colorMap[colorClass] || colorMap['accent-primary'];
 }
 
 export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesModalProps) {
@@ -165,21 +178,21 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
                         transition={{ type: 'spring', damping: 25, stiffness: 400 }}
                         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl"
                     >
-                        <div className="bg-gradient-to-b from-forge-surface to-forge-bg border border-forge-border/60 rounded-2xl shadow-2xl overflow-hidden">
+                        <div className="bg-gradient-to-b from-[hsl(var(--color-bg-elevated))] to-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default)/0.6)] rounded-2xl shadow-2xl overflow-hidden">
                             {/* Header */}
-                            <div className="flex items-center justify-between p-4 border-b border-forge-border/50">
+                            <div className="flex items-center justify-between p-4 border-b border-[hsl(var(--color-border-default)/0.5)]">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-lg bg-accent-cyan/10">
-                                        <Sparkles className="w-5 h-5 text-accent-cyan" />
+                                    <div className="p-2 rounded-lg bg-[hsl(var(--color-accent-primary)/0.1)]">
+                                        <Sparkles className="w-5 h-5 text-[hsl(var(--color-accent-primary))]" />
                                     </div>
                                     <div>
-                                        <h2 className="text-lg font-semibold text-white">Blueprint Templates</h2>
-                                        <p className="text-xs text-forge-muted">Start with a pre-built foundation</p>
+                                        <h2 className="text-lg font-semibold text-[hsl(var(--color-text-primary))]">Blueprint Templates</h2>
+                                        <p className="text-xs text-[hsl(var(--color-text-muted))]">Start with a pre-built foundation</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={onClose}
-                                    className="p-2 rounded-lg hover:bg-forge-elevated/50 text-forge-muted hover:text-white transition-colors"
+                                    className="p-2 rounded-lg hover:bg-[hsl(var(--color-bg-elevated)/0.5)] text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] transition-colors"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -190,6 +203,7 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
                                 {TEMPLATES.map((template) => {
                                     const Icon = template.icon;
                                     const isLoading = loading === template.id;
+                                    const colorVar = getColorVar(template.colorClass);
 
                                     return (
                                         <motion.button
@@ -198,8 +212,8 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
                                             disabled={!!loading}
                                             className={cn(
                                                 'group relative p-4 rounded-xl text-left',
-                                                'bg-forge-elevated/30 border border-forge-border/50',
-                                                'hover:bg-forge-elevated/50 hover:border-white/20',
+                                                'bg-[hsl(var(--color-bg-elevated)/0.3)] border border-[hsl(var(--color-border-default)/0.5)]',
+                                                'hover:bg-[hsl(var(--color-bg-elevated)/0.5)] hover:border-[hsl(var(--color-text-primary)/0.2)]',
                                                 'transition-all duration-200',
                                                 isLoading && 'opacity-50 pointer-events-none'
                                             )}
@@ -207,18 +221,25 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
                                             whileTap={{ scale: 0.98 }}
                                         >
                                             {/* Icon */}
-                                            <div className={cn(
-                                                'w-10 h-10 rounded-lg flex items-center justify-center mb-3',
-                                                `bg-${template.iconColor}/10 border border-${template.iconColor}/20`
-                                            )}>
-                                                <Icon className={cn('w-5 h-5', `text-${template.iconColor}`)} />
+                                            <div
+                                                className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
+                                                style={{
+                                                    backgroundColor: `hsl(${colorVar} / 0.1)`,
+                                                    borderWidth: '1px',
+                                                    borderColor: `hsl(${colorVar} / 0.2)`,
+                                                }}
+                                            >
+                                                <Icon
+                                                    className="w-5 h-5"
+                                                    style={{ color: `hsl(${colorVar})` }}
+                                                />
                                             </div>
 
                                             {/* Content */}
-                                            <h3 className="font-medium text-white mb-1 group-hover:text-accent-cyan transition-colors">
+                                            <h3 className="font-medium text-[hsl(var(--color-text-primary))] mb-1 group-hover:text-[hsl(var(--color-accent-primary))] transition-colors">
                                                 {template.name}
                                             </h3>
-                                            <p className="text-xs text-forge-muted line-clamp-2 mb-3">
+                                            <p className="text-xs text-[hsl(var(--color-text-muted))] line-clamp-2 mb-3">
                                                 {template.description}
                                             </p>
 
@@ -227,7 +248,7 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
                                                 {template.tags.map((tag) => (
                                                     <span
                                                         key={tag}
-                                                        className="text-[10px] px-1.5 py-0.5 rounded bg-forge-bg/50 text-forge-muted"
+                                                        className="text-[10px] px-1.5 py-0.5 rounded bg-[hsl(var(--color-bg-base)/0.5)] text-[hsl(var(--color-text-muted))]"
                                                     >
                                                         {tag}
                                                     </span>
@@ -236,13 +257,13 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
 
                                             {/* Arrow indicator */}
                                             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <ArrowRight className="w-4 h-4 text-accent-cyan" />
+                                                <ArrowRight className="w-4 h-4 text-[hsl(var(--color-accent-primary))]" />
                                             </div>
 
                                             {/* Loading state */}
                                             {isLoading && (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-forge-bg/50 rounded-xl">
-                                                    <div className="w-6 h-6 border-2 border-accent-cyan/30 border-t-accent-cyan rounded-full animate-spin" />
+                                                <div className="absolute inset-0 flex items-center justify-center bg-[hsl(var(--color-bg-base)/0.5)] rounded-xl">
+                                                    <div className="w-6 h-6 border-2 border-[hsl(var(--color-accent-primary)/0.3)] border-t-[hsl(var(--color-accent-primary))] rounded-full animate-spin" />
                                                 </div>
                                             )}
                                         </motion.button>
@@ -251,8 +272,8 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
                             </div>
 
                             {/* Footer */}
-                            <div className="p-4 border-t border-forge-border/50 bg-forge-bg/30">
-                                <p className="text-xs text-forge-muted text-center">
+                            <div className="p-4 border-t border-[hsl(var(--color-border-default)/0.5)] bg-[hsl(var(--color-bg-base)/0.3)]">
+                                <p className="text-xs text-[hsl(var(--color-text-muted))] text-center">
                                     Templates will replace your current canvas. Make sure to save first!
                                 </p>
                             </div>

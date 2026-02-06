@@ -1,0 +1,5 @@
+
+> @dapp-forge/web@0.1.0 typecheck
+> tsc --noEmit
+
+src/components/config/forms/superposition-utility-mining-form.tsx(5,10): error TS2305: Module '"lucide-react"' has no exported member 'Pickaxe'.

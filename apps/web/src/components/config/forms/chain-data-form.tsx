@@ -4,6 +4,11 @@ import { useBlueprintStore } from '@/store/blueprint';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -18,9 +23,9 @@ export function ChainDataForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Data Provider</label>
+    <div className={formStyles.container}>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Data Provider</label>
         <Select
           value={(config.provider as string) ?? 'alchemy'}
           onValueChange={(v) => updateConfig('provider', v)}
@@ -33,12 +38,12 @@ export function ChainDataForm({ nodeId, config }: Props) {
         </Select>
       </div>
 
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Features</label>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Features</label>
         <div className="space-y-2">
           {['token-balances', 'nft-data', 'transaction-history', 'price-feeds'].map((feature) => (
-            <div key={feature} className="flex items-center justify-between">
-              <span className="text-sm text-white capitalize">{feature.replace('-', ' ')}</span>
+            <div key={feature} className="flex items-center justify-between py-1">
+              <span className="text-sm text-[hsl(var(--color-text-primary))] capitalize">{feature.replace('-', ' ')}</span>
               <Switch
                 checked={((config.features as string[]) ?? ['token-balances', 'nft-data']).includes(feature)}
                 onCheckedChange={(checked) => {
@@ -51,16 +56,16 @@ export function ChainDataForm({ nodeId, config }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-white">Enable Cache</span>
+      <div className="flex items-center justify-between py-2">
+        <span className="text-sm text-[hsl(var(--color-text-primary))]">Enable Cache</span>
         <Switch
           checked={(config.cacheEnabled as boolean) ?? true}
           onCheckedChange={(v) => updateConfig('cacheEnabled', v)}
         />
       </div>
 
-      <div>
-        <label className="text-xs text-forge-muted mb-1.5 block">Cache Duration (ms)</label>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Cache Duration (ms)</label>
         <Input
           type="number"
           value={(config.cacheDuration as number) ?? 60000}
@@ -70,4 +75,3 @@ export function ChainDataForm({ nodeId, config }: Props) {
     </div>
   );
 }
-

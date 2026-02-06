@@ -466,10 +466,16 @@ export const useAuthStore = create<AuthState>()(
       // Comprehensive auth check: database + active session
       checkFullAuthStatus: async (walletAddress: string) => {
         try {
-          // Check database for user record
-          const dbResponse = await fetch(
-            `/api/auth/user?walletAddress=${encodeURIComponent(walletAddress)}`
-          );
+          // Check database user record and session in parallel to reduce latency
+          const [dbResponse, sessionResponse] = await Promise.all([
+            fetch(
+              `/api/auth/user?walletAddress=${encodeURIComponent(
+                walletAddress
+              )}`
+            ),
+            fetch("/api/auth/session"),
+          ]);
+
           let hasWallet = false;
           let hasGitHubInDb = false;
 
@@ -480,8 +486,6 @@ export const useAuthStore = create<AuthState>()(
             hasGitHubInDb = !!user?.githubId;
           }
 
-          // Check for active GitHub session (cookie)
-          const sessionResponse = await fetch("/api/auth/session");
           const sessionData = await sessionResponse.json();
           const hasActiveSession =
             sessionData.authenticated && !!sessionData.github;

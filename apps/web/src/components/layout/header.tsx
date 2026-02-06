@@ -28,6 +28,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { RecentBlueprintsDropdown, useRecentBlueprints } from '@/components/ui/recent-blueprints-dropdown';
 import type { BlueprintNode, BlueprintEdge } from '@dapp-forge/blueprint-schema';
 import { AuthFlowModal } from '../auth/auth-flow-modal';
+import { cn } from '@/lib/utils';
 
 export function Header() {
   const [showGenerate, setShowGenerate] = useState(false);
@@ -109,9 +110,9 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-forge-border/50 bg-forge-surface/80 backdrop-blur-xl flex items-center justify-between px-4 z-50 relative">
+    <header className="h-14 border-b border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-subtle)/0.95)] backdrop-blur-xl flex items-center justify-between px-4 z-50 relative">
       {/* Subtle gradient line at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent-cyan/20 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(var(--color-accent-primary)/0.15)] to-transparent" />
 
       {/* Logo & Title */}
       <div className="flex items-center gap-3">
@@ -119,24 +120,24 @@ export function Header() {
           className="flex items-center gap-2.5"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.35 }}
         >
-          <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-cyan/60 p-[1.5px]">
-            <div className="w-full h-full rounded-[6px] bg-forge-bg flex items-center justify-center">
-              <Hexagon className="w-4 h-4 text-accent-cyan" strokeWidth={2} />
+          <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(var(--color-accent-primary))] to-[hsl(var(--color-accent-primary)/0.7)] p-[1.5px]">
+            <div className="w-full h-full rounded-[6px] bg-[hsl(var(--color-bg-base))] flex items-center justify-center">
+              <Hexagon className="w-4 h-4 text-[hsl(var(--color-accent-primary))]" strokeWidth={2} />
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-semibold text-white leading-tight">
+            <span className="text-base font-semibold text-[hsl(var(--color-text-primary))] leading-tight">
               Cradle
             </span>
-            <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
+            <span className="text-[9px] uppercase tracking-wider text-[hsl(var(--color-text-muted))] -mt-0.5">
               Web3 Foundation Builder
             </span>
           </div>
         </motion.div>
 
-        <div className="h-6 w-px bg-forge-border/40 mx-2" />
+        <div className="h-6 w-px bg-[hsl(var(--color-border-default))] mx-2" />
 
         <RecentBlueprintsDropdown
           currentBlueprintName={blueprint.config.project.name || 'Untitled'}
@@ -152,30 +153,30 @@ export function Header() {
 
       {/* Center - Stats */}
       <motion.div
-        className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-forge-elevated/40 border border-forge-border/30"
+        className="flex items-center gap-3 px-3.5 py-1.5 rounded-full bg-[hsl(var(--color-bg-muted))] border border-[hsl(var(--color-border-default))]"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
+        transition={{ duration: 0.35, delay: 0.1 }}
       >
         <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-accent-cyan" />
-          <span className="text-xs font-mono text-forge-text">
-            <span className="text-accent-cyan font-medium">{blueprint.nodes.length}</span>
-            <span className="text-forge-muted ml-1">nodes</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-accent-primary))]" />
+          <span className="text-xs font-mono text-[hsl(var(--color-text-primary))]">
+            <span className="text-[hsl(var(--color-accent-primary))] font-medium">{blueprint.nodes.length}</span>
+            <span className="text-[hsl(var(--color-text-muted))] ml-1">nodes</span>
           </span>
         </div>
-        <div className="w-px h-3 bg-forge-border/40" />
+        <div className="w-px h-3 bg-[hsl(var(--color-border-default))]" />
         <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-accent-purple" />
-          <span className="text-xs font-mono text-forge-text">
-            <span className="text-accent-purple font-medium">{blueprint.edges.length}</span>
-            <span className="text-forge-muted ml-1">edges</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-accent-secondary))]" />
+          <span className="text-xs font-mono text-[hsl(var(--color-text-primary))]">
+            <span className="text-[hsl(var(--color-accent-secondary))] font-medium">{blueprint.edges.length}</span>
+            <span className="text-[hsl(var(--color-text-muted))] ml-1">edges</span>
           </span>
         </div>
-        <div className="w-px h-3 bg-forge-border/40" />
+        <div className="w-px h-3 bg-[hsl(var(--color-border-default))]" />
         <div className="flex items-center gap-1.5" title="Last saved">
-          <Clock className="w-3 h-3 text-emerald-400" />
-          <span className="text-[10px] text-emerald-400/80" suppressHydrationWarning>
+          <Clock className="w-3 h-3 text-[hsl(var(--color-success))]" />
+          <span className="text-[10px] text-[hsl(var(--color-success)/0.85)]" suppressHydrationWarning>
             {blueprint.updatedAt
               ? new Date(blueprint.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
               : 'Not saved'}
@@ -188,13 +189,17 @@ export function Header() {
         className="flex items-center gap-1"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.35 }}
       >
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setShowTemplates(true)}
-          className="h-8 px-2.5 text-accent-cyan hover:text-white hover:bg-accent-cyan/10"
+          className={cn(
+            "h-8 px-2.5",
+            "text-[hsl(var(--color-accent-primary))] hover:text-[hsl(var(--color-text-primary))]",
+            "hover:bg-[hsl(var(--color-accent-primary)/0.08)]"
+          )}
         >
           <LayoutTemplate className="w-3.5 h-3.5 mr-1.5" />
           Templates
@@ -204,7 +209,11 @@ export function Header() {
           variant="ghost"
           size="sm"
           onClick={handleImport}
-          className="h-8 px-2.5 text-forge-muted hover:text-white hover:bg-forge-elevated/50"
+          className={cn(
+            "h-8 px-2.5",
+            "text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]",
+            "hover:bg-[hsl(var(--color-bg-hover))]"
+          )}
         >
           <Download className="w-3.5 h-3.5 mr-1.5" />
           Import
@@ -214,50 +223,51 @@ export function Header() {
           variant="ghost"
           size="sm"
           onClick={handleExport}
-          className="h-8 px-2.5 text-forge-muted hover:text-white hover:bg-forge-elevated/50"
+          className={cn(
+            "h-8 px-2.5",
+            "text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]",
+            "hover:bg-[hsl(var(--color-bg-hover))]"
+          )}
         >
           <Upload className="w-3.5 h-3.5 mr-1.5" />
           Export
         </Button>
 
-        <div className="w-px h-5 bg-forge-border/40 mx-1" />
+        <div className="w-px h-5 bg-[hsl(var(--color-border-default))] mx-1" />
 
-        <AuthGuard onClick={() => setShowAI(true)}>
+        <AuthGuard onClick={() => setShowAI(true)} requireGitHub={true}>
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 px-2.5 text-forge-muted hover:text-white hover:bg-forge-elevated/50"
+            className={cn(
+              "h-8 px-2.5",
+              "text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]",
+              "hover:bg-[hsl(var(--color-bg-hover))]"
+            )}
           >
             <Wand2 className="w-3.5 h-3.5 mr-1.5" />
             AI Assist
           </Button>
         </AuthGuard>
 
-        <div className="w-px h-5 bg-forge-border/40 mx-1" />
+        <div className="w-px h-5 bg-[hsl(var(--color-border-default))] mx-1" />
 
         {/* Wallet Connect Button */}
         <WalletConnectButton variant="default" />
 
-        <div className="w-px h-5 bg-forge-border/40 mx-1" />
+        <div className="w-px h-5 bg-[hsl(var(--color-border-default))] mx-1" />
 
         <GitHubConnect />
-
-        {/* <ThemeToggle /> */}
-
-        {/* <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowSettings(true)}
-          className="h-8 w-8 p-0 text-forge-muted hover:text-white hover:bg-forge-elevated/50"
-        >
-          <Settings className="w-3.5 h-3.5" />
-        </Button> */}
 
         <AuthGuard onClick={() => setShowGenerate(true)} requireGitHub={true}>
           <Button
             size="sm"
             data-tour="generate"
-            className="h-8 ml-1 bg-accent-cyan hover:bg-accent-cyan/90 text-black font-medium"
+            className={cn(
+              "h-8 ml-1 font-medium",
+              "bg-[hsl(var(--color-accent-primary))] hover:bg-[hsl(var(--color-accent-primary)/0.9)]",
+              "text-white"
+            )}
           >
             <Sparkles className="w-3.5 h-3.5 mr-1.5" />
             Generate
@@ -282,11 +292,6 @@ export function Header() {
         open={showShortcuts}
         onClose={closeShortcuts}
       />
-      {/* <AuthFlowModal
-        open={showAuthModal}
-        onOpenChange={closeAuthModal}
-        requireGitHub={true}
-      /> */}
     </header>
   );
 }

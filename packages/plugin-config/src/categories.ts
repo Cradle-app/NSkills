@@ -1,76 +1,66 @@
-import type { CategoryDefinition } from './types';
+import { CategoryDefinition, PluginCategory } from './types';
 
-/**
- * Category definitions for the plugin palette
- * This defines how categories are displayed in the UI
- */
 export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
     {
         id: 'contracts',
-        name: 'Contracts',
-        icon: 'Box',
-        color: 'node-contracts',
+        name: 'Smart Contracts',
+        icon: 'Box', 
+        color: 'accent-cyan'
     },
     {
         id: 'payments',
         name: 'Payments',
         icon: 'CreditCard',
-        color: 'node-payments',
+        color: 'accent-green'
     },
     {
         id: 'agents',
-        name: 'Agents',
+        name: 'AI Agents',
         icon: 'Bot',
-        color: 'node-agents',
+        color: 'accent-purple'
     },
     {
         id: 'app',
-        name: 'App',
+        name: 'Application',
         icon: 'Layout',
-        color: 'node-app',
+        color: 'accent-blue'
+    },
+    {
+        id: 'quality',
+        name: 'Quality Assurance',
+        icon: 'ShieldCheck',
+        color: 'accent-orange'
     },
     {
         id: 'telegram',
         name: 'Telegram',
-        icon: 'Bot',
-        color: 'node-telegram',
-    },
-    {
-        id: 'quality',
-        name: 'Quality',
-        icon: 'ShieldCheck',
-        color: 'node-quality',
+        icon: 'Globe',
+        color: 'accent-sky'
     },
     {
         id: 'intelligence',
         name: 'Intelligence',
         icon: 'Sparkles',
-        color: 'node-intelligence',
+        color: 'accent-pink'
     },
     {
         id: 'superposition',
         name: 'Superposition',
         icon: 'Layers',
-        color: 'accent-cyan',
+        color: 'accent-indigo'
     },
     {
         id: 'analytics',
         name: 'Analytics',
-        icon: 'Database',
-        color: 'accent-purple',
-    },
+        icon: 'TrendingUp',
+        color: 'accent-yellow'
+    }
 ];
 
-/**
- * Get category definition by ID
- */
-export function getCategoryById(id: string): CategoryDefinition | undefined {
-    return CATEGORY_DEFINITIONS.find((cat) => cat.id === id);
-}
+export const getCategoryById = (id: PluginCategory): CategoryDefinition | undefined => {
+    return CATEGORY_DEFINITIONS.find(category => category.id === id);
+};
 
-/**
- * Get all category IDs
- */
-export function getCategoryIds(): string[] {
-    return CATEGORY_DEFINITIONS.map((cat) => cat.id);
-}
+export const getCategoryIds = (): PluginCategory[] => {
+    return CATEGORY_DEFINITIONS.map(category => category.id);
+};

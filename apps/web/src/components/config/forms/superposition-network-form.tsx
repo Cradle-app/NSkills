@@ -5,6 +5,17 @@ import { useBlueprintStore } from '@/store/blueprint';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Network, Activity, Info, Wifi, WifiOff, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  inputStyles,
+  toggleRowStyles,
+  cardStyles,
+  statusStyles,
+  FormHeader
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -94,14 +105,21 @@ export function SuperpositionNetworkForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className={formStyles.container}>
+      <FormHeader
+        icon={Network}
+        title="Network Configuration"
+        description="Configure connection to Superposition Layer 3 chains."
+      />
+
       {/* Network Selection */}
-      <div>
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Primary Network</label>
         <Select
           value={(config.network as string) || 'mainnet'}
           onValueChange={(value) => handleChange('network', value)}
         >
-          <SelectTrigger label="Primary Network">
+          <SelectTrigger>
             <SelectValue placeholder="Select network" />
           </SelectTrigger>
           <SelectContent>
@@ -114,127 +132,140 @@ export function SuperpositionNetworkForm({ nodeId, config }: Props) {
         </Select>
       </div>
 
-      {/* Include Testnet */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Include Testnet</p>
-          <p className="text-xs text-forge-muted">Generate testnet chain config</p>
+      <div className={formStyles.section}>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Include Testnet</p>
+            <p className={toggleRowStyles.description}>Generate testnet chain config</p>
+          </div>
+          <Switch
+            checked={(config.includeTestnet as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('includeTestnet', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.includeTestnet as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('includeTestnet', checked)}
-        />
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Chain Configuration</p>
+            <p className={toggleRowStyles.description}>Generate viem/wagmi chain definitions</p>
+          </div>
+          <Switch
+            checked={(config.generateChainConfig as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateChainConfig', checked)}
+          />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Contract Constants</p>
+            <p className={toggleRowStyles.description}>Generate contract addresses file</p>
+          </div>
+          <Switch
+            checked={(config.generateConstants as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateConstants', checked)}
+          />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>WebSocket Support</p>
+            <p className={toggleRowStyles.description}>Include WebSocket RPC configuration</p>
+          </div>
+          <Switch
+            checked={(config.enableWebSocket as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('enableWebSocket', checked)}
+          />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Network Switcher</p>
+            <p className={toggleRowStyles.description}>Generate useSuperpositionNetwork hook</p>
+          </div>
+          <Switch
+            checked={(config.generateNetworkSwitcher as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateNetworkSwitcher', checked)}
+          />
+        </div>
       </div>
 
-      {/* Generate Chain Config */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Chain Configuration</p>
-          <p className="text-xs text-forge-muted">Generate viem/wagmi chain definitions</p>
-        </div>
-        <Switch
-          checked={(config.generateChainConfig as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateChainConfig', checked)}
+      <div className={formStyles.section}>
+        <label className={labelStyles.base}>Custom RPC URL (optional)</label>
+        <Input
+          value={(config.customRpcUrl as string) || ''}
+          onChange={(e) => handleChange('customRpcUrl', e.target.value || undefined)}
+          placeholder="https://rpc.superposition.so"
         />
       </div>
-
-      {/* Generate Constants */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Contract Constants</p>
-          <p className="text-xs text-forge-muted">Generate contract addresses file</p>
-        </div>
-        <Switch
-          checked={(config.generateConstants as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateConstants', checked)}
-        />
-      </div>
-
-      {/* Enable WebSocket */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">WebSocket Support</p>
-          <p className="text-xs text-forge-muted">Include WebSocket RPC configuration</p>
-        </div>
-        <Switch
-          checked={(config.enableWebSocket as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('enableWebSocket', checked)}
-        />
-      </div>
-
-      {/* Network Switcher Hook */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Network Switcher</p>
-          <p className="text-xs text-forge-muted">Generate useSuperpositionNetwork hook</p>
-        </div>
-        <Switch
-          checked={(config.generateNetworkSwitcher as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateNetworkSwitcher', checked)}
-        />
-      </div>
-
-      {/* Custom RPC URL */}
-      <Input
-        label="Custom RPC URL (optional)"
-        value={(config.customRpcUrl as string) || ''}
-        onChange={(e) => handleChange('customRpcUrl', e.target.value || undefined)}
-        placeholder="https://rpc.superposition.so"
-      />
 
       {/* Test Connection */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-white">Test RPC Connection</p>
-            <p className="text-xs text-forge-muted">Verify network connectivity</p>
+      <div className={cardStyles.base}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Activity className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-text-muted))]')} />
+            <span className={cardStyles.cardTitle}>Test RPC Connection</span>
           </div>
           <button
             onClick={testConnection}
             disabled={connectionStatus.status === 'testing'}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-accent-cyan/20 text-accent-cyan hover:bg-accent-cyan/30 disabled:opacity-50 transition-colors"
+            className={cn(
+              "px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5",
+              "bg-[hsl(var(--color-accent-primary)/0.15)] text-[hsl(var(--color-accent-primary))]",
+              "hover:bg-[hsl(var(--color-accent-primary)/0.25)]",
+              "disabled:opacity-50 disabled:cursor-not-allowed"
+            )}
           >
+            {connectionStatus.status === 'testing' && <Loader2 className="w-3 h-3 animate-spin" />}
             {connectionStatus.status === 'testing' ? 'Testing...' : 'Test Connection'}
           </button>
         </div>
 
         {/* Connection Status Display */}
         {connectionStatus.status === 'connected' && (
-          <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs font-medium text-green-400">Connected</span>
+          <div className={statusStyles.connected}>
+            <div className={statusStyles.statusHeader}>
+              <Wifi className={cn(statusStyles.statusIcon, statusStyles.statusIconConnected)} />
+              <span className={statusStyles.statusTitle}>Connected</span>
             </div>
-            <div className="text-xs text-green-300/80 space-y-0.5">
-              <p>Chain ID: {connectionStatus.chainId}</p>
-              <p>Latest Block: #{connectionStatus.blockNumber?.toLocaleString()}</p>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span className={statusStyles.statusDetail}>Chain ID</span>
+                <code className={statusStyles.statusCode}>{connectionStatus.chainId}</code>
+              </div>
+              <div className="flex justify-between">
+                <span className={statusStyles.statusDetail}>Latest Block</span>
+                <code className={statusStyles.statusCode}>#{connectionStatus.blockNumber?.toLocaleString()}</code>
+              </div>
             </div>
           </div>
         )}
 
         {connectionStatus.status === 'error' && (
-          <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 rounded-full bg-red-500" />
-              <span className="text-xs font-medium text-red-400">Connection Failed</span>
+          <div className={cn(cardStyles.base, "bg-[hsl(var(--color-error)/0.08)] border-[hsl(var(--color-error)/0.2)]")}>
+            <div className={statusStyles.statusHeader}>
+              <WifiOff className={cn(statusStyles.statusIcon, "text-[hsl(var(--color-error))]")} />
+              <span className={cn(statusStyles.statusTitle, "text-[hsl(var(--color-error))]")}>Connection Failed</span>
             </div>
-            <p className="text-xs text-red-300/80">{connectionStatus.error}</p>
+            <p className={statusStyles.statusDetail}>{connectionStatus.error}</p>
           </div>
         )}
       </div>
 
       {/* Info Box */}
-      <div className="p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20">
-        <p className="text-xs text-accent-cyan">
+      <div className={cardStyles.info}>
+        <div className={cardStyles.cardHeader}>
+          <Info className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-info))]')} />
+          <span className={cardStyles.cardTitle}>Documentation</span>
+        </div>
+        <p className={cardStyles.cardBody}>
           Superposition is an Arbitrum L3 for incentive-driven applications.
-          This component generates the foundation for connecting to the network.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           <a
             href="https://docs.superposition.so"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Documentation
           </a>
@@ -242,7 +273,7 @@ export function SuperpositionNetworkForm({ nodeId, config }: Props) {
             href="https://explorer.superposition.so"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Explorer
           </a>
@@ -250,7 +281,7 @@ export function SuperpositionNetworkForm({ nodeId, config }: Props) {
             href="https://bridge.superposition.so"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Bridge
           </a>

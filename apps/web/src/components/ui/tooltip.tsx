@@ -1,124 +1,148 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import * as React from 'react';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { cn } from '@/lib/utils';
 
-interface TooltipProps {
-    children: ReactNode;
-    content: ReactNode;
+/**
+ * Tooltip Component
+ * 
+ * A styled tooltip with animations and keyboard support.
+ * Built on Radix UI primitives for accessibility.
+ */
+
+const TooltipProvider = TooltipPrimitive.Provider;
+
+const Tooltip = TooltipPrimitive.Root;
+
+const TooltipTrigger = TooltipPrimitive.Trigger;
+
+const TooltipPortal = TooltipPrimitive.Portal;
+
+interface TooltipContentProps extends React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> {
+    /** Show an arrow pointing to the trigger */
+    showArrow?: boolean;
+}
+
+const TooltipContent = React.forwardRef<
+    React.ElementRef<typeof TooltipPrimitive.Content>,
+    TooltipContentProps
+>(({ className, sideOffset = 6, showArrow = true, children, ...props }, ref) => (
+    <TooltipPrimitive.Portal>
+        <TooltipPrimitive.Content
+            ref={ref}
+            sideOffset={sideOffset}
+            className={cn(
+                // Base styles
+                'z-tooltip overflow-hidden',
+                'px-3 py-1.5 rounded-lg',
+                'text-xs font-medium text-white',
+                'bg-forge-elevated/95 backdrop-blur-md',
+                'border border-forge-border/50',
+                'shadow-lg shadow-black/30',
+                // Animations
+                'animate-in fade-in-0 zoom-in-95',
+                'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+                'data-[side=top]:slide-in-from-bottom-2',
+                'data-[side=bottom]:slide-in-from-top-2',
+                'data-[side=left]:slide-in-from-right-2',
+                'data-[side=right]:slide-in-from-left-2',
+                className
+            )}
+            {...props}
+        >
+            {children}
+            {showArrow && (
+                <TooltipPrimitive.Arrow
+                    className="fill-forge-elevated/95"
+                    width={12}
+                    height={6}
+                />
+            )}
+        </TooltipPrimitive.Content>
+    </TooltipPrimitive.Portal>
+));
+TooltipContent.displayName = TooltipPrimitive.Content.displayName;
+
+/**
+ * Simple Tooltip - A convenience wrapper for common use cases
+ */
+interface SimpleTooltipProps {
+    /** The content to show in the tooltip */
+    content: React.ReactNode;
+    /** The trigger element */
+    children: React.ReactNode;
+    /** Side of the trigger to show tooltip */
     side?: 'top' | 'right' | 'bottom' | 'left';
-    delay?: number;
-    className?: string;
+    /** Alignment of the tooltip */
+    align?: 'start' | 'center' | 'end';
+    /** Delay before showing (in ms) */
+    delayDuration?: number;
+    /** Whether the tooltip is disabled */
+    disabled?: boolean;
+    /** Additional className for the content */
+    contentClassName?: string;
 }
 
-export function Tooltip({
-    children,
+const SimpleTooltip = ({
     content,
-    side = 'right',
-    delay = 300,
-    className,
-}: TooltipProps) {
-    const [isVisible, setIsVisible] = useState(false);
-    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-
-    const handleMouseEnter = () => {
-        const id = setTimeout(() => setIsVisible(true), delay);
-        setTimeoutId(id);
-    };
-
-    const handleMouseLeave = () => {
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-            setTimeoutId(null);
-        }
-        setIsVisible(false);
-    };
-
-    const positionClasses = {
-        top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-        right: 'left-full top-1/2 -translate-y-1/2 ml-2',
-        bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-        left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-    };
-
-    const animationVariants = {
-        top: { initial: { opacity: 0, y: 5 }, animate: { opacity: 1, y: 0 } },
-        right: { initial: { opacity: 0, x: -5 }, animate: { opacity: 1, x: 0 } },
-        bottom: { initial: { opacity: 0, y: -5 }, animate: { opacity: 1, y: 0 } },
-        left: { initial: { opacity: 0, x: 5 }, animate: { opacity: 1, x: 0 } },
-    };
-
-    return (
-        <div
-            className="relative inline-block"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-        >
-            {children}
-            <AnimatePresence>
-                {isVisible && (
-                    <motion.div
-                        initial={animationVariants[side].initial}
-                        animate={animationVariants[side].animate}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                        className={cn(
-                            'absolute z-50 pointer-events-none',
-                            positionClasses[side],
-                            className
-                        )}
-                    >
-                        <div className="px-3 py-2 rounded-lg bg-forge-surface border border-forge-border/60 shadow-xl backdrop-blur-xl">
-                            {content}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
-}
-
-// Rich tooltip for node palette items
-interface NodeTooltipProps {
-    name: string;
-    description: string;
-    tags?: string[];
-    color?: string;
-    children: ReactNode;
-}
-
-export function NodeTooltip({
-    name,
-    description,
-    tags = [],
-    color = 'accent-cyan',
     children,
-}: NodeTooltipProps) {
+    side = 'top',
+    align = 'center',
+    delayDuration = 200,
+    disabled = false,
+    contentClassName,
+}: SimpleTooltipProps) => {
+    if (disabled || !content) {
+        return <>{children}</>;
+    }
+
     return (
-        <Tooltip
-            side="right"
-            delay={400}
-            content={
-                <div className="max-w-[220px]">
-                    <p className={cn('text-sm font-medium mb-1', `text-${color}`)}>{name}</p>
-                    <p className="text-xs text-forge-muted leading-relaxed">{description}</p>
-                    {tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                            {tags.slice(0, 3).map((tag) => (
-                                <span
-                                    key={tag}
-                                    className="text-[9px] px-1.5 py-0.5 rounded bg-forge-elevated text-forge-muted"
-                                >
-                                    {tag}
-                                </span>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            }
-        >
-            {children}
-        </Tooltip>
+        <TooltipProvider delayDuration={delayDuration}>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    {children}
+                </TooltipTrigger>
+                <TooltipContent
+                    side={side}
+                    align={align}
+                    className={contentClassName}
+                >
+                    {content}
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     );
+};
+
+/**
+ * Tooltip Group - For multiple tooltips with shared provider
+ */
+interface TooltipGroupProps {
+    children: React.ReactNode;
+    delayDuration?: number;
+    skipDelayDuration?: number;
 }
+
+const TooltipGroup = ({
+    children,
+    delayDuration = 200,
+    skipDelayDuration = 100
+}: TooltipGroupProps) => (
+    <TooltipProvider
+        delayDuration={delayDuration}
+        skipDelayDuration={skipDelayDuration}
+    >
+        {children}
+    </TooltipProvider>
+);
+
+export {
+    Tooltip,
+    TooltipTrigger,
+    TooltipContent,
+    TooltipProvider,
+    TooltipPortal,
+    SimpleTooltip,
+    TooltipGroup,
+};

@@ -2,6 +2,14 @@
 
 import { useBlueprintStore } from '@/store/blueprint';
 import { Switch } from '@/components/ui/switch';
+import { Hexagon, Wrench, FileCode, CheckCircle2, Zap, Info } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  toggleRowStyles,
+  cardStyles,
+  FormHeader
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -34,90 +42,102 @@ export function SuperpositionThirdwebForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className={formStyles.container}>
+      <FormHeader
+        icon={Hexagon}
+        title="Thirdweb SDK"
+        description="Integrate Thirdweb for streamlined contract deployment and interaction."
+      />
+
       {/* Features */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-white mb-2">Features</p>
-        {FEATURES.map((feature) => (
-          <div
-            key={feature.value}
-            className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border"
-          >
-            <div>
-              <p className="text-sm font-medium text-white">{feature.label}</p>
-              <p className="text-xs text-forge-muted">{feature.description}</p>
+      <div className={formStyles.section}>
+        <div className="flex items-center gap-2 mb-2">
+          <Wrench className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
+          <span className="text-xs font-semibold text-[hsl(var(--color-text-secondary))] tracking-wide uppercase">Features</span>
+        </div>
+        <div className="space-y-2">
+          {FEATURES.map((feature) => (
+            <div
+              key={feature.value}
+              className={toggleRowStyles.row}
+            >
+              <div>
+                <p className={toggleRowStyles.title}>{feature.label}</p>
+                <p className={toggleRowStyles.description}>{feature.description}</p>
+              </div>
+              <Switch
+                checked={features.includes(feature.value)}
+                onCheckedChange={() => handleFeatureToggle(feature.value)}
+              />
             </div>
-            <Switch
-              checked={features.includes(feature.value)}
-              onCheckedChange={() => handleFeatureToggle(feature.value)}
-            />
+          ))}
+        </div>
+      </div>
+
+      <div className={formStyles.section}>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Thirdweb Provider</p>
+            <p className={toggleRowStyles.description}>Generate provider component</p>
           </div>
-        ))}
-      </div>
-
-      {/* Generate Thirdweb Provider */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Thirdweb Provider</p>
-          <p className="text-xs text-forge-muted">Generate provider component</p>
+          <Switch
+            checked={(config.generateThirdwebProvider as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateThirdwebProvider', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.generateThirdwebProvider as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateThirdwebProvider', checked)}
-        />
-      </div>
 
-      {/* Generate Deploy Helpers */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Deploy Helpers</p>
-          <p className="text-xs text-forge-muted">Generate deployment hooks</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Deploy Helpers</p>
+            <p className={toggleRowStyles.description}>Generate deployment hooks</p>
+          </div>
+          <Switch
+            checked={(config.generateDeployHelpers as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateDeployHelpers', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.generateDeployHelpers as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateDeployHelpers', checked)}
-        />
-      </div>
 
-      {/* Generate Contract Hooks */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Contract Hooks</p>
-          <p className="text-xs text-forge-muted">Generate contract interaction hooks</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Contract Hooks</p>
+            <p className={toggleRowStyles.description}>Generate contract interaction hooks</p>
+          </div>
+          <Switch
+            checked={(config.generateContractHooks as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateContractHooks', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.generateContractHooks as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateContractHooks', checked)}
-        />
-      </div>
 
-      {/* Include Prebuilt Contracts */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Prebuilt Contracts</p>
-          <p className="text-xs text-forge-muted">Include prebuilt contract configs</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Prebuilt Contracts</p>
+            <p className={toggleRowStyles.description}>Include prebuilt contract configs</p>
+          </div>
+          <Switch
+            checked={(config.includePrebuiltContracts as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('includePrebuiltContracts', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.includePrebuiltContracts as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('includePrebuiltContracts', checked)}
-        />
-      </div>
 
-      {/* Gasless Transactions */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Gasless Mode</p>
-          <p className="text-xs text-forge-muted">Enable gasless transactions</p>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Gasless Mode</p>
+            <p className={toggleRowStyles.description}>Enable gasless transactions</p>
+          </div>
+          <Switch
+            checked={(config.gasless as boolean) ?? false}
+            onCheckedChange={(checked) => handleChange('gasless', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.gasless as boolean) ?? false}
-          onCheckedChange={(checked) => handleChange('gasless', checked)}
-        />
       </div>
 
       {/* Info Box */}
-      <div className="p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20">
-        <p className="text-xs text-accent-cyan">
+      <div className={cardStyles.info}>
+        <div className={cardStyles.cardHeader}>
+          <Info className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-info))]')} />
+          <span className={cardStyles.cardTitle}>Requirement</span>
+        </div>
+        <p className={cardStyles.cardBody}>
           Deploy and interact with smart contracts on Superposition using Thirdweb SDK v5.
           Requires a Thirdweb client ID from thirdweb.com/dashboard
         </p>

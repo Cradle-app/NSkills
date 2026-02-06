@@ -3,6 +3,11 @@
 import { useBlueprintStore } from '@/store/blueprint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
+import {
+    formStyles,
+    labelStyles,
+} from './shared-styles';
 
 interface Props {
     nodeId: string;
@@ -23,9 +28,9 @@ export function TelegramNotificationsForm({ nodeId, config }: Props) {
     ];
 
     return (
-        <div className="space-y-4">
-            <div>
-                <label className="text-xs text-forge-muted mb-1.5 block">Template Format</label>
+        <div className={formStyles.container}>
+            <div className={formStyles.section}>
+                <label className={labelStyles.base}>Template Format</label>
                 <Select
                     value={(config.templateFormat as string) ?? 'HTML'}
                     onValueChange={(v) => updateConfig('templateFormat', v)}
@@ -39,12 +44,12 @@ export function TelegramNotificationsForm({ nodeId, config }: Props) {
                 </Select>
             </div>
 
-            <div>
-                <label className="text-xs text-forge-muted mb-1.5 block">Notification Types</label>
+            <div className={formStyles.section}>
+                <label className={labelStyles.base}>Notification Types</label>
                 <div className="space-y-2">
                     {notificationTypes.map((type) => (
-                        <div key={type} className="flex items-center justify-between">
-                            <span className="text-sm text-white capitalize">{type.replace('-', ' ')}</span>
+                        <div key={type} className="flex items-center justify-between py-1">
+                            <span className="text-sm text-[hsl(var(--color-text-primary))] capitalize">{type.replace('-', ' ')}</span>
                             <Switch
                                 checked={((config.notificationTypes as string[]) ?? ['transaction']).includes(type)}
                                 onCheckedChange={(checked) => {

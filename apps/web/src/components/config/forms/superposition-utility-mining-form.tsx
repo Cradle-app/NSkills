@@ -2,6 +2,14 @@
 
 import { useBlueprintStore } from '@/store/blueprint';
 import { Switch } from '@/components/ui/switch';
+import { Hammer, TrendingUp, Info } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  toggleRowStyles,
+  cardStyles,
+  FormHeader
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -38,7 +46,7 @@ export function SuperpositionUtilityMiningForm({ nodeId, config }: Props) {
 
     // Remove 'all' if selecting individual types
     let currentTypes = trackTypes.filter((t) => t !== 'all');
-    
+
     if (currentTypes.includes(type)) {
       currentTypes = currentTypes.filter((t) => t !== type);
     } else {
@@ -54,66 +62,84 @@ export function SuperpositionUtilityMiningForm({ nodeId, config }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Generate Reward Tracking */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Reward Tracking</p>
-          <p className="text-xs text-forge-muted">Generate useUtilityMiningRewards hook</p>
+    <div className={formStyles.container}>
+      <FormHeader
+        icon={Hammer}
+        title="Utility Mining"
+        description="Earn SPN tokens for on-chain activity via Fluidity's TRF mechanism."
+      />
+
+      <div className={formStyles.section}>
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Reward Tracking</p>
+            <p className={toggleRowStyles.description}>Generate useUtilityMiningRewards hook</p>
+          </div>
+          <Switch
+            checked={(config.generateRewardTracking as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateRewardTracking', checked)}
+          />
         </div>
-        <Switch
-          checked={(config.generateRewardTracking as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateRewardTracking', checked)}
-        />
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Claim Function</p>
+            <p className={toggleRowStyles.description}>Include reward claiming functionality</p>
+          </div>
+          <Switch
+            checked={(config.generateClaimFunction as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateClaimFunction', checked)}
+          />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Reward History</p>
+            <p className={toggleRowStyles.description}>Fetch and display reward history</p>
+          </div>
+          <Switch
+            checked={(config.generateRewardHistory as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateRewardHistory', checked)}
+          />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Reward Display UI</p>
+            <p className={toggleRowStyles.description}>Generate reward display component</p>
+          </div>
+          <Switch
+            checked={(config.generateUI as boolean) ?? true}
+            onCheckedChange={(checked) => handleChange('generateUI', checked)}
+          />
+        </div>
+
+        <div className={toggleRowStyles.row}>
+          <div>
+            <p className={toggleRowStyles.title}>Leaderboard</p>
+            <p className={toggleRowStyles.description}>Include leaderboard functionality</p>
+          </div>
+          <Switch
+            checked={(config.includeLeaderboard as boolean) ?? false}
+            onCheckedChange={(checked) => handleChange('includeLeaderboard', checked)}
+          />
+        </div>
       </div>
 
-      {/* Generate Claim Function */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Claim Function</p>
-          <p className="text-xs text-forge-muted">Include reward claiming functionality</p>
+      <div className={formStyles.section}>
+        <div className="flex items-center gap-2 mb-2">
+          <TrendingUp className="w-4 h-4 text-[hsl(var(--color-text-muted))]" />
+          <span className="text-xs font-semibold text-[hsl(var(--color-text-secondary))] tracking-wide uppercase">Track Transaction Types</span>
         </div>
-        <Switch
-          checked={(config.generateClaimFunction as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateClaimFunction', checked)}
-        />
-      </div>
 
-      {/* Generate Reward History */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Reward History</p>
-          <p className="text-xs text-forge-muted">Fetch and display reward history</p>
-        </div>
-        <Switch
-          checked={(config.generateRewardHistory as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateRewardHistory', checked)}
-        />
-      </div>
-
-      {/* Generate UI */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Reward Display UI</p>
-          <p className="text-xs text-forge-muted">Generate reward display component</p>
-        </div>
-        <Switch
-          checked={(config.generateUI as boolean) ?? true}
-          onCheckedChange={(checked) => handleChange('generateUI', checked)}
-        />
-      </div>
-
-      {/* Transaction Types */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-white mb-2">Track Transaction Types</p>
         {TRANSACTION_TYPES.map((type) => (
           <div
             key={type.value}
-            className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border"
+            className={toggleRowStyles.row}
           >
             <div>
-              <p className="text-sm font-medium text-white">{type.label}</p>
-              <p className="text-xs text-forge-muted">{type.description}</p>
+              <p className={toggleRowStyles.title}>{type.label}</p>
+              <p className={toggleRowStyles.description}>{type.description}</p>
             </div>
             <Switch
               checked={trackTypes.includes(type.value) || (type.value !== 'all' && trackTypes.includes('all'))}
@@ -124,48 +150,42 @@ export function SuperpositionUtilityMiningForm({ nodeId, config }: Props) {
       </div>
 
       {/* TRF Explanation */}
-      <div className="p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <p className="text-sm font-medium text-white mb-2">Transfer Reward Function (TRF)</p>
-        <div className="space-y-2 text-xs text-forge-muted">
-          <div className="flex items-start gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
+      <div className={cardStyles.base}>
+        <div className={cardStyles.cardHeader}>
+          <Info className={cn(cardStyles.cardIcon, "text-[hsl(var(--color-accent-primary))]")} />
+          <span className={cardStyles.cardTitle}>Transfer Reward Function (TRF)</span>
+        </div>
+        <div className={cardStyles.cardList}>
+          <div className={cardStyles.cardListItem}>
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-accent-secondary))] mt-1.5 flex-shrink-0" />
             <span>Rewards are distributed proportionally based on transaction value</span>
           </div>
-          <div className="flex items-start gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
+          <div className={cardStyles.cardListItem}>
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-accent-secondary))] mt-1.5 flex-shrink-0" />
             <span>Reward amounts vary based on protocol activity and liquidity</span>
           </div>
-          <div className="flex items-start gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0" />
+          <div className={cardStyles.cardListItem}>
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-[hsl(var(--color-accent-secondary))] mt-1.5 flex-shrink-0" />
             <span>Rewards paid in native SPN tokens via Fluidity Money protocol</span>
           </div>
         </div>
       </div>
 
-      {/* Include Leaderboard */}
-      <div className="flex items-center justify-between p-3 rounded-lg bg-forge-bg border border-forge-border">
-        <div>
-          <p className="text-sm font-medium text-white">Leaderboard</p>
-          <p className="text-xs text-forge-muted">Include leaderboard functionality</p>
-        </div>
-        <Switch
-          checked={(config.includeLeaderboard as boolean) ?? false}
-          onCheckedChange={(checked) => handleChange('includeLeaderboard', checked)}
-        />
-      </div>
-
       {/* Info Box */}
-      <div className="p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20">
-        <p className="text-xs text-accent-cyan">
-          Utility Mining rewards users for on-chain activity. Earn SPN tokens for swaps,
-          transfers, and other transactions on Superposition via the TRF (Transfer Reward Function).
+      <div className={cardStyles.info}>
+        <div className={cardStyles.cardHeader}>
+          <Info className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-info))]')} />
+          <span className={cardStyles.cardTitle}>Documentation</span>
+        </div>
+        <p className={cardStyles.cardBody}>
+          Utility Mining rewards users for on-chain activity. Earn SPN tokens via the TRF.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           <a
             href="https://docs.superposition.so/superposition-mainnet/super-layer/utility-mining"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Utility Mining Docs
           </a>
@@ -173,7 +193,7 @@ export function SuperpositionUtilityMiningForm({ nodeId, config }: Props) {
             href="https://docs.fluidity.money/docs/fundamentals/utility-mining"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-accent-cyan/80 hover:text-accent-cyan underline"
+            className="text-[10px] text-[hsl(var(--color-accent-primary))] hover:underline"
           >
             Fluidity TRF
           </a>

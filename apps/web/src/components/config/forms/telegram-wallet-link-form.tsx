@@ -3,6 +3,11 @@
 import { useBlueprintStore } from '@/store/blueprint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
+import {
+    formStyles,
+    labelStyles,
+} from './shared-styles';
 
 interface Props {
     nodeId: string;
@@ -17,9 +22,9 @@ export function TelegramWalletLinkForm({ nodeId, config }: Props) {
     };
 
     return (
-        <div className="space-y-4">
-            <div>
-                <label className="text-xs text-forge-muted mb-1.5 block">Persistence Type</label>
+        <div className={formStyles.container}>
+            <div className={formStyles.section}>
+                <label className={labelStyles.base}>Persistence Type</label>
                 <Select
                     value={(config.persistenceType as string) ?? 'prisma'}
                     onValueChange={(v) => updateConfig('persistenceType', v)}
@@ -33,8 +38,8 @@ export function TelegramWalletLinkForm({ nodeId, config }: Props) {
                 </Select>
             </div>
 
-            <div className="flex items-center justify-between">
-                <span className="text-sm text-white">Signature Verification</span>
+            <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-[hsl(var(--color-text-primary))]">Signature Verification</span>
                 <Switch
                     checked={(config.verificationEnabled as boolean) ?? true}
                     onCheckedChange={(v) => updateConfig('verificationEnabled', v)}

@@ -6,8 +6,16 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Database, DollarSign, Wallet, TrendingUp, Image, Tag, Clock, Fuel, Lock } from 'lucide-react';
+import { Database, DollarSign, Wallet, TrendingUp, Image, Tag, Clock, Fuel, Lock, AlertTriangle, Play, CheckCircle2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import {
+  formStyles,
+  labelStyles,
+  cardStyles,
+  codeStyles,
+  FormHeader,
+} from './shared-styles';
 
 interface Props {
   nodeId: string;
@@ -29,55 +37,73 @@ const nodeInfo = {
     title: 'Execute SQL',
     description: 'Execute custom SQL queries on Dune\'s blockchain data warehouse',
     icon: Database,
-    color: 'text-purple-400',
+    color: 'text-[hsl(var(--color-accent-primary))]',
+    bgColor: 'bg-[hsl(var(--color-accent-primary)/0.12)]',
+    borderColor: 'border-[hsl(var(--color-accent-primary)/0.2)]',
   },
   'dune-token-price': {
     title: 'Token Price',
     description: 'Fetch latest token prices across multiple blockchains',
     icon: DollarSign,
-    color: 'text-green-400',
+    color: 'text-[hsl(var(--color-success))]',
+    bgColor: 'bg-[hsl(var(--color-success)/0.12)]',
+    borderColor: 'border-[hsl(var(--color-success)/0.2)]',
   },
   'dune-wallet-balances': {
     title: 'Wallet Balances',
     description: 'Fetch wallet token balances with USD values',
     icon: Wallet,
-    color: 'text-blue-400',
+    color: 'text-[hsl(var(--color-info))]',
+    bgColor: 'bg-[hsl(var(--color-info)/0.12)]',
+    borderColor: 'border-[hsl(var(--color-info)/0.2)]',
   },
   'dune-dex-volume': {
     title: 'DEX Volume',
     description: 'Fetch DEX trading volume and statistics',
     icon: TrendingUp,
-    color: 'text-cyan-400',
+    color: 'text-[hsl(var(--color-accent-secondary))]',
+    bgColor: 'bg-[hsl(var(--color-accent-secondary)/0.12)]',
+    borderColor: 'border-[hsl(var(--color-accent-secondary)/0.2)]',
   },
   'dune-nft-floor': {
     title: 'NFT Floor Price',
     description: 'Fetch NFT collection floor prices and statistics',
     icon: Image,
-    color: 'text-pink-400',
+    color: 'text-[hsl(var(--color-accent-primary))]',
+    bgColor: 'bg-[hsl(var(--color-accent-primary)/0.12)]',
+    borderColor: 'border-[hsl(var(--color-accent-primary)/0.2)]',
   },
   'dune-address-labels': {
     title: 'Address Labels',
     description: 'Fetch human-readable labels for blockchain addresses',
     icon: Tag,
-    color: 'text-yellow-400',
+    color: 'text-[hsl(var(--color-warning))]',
+    bgColor: 'bg-[hsl(var(--color-warning)/0.12)]',
+    borderColor: 'border-[hsl(var(--color-warning)/0.2)]',
   },
   'dune-transaction-history': {
     title: 'Transaction History',
     description: 'Fetch transaction history for wallets',
     icon: Clock,
-    color: 'text-orange-400',
+    color: 'text-[hsl(var(--color-accent-primary))]',
+    bgColor: 'bg-[hsl(var(--color-accent-primary)/0.12)]',
+    borderColor: 'border-[hsl(var(--color-accent-primary)/0.2)]',
   },
   'dune-gas-price': {
     title: 'Gas Price Analytics',
     description: 'Fetch gas price analytics and statistics',
     icon: Fuel,
-    color: 'text-red-400',
+    color: 'text-[hsl(var(--color-error))]',
+    bgColor: 'bg-[hsl(var(--color-error)/0.12)]',
+    borderColor: 'border-[hsl(var(--color-error)/0.2)]',
   },
   'dune-protocol-tvl': {
     title: 'Protocol TVL',
     description: 'Fetch Total Value Locked for DeFi protocols',
     icon: Lock,
-    color: 'text-indigo-400',
+    color: 'text-[hsl(var(--color-accent-secondary))]',
+    bgColor: 'bg-[hsl(var(--color-accent-secondary)/0.12)]',
+    borderColor: 'border-[hsl(var(--color-accent-secondary)/0.2)]',
   },
 };
 
@@ -206,35 +232,42 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className={formStyles.container}>
       {/* Header */}
-      <div className="flex items-start gap-3 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
-        <div className={`p-2 rounded-lg bg-zinc-800 ${info.color}`}>
-          <Icon className="w-5 h-5" />
+      <div className={cn(
+        'flex items-start gap-3 p-3.5 rounded-xl',
+        'bg-[hsl(var(--color-bg-muted)/0.5)]',
+        'border',
+        info.borderColor
+      )}>
+        <div className={cn('p-2.5 rounded-lg', info.bgColor)}>
+          <Icon className={cn('w-5 h-5', info.color)} />
         </div>
         <div>
-          <h3 className="text-sm font-medium text-white">{info.title}</h3>
-          <p className="text-xs text-zinc-400 mt-0.5">{info.description}</p>
+          <h3 className="text-sm font-semibold text-[hsl(var(--color-text-primary))]">{info.title}</h3>
+          <p className="text-[11px] text-[hsl(var(--color-text-muted))] mt-0.5 leading-relaxed">{info.description}</p>
         </div>
       </div>
 
       {/* Plugin help / requirements / credits */}
-      <div className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-700/60 space-y-1.5">
-        <p className="text-xs text-zinc-200">
-          <span className="font-semibold">Use:</span> {pluginHelp[type].use}
-        </p>
-        <p className="text-xs text-zinc-300">
-          <span className="font-semibold">Requires:</span> {pluginHelp[type].requires}
-        </p>
-        <p className="text-[11px] text-zinc-500">
-          <span className="font-semibold">Dune credits:</span> {pluginHelp[type].credits}
-        </p>
+      <div className={cardStyles.base}>
+        <div className="space-y-2">
+          <p className="text-[11px] text-[hsl(var(--color-text-secondary))]">
+            <span className="font-semibold text-[hsl(var(--color-text-primary))]">Use:</span> {pluginHelp[type].use}
+          </p>
+          <p className="text-[11px] text-[hsl(var(--color-text-muted))]">
+            <span className="font-semibold text-[hsl(var(--color-text-secondary))]">Requires:</span> {pluginHelp[type].requires}
+          </p>
+          <p className="text-[10px] text-[hsl(var(--color-text-disabled))]">
+            <span className="font-semibold">Dune credits:</span> {pluginHelp[type].credits}
+          </p>
+        </div>
       </div>
 
       {/* Runtime inputs required to run queries */}
       {type === 'dune-execute-sql' && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">SQL Query</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>SQL Query</label>
           <Textarea
             value={(config.sql as string) ?? executeSqlExample}
             onChange={(e) => updateConfig('sql', e.target.value)}
@@ -245,8 +278,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       )}
 
       {type === 'dune-token-price' && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">Token Contract Address</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Token Contract Address</label>
           <Input
             placeholder="0x..."
             value={(config.contractAddress as string) ?? ''}
@@ -256,8 +289,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       )}
 
       {type === 'dune-wallet-balances' && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">Wallet Address</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Wallet Address</label>
           <Input
             placeholder="0x..."
             value={(config.address as string) ?? ''}
@@ -267,8 +300,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       )}
 
       {type === 'dune-nft-floor' && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">Collection Contract Address</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Collection Contract Address</label>
           <Input
             placeholder="0x..."
             value={(config.collectionAddress as string) ?? ''}
@@ -278,8 +311,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       )}
 
       {type === 'dune-address-labels' && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">Address</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Address</label>
           <Input
             placeholder="0x..."
             value={(config.address as string) ?? ''}
@@ -289,8 +322,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       )}
 
       {type === 'dune-transaction-history' && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">Wallet Address</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Wallet Address</label>
           <Input
             placeholder="0x..."
             value={(config.address as string) ?? ''}
@@ -300,8 +333,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       )}
 
       {type === 'dune-protocol-tvl' && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">Protocol Namespace</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Protocol Namespace</label>
           <Input
             placeholder="e.g., uniswap-v3"
             value={(config.protocol as string) ?? ''}
@@ -313,8 +346,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       {/* Execute SQL specific config */}
       {type === 'dune-execute-sql' && (
         <>
-          <div>
-            <label className="text-xs text-forge-muted mb-1.5 block">Performance Mode</label>
+          <div className={formStyles.section}>
+            <label className={labelStyles.base}>Performance Mode</label>
             <Select
               value={(config.performanceMode as string) ?? 'medium'}
               onValueChange={(v) => updateConfig('performanceMode', v)}
@@ -327,8 +360,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
             </Select>
           </div>
 
-          <div>
-            <label className="text-xs text-forge-muted mb-1.5 block">Timeout (ms)</label>
+          <div className={formStyles.section}>
+            <label className={labelStyles.base}>Timeout (ms)</label>
             <Input
               type="number"
               value={(config.timeout as number) ?? 60000}
@@ -338,8 +371,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-white">Generate React Hooks</span>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-[hsl(var(--color-text-primary))]">Generate React Hooks</span>
             <Switch
               checked={(config.generateHooks as boolean) ?? true}
               onCheckedChange={(v) => updateConfig('generateHooks', v)}
@@ -350,8 +383,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
 
       {/* Blockchain selector (common to many) */}
       {['dune-token-price', 'dune-wallet-balances', 'dune-dex-volume', 'dune-nft-floor', 'dune-transaction-history', 'dune-gas-price', 'dune-protocol-tvl'].includes(type) && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">Blockchain</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Blockchain</label>
           <Select
             value={(config.blockchain as string) ?? 'arbitrum'}
             onValueChange={(v) => updateConfig('blockchain', v)}
@@ -371,15 +404,15 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       {/* Token Price specific */}
       {type === 'dune-token-price' && (
         <>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-white">Enable Cache</span>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-[hsl(var(--color-text-primary))]">Enable Cache</span>
             <Switch
               checked={(config.cacheEnabled as boolean) ?? true}
               onCheckedChange={(v) => updateConfig('cacheEnabled', v)}
             />
           </div>
-          <div>
-            <label className="text-xs text-forge-muted mb-1.5 block">Cache Duration (ms)</label>
+          <div className={formStyles.section}>
+            <label className={labelStyles.base}>Cache Duration (ms)</label>
             <Input
               type="number"
               value={(config.cacheDuration as number) ?? 60000}
@@ -392,8 +425,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       {/* Wallet Balances specific */}
       {type === 'dune-wallet-balances' && (
         <>
-          <div>
-            <label className="text-xs text-forge-muted mb-1.5 block">Minimum Balance (USD)</label>
+          <div className={formStyles.section}>
+            <label className={labelStyles.base}>Minimum Balance (USD)</label>
             <Input
               type="number"
               value={(config.minBalanceUsd as number) ?? 1}
@@ -402,8 +435,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
               step={0.01}
             />
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-white">Include NFTs</span>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-[hsl(var(--color-text-primary))]">Include NFTs</span>
             <Switch
               checked={(config.includeNFTs as boolean) ?? false}
               onCheckedChange={(v) => updateConfig('includeNFTs', v)}
@@ -415,8 +448,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       {/* DEX Volume specific */}
       {type === 'dune-dex-volume' && (
         <>
-          <div>
-            <label className="text-xs text-forge-muted mb-1.5 block">Time Range</label>
+          <div className={formStyles.section}>
+            <label className={labelStyles.base}>Time Range</label>
             <Select
               value={(config.timeRange as string) ?? '24h'}
               onValueChange={(v) => updateConfig('timeRange', v)}
@@ -429,8 +462,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <label className="text-xs text-forge-muted mb-1.5 block">Protocol Filter (optional)</label>
+          <div className={formStyles.section}>
+            <label className={labelStyles.base}>Protocol Filter (optional)</label>
             <Input
               placeholder="e.g., uniswap-v3"
               value={(config.protocol as string) ?? ''}
@@ -443,15 +476,15 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       {/* Address Labels specific */}
       {type === 'dune-address-labels' && (
         <>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-white">Include ENS Names</span>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-[hsl(var(--color-text-primary))]">Include ENS Names</span>
             <Switch
               checked={(config.includeENS as boolean) ?? true}
               onCheckedChange={(v) => updateConfig('includeENS', v)}
             />
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-white">Include Owner Info</span>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-[hsl(var(--color-text-primary))]">Include Owner Info</span>
             <Switch
               checked={(config.includeOwnerInfo as boolean) ?? true}
               onCheckedChange={(v) => updateConfig('includeOwnerInfo', v)}
@@ -462,8 +495,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
 
       {/* Transaction History specific */}
       {type === 'dune-transaction-history' && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">Transaction Limit</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Transaction Limit</label>
           <Input
             type="number"
             value={(config.limit as number) ?? 100}
@@ -476,8 +509,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
 
       {/* Generate UI toggle (common to many) */}
       {['dune-token-price', 'dune-wallet-balances', 'dune-dex-volume', 'dune-nft-floor', 'dune-transaction-history', 'dune-gas-price', 'dune-protocol-tvl'].includes(type) && (
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-white">Generate UI Components</span>
+        <div className="flex items-center justify-between py-2">
+          <span className="text-sm text-[hsl(var(--color-text-primary))]">Generate UI Components</span>
           <Switch
             checked={(config.generateUI as boolean) ?? true}
             onCheckedChange={(v) => updateConfig('generateUI', v)}
@@ -487,8 +520,8 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
 
       {/* NFT Floor, Gas, TVL cache duration */}
       {['dune-nft-floor', 'dune-gas-price', 'dune-protocol-tvl'].includes(type) && (
-        <div>
-          <label className="text-xs text-forge-muted mb-1.5 block">Cache Duration (ms)</label>
+        <div className={formStyles.section}>
+          <label className={labelStyles.base}>Cache Duration (ms)</label>
           <Input
             type="number"
             value={(config.cacheDuration as number) ?? (type === 'dune-nft-floor' ? 300000 : type === 'dune-gas-price' ? 60000 : 600000)}
@@ -498,10 +531,13 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
       )}
 
       {/* API Key Notice */}
-      <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-        <p className="text-xs text-amber-400">
-          <strong>Note:</strong> You must set the <code className="bg-amber-500/20 px-1 rounded">DUNE_API_KEY</code> environment variable to use Dune Analytics features (server-side).
-        </p>
+      <div className={cardStyles.warning}>
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 text-[hsl(var(--color-warning))] flex-shrink-0 mt-0.5" />
+          <p className="text-[11px] text-[hsl(var(--color-warning))] leading-relaxed">
+            <strong>Note:</strong> You must set the <code className={codeStyles.inline}>DUNE_API_KEY</code> environment variable to use Dune Analytics features (server-side).
+          </p>
+        </div>
       </div>
 
       {/* Run */}
@@ -511,24 +547,29 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
           onClick={runQuery}
           disabled={!canRun || isRunning}
           variant="secondary"
+          className="gap-2"
         >
+          <Play className="w-3.5 h-3.5" />
           {isRunning ? 'Running…' : 'Run query'}
         </Button>
         {!canRun && (
-          <p className="text-xs text-zinc-500">Fill in the required inputs above to run.</p>
+          <p className="text-[11px] text-[hsl(var(--color-text-disabled))]">Fill in the required inputs above to run.</p>
         )}
       </div>
 
       {runError && (
-        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-          <p className="text-xs text-red-400">{runError}</p>
+        <div className={cn(cardStyles.base, 'border-[hsl(var(--color-error)/0.2)] bg-[hsl(var(--color-error)/0.06)]')}>
+          <p className="text-xs text-[hsl(var(--color-error))]">{runError}</p>
         </div>
       )}
 
       {runResult !== null && (
-        <div className="p-3 bg-zinc-900/40 border border-zinc-700/50 rounded-lg">
-          <p className="text-xs text-zinc-400 mb-2">Result</p>
-          <pre className="text-xs text-zinc-200 overflow-auto max-h-[260px]">
+        <div className={cardStyles.success}>
+          <div className={cardStyles.cardHeader}>
+            <CheckCircle2 className={cn(cardStyles.cardIcon, 'text-[hsl(var(--color-success))]')} />
+            <span className={cardStyles.cardTitle}>Result</span>
+          </div>
+          <pre className="text-[11px] text-[hsl(var(--color-text-secondary))] overflow-auto max-h-[260px] font-mono">
             {JSON.stringify(runResult, null, 2)}
           </pre>
         </div>

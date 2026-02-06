@@ -152,8 +152,8 @@ export function IPFSUploadPanel({ pinataApiKey, pinataSecretKey }: IPFSUploadPan
                     'relative border-2 border-dashed rounded-xl p-6 cursor-pointer transition-all duration-200',
                     'flex flex-col items-center justify-center gap-2',
                     isDragging
-                        ? 'border-accent-cyan bg-accent-cyan/10'
-                        : 'border-forge-border/50 hover:border-white/30 hover:bg-forge-elevated/30',
+                        ? 'border-[hsl(var(--color-accent-primary))] bg-[hsl(var(--color-accent-primary)/0.1)]'
+                        : 'border-[hsl(var(--color-border-default)/0.5)] hover:border-[hsl(var(--color-text-primary)/0.3)] hover:bg-[hsl(var(--color-bg-elevated)/0.3)]',
                     isUploading && 'pointer-events-none opacity-50'
                 )}
             >
@@ -168,19 +168,19 @@ export function IPFSUploadPanel({ pinataApiKey, pinataSecretKey }: IPFSUploadPan
 
                 {isUploading ? (
                     <>
-                        <Loader2 className="w-8 h-8 text-accent-cyan animate-spin" />
-                        <p className="text-sm text-white">Uploading to IPFS...</p>
+                        <Loader2 className="w-8 h-8 text-[hsl(var(--color-accent-primary))] animate-spin" />
+                        <p className="text-sm text-[hsl(var(--color-text-primary))]">Uploading to IPFS...</p>
                     </>
                 ) : (
                     <>
-                        <div className="p-3 rounded-xl bg-accent-cyan/10 border border-accent-cyan/20">
-                            <Upload className="w-6 h-6 text-accent-cyan" />
+                        <div className="p-3 rounded-xl bg-[hsl(var(--color-accent-primary)/0.1)] border border-[hsl(var(--color-accent-primary)/0.2)]">
+                            <Upload className="w-6 h-6 text-[hsl(var(--color-accent-primary))]" />
                         </div>
                         <div className="text-center">
-                            <p className="text-sm font-medium text-white">
+                            <p className="text-sm font-medium text-[hsl(var(--color-text-primary))]">
                                 Drop files here or click to upload
                             </p>
-                            <p className="text-xs text-forge-muted mt-1">
+                            <p className="text-xs text-[hsl(var(--color-text-muted))] mt-1">
                                 Images, videos, documents, or any file type
                             </p>
                         </div>
@@ -195,13 +195,13 @@ export function IPFSUploadPanel({ pinataApiKey, pinataSecretKey }: IPFSUploadPan
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30"
+                        className="flex items-center gap-2 p-3 rounded-lg bg-[hsl(var(--color-error)/0.1)] border border-[hsl(var(--color-error)/0.3)]"
                     >
-                        <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                        <p className="text-xs text-red-400">{error}</p>
+                        <AlertCircle className="w-4 h-4 text-[hsl(var(--color-error))] shrink-0" />
+                        <p className="text-xs text-[hsl(var(--color-error))]">{error}</p>
                         <button
                             onClick={() => setError(null)}
-                            className="ml-auto text-red-400 hover:text-red-300"
+                            className="ml-auto text-[hsl(var(--color-error))] hover:text-[hsl(var(--color-error)/0.8)]"
                         >
                             <X className="w-3.5 h-3.5" />
                         </button>
@@ -212,7 +212,7 @@ export function IPFSUploadPanel({ pinataApiKey, pinataSecretKey }: IPFSUploadPan
             {/* Uploaded files list */}
             {uploadedFiles.length > 0 && (
                 <div className="space-y-2">
-                    <p className="text-[10px] text-forge-muted uppercase tracking-wider">
+                    <p className="text-[10px] text-[hsl(var(--color-text-muted))] uppercase tracking-wider">
                         Uploaded Files ({uploadedFiles.length})
                     </p>
 
@@ -228,37 +228,37 @@ export function IPFSUploadPanel({ pinataApiKey, pinataSecretKey }: IPFSUploadPan
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ delay: index * 0.05 }}
-                                        className="p-3 rounded-lg bg-forge-elevated/50 border border-forge-border/50"
+                                        className="p-3 rounded-lg bg-[hsl(var(--color-bg-elevated)/0.5)] border border-[hsl(var(--color-border-default)/0.5)]"
                                     >
                                         <div className="flex items-start gap-3">
                                             {/* File icon */}
-                                            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                                                <FileIcon className="w-4 h-4 text-emerald-400" />
+                                            <div className="p-2 rounded-lg bg-[hsl(var(--color-success)/0.1)] border border-[hsl(var(--color-success)/0.2)]">
+                                                <FileIcon className="w-4 h-4 text-[hsl(var(--color-success))]" />
                                             </div>
 
                                             {/* File info */}
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-white truncate">
+                                                <p className="text-sm font-medium text-[hsl(var(--color-text-primary))] truncate">
                                                     {file.name}
                                                 </p>
-                                                <p className="text-[10px] text-forge-muted">
+                                                <p className="text-[10px] text-[hsl(var(--color-text-muted))]">
                                                     {formatFileSize(file.size)} • Pinned to IPFS
                                                 </p>
 
                                                 {/* IPFS Hash */}
                                                 <div className="flex items-center gap-1.5 mt-2">
-                                                    <code className="text-[10px] text-accent-cyan bg-accent-cyan/10 px-1.5 py-0.5 rounded font-mono truncate flex-1">
+                                                    <code className="text-[10px] text-[hsl(var(--color-accent-primary))] bg-[hsl(var(--color-accent-primary)/0.1)] px-1.5 py-0.5 rounded font-mono truncate flex-1">
                                                         {file.ipfsHash}
                                                     </code>
                                                     <button
                                                         onClick={() => copyToClipboard(file.ipfsHash, file.ipfsHash)}
-                                                        className="p-1 rounded hover:bg-white/10 transition-colors"
+                                                        className="p-1 rounded hover:bg-[hsl(var(--color-text-primary)/0.1)] transition-colors"
                                                         title="Copy hash"
                                                     >
                                                         {copiedHash === file.ipfsHash ? (
-                                                            <Check className="w-3 h-3 text-emerald-400" />
+                                                            <Check className="w-3 h-3 text-[hsl(var(--color-success))]" />
                                                         ) : (
-                                                            <Copy className="w-3 h-3 text-forge-muted" />
+                                                            <Copy className="w-3 h-3 text-[hsl(var(--color-text-muted))]" />
                                                         )}
                                                     </button>
                                                 </div>
@@ -266,19 +266,19 @@ export function IPFSUploadPanel({ pinataApiKey, pinataSecretKey }: IPFSUploadPan
                                         </div>
 
                                         {/* Action buttons */}
-                                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-forge-border/30">
+                                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[hsl(var(--color-border-default)/0.3)]">
                                             <a
                                                 href={file.pinataUrl}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-accent-cyan/10 hover:bg-accent-cyan/20 text-accent-cyan text-[11px] font-medium transition-colors"
+                                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[hsl(var(--color-accent-primary)/0.1)] hover:bg-[hsl(var(--color-accent-primary)/0.2)] text-[hsl(var(--color-accent-primary))] text-[11px] font-medium transition-colors"
                                             >
                                                 <ExternalLink className="w-3 h-3" />
                                                 View on Pinata
                                             </a>
                                             <button
                                                 onClick={() => copyToClipboard(file.ipfsUrl, file.ipfsHash + '-url')}
-                                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-forge-bg/50 hover:bg-forge-bg text-forge-muted hover:text-white text-[11px] font-medium transition-colors"
+                                                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] hover:bg-[hsl(var(--color-bg-base))] text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] text-[11px] font-medium transition-colors"
                                             >
                                                 <Copy className="w-3 h-3" />
                                                 Copy IPFS URL

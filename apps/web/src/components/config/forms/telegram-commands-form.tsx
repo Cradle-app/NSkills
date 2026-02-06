@@ -3,6 +3,11 @@
 import { useBlueprintStore } from '@/store/blueprint';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
+import {
+    formStyles,
+    labelStyles,
+} from './shared-styles';
 
 interface Props {
     nodeId: string;
@@ -22,9 +27,9 @@ export function TelegramCommandsForm({ nodeId, config }: Props) {
     ];
 
     return (
-        <div className="space-y-4">
-            <div>
-                <label className="text-xs text-forge-muted mb-1.5 block">Framework</label>
+        <div className={formStyles.container}>
+            <div className={formStyles.section}>
+                <label className={labelStyles.base}>Framework</label>
                 <Select
                     value={(config.framework as string) ?? 'grammy'}
                     onValueChange={(v) => updateConfig('framework', v)}
@@ -37,8 +42,8 @@ export function TelegramCommandsForm({ nodeId, config }: Props) {
                 </Select>
             </div>
 
-            <div>
-                <label className="text-xs text-forge-muted mb-1.5 block">Delivery Method</label>
+            <div className={formStyles.section}>
+                <label className={labelStyles.base}>Delivery Method</label>
                 <Select
                     value={(config.deliveryMethod as string) ?? 'webhook'}
                     onValueChange={(v) => updateConfig('deliveryMethod', v)}
@@ -51,18 +56,18 @@ export function TelegramCommandsForm({ nodeId, config }: Props) {
                 </Select>
             </div>
 
-            <div className="flex items-center justify-between">
-                <span className="text-sm text-white">Rate Limiting</span>
+            <div className="flex items-center justify-between py-2">
+                <span className="text-sm text-[hsl(var(--color-text-primary))]">Rate Limiting</span>
                 <Switch
                     checked={(config.rateLimitEnabled as boolean) ?? true}
                     onCheckedChange={(v) => updateConfig('rateLimitEnabled', v)}
                 />
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between py-2">
                 <div className="space-y-0.5">
-                    <span className="text-sm text-white">Standard Chat Flow</span>
-                    <p className="text-[10px] text-forge-muted">Handle non-command messages</p>
+                    <span className="text-sm text-[hsl(var(--color-text-primary))]">Standard Chat Flow</span>
+                    <p className="text-[10px] text-[hsl(var(--color-text-muted))]">Handle non-command messages</p>
                 </div>
                 <Switch
                     checked={(config.chatFlowEnabled as boolean) ?? false}
@@ -70,12 +75,12 @@ export function TelegramCommandsForm({ nodeId, config }: Props) {
                 />
             </div>
 
-            <div>
-                <label className="text-xs text-forge-muted mb-1.5 block">Commands</label>
+            <div className={formStyles.section}>
+                <label className={labelStyles.base}>Commands</label>
                 <div className="space-y-2">
                     {commandsList.map((cmd) => (
-                        <div key={cmd} className="flex items-center justify-between">
-                            <span className="text-sm text-white capitalize">{cmd}</span>
+                        <div key={cmd} className="flex items-center justify-between py-1">
+                            <span className="text-sm text-[hsl(var(--color-text-primary))] capitalize">{cmd}</span>
                             <Switch
                                 checked={((config.commands as string[]) ?? ['start', 'help']).includes(cmd)}
                                 onCheckedChange={(checked) => {
