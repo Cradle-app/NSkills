@@ -341,7 +341,7 @@ function BlueprintCanvasInner() {
           </div>
 
           {/* Zoom Controls */}
-          <div className="flex items-center gap-1 rounded-lg bg-black/60 p-1 ring-1 ring-white/5 backdrop-blur">
+          {/* <div className="flex items-center gap-1 rounded-lg bg-black/60 p-1 ring-1 ring-white/5 backdrop-blur">
             <button
               onClick={() => zoomOut()}
               className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
@@ -367,7 +367,7 @@ function BlueprintCanvasInner() {
             >
               <Maximize2 className="h-3.5 w-3.5" />
             </button>
-          </div>
+          </div> */}
 
           {/* Subtle canvas hint - centered */}
           <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-white/5 backdrop-blur">

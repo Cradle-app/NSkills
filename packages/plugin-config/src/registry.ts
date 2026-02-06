@@ -319,9 +319,9 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     // ============================================
     // ORACLES / ANALYTICS (PYTH)
     // ============================================
-    'pyth-oracle': {
-        id: 'pyth-oracle',
-        name: 'Pyth Price Oracle',
+    'pyth': {
+        id: 'pyth',
+        name: 'Pyth',
         description: 'On-chain price feeds from Pyth Network',
         icon: 'TrendingUp',
         color: 'accent-purple',
@@ -336,9 +336,9 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             chain: 'arbitrum',
         },
     },
-    'chainlink-price-feed': {
-        id: 'chainlink-price-feed',
-        name: 'Chainlink Price Feed',
+    'chainlink': {
+        id: 'chainlink',
+        name: 'Chainlink',
         description: 'On-chain price feeds from Chainlink Data Feeds',
         icon: 'Link',
         color: 'accent-purple',
@@ -346,7 +346,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         tags: ['chainlink', 'oracle', 'prices', 'feeds', 'arbitrum', 'aggregator'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'chain-data', 'rpc-provider'],
-            suggestedWith: ['dune-token-price', 'pyth-oracle'],
+            suggestedWith: ['dune-token-price', 'pyth'],
             requires: [],
         },
         defaultConfig: {
@@ -354,9 +354,9 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612', // ETH/USD Arbitrum One
         },
     },
-    'aave-lending': {
-        id: 'aave-lending',
-        name: 'Aave Lending',
+    'aave': {
+        id: 'aave',
+        name: 'Aave',
         description: 'Supply, borrow, withdraw, and repay on Aave V3',
         icon: 'Coins',
         color: 'node-agents',
@@ -364,16 +364,16 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         tags: ['aave', 'lending', 'borrow', 'supply', 'defi', 'arbitrum'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
-            suggestedWith: ['chainlink-price-feed', 'pyth-oracle'],
+            suggestedWith: ['chainlink', 'pyth'],
             requires: [],
         },
         defaultConfig: {
             chain: 'arbitrum',
         },
     },
-    'compound-lending': {
-        id: 'compound-lending',
-        name: 'Compound Lending',
+    'compound': {
+        id: 'compound',
+        name: 'Compound',
         description: 'Supply, borrow, withdraw, and repay on Compound V3 (Comet)',
         icon: 'Zap',
         color: 'node-agents',
@@ -381,16 +381,16 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         tags: ['compound', 'lending', 'borrow', 'supply', 'defi', 'arbitrum', 'comet'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
-            suggestedWith: ['aave-lending', 'chainlink-price-feed'],
+            suggestedWith: ['aave', 'chainlink'],
             requires: [],
         },
         defaultConfig: {
             chain: 'arbitrum',
         },
     },
-    'uniswap-swap': {
-        id: 'uniswap-swap',
-        name: 'Uniswap Swap',
+    'uniswap': {
+        id: 'uniswap',
+        name: 'Uniswap',
         description: 'Swap tokens via Uniswap V3 across Arbitrum and Sepolia',
         icon: 'Coins',
         color: 'node-agents',
@@ -398,7 +398,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         tags: ['uniswap', 'swap', 'dex', 'defi', 'arbitrum', 'sepolia'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
-            suggestedWith: ['chainlink-price-feed', 'pyth-oracle', 'onchain-activity'],
+            suggestedWith: ['chainlink', 'pyth', 'onchain-activity'],
             requires: [],
         },
         defaultConfig: {
