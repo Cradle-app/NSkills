@@ -68,13 +68,9 @@ export function AuthGuard({
   }, [isConnected, address, checkFullAuthStatus]);
 
   const handleClick = useCallback(async (e: React.MouseEvent) => {
+    console.log('[AuthGuard] handleClick ENTRY', { requireGitHub });
     e.preventDefault();
     e.stopPropagation();
-
-    // If checking auth status, wait
-    if (isChecking || walletLoading || githubLoading) {
-      return;
-    }
 
     // Check full auth status if wallet is connected
     let shouldShowModal = false;
@@ -92,17 +88,25 @@ export function AuthGuard({
       shouldShowModal = !hasRequiredAuth;
     }
 
+    console.log('[AuthGuard] handleClick state', {
+      isConnected,
+      address: address ? `${address.slice(0, 8)}...` : null,
+      fullAuthStatus,
+      isFullyAuthenticated,
+      isWalletConnected,
+      shouldShowModal,
+      hasOnClick: !!onClick,
+    });
+
     if (shouldShowModal) {
-      // Open the global auth flow modal and pass the intended action
+      console.log('[AuthGuard] Opening auth modal');
       openAuthModal(onClick);
       return;
     }
 
+    console.log('[AuthGuard] Calling onClick (auth passed)');
     onClick?.();
   }, [
-    isChecking,
-    walletLoading,
-    githubLoading,
     isConnected,
     address,
     fullAuthStatus,
@@ -121,7 +125,7 @@ export function AuthGuard({
       onClick={handleClick}
       className={cn(
         'cursor-pointer relative',
-        isLoading && 'opacity-70 pointer-events-none',
+        isLoading && 'opacity-70',
         className
       )}
     >

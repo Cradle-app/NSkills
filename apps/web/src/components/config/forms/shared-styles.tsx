@@ -87,7 +87,7 @@ export const inputStyles = {
     'bg-[hsl(var(--color-bg-base))]',
     'border border-[hsl(var(--color-border-default))] rounded-lg',
     'text-[hsl(var(--color-text-primary))]',
-    'placeholder:text-[hsl(var(--color-text-muted))]',
+    'placeholder:text-[hsl(var(--color-placeholder))]',
     'focus:outline-none focus:border-[hsl(var(--color-accent-primary))]',
     'focus:ring-2 focus:ring-[hsl(var(--color-accent-primary)/0.15)]',
     'transition-all duration-150'
@@ -99,7 +99,7 @@ export const inputStyles = {
     'bg-[hsl(var(--color-bg-base))]',
     'border border-[hsl(var(--color-border-default))] rounded-lg',
     'text-[hsl(var(--color-text-primary))] font-mono',
-    'placeholder:text-[hsl(var(--color-text-muted))]',
+    'placeholder:text-[hsl(var(--color-placeholder))]',
     'focus:outline-none focus:border-[hsl(var(--color-accent-primary))]',
     'focus:ring-2 focus:ring-[hsl(var(--color-accent-primary)/0.15)]',
     'transition-all duration-150'

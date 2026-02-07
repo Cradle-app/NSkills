@@ -20,19 +20,20 @@ import { ProjectSettingsDialog } from '@/components/dialogs/project-settings-dia
 import { GitHubConnect } from '@/components/auth/github-connect';
 import { WalletConnectButton } from '@/components/auth/wallet-connect-button';
 import { AuthGuard } from '@/components/auth/auth-guard';
-import { AIChatModal } from '@/components/dialogs/ai-chat-modal';
 import { BlueprintTemplatesModal } from '@/components/templates/blueprint-templates-modal';
 import { KeyboardShortcutsModal, useKeyboardShortcutsModal } from '@/components/dialogs/keyboard-shortcuts-modal';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { RecentBlueprintsDropdown, useRecentBlueprints } from '@/components/ui/recent-blueprints-dropdown';
-import type { BlueprintNode, BlueprintEdge } from '@dapp-forge/blueprint-schema';
-import { AuthFlowModal } from '../auth/auth-flow-modal';
 import { cn } from '@/lib/utils';
 
-export function Header() {
+interface HeaderProps {
+  showAI?: boolean;
+  setShowAI?: (open: boolean) => void;
+}
+
+export function Header({ setShowAI }: HeaderProps = {}) {
   const [showGenerate, setShowGenerate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showAI, setShowAI] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const { isOpen: showShortcuts, open: openShortcuts, close: closeShortcuts } = useKeyboardShortcutsModal();
   const {
@@ -41,26 +42,6 @@ export function Header() {
     importBlueprint,
   } = useBlueprintStore();
   const { addRecent } = useRecentBlueprints();
-
-  // Handle applying AI-generated workflow to canvas
-  const handleApplyWorkflow = useCallback((
-    blueprintNodes: BlueprintNode[],
-    blueprintEdges: BlueprintEdge[]
-  ) => {
-    // Get current state and update the blueprint directly
-    const currentState = useBlueprintStore.getState();
-
-    // Update blueprint with new nodes and edges (append to existing)
-    useBlueprintStore.setState({
-      ...currentState,
-      blueprint: {
-        ...currentState.blueprint,
-        nodes: [...currentState.blueprint.nodes, ...blueprintNodes],
-        edges: [...currentState.blueprint.edges, ...blueprintEdges],
-        updatedAt: new Date().toISOString(),
-      },
-    });
-  }, []);
 
   // Persist current blueprint into "Recent Blueprints"
   useEffect(() => {
@@ -109,7 +90,7 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-subtle)/0.95)] backdrop-blur-xl flex items-center justify-between px-4 z-50 relative">
+    <header className="h-14 border-b border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-subtle)/0.95)] backdrop-blur-xl flex items-center justify-between px-4 z-[200] relative">
       {/* Subtle gradient line at bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(var(--color-accent-primary)/0.15)] to-transparent" />
 
@@ -225,8 +206,15 @@ export function Header() {
 
         <div className="w-px h-5 bg-[hsl(var(--color-border-default))] mx-1" />
 
-        <AuthGuard onClick={() => setShowAI(true)} requireGitHub={true}>
+        <AuthGuard
+          onClick={() => {
+            console.log('[Header] AI Assist onClick fired');
+            if (setShowAI) setShowAI(true);
+          }}
+          requireGitHub={true}
+        >
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             className={cn(
@@ -249,8 +237,15 @@ export function Header() {
 
         <GitHubConnect />
 
-        <AuthGuard onClick={() => setShowGenerate(true)} requireGitHub={true}>
+        <AuthGuard
+          onClick={() => {
+            console.log('[Header] Build onClick fired');
+            setShowGenerate(true);
+          }}
+          requireGitHub={true}
+        >
           <Button
+            type="button"
             size="sm"
             data-tour="generate"
             className={cn(
@@ -265,14 +260,9 @@ export function Header() {
         </AuthGuard>
       </motion.div>
 
-      {/* Dialogs */}
+      {/* Dialogs - AIChatModal is rendered at page level for state stability */}
       <GenerateDialog open={showGenerate} onOpenChange={setShowGenerate} />
       <ProjectSettingsDialog open={showSettings} onOpenChange={setShowSettings} />
-      <AIChatModal
-        open={showAI}
-        onOpenChange={setShowAI}
-        onApplyWorkflow={handleApplyWorkflow}
-      />
       <BlueprintTemplatesModal
         isOpen={showTemplates}
         onClose={() => setShowTemplates(false)}

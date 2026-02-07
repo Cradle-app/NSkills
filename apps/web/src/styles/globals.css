@@ -29,8 +29,9 @@
     /* Text hierarchy - softer whites */
     --color-text-primary: 220 15% 93%;      /* #eceff4 - Primary text */
     --color-text-secondary: 220 10% 70%;    /* #a8b0bd - Secondary text */
-    --color-text-muted: 220 8% 50%;         /* #787e88 - Muted/placeholder */
+    --color-text-muted: 220 8% 50%;         /* #787e88 - Muted */
     --color-text-disabled: 220 6% 35%;      /* #545962 - Disabled text */
+    --color-placeholder: 220 10% 70% / 0.6; /* Visible placeholder on dark bg */
     
     /* Border hierarchy - subtle dividers */
     --color-border-subtle: 220 10% 16%;     /* #242830 - Subtle dividers */
@@ -312,9 +313,11 @@
     color: inherit;
   }
   
+  /* Placeholder: whitish, visible on dark backgrounds */
   input::placeholder,
-  textarea::placeholder {
-    color: hsl(var(--color-text-muted));
+  textarea::placeholder,
+  select::placeholder {
+    color: hsl(var(--color-placeholder));
     opacity: 1;
   }
 

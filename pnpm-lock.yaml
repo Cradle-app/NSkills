@@ -20,6 +20,9 @@ importers:
 
   apps/orchestrator:
     dependencies:
+      '@cradle/plugin-config':
+        specifier: workspace:*
+        version: link:../../packages/plugin-config
       '@dapp-forge/blueprint-schema':
         specifier: workspace:*
         version: link:../../packages/blueprint-schema

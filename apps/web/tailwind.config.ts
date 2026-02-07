@@ -215,6 +215,18 @@ const config: Config = {
         'slow': '300ms',
         'slower': '400ms',
       },
+
+      zIndex: {
+        'dropdown': '1000',
+        'sticky': '1100',
+        'fixed': '1200',
+        'modal-backdrop': '1300',
+        'modal': '1400',
+        'popover': '1500',
+        'tooltip': '1600',
+        'toast': '1700',
+        'max': '9999',
+      },
     },
   },
   plugins: [],

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Panel, Group as PanelGroup, Separator } from 'react-resizable-panels';
 import { motion } from 'framer-motion';
 import { BlueprintCanvas } from '@/components/canvas/blueprint-canvas';
@@ -7,8 +8,10 @@ import { NodePalette } from '@/components/palette/node-palette';
 import { ConfigPanel } from '@/components/config/config-panel';
 import { Header } from '@/components/layout/header';
 import { Toaster } from '@/components/ui/toaster';
+import { AIChatModal } from '@/components/dialogs/ai-chat-modal';
 import { GripVertical } from 'lucide-react';
 import { useBlueprintStore } from '@/store/blueprint';
+import type { BlueprintNode, BlueprintEdge } from '@dapp-forge/blueprint-schema';
 
 function ResizeHandle({ className = '' }: { className?: string }) {
   return (
@@ -25,6 +28,20 @@ function ResizeHandle({ className = '' }: { className?: string }) {
 export default function HomePage() {
   const { selectedNodeId } = useBlueprintStore();
   const hasSelection = selectedNodeId !== null;
+  const [showAI, setShowAI] = useState(false);
+
+  const handleApplyWorkflow = (blueprintNodes: BlueprintNode[], blueprintEdges: BlueprintEdge[]) => {
+    const currentState = useBlueprintStore.getState();
+    useBlueprintStore.setState({
+      ...currentState,
+      blueprint: {
+        ...currentState.blueprint,
+        nodes: [...currentState.blueprint.nodes, ...blueprintNodes],
+        edges: [...currentState.blueprint.edges, ...blueprintEdges],
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  };
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden relative">
@@ -45,7 +62,7 @@ export default function HomePage() {
       {/* Content */}
       <div className="relative z-10 flex flex-col h-full">
         {/* Header */}
-        <Header />
+        <Header showAI={showAI} setShowAI={setShowAI} />
 
         {/* Main content with resizable panels */}
         <PanelGroup orientation="horizontal" className="flex-1">
@@ -102,6 +119,13 @@ export default function HomePage() {
 
       {/* Toast notifications */}
       <Toaster />
+
+      {/* AI Chat Modal - rendered at page level so state survives Header remounts (Fast Refresh) */}
+      <AIChatModal
+        open={showAI}
+        onOpenChange={setShowAI}
+        onApplyWorkflow={handleApplyWorkflow}
+      />
     </div>
   );
 }
