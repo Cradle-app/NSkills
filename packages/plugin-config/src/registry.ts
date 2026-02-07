@@ -114,46 +114,46 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             testCoverage: true,
         },
     },
-    'eip7702-smart-eoa': {
-        id: 'eip7702-smart-eoa',
-        name: 'EIP-7702 Smart EOA',
-        description: 'Smart EOA delegation (trending)',
-        icon: 'Key',
-        color: 'node-primary',
-        category: 'contracts',
-        tags: ['eip7702', 'eoa', 'delegation', 'account-abstraction'],
-        compatibility: {
-            compatibleWith: ['frontend-scaffold', 'wallet-auth'],
-            suggestedWith: ['chain-abstraction'],
-            requires: [],
-        },
-        defaultConfig: {
-            delegateName: 'BatchExecutor',
-            delegateType: 'batch-executor',
-            features: ['batch-calls', 'sponsored-tx'],
-            securityWarnings: true,
-            generateUI: true,
-        },
-    },
-    'zk-primitives': {
-        id: 'zk-primitives',
-        name: 'ZK Primitives',
-        description: 'Privacy proofs: membership, range, semaphore',
-        icon: 'Lock',
-        color: 'node-primary',
-        category: 'contracts',
-        tags: ['zk', 'privacy', 'semaphore', 'proof', 'membership'],
-        compatibility: {
-            compatibleWith: ['stylus-zk-contract', 'frontend-scaffold'],
-            suggestedWith: ['wallet-auth'],
-            requires: [],
-        },
-        defaultConfig: {
-            proofTypes: ['membership'],
-            clientSideProving: true,
-            generateVerifiers: true,
-        },
-    },
+    // 'eip7702-smart-eoa': {
+    //     id: 'eip7702-smart-eoa',
+    //     name: 'EIP-7702 Smart EOA',
+    //     description: 'Smart EOA delegation (trending)',
+    //     icon: 'Key',
+    //     color: 'node-contracts',
+    //     category: 'contracts',
+    //     tags: ['eip7702', 'eoa', 'delegation', 'account-abstraction'],
+    //     compatibility: {
+    //         compatibleWith: ['frontend-scaffold', 'wallet-auth'],
+    //         suggestedWith: ['chain-abstraction'],
+    //         requires: [],
+    //     },
+    //     defaultConfig: {
+    //         delegateName: 'BatchExecutor',
+    //         delegateType: 'batch-executor',
+    //         features: ['batch-calls', 'sponsored-tx'],
+    //         securityWarnings: true,
+    //         generateUI: true,
+    //     },
+    // },
+    // 'zk-primitives': {
+    //     id: 'zk-primitives',
+    //     name: 'ZK Primitives',
+    //     description: 'Privacy proofs: membership, range, semaphore',
+    //     icon: 'Lock',
+    //     color: 'node-contracts',
+    //     category: 'contracts',
+    //     tags: ['zk', 'privacy', 'semaphore', 'proof', 'membership'],
+    //     compatibility: {
+    //         compatibleWith: ['stylus-zk-contract', 'frontend-scaffold'],
+    //         suggestedWith: ['wallet-auth'],
+    //         requires: [],
+    //     },
+    //     defaultConfig: {
+    //         proofTypes: ['membership'],
+    //         clientSideProving: true,
+    //         generateVerifiers: true,
+    //     },
+    // },
     'stylus-rust-contract': {
         id: 'stylus-rust-contract',
         name: 'Stylus Rust Contract',
@@ -213,32 +213,6 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     },
 
     // ============================================
-    // PAYMENTS CATEGORY
-    // ============================================
-    'x402-paywall-api': {
-        id: 'x402-paywall-api',
-        name: 'x402 Paywall',
-        description: 'HTTP 402 payment endpoint',
-        icon: 'CreditCard',
-        color: 'node-accent',
-        category: 'payments',
-        tags: ['payment', 'api', 'monetization', '402'],
-        compatibility: {
-            compatibleWith: ['frontend-scaffold', 'wallet-auth'],
-            suggestedWith: ['rpc-provider', 'erc20-stylus'],
-            requires: [],
-        },
-        defaultConfig: {
-            resourcePath: '/api/premium/resource',
-            priceInWei: '1000000000000000',
-            currency: 'ETH',
-            paymentTimeout: 300,
-            receiptValidation: true,
-            openApiSpec: true,
-        },
-    },
-
-    // ============================================
     // AGENTS CATEGORY
     // ============================================
     'erc8004-agent-runtime': {
@@ -246,7 +220,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'ERC-8004 Agent',
         description: 'AI agent with on-chain registry',
         icon: 'Bot',
-        color: 'node-secondary',
+        logoAsset: 'AIbot.png',
+        color: 'node-agents',
         category: 'agents',
         tags: ['ai', 'agent', 'erc8004', 'llm', 'registry'],
         compatibility: {
@@ -267,7 +242,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Ostium Trading',
         description: 'One-click trading setup for Ostium',
         icon: 'Zap',
-        color: 'node-secondary',
+        logoAsset: 'Ostium.svg',
+        color: 'node-agents',
         category: 'agents',
         tags: ['trading', 'defi', 'ostium', 'perpetuals'],
         compatibility: {
@@ -286,7 +262,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Maxxit Lazy Trader',
         description: 'Connect and message Maxxit Lazy Trader agents',
         icon: 'Bot',
-        color: 'node-secondary',
+        logoAsset: 'MaxxitLogo.png',
+        color: 'node-agents',
         category: 'agents',
         tags: ['trading', 'agent', 'maxxit', 'automation'],
         compatibility: {
@@ -301,7 +278,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Onchain Activity',
         description: 'Fetch wallet transactions by category from Arbitrum',
         icon: 'TrendingUp',
-        color: 'node-secondary',
+        logoAsset: 'Wallet.svg',
+        color: 'node-agents',
         category: 'agents',
         tags: ['analytics', 'transactions', 'wallet', 'arbitrum'],
         compatibility: {
@@ -317,11 +295,37 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     },
 
     // ============================================
+    // PAYMENTS CATEGORY
+    // ============================================
+    'x402-paywall-api': {
+        id: 'x402-paywall-api',
+        name: 'x402 Paywall',
+        description: 'HTTP 402 payment endpoint',
+        icon: 'CreditCard',
+        color: 'node-payments',
+        category: 'payments',
+        tags: ['payment', 'api', 'monetization', '402'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth'],
+            suggestedWith: ['rpc-provider', 'erc20-stylus'],
+            requires: [],
+        },
+        defaultConfig: {
+            resourcePath: '/api/premium/resource',
+            priceInWei: '1000000000000000',
+            currency: 'ETH',
+            paymentTimeout: 300,
+            receiptValidation: true,
+            openApiSpec: true,
+        },
+    },
+
+    // ============================================
     // ORACLES / ANALYTICS (PYTH)
     // ============================================
-    'pyth': {
-        id: 'pyth',
-        name: 'Pyth',
+    'pyth-oracle': {
+        id: 'pyth-oracle',
+        name: 'Pyth Price Oracle',
         description: 'On-chain price feeds from Pyth Network',
         icon: 'TrendingUp',
         color: 'accent-purple',
@@ -336,9 +340,9 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             chain: 'arbitrum',
         },
     },
-    'chainlink': {
-        id: 'chainlink',
-        name: 'Chainlink',
+    'chainlink-price-feed': {
+        id: 'chainlink-price-feed',
+        name: 'Chainlink Price Feed',
         description: 'On-chain price feeds from Chainlink Data Feeds',
         icon: 'Link',
         color: 'accent-purple',
@@ -346,7 +350,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         tags: ['chainlink', 'oracle', 'prices', 'feeds', 'arbitrum', 'aggregator'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'chain-data', 'rpc-provider'],
-            suggestedWith: ['dune-token-price', 'pyth'],
+            suggestedWith: ['dune-token-price', 'pyth-oracle'],
             requires: [],
         },
         defaultConfig: {
@@ -354,9 +358,9 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612', // ETH/USD Arbitrum One
         },
     },
-    'aave': {
-        id: 'aave',
-        name: 'Aave',
+    'aave-lending': {
+        id: 'aave-lending',
+        name: 'Aave Lending',
         description: 'Supply, borrow, withdraw, and repay on Aave V3',
         icon: 'Coins',
         color: 'node-agents',
@@ -364,16 +368,16 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         tags: ['aave', 'lending', 'borrow', 'supply', 'defi', 'arbitrum'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
-            suggestedWith: ['chainlink', 'pyth'],
+            suggestedWith: ['chainlink-price-feed', 'pyth-oracle'],
             requires: [],
         },
         defaultConfig: {
             chain: 'arbitrum',
         },
     },
-    'compound': {
-        id: 'compound',
-        name: 'Compound',
+    'compound-lending': {
+        id: 'compound-lending',
+        name: 'Compound Lending',
         description: 'Supply, borrow, withdraw, and repay on Compound V3 (Comet)',
         icon: 'Zap',
         color: 'node-agents',
@@ -381,16 +385,16 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         tags: ['compound', 'lending', 'borrow', 'supply', 'defi', 'arbitrum', 'comet'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
-            suggestedWith: ['aave', 'chainlink'],
+            suggestedWith: ['aave-lending', 'chainlink-price-feed'],
             requires: [],
         },
         defaultConfig: {
             chain: 'arbitrum',
         },
     },
-    'uniswap': {
-        id: 'uniswap',
-        name: 'Uniswap',
+    'uniswap-swap': {
+        id: 'uniswap-swap',
+        name: 'Uniswap Swap',
         description: 'Swap tokens via Uniswap V3 across Arbitrum and Sepolia',
         icon: 'Coins',
         color: 'node-agents',
@@ -398,7 +402,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         tags: ['uniswap', 'swap', 'dex', 'defi', 'arbitrum', 'sepolia'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
-            suggestedWith: ['chainlink', 'pyth', 'onchain-activity'],
+            suggestedWith: ['chainlink-price-feed', 'pyth-oracle', 'onchain-activity'],
             requires: [],
         },
         defaultConfig: {
@@ -774,7 +778,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Network Config',
         description: 'Chain config, RPC, and contract addresses',
         icon: 'Globe',
-        color: 'node-primary',
+        logoAsset: 'superposition.png',
+        color: 'accent-cyan',
         category: 'superposition',
         tags: ['superposition', 'network', 'config', 'rpc'],
         compatibility: {
@@ -789,7 +794,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Bridge',
         description: 'Bridge assets from Arbitrum via Li.Fi',
         icon: 'ArrowLeftRight',
-        color: 'node-primary',
+        logoAsset: 'superposition.png',
+        color: 'accent-cyan',
         category: 'superposition',
         tags: ['superposition', 'bridge', 'lifi', 'arbitrum'],
         compatibility: {
@@ -804,7 +810,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Longtail AMM',
         description: 'Swap and liquidity on Longtail DEX',
         icon: 'TrendingUp',
-        color: 'node-primary',
+        logoAsset: 'superposition.png',
+        color: 'accent-cyan',
         category: 'superposition',
         tags: ['superposition', 'longtail', 'dex', 'amm', 'swap'],
         compatibility: {
@@ -819,7 +826,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Super Assets',
         description: 'Yield-bearing wrapped tokens',
         icon: 'Sparkles',
-        color: 'node-primary',
+        logoAsset: 'superposition.png',
+        color: 'accent-cyan',
         category: 'superposition',
         tags: ['superposition', 'yield', 'wrapped', 'tokens'],
         compatibility: {
@@ -834,7 +842,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Thirdweb Deploy',
         description: 'Deploy contracts using Thirdweb SDK',
         icon: 'Box',
-        color: 'node-primary',
+        logoAsset: 'superposition.png',
+        color: 'accent-cyan',
         category: 'superposition',
         tags: ['superposition', 'thirdweb', 'deploy', 'contracts'],
         compatibility: {
@@ -849,7 +858,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Utility Mining',
         description: 'Track and claim activity rewards',
         icon: 'Zap',
-        color: 'node-primary',
+        logoAsset: 'superposition.png',
+        color: 'accent-cyan',
         category: 'superposition',
         tags: ['superposition', 'mining', 'rewards', 'activity'],
         compatibility: {
@@ -864,7 +874,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Testnet Faucet',
         description: 'Request testnet tokens for development',
         icon: 'Database',
-        color: 'node-primary',
+        logoAsset: 'superposition.png',
+        color: 'accent-cyan',
         category: 'superposition',
         tags: ['superposition', 'faucet', 'testnet', 'tokens'],
         compatibility: {
@@ -879,7 +890,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Meow Domains',
         description: '.meow Web3 identity and resolution',
         icon: 'Key',
-        color: 'node-primary',
+        logoAsset: 'superposition.png',
+        color: 'accent-cyan',
         category: 'superposition',
         tags: ['superposition', 'domains', 'identity', 'meow'],
         compatibility: {
@@ -898,7 +910,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Execute SQL',
         description: 'Custom SQL queries on Dune blockchain data',
         icon: 'Database',
-        color: 'node-secondary',
+        logoAsset: 'dune.png',
+        color: 'accent-purple',
         category: 'analytics',
         tags: ['dune', 'sql', 'analytics', 'query', 'data'],
         compatibility: {
@@ -917,7 +930,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Token Price',
         description: 'Fetch latest token prices across blockchains',
         icon: 'TrendingUp',
-        color: 'node-secondary',
+        logoAsset: 'dune.png',
+        color: 'accent-purple',
         category: 'analytics',
         tags: ['dune', 'price', 'tokens', 'analytics'],
         compatibility: {
@@ -937,7 +951,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Wallet Balances',
         description: 'Token balances with USD valuations',
         icon: 'Wallet',
-        color: 'node-secondary',
+        logoAsset: 'dune.png',
+        color: 'accent-purple',
         category: 'analytics',
         tags: ['dune', 'balances', 'wallet', 'portfolio'],
         compatibility: {
@@ -957,7 +972,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'DEX Volume',
         description: 'Trading volume and DEX statistics',
         icon: 'TrendingUp',
-        color: 'node-secondary',
+        logoAsset: 'dune.png',
+        color: 'accent-purple',
         category: 'analytics',
         tags: ['dune', 'dex', 'volume', 'trading', 'analytics'],
         compatibility: {
@@ -976,7 +992,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'NFT Floor Price',
         description: 'Collection floor prices and stats',
         icon: 'Sparkles',
-        color: 'node-secondary',
+        logoAsset: 'dune.png',
+        color: 'accent-purple',
         category: 'analytics',
         tags: ['dune', 'nft', 'floor', 'collections'],
         compatibility: {
@@ -995,7 +1012,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Address Labels',
         description: 'Human-readable names for addresses',
         icon: 'Key',
-        color: 'node-secondary',
+        logoAsset: 'dune.png',
+        color: 'accent-purple',
         category: 'analytics',
         tags: ['dune', 'labels', 'ens', 'addresses'],
         compatibility: {
@@ -1014,7 +1032,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Transaction History',
         description: 'Wallet transaction history',
         icon: 'Database',
-        color: 'node-secondary',
+        logoAsset: 'dune.png',
+        color: 'accent-purple',
         category: 'analytics',
         tags: ['dune', 'transactions', 'history', 'wallet'],
         compatibility: {
@@ -1033,7 +1052,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Gas Price',
         description: 'Gas price analytics and stats',
         icon: 'Zap',
-        color: 'node-secondary',
+        logoAsset: 'dune.png',
+        color: 'accent-purple',
         category: 'analytics',
         tags: ['dune', 'gas', 'price', 'analytics'],
         compatibility: {
@@ -1052,7 +1072,8 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         name: 'Protocol TVL',
         description: 'Total Value Locked for DeFi protocols',
         icon: 'Lock',
-        color: 'node-secondary',
+        logoAsset: 'dune.png',
+        color: 'accent-purple',
         category: 'analytics',
         tags: ['dune', 'tvl', 'defi', 'protocol'],
         compatibility: {
@@ -1146,4 +1167,3 @@ export function getRequiredPlugins(pluginId: string): PluginRegistryEntry[] {
 export function getDefaultConfig(pluginId: string): Record<string, unknown> {
     return PLUGIN_REGISTRY[pluginId]?.defaultConfig ?? {};
 }
-

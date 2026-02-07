@@ -8,6 +8,7 @@ import {
   Hexagon,
   Sparkles,
   LayoutTemplate,
+  Play,
   Clock,
 } from 'lucide-react';
 import { useBlueprintStore } from '@/store/blueprint';
@@ -23,7 +24,12 @@ import { RecentBlueprintsDropdown, useRecentBlueprints } from '@/components/ui/r
 import { SimpleTooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
-export function Header() {
+interface HeaderProps {
+  showAI?: boolean;
+  setShowAI?: (open: boolean) => void;
+}
+
+export function Header({ setShowAI }: HeaderProps = {}) {
   const [showGenerate, setShowGenerate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -82,7 +88,7 @@ export function Header() {
   };
 
   return (
-    <header className="h-14 border-b border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-subtle)/0.95)] backdrop-blur-xl flex items-center justify-between px-4 z-50 relative">
+    <header className="h-14 border-b border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-subtle)/0.95)] backdrop-blur-xl flex items-center justify-between px-4 z-[200] relative">
       {/* Subtle gradient line at bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[hsl(var(--color-accent-primary)/0.15)] to-transparent" />
 
@@ -101,8 +107,11 @@ export function Header() {
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-[hsl(var(--color-text-primary))] leading-tight tracking-tight">
-              Cradle
+            <span className="text-base font-semibold text-[hsl(var(--color-text-primary))] leading-tight">
+              <span className="text-[hsl(var(--color-accent-primary))]">[N]</span>skills
+            </span>
+            <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
+              Compose N skills for your Web3 project
             </span>
           </div>
         </motion.div>
@@ -200,6 +209,7 @@ export function Header() {
         {/* Primary Action */}
         <AuthGuard onClick={() => setShowGenerate(true)} requireGitHub={true}>
           <Button
+            type="button"
             size="sm"
             data-tour="generate"
             className={cn(
@@ -208,13 +218,13 @@ export function Header() {
               "hover:brightness-110 transition-all"
             )}
           >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Generate
+            <Play className="w-3.5 h-3.5 mr-1.5 fill-current" />
+            Build
           </Button>
         </AuthGuard>
       </motion.div>
 
-      {/* Dialogs */}
+      {/* Dialogs - AIChatModal is rendered at page level for state stability */}
       <GenerateDialog open={showGenerate} onOpenChange={setShowGenerate} />
       <ProjectSettingsDialog open={showSettings} onOpenChange={setShowSettings} />
       <BlueprintTemplatesModal

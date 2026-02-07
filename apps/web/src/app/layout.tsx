@@ -14,15 +14,15 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Cradle - Web3 Foundation Builder',
-  description: 'Build your Web3 project foundation visually. Define architecture, generate clean structured code, then fine-tune with AI.',
+  title: '[N]skills - Web3 Skills Composer',
+  description: 'Compose N skills for your Web3 project visually. Define architecture, generate a skills repo, then let Claude Code scaffold the full project.',
   icons: {
     icon: '/favicon.ico',
   },
   metadataBase: new URL('https://cradle.dev'),
   openGraph: {
-    title: 'Cradle - Web3 Foundation Builder',
-    description: 'Build your Web3 project foundation visually. Define architecture, generate clean structured code, then fine-tune with AI.',
+    title: '[N]skills - Web3 Skills Composer',
+    description: 'Compose N skills for your Web3 project visually. Define architecture, generate a skills repo, then let Claude Code scaffold the full project.',
     type: 'website',
   },
 };

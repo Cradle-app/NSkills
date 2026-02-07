@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAccount } from 'wagmi';
-import { Play, Github, Loader2, Check, AlertCircle, LogIn } from 'lucide-react';
+import { Play, Github, Loader2, Check, AlertCircle, LogIn, Sparkles, Code, Layers } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -56,6 +56,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
   const [sessionLoading, setSessionLoading] = useState(false);
   const [steps, setSteps] = useState<ProgressStep[]>(stableDefaultSteps);
   const [currentStepId, setCurrentStepId] = useState<string | null>(null);
+  const [generateMode, setGenerateMode] = useState<'codebase' | 'skills' | 'both'>('codebase');
 
   // Fetch GitHub session status when dialog opens
   useEffect(() => {
@@ -205,6 +206,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
           blueprint: blueprintToGenerate,
           options: {
             createGitHubRepo,
+            generateMode,
           },
         }),
       });
@@ -255,9 +257,10 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
       }
 
       if (createGitHubRepo && repoUrl) {
-        toast.success('Repository created!', `Your repository is ready at ${repoUrl}`);
+        toast.success('Repository created!', `Your ${generateMode === 'skills' ? 'skills ' : ''}repository is ready at ${repoUrl}`);
       } else {
-        toast.success('Generation complete!', `Generated ${fileCount} files.`);
+        const label = generateMode === 'skills' ? 'context' : generateMode === 'both' ? 'code + context' : '';
+        toast.success('Generation complete!', `Generated ${fileCount} ${label} files.`);
       }
     } catch (err) {
       setStatus('error');
@@ -280,14 +283,49 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(var(--color-accent-primary))] to-[hsl(var(--color-success))] flex items-center justify-center">
               <Play className="w-4 h-4 text-black" />
             </div>
-            Build Foundation
+            Build Your Project
           </DialogTitle>
           <DialogDescription>
-            Generate your project&apos;s foundation - clean, structured code ready for AI-assisted development.
+            Generate a skills repo that Claude Code can consume for full-context scaffolding, a production codebase, or both.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4 flex-1 overflow-y-auto pr-1">
+          {/* Output mode selector */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-[hsl(var(--color-text-muted))] uppercase tracking-wider">Output Mode</p>
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { value: 'codebase' as const, icon: Code, label: 'Codebase', desc: 'Production scaffold' },
+                { value: 'skills' as const, icon: Sparkles, label: 'Skills Repo', desc: 'For Claude Code' },
+                { value: 'both' as const, icon: Layers, label: 'Both', desc: 'Scaffold + skills' },
+              ]).map(({ value, icon: Icon, label, desc }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setGenerateMode(value)}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border text-center transition-all duration-150 ${
+                    generateMode === value
+                      ? 'bg-[hsl(var(--color-accent-primary)/0.08)] border-[hsl(var(--color-accent-primary)/0.4)] ring-1 ring-[hsl(var(--color-accent-primary)/0.2)]'
+                      : 'bg-[hsl(var(--color-bg-base))] border-[hsl(var(--color-border-default))] hover:bg-[hsl(var(--color-bg-hover))]'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${
+                    generateMode === value
+                      ? 'text-[hsl(var(--color-accent-primary))]'
+                      : 'text-[hsl(var(--color-text-muted))]'
+                  }`} />
+                  <span className={`text-xs font-medium ${
+                    generateMode === value
+                      ? 'text-[hsl(var(--color-accent-primary))]'
+                      : 'text-[hsl(var(--color-text-primary))]'
+                  }`}>{label}</span>
+                  <span className="text-[10px] text-[hsl(var(--color-text-muted))]">{desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* GitHub option */}
           <div className="flex items-center justify-between p-4 rounded-lg bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))]">
             <div className="flex items-center gap-3">
@@ -370,7 +408,13 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
               {status === 'generating' && (
                 <div className="flex items-center gap-2 text-[hsl(var(--color-accent-primary))]">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">Generating code...</span>
+                  <span className="text-sm">
+                    {generateMode === 'skills'
+                      ? 'Analyzing components...'
+                      : generateMode === 'both'
+                        ? 'Generating code + context...'
+                        : 'Generating code...'}
+                  </span>
                 </div>
               )}
               {status === 'success' && (
@@ -381,7 +425,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
                   </div>
                   {result?.fileCount !== undefined && (
                     <p className="text-xs text-[hsl(var(--color-text-muted))]">
-                      Generated {result.fileCount} files
+                      Generated {result.fileCount} {generateMode === 'skills' ? 'context' : generateMode === 'both' ? 'code + context' : ''} files
                     </p>
                   )}
 

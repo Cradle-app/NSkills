@@ -1,4 +1,4 @@
-// Cradle Orchestrator API
+// [N]skills Orchestrator API
 // Main entry point
 
 import Fastify from 'fastify';
@@ -28,7 +28,7 @@ async function bootstrap() {
     timeWindow: '1 minute',
   });
 
-  // Initialize Cradle plugins
+  // Initialize plugins
   initializePlugins();
 
   // Register routes
@@ -57,7 +57,7 @@ async function bootstrap() {
 
   try {
     await fastify.listen({ port, host });
-    logger.info(`Cradle Orchestrator running on ${host}:${port}`);
+    logger.info(`[N]skills Orchestrator running on ${host}:${port}`);
   } catch (err) {
     logger.error('Failed to start server', { error: err });
     process.exit(1);

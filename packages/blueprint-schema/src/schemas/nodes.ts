@@ -121,6 +121,7 @@ export type NodePosition = z.infer<typeof NodePosition>;
 export const BaseNodeConfig = z.object({
   label: nullableString().optional(),
   description: nullableString().optional(),
+  prompt: nullableString().optional(),
 });
 export type BaseNodeConfig = z.infer<typeof BaseNodeConfig>;
 

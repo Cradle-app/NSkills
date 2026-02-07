@@ -132,7 +132,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             'w-full rounded-lg bg-forge-bg text-white',
             'px-3 py-2.5 text-sm',
             'border transition-all duration-150',
-            'placeholder:text-forge-muted',
+            'placeholder:text-[hsl(var(--color-placeholder))]',
             'resize-none',
             'min-h-[84px]',
             'focus:outline-none',

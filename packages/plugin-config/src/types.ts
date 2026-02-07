@@ -62,6 +62,8 @@ export interface PluginDefinition {
     description: string;
     /** Lucide icon name */
     icon: PluginIcon;
+    /** Optional logo asset filename for plugins with custom branding (e.g. 'Ostium.svg') */
+    logoAsset?: string;
     /** CSS color class for theming */
     color: string;
     /** Category for grouping in palette */

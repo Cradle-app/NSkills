@@ -16,9 +16,11 @@ function ForgeEdgeComponent({
   targetPosition,
   style = {},
   markerEnd,
+  data,
 }: EdgeProps) {
   const [isHovered, setIsHovered] = useState(false);
   const removeEdge = useBlueprintStore((state) => state.removeEdge);
+  const isGhost = data?.isGhost === true;
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -38,6 +40,31 @@ function ForgeEdgeComponent({
     [id, removeEdge]
   );
 
+  // ── Ghost edge rendering ──────────────────────────────────────────
+  if (isGhost) {
+    return (
+      <>
+        <path
+          id={id}
+          className="react-flow__edge-path"
+          d={edgePath}
+          fill="none"
+          stroke="url(#ghost-edge-gradient)"
+          strokeWidth={1.5}
+          strokeDasharray="6 4"
+          strokeOpacity={0.25}
+        />
+        <defs>
+          <linearGradient id="ghost-edge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#00d4ff" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#ff00ff" stopOpacity="0.4" />
+          </linearGradient>
+        </defs>
+      </>
+    );
+  }
+
+  // ── Regular edge rendering ────────────────────────────────────────
   return (
     <>
       {/* Invisible wider path for easier hover detection */}

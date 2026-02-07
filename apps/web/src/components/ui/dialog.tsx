@@ -24,19 +24,18 @@ const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      // Base overlay
-      'fixed inset-0 z-modal-backdrop',
-      'bg-black/70 backdrop-blur-sm',
-      // Animations
-      'data-[state=open]:animate-in data-[state=closed]:animate-out',
-      'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-      className
-    )}
-    {...props}
-  />
+      <DialogPrimitive.Overlay
+        ref={ref}
+        className={cn(
+          // Base overlay - use opacity transition only (animations override transform/position)
+          'fixed inset-0 z-modal-backdrop',
+          'bg-black/70 backdrop-blur-sm',
+          'transition-opacity duration-200',
+          'data-[state=closed]:opacity-0 data-[state=open]:opacity-100',
+          className
+        )}
+        {...props}
+      />
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
@@ -65,7 +64,7 @@ const DialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          // Position
+          // Position - keep centering transform; do NOT use keyframe animations (they override transform)
           'fixed left-1/2 top-1/2 z-modal',
           '-translate-x-1/2 -translate-y-1/2',
           // Size
@@ -75,13 +74,9 @@ const DialogContent = React.forwardRef<
           'bg-gradient-to-b from-forge-surface to-forge-bg',
           'border border-forge-border rounded-2xl',
           'shadow-2xl shadow-black/50',
-          // Animations
-          'duration-200',
-          'data-[state=open]:animate-in data-[state=closed]:animate-out',
-          'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-          'data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]',
-          'data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]',
+          // Opacity transition only - preserves centering, no position flash
+          'transition-opacity duration-200',
+          'data-[state=closed]:opacity-0 data-[state=open]:opacity-100',
           className
         )}
         {...props}

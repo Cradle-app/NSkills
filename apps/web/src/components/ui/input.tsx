@@ -111,7 +111,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               // Base styles
               'w-full rounded-lg bg-forge-bg text-white',
               'border transition-all duration-150',
-              'placeholder:text-forge-muted',
+              'placeholder:text-[hsl(var(--color-placeholder))]',
               'focus:outline-none',
 
               // Size

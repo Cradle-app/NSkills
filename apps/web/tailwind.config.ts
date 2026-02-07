@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 /**
- * Cradle Design System v3.0 - Tailwind Configuration
+ * [N]skills Design System v3.0 - Tailwind Configuration
  * 
  * Modern, Claude Code-inspired design system with:
  * - Warm, soft dark palette
@@ -151,6 +151,8 @@ const config: Config = {
         'scale-in': 'scale-in 0.2s ease-out',
         'shimmer': 'shimmer 2s linear infinite',
         'float': 'float 6s ease-in-out infinite',
+        'ghost-pulse': 'ghostPulse 3s ease-in-out infinite',
+        'ghost-shimmer': 'ghostShimmer 2.5s ease-in-out infinite',
       },
 
       keyframes: {
@@ -190,6 +192,14 @@ const config: Config = {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-4px)' },
         },
+        'ghostPulse': {
+          '0%, 100%': { opacity: '0.45' },
+          '50%': { opacity: '0.65' },
+        },
+        'ghostShimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
+        },
       },
 
       transitionTimingFunction: {
@@ -204,6 +214,18 @@ const config: Config = {
         'moderate': '200ms',
         'slow': '300ms',
         'slower': '400ms',
+      },
+
+      zIndex: {
+        'dropdown': '1000',
+        'sticky': '1100',
+        'fixed': '1200',
+        'modal-backdrop': '1300',
+        'modal': '1400',
+        'popover': '1500',
+        'tooltip': '1600',
+        'toast': '1700',
+        'max': '9999',
       },
     },
   },

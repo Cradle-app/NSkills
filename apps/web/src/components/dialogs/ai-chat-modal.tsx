@@ -327,7 +327,7 @@ export function AIChatModal({ open, onOpenChange, onApplyWorkflow }: AIChatModal
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Describe your app..."
-                className="w-full min-h-[44px] max-h-[100px] px-3 py-2.5 text-sm bg-forge-elevated border border-forge-border/50 rounded-lg text-white placeholder:text-forge-muted focus:outline-none focus:border-accent-cyan/40 transition-colors resize-none"
+                className="w-full min-h-[44px] max-h-[100px] px-3 py-2.5 text-sm bg-forge-elevated border border-forge-border/50 rounded-lg text-white placeholder:text-[hsl(var(--color-placeholder))] focus:outline-none focus:border-accent-cyan/40 transition-colors resize-none"
                 disabled={isLoading}
                 rows={1}
               />

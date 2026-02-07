@@ -1,68 +1,96 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
+import Image from 'next/image';
 import { Handle, Position, type NodeProps } from 'reactflow';
 import { motion } from 'framer-motion';
 import {
   Box, CreditCard, Bot, Layout, ShieldCheck, Trash2,
   Lock, Key, Wallet, Globe, ArrowLeftRight, Database,
   HardDrive, Layers, TrendingUp, Zap, Sparkles, Search,
-  DollarSign, Fuel, Send, Link, Coins
+  DollarSign, Fuel, Send, Link, Coins, Plus, X as XIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBlueprintStore } from '@/store/blueprint';
 import { nodeTypeToLabel, nodeTypeToColor } from '@/lib/utils';
-import { PLUGIN_REGISTRY, type PluginIcon } from '@cradle/plugin-config';
 
 import AaveLogo from '@/assets/blocks/Aave.svg';
 import CompoundLogo from '@/assets/blocks/Compound.svg';
 import ChainlinkLogo from '@/assets/blocks/Chainlink.svg';
 import PythLogo from '@/assets/blocks/Pyth.svg';
 import UniswapLogo from '@/assets/blocks/Uniswap.svg';
+import CSLogo from '@/assets/blocks/CS_logo.png';
+import AuditwareLogo from '@/assets/blocks/auditware.png';
+import StylusLogo from '@/assets/blocks/stylus.svg';
+import OstiumLogo from '@/assets/blocks/Ostium.svg';
+import MaxxitLogo from '@/assets/blocks/MaxxitLogo.png';
+import AIbotLogo from '@/assets/blocks/AIbot.png';
+import WalletLogo from '@/assets/blocks/Wallet.svg';
+import SuperpositionLogo from '@/assets/blocks/superposition.png';
+import DuneLogo from '@/assets/blocks/dune.png';
 
-const ICON_MAP: Record<PluginIcon, React.ComponentType<any>> = {
-  Box, CreditCard, Bot, Layout, ShieldCheck,
-  Lock, Key, Wallet, Globe, ArrowLeftRight, Database,
-  HardDrive, Layers, TrendingUp, Zap, Sparkles, Search,
-  Link, Coins
+/** Node types with custom logos (matches palette) */
+const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
+  'aave-lending': { src: AaveLogo, alt: 'Aave' },
+  'compound-lending': { src: CompoundLogo, alt: 'Compound' },
+  'chainlink-price-feed': { src: ChainlinkLogo, alt: 'Chainlink' },
+  'pyth-oracle': { src: PythLogo, alt: 'Pyth' },
+  'uniswap-swap': { src: UniswapLogo, alt: 'Uniswap' },
+  'smartcache-caching': { src: CSLogo, alt: 'SmartCache' },
+  'auditware-analyzing': { src: AuditwareLogo, alt: 'Auditware' },
+  'erc20-stylus': { src: StylusLogo, alt: 'Stylus' },
+  'erc721-stylus': { src: StylusLogo, alt: 'Stylus' },
+  'erc1155-stylus': { src: StylusLogo, alt: 'Stylus' },
+  'stylus-contract': { src: StylusLogo, alt: 'Stylus' },
+  'stylus-zk-contract': { src: StylusLogo, alt: 'Stylus' },
+  'stylus-rust-contract': { src: StylusLogo, alt: 'Stylus' },
+  'ostium-trading': { src: OstiumLogo, alt: 'Ostium' },
+  'maxxit': { src: MaxxitLogo, alt: 'Maxxit' },
+  'erc8004-agent-runtime': { src: AIbotLogo, alt: 'AIbot' },
+  'onchain-activity': { src: WalletLogo, alt: 'Wallet' },
 };
 
-// Protocol plugins use SVG assets
-const PROTOCOL_ICONS: Record<string, any> = {
-  'aave': AaveLogo,
-  'compound': CompoundLogo,
-  'chainlink': ChainlinkLogo,
-  'pyth': PythLogo,
-  'uniswap': UniswapLogo,
+const iconMap: Record<string, typeof Box> = {
+  'stylus-contract': Box,
+  'stylus-zk-contract': Lock,
+  'stylus-rust-contract': Box,
+  'smartcache-caching': Database,
+  'auditware-analyzing': ShieldCheck,
+  'x402-paywall-api': CreditCard,
+  'erc8004-agent-runtime': Bot,
+  'repo-quality-gates': ShieldCheck,
+  'frontend-scaffold': Layout,
+  'sdk-generator': Layout,
+  'eip7702-smart-eoa': Key,
+  'wallet-auth': Wallet,
+  'rpc-provider': Globe,
+  'arbitrum-bridge': ArrowLeftRight,
+  'chain-data': Database,
+  'ipfs-storage': HardDrive,
+  'chain-abstraction': Layers,
+  'zk-primitives': Lock,
+  'ostium-trading': TrendingUp,
+  'maxxit': Bot,
+  'aixbt-momentum': TrendingUp,
+  'aixbt-signals': Zap,
+  'aixbt-indigo': Sparkles,
+  'aixbt-observer': Search,
+  // Telegram
+  'telegram-notifications': Send,
+  'telegram-commands': Send,
+  'telegram-wallet-link': Send,
+  'telegram-ai-agent': Send,
+  // Dune Analytics
+  'dune-execute-sql': Database,
+  'dune-token-price': DollarSign,
+  'dune-wallet-balances': Wallet,
+  'dune-dex-volume': TrendingUp,
+  'dune-nft-floor': Sparkles,
+  'dune-address-labels': Key,
+  'dune-transaction-history': Database,
+  'dune-gas-price': Fuel,
+  'dune-protocol-tvl': Lock,
 };
-
-function getIconForNodeType(nodeType: string): React.ComponentType<any> | any {
-  // 1. Check if it's a protocol plugin (SVG)
-  if (PROTOCOL_ICONS[nodeType]) {
-    return PROTOCOL_ICONS[nodeType];
-  }
-
-  // 2. Check registry for Lucide icon
-  const registryEntry = PLUGIN_REGISTRY[nodeType];
-  if (registryEntry?.icon && ICON_MAP[registryEntry.icon]) {
-    return ICON_MAP[registryEntry.icon];
-  }
-
-  // 3. Fallback to hardcoded map (legacy) or Box
-  const legacyMap: Record<string, React.ComponentType<any>> = {
-    'dune-execute-sql': Database,
-    'dune-token-price': DollarSign,
-    'dune-wallet-balances': Wallet,
-    'dune-dex-volume': TrendingUp,
-    'dune-nft-floor': Sparkles,
-    'dune-address-labels': Key,
-    'dune-transaction-history': Database,
-    'dune-gas-price': Fuel,
-    'dune-protocol-tvl': Lock,
-  };
-
-  return legacyMap[nodeType] || Box;
-}
 
 /**
  * Node color mapping - Modern, refined palette
@@ -184,17 +212,132 @@ const colorMap: Record<string, NodeColorScheme> = {
 };
 
 function ForgeNodeComponent({ id, data, selected }: NodeProps) {
-  const { selectedNodeId, removeNode } = useBlueprintStore();
+  const { selectedNodeId, removeNode, activateGhostNode, dismissGhostNode } = useBlueprintStore();
   const nodeType = data.nodeType as string;
   const colorClass = nodeTypeToColor(nodeType);
   const colors = colorMap[colorClass] || colorMap['node-contracts'];
-  const Icon = getIconForNodeType(nodeType);
-  const isSelected = selected || selectedNodeId === id;
+  const Icon = iconMap[nodeType] || Box;
+  const isGhost = data.isGhost === true;
+  const logoInfo = NODE_LOGO_MAP[nodeType];
+  const isSelected = !isGhost && (selected || selectedNodeId === id);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     removeNode(id);
   };
+
+  const handleActivate = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      activateGhostNode(id);
+    },
+    [id, activateGhostNode],
+  );
+
+  const handleDismiss = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      dismissGhostNode(id);
+    },
+    [id, dismissGhostNode],
+  );
+
+  // ── Ghost node rendering ────────────────────────────────────────────
+  if (isGhost) {
+    return (
+      <div className="relative">
+        {/* Input handle */}
+        <Handle
+          type="target"
+          position={Position.Left}
+          className="!w-3 !h-3 !-left-[6px] !border-2 !rounded-full !bg-transparent !border-[hsl(var(--color-border-default)/0.3)]"
+        />
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          onClick={handleActivate}
+          className={cn(
+            'group relative w-[200px] rounded-xl border-[1.5px] border-dashed cursor-pointer',
+            'bg-[hsl(var(--color-bg-muted)/0.4)]',
+            'transition-all duration-200 ease-out',
+            colors.border,
+            'hover:border-[hsl(var(--color-accent-primary)/0.5)]',
+            'hover:bg-[hsl(var(--color-bg-muted)/0.6)]',
+            'animate-[ghostPulse_3s_ease-in-out_infinite]',
+          )}
+        >
+          {/* Shimmer overlay */}
+          <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-[ghostShimmer_2.5s_ease-in-out_infinite]" />
+          </div>
+
+          {/* Dismiss button */}
+          <button
+            onClick={handleDismiss}
+            className={cn(
+              'absolute -top-2 -right-2 z-10 p-1 rounded-full',
+              'bg-[hsl(var(--color-bg-elevated))] border border-[hsl(var(--color-border-default)/0.5)]',
+              'text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-error))]',
+              'opacity-0 group-hover:opacity-100 transition-all duration-150',
+              'hover:bg-[hsl(var(--color-error)/0.1)]',
+            )}
+          >
+            <XIcon className="w-3 h-3" />
+          </button>
+
+          {/* Node content */}
+          <div className="relative p-3 opacity-50 group-hover:opacity-80 transition-opacity duration-200">
+            <div className="flex items-start gap-2.5">
+              {/* Icon */}
+              <div
+                className={cn(
+                  'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
+                  colors.iconBg,
+                  'border border-dashed border-[hsl(var(--color-border-subtle))]',
+                )}
+              >
+                <Icon className={cn('w-4.5 h-4.5', colors.text)} />
+              </div>
+
+              {/* Label */}
+              <div className="flex-1 min-w-0 pt-0.5">
+                <p className="text-[13px] font-semibold truncate leading-tight text-[hsl(var(--color-text-primary))]">
+                  {nodeTypeToLabel(nodeType)}
+                </p>
+                <p className={cn('text-[10px] mt-1 font-medium', 'text-[hsl(var(--color-accent-primary))]')}>
+                  Click to add
+                </p>
+              </div>
+
+              {/* Plus icon */}
+              <div
+                className={cn(
+                  'p-1.5 rounded-md',
+                  'bg-[hsl(var(--color-accent-primary)/0.1)]',
+                  'text-[hsl(var(--color-accent-primary))]',
+                  'group-hover:bg-[hsl(var(--color-accent-primary)/0.2)]',
+                  'transition-colors duration-150',
+                )}
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Output handle */}
+        <Handle
+          type="source"
+          position={Position.Right}
+          className="!w-3 !h-3 !-right-[6px] !border-2 !rounded-full !bg-transparent !border-[hsl(var(--color-border-default)/0.3)]"
+        />
+      </div>
+    );
+  }
+
+  // ── Regular node rendering ──────────────────────────────────────────
 
   // Check if there's extra context to show
   const hasExtraInfo = (
@@ -260,41 +403,28 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
       />
 
       {/* Node content */}
-      <div className="relative p-3">
-        <div className="flex items-start gap-2.5">
-          {/* Icon container - enhanced for selected state */}
-          <motion.div
-            initial={false}
-            animate={{
-              scale: isSelected ? 1.05 : 1,
-            }}
-            transition={{ duration: 0.15 }}
+      <div className="relative p-2.5">
+        <div className="flex items-center gap-2">
+          {/* Icon / Logo container */}
+          <div
             className={cn(
-              'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
-              colors.iconBg,
-              'border border-[hsl(var(--color-border-subtle))]',
-              'transition-all duration-200',
-              isSelected && 'border-transparent',
-              'overflow-hidden' // Ensure images don't overflow
+              'relative w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden',
+              'bg-forge-bg/70 border border-white/5',
+              'group-hover:border-white/10 transition-colors duration-200'
             )}
           >
-            {/* 
-              Distinguish between Protocol Plugins (Images) and Standard Plugins (Lucide Icons).
-              We check PROTOCOL_ICONS to see if this node type uses a custom image asset.
-            */}
-            {!PROTOCOL_ICONS[nodeType] ? (
-              <Icon className={cn('w-4.5 h-4.5', colors.text)} />
+            {logoInfo ? (
+              <Image
+                src={logoInfo.src}
+                alt={logoInfo.alt}
+                fill
+                className="object-contain p-0.5"
+                unoptimized
+              />
             ) : (
-              <div className="relative w-5 h-5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={(Icon as any).src || Icon}
-                  alt={nodeType}
-                  className="w-full h-full object-contain"
-                />
-              </div>
+              <Icon className={cn('w-4 h-4', colors.text)} />
             )}
-          </motion.div>
+          </div>
 
           {/* Label section */}
           <div className="flex-1 min-w-0 pt-0.5">

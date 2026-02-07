@@ -18,7 +18,7 @@ import ReactFlow, {
   BackgroundVariant,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Trash2, Undo2, Redo2, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { Trash2, Undo2, Redo2, Maximize2, ZoomOut, ZoomIn } from 'lucide-react';
 import { nodeTypeToColor } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { useAccount } from 'wagmi';
@@ -63,6 +63,9 @@ function BlueprintCanvasInner() {
     redo,
     canUndo,
     canRedo,
+    ghostNodes,
+    ghostEdges,
+    activateGhostNode,
   } = useBlueprintStore();
   const { isConnected, address } = useAccount();
   const {
@@ -94,37 +97,65 @@ function BlueprintCanvasInner() {
   const authState = useAuthState();
   const connectionState = getConnectionState();
 
-  // Zoom controls
-  const { fitView, zoomIn, zoomOut } = useReactFlow();
-  const { zoom } = useViewport();
-  const zoomPercentage = Math.round(zoom * 100);
-
   // Node search modal
   const { isOpen: showNodeSearch, close: closeNodeSearch } = useNodeSearchModal();
 
-  // Convert blueprint nodes to ReactFlow nodes
-  const blueprintNodes: Node[] = useMemo(() =>
-    blueprint.nodes.map(node => ({
+  // Zoom controls
+  const { fitView, zoomIn, zoomOut, screenToFlowPosition } = useReactFlow();
+  const { zoom } = useViewport();
+  const zoomPercentage = Math.round(zoom * 100);
+
+  // Convert blueprint nodes to ReactFlow nodes (including ghost nodes)
+  const blueprintNodes: Node[] = useMemo(() => {
+    const real = blueprint.nodes.map(node => ({
       id: node.id,
       type: node.type,
       position: node.position,
-      selected: node.id === selectedNodeId, // Enable keyboard delete
+      selected: node.id === selectedNodeId,
       data: {
         ...node.config,
         nodeType: node.type,
         label: node.config.label || node.config.contractName || node.config.agentName || node.type,
+        isGhost: false,
       },
-    })), [blueprint.nodes, selectedNodeId]);
+    }));
+    const ghosts = ghostNodes.map(node => ({
+      id: node.id,
+      type: node.type,
+      position: node.position,
+      selected: false,
+      draggable: false,
+      selectable: false,
+      data: {
+        ...node.config,
+        nodeType: node.type,
+        label: node.config.label || node.config.contractName || node.config.agentName || node.type,
+        isGhost: true,
+      },
+    }));
+    return [...real, ...ghosts];
+  }, [blueprint.nodes, ghostNodes, selectedNodeId]);
 
-  // Convert blueprint edges to ReactFlow edges
-  const blueprintEdges: Edge[] = useMemo(() =>
-    blueprint.edges.map(edge => ({
+  // Convert blueprint edges to ReactFlow edges (including ghost edges)
+  const blueprintEdges: Edge[] = useMemo(() => {
+    const real = blueprint.edges.map(edge => ({
       id: edge.id,
       source: edge.source,
       target: edge.target,
       type: 'default',
       animated: true,
-    })), [blueprint.edges]);
+      data: { isGhost: false },
+    }));
+    const ghosts = ghostEdges.map(edge => ({
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      type: 'default',
+      animated: false,
+      data: { isGhost: true },
+    }));
+    return [...real, ...ghosts];
+  }, [blueprint.edges, ghostEdges]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(blueprintNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(blueprintEdges);
@@ -141,18 +172,11 @@ function BlueprintCanvasInner() {
   const onConnect = useCallback(
     (connection: Connection) => {
       if (connection.source && connection.target) {
-        const newEdge = storeAddEdge(connection.source, connection.target);
-        if (newEdge) {
-          setEdges((eds) => addEdge({
-            ...connection,
-            id: newEdge.id,
-            type: 'default',
-            animated: true,
-          }, eds));
-        }
+        // Redundant setEdges removed as store update triggers effect
+        storeAddEdge(connection.source, connection.target);
       }
     },
-    [storeAddEdge, setEdges]
+    [storeAddEdge]
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -180,36 +204,25 @@ function BlueprintCanvasInner() {
         return;
       }
 
-      const position = {
-        x: event.clientX - 280, // Offset for sidebar
-        y: event.clientY - 56,   // Offset for header
-      };
+      // Use screenToFlowPosition for accurate drop location
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
 
-      const newNode = addNode(type, position);
-
-      if (newNode) {
-        setNodes((nds) => [
-          ...nds,
-          {
-            id: newNode.id,
-            type: newNode.type,
-            position: newNode.position,
-            data: {
-              ...newNode.config,
-              nodeType: newNode.type,
-              label: (newNode.config as Record<string, unknown>).contractName ||
-                (newNode.config as Record<string, unknown>).agentName ||
-                newNode.type,
-            },
-          },
-        ]);
-      }
+      // Redundant setNodes removed as store update triggers effect
+      addNode(type, position);
     },
-    [addNode, setNodes, isConnected, isWalletConnected, isFullyAuthenticated, openAuthModal]
+    [addNode, isConnected, isWalletConnected, isFullyAuthenticated, openAuthModal, screenToFlowPosition]
   );
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
+      // If this is a ghost node, activate it instead of selecting
+      if (node.data?.isGhost) {
+        activateGhostNode(node.id);
+        return;
+      }
       const walletConnected = isConnected || isWalletConnected;
       if (!walletConnected) {
         openAuthModal(() => selectNode(node.id));
@@ -217,7 +230,7 @@ function BlueprintCanvasInner() {
       }
       selectNode(node.id);
     },
-    [isConnected, isWalletConnected, openAuthModal, selectNode]
+    [isConnected, isWalletConnected, openAuthModal, selectNode, activateGhostNode]
   );
 
   const onPaneClick = useCallback(() => {
@@ -340,35 +353,6 @@ function BlueprintCanvasInner() {
               </button>
             </div>
           </div>
-
-          {/* Zoom Controls */}
-          {/* <div className="flex items-center gap-1 rounded-lg bg-black/60 p-1 ring-1 ring-white/5 backdrop-blur">
-            <button
-              onClick={() => zoomOut()}
-              className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
-              title="Zoom out"
-            >
-              <ZoomOut className="h-3.5 w-3.5" />
-            </button>
-            <span className="text-[11px] font-mono text-forge-muted min-w-[40px] text-center">
-              {zoomPercentage}%
-            </span>
-            <button
-              onClick={() => zoomIn()}
-              className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
-              title="Zoom in"
-            >
-              <ZoomIn className="h-3.5 w-3.5" />
-            </button>
-            <div className="w-px h-4 bg-forge-border/50 mx-0.5" />
-            <button
-              onClick={() => fitView({ padding: 0.2 })}
-              className="p-1.5 rounded hover:bg-white/10 text-forge-muted hover:text-white transition-colors"
-              title="Fit to view"
-            >
-              <Maximize2 className="h-3.5 w-3.5" />
-            </button>
-          </div> */}
 
           {/* Subtle canvas hint - centered */}
           <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-[hsl(var(--color-bg-elevated))/0.8] px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-[hsl(var(--color-border-subtle))] backdrop-blur">
@@ -514,11 +498,11 @@ function BlueprintCanvasInner() {
                 </div>
               </div>
 
-              <h3 className="mb-2 text-lg font-semibold text-[hsl(var(--color-text-primary))]">
-                Start building your dApp
+              <h3 className="mb-2 text-lg font-semibold text-white">
+                Compose [N] skills for your project
               </h3>
               <p className="text-sm text-forge-muted mb-6 max-w-xs mx-auto">
-                Drag components from the palette or use quick actions to begin
+                Drag components from the palette, connect them, then build a skills repo that Claude Code can use to scaffold your project.
               </p>
 
               {/* Quick hints */}
@@ -528,7 +512,7 @@ function BlueprintCanvasInner() {
                   <span>Drag from palette</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-forge-elevated/30 border border-forge-border/30">
-                  <kbd className="px-1 py-0.5 text-[10px] bg-forge-bg rounded">?</kbd>
+                  <kbd className="px-1 py-0.5 text-[10px] bg-forge-bg rounded font-mono">?</kbd>
                   <span>Shortcuts</span>
                 </div>
               </div>

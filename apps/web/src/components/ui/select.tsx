@@ -120,7 +120,7 @@ const SelectContent = React.forwardRef<
       ref={ref}
       className={cn(
         // Base styles
-        'relative z-popover overflow-hidden',
+        'relative z-[9999] overflow-hidden',
         'min-w-[8rem] max-h-96',
         'bg-forge-surface rounded-xl',
         'border border-forge-border',

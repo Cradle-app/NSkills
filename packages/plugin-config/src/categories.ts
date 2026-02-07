@@ -3,9 +3,27 @@ import { CategoryDefinition, PluginCategory } from './types';
 export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
     {
         id: 'contracts',
-        name: 'Smart Contracts',
-        icon: 'Box', 
-        color: 'accent-cyan'
+        name: 'Contracts',
+        icon: 'Box',
+        color: 'node-contracts',
+    },
+    {
+        id: 'agents',
+        name: 'Agents',
+        icon: 'Bot',
+        color: 'node-agents',
+    },
+    {
+        id: 'superposition',
+        name: 'Superposition',
+        icon: 'Layers',
+        color: 'accent-cyan',
+    },
+    {
+        id: 'analytics',
+        name: 'Analytics',
+        icon: 'Database',
+        color: 'accent-purple',
     },
     {
         id: 'payments',
@@ -18,12 +36,6 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
         name: 'Protocols',
         icon: 'Globe',
         color: 'accent-cyan'
-    },
-    {
-        id: 'agents',
-        name: 'AI Agents',
-        icon: 'Bot',
-        color: 'accent-purple'
     },
     {
         id: 'app',
@@ -49,18 +61,6 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
         icon: 'Sparkles',
         color: 'accent-pink'
     },
-    {
-        id: 'superposition',
-        name: 'Superposition',
-        icon: 'Layers',
-        color: 'accent-indigo'
-    },
-    {
-        id: 'analytics',
-        name: 'Analytics',
-        icon: 'TrendingUp',
-        color: 'accent-yellow'
-    }
 ];
 
 export const getCategoryById = (id: PluginCategory): CategoryDefinition | undefined => {
