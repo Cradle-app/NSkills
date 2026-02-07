@@ -34,6 +34,7 @@ import { useSessionMonitor, useAuthState } from '@/hooks/useSessionMonitor';
 import { AuthStatusBadge } from '@/components/auth/auth-guard';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { BlueprintNode as BPNode, BlueprintEdge as BPEdge } from '@dapp-forge/blueprint-schema';
+import { BlueprintTemplatesModal } from '@/components/templates/blueprint-templates-modal';
 
 // Dynamically build node types from plugin registry
 const nodeTypes: NodeTypes = getPluginIds().reduce(
@@ -99,6 +100,9 @@ function BlueprintCanvasInner() {
 
   // Node search modal
   const { isOpen: showNodeSearch, close: closeNodeSearch } = useNodeSearchModal();
+
+  // Templates modal state
+  const [showTemplates, setShowTemplates] = useState(false);
 
   // Zoom controls
   const { fitView, zoomIn, zoomOut, screenToFlowPosition } = useReactFlow();
@@ -475,16 +479,44 @@ function BlueprintCanvasInner() {
         {/* Empty state */}
         {nodes.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-            <div className="max-w-md text-center">
-              {/* Animated rings */}
-              <div className="relative mx-auto mb-6 w-24 h-24">
-                <div className="absolute inset-0 rounded-full border border-dashed border-accent-cyan/30 animate-[spin_20s_linear_infinite]" />
-                <div className="absolute inset-2 rounded-full border border-dashed border-accent-purple/20 animate-[spin_15s_linear_infinite_reverse]" />
-                <div className="absolute inset-4 rounded-full border border-forge-border/40" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-cyan/20 to-accent-purple/10 border border-accent-cyan/30 flex items-center justify-center backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="max-w-lg text-center"
+            >
+              {/* Animated logo/icon */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                className="relative mx-auto mb-8 w-32 h-32"
+              >
+                {/* Outer rotating ring */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 rounded-full border-2 border-dashed border-accent-cyan/30"
+                />
+                {/* Middle counter-rotating ring */}
+                <motion.div
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-3 rounded-full border-2 border-dashed border-accent-purple/20"
+                />
+                {/* Static inner ring */}
+                <div className="absolute inset-6 rounded-full border border-forge-border/40" />
+
+                {/* Center icon with pulse */}
+                <motion.div
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-accent-cyan/20 to-accent-purple/20 border border-accent-cyan/40 flex items-center justify-center backdrop-blur-sm shadow-lg shadow-accent-cyan/10">
+                    {/* Sparkles icon */}
                     <svg
-                      className="w-6 h-6 text-accent-cyan"
+                      className="w-8 h-8 text-accent-cyan"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -492,48 +524,121 @@ function BlueprintCanvasInner() {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        strokeWidth={2}
+                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
                       />
                     </svg>
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
 
-              <h3 className="mb-2 text-lg font-semibold text-white">
-                Compose [N] skills for your project
-              </h3>
-              <p className="text-sm text-forge-muted mb-6 max-w-xs mx-auto">
-                Drag components from the palette, connect them, then build a skills repo that Claude Code can use to scaffold your project.
-              </p>
+              {/* Text content */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <h3 className="mb-3 text-2xl font-bold text-white">
+                  Start Building Your Project
+                </h3>
+                <p className="text-sm text-forge-muted mb-8 max-w-md mx-auto leading-relaxed">
+                  Choose from 18 ready-to-use templates or start from scratch by dragging components from the palette
+                </p>
+              </motion.div>
+
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8 pointer-events-auto"
+              >
+                {/* Primary CTA: Use Templates */}
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setShowTemplates(true);
+                  }}
+                  className="group relative px-6 py-3 rounded-xl font-semibold text-sm overflow-hidden transition-all duration-300 shadow-lg shadow-accent-cyan/20 hover:shadow-accent-cyan/30"
+                >
+                  {/* Gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-accent-cyan to-accent-cyan/80 group-hover:from-accent-cyan/90 group-hover:to-accent-cyan transition-all duration-300" />
+
+                  {/* Shine effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    initial={{ x: '-100%' }}
+                    whileHover={{ x: '100%' }}
+                    transition={{ duration: 0.6 }}
+                  />
+
+                  <span className="relative z-10 flex items-center gap-2 text-black">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 13a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z" />
+                    </svg>
+                    Use Templates
+                    <span className="text-xs opacity-80">(18 available)</span>
+                  </span>
+                </motion.button>
+
+                {/* Secondary CTA: Start from Scratch */}
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="group px-6 py-3 rounded-xl font-semibold text-sm bg-forge-elevated/80 text-white border border-forge-border/50 hover:bg-forge-elevated hover:border-accent-purple/50 transition-all duration-300 shadow-md hover:shadow-lg backdrop-blur-sm"
+                >
+                  <span className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-accent-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Start from Scratch
+                  </span>
+                </motion.button>
+              </motion.div>
 
               {/* Quick hints */}
-              <div className="flex items-center justify-center gap-4 text-xs text-forge-muted">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-forge-elevated/30 border border-forge-border/30">
-                  <span className="text-accent-cyan">←</span>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+                className="flex items-center justify-center gap-4 text-xs text-forge-muted mb-6"
+              >
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-forge-elevated/30 border border-forge-border/30 backdrop-blur-sm">
+                  <span className="text-accent-cyan font-semibold">←</span>
                   <span>Drag from palette</span>
                 </div>
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-forge-elevated/30 border border-forge-border/30">
-                  <kbd className="px-1 py-0.5 text-[10px] bg-forge-bg rounded font-mono">?</kbd>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-forge-elevated/30 border border-forge-border/30 backdrop-blur-sm">
+                  <kbd className="px-1.5 py-0.5 text-[10px] bg-forge-bg rounded font-mono border border-forge-border/40">Cmd+K</kbd>
+                  <span>Quick search</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-forge-elevated/30 border border-forge-border/30 backdrop-blur-sm">
+                  <kbd className="px-1.5 py-0.5 text-[10px] bg-forge-bg rounded font-mono border border-forge-border/40">?</kbd>
                   <span>Shortcuts</span>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Auth hint */}
               {!isFullyAuthenticated && (
-                <button
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 1 }}
                   onClick={() => openAuthModal()}
-                  className="mt-4 text-xs text-accent-cyan hover:underline pointer-events-auto"
+                  className="text-xs text-accent-cyan hover:text-accent-cyan/80 hover:underline pointer-events-auto transition-colors inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20"
                 >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
                   {connectionState === 'none_connected'
                     ? 'Connect wallet & GitHub to get started'
                     : connectionState === 'wallet_only'
                       ? 'Connect GitHub to unlock all features'
                       : 'Connect wallet to get started'
                   }
-                </button>
+                </motion.button>
               )}
-            </div>
+            </motion.div>
           </div>
         )}
       </div>
@@ -562,6 +667,12 @@ function BlueprintCanvasInner() {
 
       {/* Node Search Modal (Cmd+K) */}
       <NodeSearchModal open={showNodeSearch} onClose={closeNodeSearch} />
+
+      {/* Templates Modal */}
+      <BlueprintTemplatesModal
+        isOpen={showTemplates}
+        onClose={() => setShowTemplates(false)}
+      />
     </div>
   );
 }
