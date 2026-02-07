@@ -213,18 +213,45 @@ export function CanvasSuggestions() {
                 // Get only top 3 suggestions to avoid cluttering human-readable flow
                 const visibleSuggestions = suggestions.slice(0, 3);
 
-                // Calculate positions using available canvas space
-                const positions = calculateSuggestionPositions(
-                    sourceNodePosition,
-                    blueprint.nodes.map(n => ({ position: n.position })),
-                    visibleSuggestions.length
-                );
+                // =====================================================================
+                // AUTO-SUGGESTION POSITIONING - VERTICAL COLUMN ON RIGHT
+                // =====================================================================
+                // Strategy: Place auto-suggestions in a vertical column on the far 
+                // right side of the canvas. This creates visual separation from:
+                // - Core workflow nodes (left/center)
+                // - Template ghost nodes (horizontal row at bottom)
+                // =====================================================================
 
-                // Add to store
+                const NODE_WIDTH = 200;
+                const VERTICAL_SPACING = 120;  // Space between suggestion nodes
+                const RIGHT_MARGIN = 300;      // Distance from rightmost node
+
+                // Find the rightmost position considering all nodes AND template ghosts
+                const allNodePositions = [
+                    ...blueprint.nodes.map(n => n.position),
+                    ...ghostNodes.filter(g => !g.data?.isSuggestion).map(g => g.position),
+                ];
+
+                const maxX = allNodePositions.length > 0
+                    ? Math.max(...allNodePositions.map(p => p.x)) + NODE_WIDTH
+                    : 0;
+
+                // Position column to the right of everything
+                const suggestionColumnX = maxX + RIGHT_MARGIN;
+
+                // Center vertically around the selected node
+                const totalHeight = (visibleSuggestions.length - 1) * VERTICAL_SPACING;
+                const startY = sourceNodePosition.y - totalHeight / 2;
+
+                // Add to store in a vertical column
                 visibleSuggestions.forEach((suggestion, idx) => {
-                    const pos = positions[idx].position;
+                    const position = {
+                        x: suggestionColumnX,
+                        y: startY + (idx * VERTICAL_SPACING),
+                    };
+
                     // Pass the suggestion reason directly in the data object
-                    const ghostNode = addGhostNode(suggestion.id, pos, {
+                    const ghostNode = addGhostNode(suggestion.id, position, {
                         suggestionReason: suggestion.reason,
                         isGhost: true, // Explicitly mark as ghost in data too for consistency
                         isSuggestion: true // Mark as suggestion so it can be cleared independently
@@ -242,6 +269,7 @@ export function CanvasSuggestions() {
         hasSuggestions,
         sourceNodePosition,
         blueprint.nodes.length,
+        ghostNodes,
         addGhostNode,
         addGhostEdge,
         clearGhostSuggestions

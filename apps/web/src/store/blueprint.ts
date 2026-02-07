@@ -72,6 +72,7 @@ interface BlueprintState {
   exportBlueprint: () => string;
   importBlueprint: (json: string) => void;
   resetBlueprint: () => void;
+  clearAllNodes: () => void;
 
   // Undo/Redo
   undo: () => void;
@@ -423,6 +424,22 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
       ghostNodes: [],
       ghostEdges: [],
     });
+  },
+
+  clearAllNodes: () => {
+    get()._saveToHistory();
+
+    set((state) => ({
+      blueprint: {
+        ...state.blueprint,
+        nodes: [],
+        edges: [],
+        updatedAt: new Date().toISOString(),
+      },
+      selectedNodeId: null,
+      ghostNodes: [],
+      ghostEdges: [],
+    }));
   },
 
   undo: () => {

@@ -23,6 +23,8 @@ import { KeyboardShortcutsModal, useKeyboardShortcutsModal } from '@/components/
 import { RecentBlueprintsDropdown, useRecentBlueprints } from '@/components/ui/recent-blueprints-dropdown';
 import { SimpleTooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import logo from '@/assets/logo.png';
 
 interface HeaderProps {
   showAI?: boolean;
@@ -101,7 +103,7 @@ export function Header({ setShowAI }: HeaderProps = {}) {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.35 }}
         >
-          <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(var(--color-accent-primary))] to-[hsl(var(--color-accent-primary)/0.7)] p-[1.5px]">
+          {/* <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[hsl(var(--color-accent-primary))] to-[hsl(var(--color-accent-primary)/0.7)] p-[1.5px]">
             <div className="w-full h-full rounded-[6px] bg-[hsl(var(--color-bg-base))] flex items-center justify-center">
               <Hexagon className="w-4 h-4 text-[hsl(var(--color-accent-primary))]" strokeWidth={2} />
             </div>
@@ -110,10 +112,11 @@ export function Header({ setShowAI }: HeaderProps = {}) {
             <span className="text-base font-semibold text-[hsl(var(--color-text-primary))] leading-tight">
               <span className="text-[hsl(var(--color-accent-primary))]">[N]</span>skills
             </span>
-            {/* <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
+            <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
               Compose N skills for your Web3 project
-            </span> */}
-          </div>
+            </span>
+          </div> */}
+          <Image src={logo} alt="Logo" width={100} height={100} className='w-24' />
         </motion.div>
 
         <div className="h-5 w-px bg-[hsl(var(--color-border-subtle))]" />
@@ -165,14 +168,15 @@ export function Header({ setShowAI }: HeaderProps = {}) {
         {/* Toolbar: Templates, Import, Export, AI */}
         <div className="flex items-center p-1 rounded-lg bg-[hsl(var(--color-bg-muted)/0.5)] border border-[hsl(var(--color-border-subtle))]">
           <SimpleTooltip content="Templates">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setShowTemplates(true)}
-              className="text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]"
-            >
-              <LayoutTemplate className="w-4 h-4" />
-            </Button>
+            <AuthGuard onClick={() => setShowTemplates(true)} requireGitHub={true}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]"
+              >
+                <LayoutTemplate className="w-4 h-4" />
+              </Button>
+            </AuthGuard>
           </SimpleTooltip>
 
           <div className="w-px h-4 bg-[hsl(var(--color-border-subtle))] mx-0.5" />

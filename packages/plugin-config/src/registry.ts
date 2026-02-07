@@ -722,7 +722,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     // ============================================
     'aixbt-momentum': {
         id: 'aixbt-momentum',
-        name: 'Momentum',
+        name: 'AIXBT Momentum',
         description: 'Track social heat and project trends',
         icon: 'TrendingUp',
         logoAsset: 'aixbt.png',
@@ -743,7 +743,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     },
     'aixbt-signals': {
         id: 'aixbt-signals',
-        name: 'Signals',
+        name: 'AIXBT Signals',
         description: 'Real-time project activity alerts',
         icon: 'Zap',
         logoAsset: 'aixbt.png',
@@ -763,7 +763,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     },
     'aixbt-indigo': {
         id: 'aixbt-indigo',
-        name: 'Indigo',
+        name: 'AIXBT Indigo',
         description: 'Conversational market research',
         icon: 'Sparkles',
         logoAsset: 'aixbt.png',
@@ -784,7 +784,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     },
     'aixbt-observer': {
         id: 'aixbt-observer',
-        name: 'Observer',
+        name: 'AIXBT Observer',
         description: 'Correlate on-chain activity',
         icon: 'Search',
         logoAsset: 'aixbt.png',

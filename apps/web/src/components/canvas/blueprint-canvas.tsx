@@ -66,6 +66,7 @@ function BlueprintCanvasInner() {
     ghostNodes,
     ghostEdges,
     activateGhostNode,
+    clearAllNodes,
   } = useBlueprintStore();
   const { isConnected, address } = useAccount();
   const {
@@ -280,13 +281,10 @@ function BlueprintCanvasInner() {
       return;
     }
 
-    // Actually delete all nodes
-    blueprint.nodes.forEach(node => {
-      removeNode(node.id);
-    });
-    selectNode(null);
+    // Actually delete all nodes and ghosts
+    clearAllNodes();
     setShowDeleteConfirm(false);
-  }, [showDeleteConfirm, blueprint.nodes, removeNode, selectNode]);
+  }, [showDeleteConfirm, clearAllNodes]);
 
   // Show auth error notification
   const hasAuthError = walletError || githubError;
@@ -324,17 +322,16 @@ function BlueprintCanvasInner() {
           <div className="flex items-center gap-1">
             <AuthStatusBadge className="min-w-[120px]" />
             {/* Left side - Undo/Redo buttons */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-forge-bg/40 ring-1 ring-forge-border/40 backdrop-blur-md">
               <button
                 onClick={undo}
                 disabled={!canUndo}
                 title="Undo (Ctrl+Z)"
                 className={cn(
-                  'flex items-center justify-center w-8 h-8 rounded-lg',
-                  'transition-all duration-200 backdrop-blur',
+                  'flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200',
                   canUndo
-                    ? 'bg-[hsl(var(--color-bg-elevated))] text-forge-muted ring-1 ring-[hsl(var(--color-border-subtle))] hover:bg-[hsl(var(--color-bg-hover))] hover:text-white'
-                    : 'bg-[hsl(var(--color-bg-subtle))] text-forge-border cursor-not-allowed'
+                    ? 'bg-forge-elevated text-forge-text ring-1 ring-forge-border-strong/50 shadow-sm hover:bg-forge-hover hover:text-white hover:ring-forge-border-strong active:scale-95 active:bg-forge-active'
+                    : 'text-forge-text/80 cursor-not-allowed opacity-40'
                 )}
               >
                 <Undo2 className="h-4 w-4" />
@@ -344,11 +341,10 @@ function BlueprintCanvasInner() {
                 disabled={!canRedo}
                 title="Redo (Ctrl+Y)"
                 className={cn(
-                  'flex items-center justify-center w-8 h-8 rounded-lg',
-                  'transition-all duration-200 backdrop-blur',
+                  'flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200',
                   canRedo
-                    ? 'bg-[hsl(var(--color-bg-elevated))] text-forge-muted ring-1 ring-[hsl(var(--color-border-subtle))] hover:bg-[hsl(var(--color-bg-hover))] hover:text-white'
-                    : 'bg-[hsl(var(--color-bg-subtle))] text-forge-border ring-1 cursor-not-allowed'
+                    ? 'bg-forge-elevated text-forge-text ring-1 ring-forge-border-strong/50 shadow-sm hover:bg-forge-hover hover:text-white hover:ring-forge-border-strong active:scale-95 active:bg-forge-active'
+                    : 'text-forge-text/80 cursor-not-allowed opacity-40'
                 )}
               >
                 <Redo2 className="h-4 w-4" />
@@ -357,8 +353,8 @@ function BlueprintCanvasInner() {
           </div>
 
           {/* Subtle canvas hint - centered */}
-          <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-[hsl(var(--color-bg-elevated))/0.8] px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-[hsl(var(--color-border-subtle))] backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan/80" />
+          <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-forge-elevated/60 px-3 py-1 text-[11px] font-medium text-forge-text-secondary ring-1 ring-forge-border/40 backdrop-blur-md shadow-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-primary animate-pulse-subtle" />
             <span>Drag to pan · Scroll to zoom · ? shortcuts</span>
           </div>
 
@@ -369,44 +365,43 @@ function BlueprintCanvasInner() {
               <button
                 onClick={handleDeleteAll}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
-                  'transition-all duration-200 backdrop-blur',
+                  'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] font-medium border transition-all duration-200 shadow-sm backdrop-blur-md',
                   showDeleteConfirm
-                    ? 'bg-red-500/20 text-red-400 ring-1 ring-red-500/40 hover:bg-red-500/30'
-                    : 'bg-[hsl(var(--color-bg-elevated))] text-forge-muted ring-1 ring-[hsl(var(--color-border-subtle))] hover:bg-[hsl(var(--color-bg-hover))] hover:text-white'
+                    ? 'bg-red-500/20 text-red-400 border-red-500/40 hover:bg-red-500/30'
+                    : 'bg-forge-elevated text-forge-text border-forge-border-strong/50 hover:bg-forge-hover hover:text-white hover:border-forge-border-strong active:scale-95'
                 )}
               >
                 <Trash2 className="h-3 w-3" />
                 <span>{showDeleteConfirm ? 'Click to confirm' : 'Delete All'}</span>
                 {showDeleteConfirm && (
-                  <span className="ml-1 text-[9px] text-red-400/70">({nodes.length})</span>
+                  <span className="ml-1 text-[9px] text-red-400/70">({blueprint.nodes.length})</span>
                 )}
               </button>
             )}
 
             {/* Zoom Controls */}
-            <div className="flex items-center gap-1 rounded-lg bg-[hsl(var(--color-bg-elevated))] p-1 ring-1 ring-[hsl(var(--color-border-subtle))] backdrop-blur">
+            <div className="flex items-center gap-1 rounded-lg bg-forge-bg/60 p-1 ring-1 ring-forge-border/40 backdrop-blur-md shadow-sm">
               <button
                 onClick={() => zoomOut()}
-                className="p-1.5 rounded hover:bg-[hsl(var(--color-bg-hover))] text-forge-muted hover:text-white transition-colors"
+                className="p-1.5 rounded-md hover:bg-forge-hover text-forge-text-secondary hover:text-white transition-all active:scale-90"
                 title="Zoom out"
               >
                 <ZoomOut className="h-3.5 w-3.5" />
               </button>
-              <span className="text-[11px] font-mono text-forge-muted min-w-[40px] text-center">
+              <span className="text-[11px] font-mono text-forge-text min-w-[40px] text-center font-medium">
                 {zoomPercentage}%
               </span>
               <button
                 onClick={() => zoomIn()}
-                className="p-1.5 rounded hover:bg-[hsl(var(--color-bg-hover))] text-forge-muted hover:text-white transition-colors"
+                className="p-1.5 rounded-md hover:bg-forge-hover text-forge-text-secondary hover:text-white transition-all active:scale-90"
                 title="Zoom in"
               >
                 <ZoomIn className="h-3.5 w-3.5" />
               </button>
-              <div className="w-px h-4 bg-forge-border/50 mx-0.5" />
+              <div className="w-px h-4 bg-forge-border-strong/40 mx-0.5" />
               <button
                 onClick={() => fitView({ padding: 0.2 })}
-                className="p-1.5 rounded hover:bg-[hsl(var(--color-bg-hover))] text-forge-muted hover:text-white transition-colors"
+                className="p-1.5 rounded-md hover:bg-forge-hover text-forge-text-secondary hover:text-white transition-all active:scale-90"
                 title="Fit to view"
               >
                 <Maximize2 className="h-3.5 w-3.5" />
@@ -431,6 +426,7 @@ function BlueprintCanvasInner() {
           deleteKeyCode={['Delete', 'Backspace']}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
+          proOptions={{ hideAttribution: true }}
           fitView
           snapToGrid
           snapGrid={[20, 20]}
@@ -442,12 +438,12 @@ function BlueprintCanvasInner() {
         >
           <Background
             variant={BackgroundVariant.Dots}
-            gap={20}
-            size={1}
+            gap={30}
+            size={2}
             color="rgba(255,255,255, 0.15)"
           />
           {/* Minimap - positioned to left-bottom */}
-          <MiniMap
+          {/* <MiniMap
             position="bottom-left"
             pannable
             zoomable
@@ -469,7 +465,7 @@ function BlueprintCanvasInner() {
             maskColor="rgba(0, 0, 0, 0.85)"
             className="!bg-forge-surface/90 !border-forge-border !rounded-xl !shadow-sm cursor-pointer"
             style={{ left: 12, right: 'auto' }}
-          />
+          /> */}
         </ReactFlow>
 
         {/* Empty state */}

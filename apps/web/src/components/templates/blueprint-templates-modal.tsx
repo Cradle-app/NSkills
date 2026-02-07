@@ -151,79 +151,61 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
             addEdge(nodeIds[edge.source], nodeIds[edge.target]);
         }
 
-        // Calculate dynamic positions for ghost nodes based on parent relationships
-        // Ghost nodes should be positioned in a new column to the RIGHT of ALL core nodes
+        // =====================================================================
+        // TEMPLATE GHOST NODE POSITIONING - HORIZONTAL ROW AT BOTTOM
+        // =====================================================================
+        // Strategy: Place ALL template ghost nodes in a HORIZONTAL row at the 
+        // bottom of the workflow. This creates visual separation from the main
+        // workflow and from node-specific suggestions (which appear on the right).
+        // =====================================================================
+
         const coreNodeCount = template.nodes.length;
+        const ghostCount = template.ghostNodes.length;
 
-        // Find the rightmost x position of all core nodes
-        const maxCoreX = Math.max(...nodePositions.map(p => p.x));
-        const ghostColumnX = maxCoreX + 280; // Place ghost column with good spacing from last tier
-
-        const ghostNodeHeight = 90; // Approximate node height
-        const ghostNodeVerticalGap = 30; // Gap between ghost nodes
-        const ghostNodeSpacing = ghostNodeHeight + ghostNodeVerticalGap; // Total vertical space per ghost
-
-        // Build a map of ghost node index -> parent node index from ghostEdges
-        const ghostParentMap: Map<number, number> = new Map();
-        for (const ge of template.ghostEdges) {
-            const ghostIndex = ge.target - coreNodeCount;
-            if (ghostIndex >= 0 && ge.source < coreNodeCount) {
-                // Only map if we haven't set a parent yet (use first edge as primary)
-                if (!ghostParentMap.has(ghostIndex)) {
-                    ghostParentMap.set(ghostIndex, ge.source);
-                }
+        if (ghostCount === 0) {
+            // No ghost nodes to position
+            const ghostIds: string[] = [];
+            const allIds = [...nodeIds, ...ghostIds];
+            for (const ge of template.ghostEdges) {
+                addGhostEdge(allIds[ge.source], allIds[ge.target]);
             }
+            setLoading(null);
+            onClose();
+            return;
         }
 
-        // Group ghost nodes by their parent for smarter positioning
-        const ghostsByParent: Map<number, number[]> = new Map();
-        for (let i = 0; i < template.ghostNodes.length; i++) {
-            const parentIndex = ghostParentMap.get(i);
-            if (parentIndex !== undefined) {
-                const existing = ghostsByParent.get(parentIndex) ?? [];
-                existing.push(i);
-                ghostsByParent.set(parentIndex, existing);
-            }
-        }
+        // Layout constants for horizontal bottom row
+        const NODE_WIDTH = 200;          // Approximate node width
+        const NODE_HEIGHT = 100;         // Approximate node height  
+        const HORIZONTAL_SPACING = 240;  // Horizontal space between ghost nodes
+        const BOTTOM_GAP = 180;          // Gap below the lowest core node
 
-        // Sort parents by their y position for top-to-bottom ordering
-        const sortedParents = [...ghostsByParent.keys()].sort((a, b) => {
-            return nodePositions[a].y - nodePositions[b].y;
-        });
+        // Find the bounds of all core nodes
+        const coreXs = nodePositions.map(p => p.x);
+        const coreYs = nodePositions.map(p => p.y);
+        const minCoreX = Math.min(...coreXs);
+        const maxCoreX = Math.max(...coreXs);
+        const maxCoreY = Math.max(...coreYs);
 
-        // Calculate positions for each ghost, tracking occupied y-ranges to avoid overlap
-        const ghostPositions: Map<number, { x: number; y: number }> = new Map();
-        let nextAvailableY = 0; // Track the next available y position
+        // Calculate the horizontal center of the core nodes
+        const coreWidth = maxCoreX - minCoreX + NODE_WIDTH;
+        const coreCenterX = minCoreX + coreWidth / 2;
 
-        for (const parentIdx of sortedParents) {
-            const ghostIndices = ghostsByParent.get(parentIdx) ?? [];
-            const parentY = nodePositions[parentIdx].y;
+        // Calculate total width needed for ghost nodes row
+        const ghostRowWidth = (ghostCount - 1) * HORIZONTAL_SPACING + NODE_WIDTH;
 
-            // Start at parent's y if available, otherwise use next available position
-            let startY = Math.max(parentY, nextAvailableY);
+        // Position ghost row below all core nodes, centered horizontally
+        const ghostRowY = maxCoreY + NODE_HEIGHT + BOTTOM_GAP;
+        const ghostRowStartX = coreCenterX - ghostRowWidth / 2;
 
-            for (let i = 0; i < ghostIndices.length; i++) {
-                const ghostIdx = ghostIndices[i];
-                const y = startY + (i * ghostNodeSpacing);
-                ghostPositions.set(ghostIdx, { x: ghostColumnX, y });
-                nextAvailableY = Math.max(nextAvailableY, y + ghostNodeSpacing);
-            }
-        }
-
-        // Handle any ghost nodes without a parent (use template positions)
-        for (let i = 0; i < template.ghostNodes.length; i++) {
-            if (!ghostPositions.has(i)) {
-                const gn = template.ghostNodes[i];
-                ghostPositions.set(i, { x: ghostColumnX, y: nextAvailableY });
-                nextAvailableY += ghostNodeSpacing;
-            }
-        }
-
-        // Add ghost nodes with calculated positions
+        // Add ghost nodes with horizontal row positioning
         const ghostIds: string[] = [];
-        for (let i = 0; i < template.ghostNodes.length; i++) {
+        for (let i = 0; i < ghostCount; i++) {
             const gn = template.ghostNodes[i];
-            const position = ghostPositions.get(i) ?? gn.position;
+            const position = {
+                x: ghostRowStartX + (i * HORIZONTAL_SPACING),
+                y: ghostRowY,
+            };
             const ghost = addGhostNode(gn.type, position);
             ghostIds.push(ghost.id);
         }
