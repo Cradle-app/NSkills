@@ -3,7 +3,6 @@
 import { useCallback, useMemo, useEffect, useState } from 'react';
 import ReactFlow, {
   Background,
-  Controls,
   MiniMap,
   addEdge,
   useNodesState,
@@ -29,10 +28,12 @@ import { ForgeNode } from './forge-node';
 import { ForgeEdge } from './forge-edge';
 import { CanvasSuggestions } from './canvas-suggestions';
 import { NodeSearchModal, useNodeSearchModal } from './node-search-modal';
+import { AIChatbot } from './ai-chatbot';
 import { getPluginIds } from '@cradle/plugin-config';
 import { useSessionMonitor, useAuthState } from '@/hooks/useSessionMonitor';
 import { AuthStatusBadge } from '@/components/auth/auth-guard';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { BlueprintNode as BPNode, BlueprintEdge as BPEdge } from '@dapp-forge/blueprint-schema';
 
 // Dynamically build node types from plugin registry
 const nodeTypes: NodeTypes = getPluginIds().reduce(
@@ -301,7 +302,7 @@ function BlueprintCanvasInner() {
   return (
     <div data-tour="canvas" className="relative h-full w-full">
       {/* Canvas container with overflow hidden */}
-      <div className="absolute inset-0 overflow-hidden rounded-2xl border border-forge-border/60 bg-gradient-to-b from-black/70 via-black/80 to-black/95">
+      <div className="absolute inset-0 overflow-hidden rounded-2xl border border-forge-border/80 bg-[hsl(var(--color-bg-base))]">
         {/* Top bar with hint and actions */}
         <div className="absolute inset-x-0 top-3 z-20 flex items-center justify-between px-3">
           {/* Auth status badge */}
@@ -317,8 +318,8 @@ function BlueprintCanvasInner() {
                   'flex items-center justify-center w-8 h-8 rounded-lg',
                   'transition-all duration-200 backdrop-blur',
                   canUndo
-                    ? 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
-                    : 'bg-black/30 text-forge-muted/30 cursor-not-allowed'
+                    ? 'bg-[hsl(var(--color-bg-elevated))] text-forge-muted ring-1 ring-[hsl(var(--color-border-subtle))] hover:bg-[hsl(var(--color-bg-hover))] hover:text-white'
+                    : 'bg-[hsl(var(--color-bg-subtle))] text-forge-border cursor-not-allowed'
                 )}
               >
                 <Undo2 className="h-4 w-4" />
@@ -331,8 +332,8 @@ function BlueprintCanvasInner() {
                   'flex items-center justify-center w-8 h-8 rounded-lg',
                   'transition-all duration-200 backdrop-blur',
                   canRedo
-                    ? 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
-                    : 'bg-black/30 text-forge-muted/30 cursor-not-allowed'
+                    ? 'bg-[hsl(var(--color-bg-elevated))] text-forge-muted ring-1 ring-[hsl(var(--color-border-subtle))] hover:bg-[hsl(var(--color-bg-hover))] hover:text-white'
+                    : 'bg-[hsl(var(--color-bg-subtle))] text-forge-border ring-1 cursor-not-allowed'
                 )}
               >
                 <Redo2 className="h-4 w-4" />
@@ -370,33 +371,62 @@ function BlueprintCanvasInner() {
           </div> */}
 
           {/* Subtle canvas hint - centered */}
-          <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-black/60 px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-white/5 backdrop-blur">
+          <div className="pointer-events-none inline-flex items-center gap-2 rounded-full bg-[hsl(var(--color-bg-elevated))/0.8] px-3 py-1 text-[11px] font-medium text-forge-muted ring-1 ring-[hsl(var(--color-border-subtle))] backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan/80" />
             <span>Drag to pan · Scroll to zoom · ? shortcuts</span>
           </div>
 
-          {/* Delete All button - only show when there are nodes */}
-          {nodes.length > 0 && (
-            <button
-              onClick={handleDeleteAll}
-              className={cn(
-                'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
-                'transition-all duration-200 backdrop-blur',
-                showDeleteConfirm
-                  ? 'bg-red-500/20 text-red-400 ring-1 ring-red-500/40 hover:bg-red-500/30'
-                  : 'bg-black/50 text-forge-muted ring-1 ring-white/5 hover:bg-black/70 hover:text-white/80'
-              )}
-            >
-              <Trash2 className="h-3 w-3" />
-              <span>{showDeleteConfirm ? 'Click to confirm' : 'Delete All'}</span>
-              {showDeleteConfirm && (
-                <span className="ml-1 text-[9px] text-red-400/70">({nodes.length})</span>
-              )}
-            </button>
-          )}
+          {/* Right side controls: Delete All + Zoom Controls */}
+          <div className="flex items-center gap-2">
+            {/* Delete All button - only show when there are nodes */}
+            {nodes.length > 0 && (
+              <button
+                onClick={handleDeleteAll}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
+                  'transition-all duration-200 backdrop-blur',
+                  showDeleteConfirm
+                    ? 'bg-red-500/20 text-red-400 ring-1 ring-red-500/40 hover:bg-red-500/30'
+                    : 'bg-[hsl(var(--color-bg-elevated))] text-forge-muted ring-1 ring-[hsl(var(--color-border-subtle))] hover:bg-[hsl(var(--color-bg-hover))] hover:text-white'
+                )}
+              >
+                <Trash2 className="h-3 w-3" />
+                <span>{showDeleteConfirm ? 'Click to confirm' : 'Delete All'}</span>
+                {showDeleteConfirm && (
+                  <span className="ml-1 text-[9px] text-red-400/70">({nodes.length})</span>
+                )}
+              </button>
+            )}
 
-          {/* Right spacer when no nodes */}
-          {nodes.length === 0 && <div className="w-24" />}
+            {/* Zoom Controls */}
+            <div className="flex items-center gap-1 rounded-lg bg-[hsl(var(--color-bg-elevated))] p-1 ring-1 ring-[hsl(var(--color-border-subtle))] backdrop-blur">
+              <button
+                onClick={() => zoomOut()}
+                className="p-1.5 rounded hover:bg-[hsl(var(--color-bg-hover))] text-forge-muted hover:text-white transition-colors"
+                title="Zoom out"
+              >
+                <ZoomOut className="h-3.5 w-3.5" />
+              </button>
+              <span className="text-[11px] font-mono text-forge-muted min-w-[40px] text-center">
+                {zoomPercentage}%
+              </span>
+              <button
+                onClick={() => zoomIn()}
+                className="p-1.5 rounded hover:bg-[hsl(var(--color-bg-hover))] text-forge-muted hover:text-white transition-colors"
+                title="Zoom in"
+              >
+                <ZoomIn className="h-3.5 w-3.5" />
+              </button>
+              <div className="w-px h-4 bg-forge-border/50 mx-0.5" />
+              <button
+                onClick={() => fitView({ padding: 0.2 })}
+                className="p-1.5 rounded hover:bg-[hsl(var(--color-bg-hover))] text-forge-muted hover:text-white transition-colors"
+                title="Fit to view"
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
 
         <ReactFlow
@@ -422,7 +452,7 @@ function BlueprintCanvasInner() {
             animated: true,
             style: { strokeWidth: 2 },
           }}
-          className="z-10 rounded-2xl bg-black/60 backdrop-blur-sm"
+          className="z-10 rounded-2xl bg-transparent backdrop-blur-sm"
         >
           <Background
             variant={BackgroundVariant.Dots}
@@ -430,8 +460,9 @@ function BlueprintCanvasInner() {
             size={1}
             color="rgba(255,255,255, 0.15)"
           />
-          <Controls className="!bg-forge-surface/95 !border-forge-border !rounded-xl !shadow-sm !text-forge-muted" />
+          {/* Minimap - positioned to left-bottom */}
           <MiniMap
+            position="bottom-left"
             pannable
             zoomable
             nodeColor={(node) => {
@@ -451,6 +482,7 @@ function BlueprintCanvasInner() {
             }}
             maskColor="rgba(0, 0, 0, 0.85)"
             className="!bg-forge-surface/90 !border-forge-border !rounded-xl !shadow-sm cursor-pointer"
+            style={{ left: 12, right: 'auto' }}
           />
         </ReactFlow>
 
@@ -482,7 +514,7 @@ function BlueprintCanvasInner() {
                 </div>
               </div>
 
-              <h3 className="mb-2 text-lg font-semibold text-white">
+              <h3 className="mb-2 text-lg font-semibold text-[hsl(var(--color-text-primary))]">
                 Start building your dApp
               </h3>
               <p className="text-sm text-forge-muted mb-6 max-w-xs mx-auto">
@@ -522,6 +554,25 @@ function BlueprintCanvasInner() {
 
       {/* Canvas-based suggestions - rendered OUTSIDE overflow-hidden container */}
       <CanvasSuggestions />
+
+      {/* AI Chatbot - Right bottom corner with genie animation */}
+      <AIChatbot
+        onApplyWorkflow={(blueprintNodes: BPNode[], blueprintEdges: BPEdge[]) => {
+          // Get current state and update the blueprint directly
+          const currentState = useBlueprintStore.getState();
+
+          // Update blueprint with new nodes and edges (append to existing)
+          useBlueprintStore.setState({
+            ...currentState,
+            blueprint: {
+              ...currentState.blueprint,
+              nodes: [...currentState.blueprint.nodes, ...blueprintNodes],
+              edges: [...currentState.blueprint.edges, ...blueprintEdges],
+              updatedAt: new Date().toISOString(),
+            },
+          });
+        }}
+      />
 
       {/* Node Search Modal (Cmd+K) */}
       <NodeSearchModal open={showNodeSearch} onClose={closeNodeSearch} />

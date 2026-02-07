@@ -14,7 +14,9 @@ export {
     CATEGORY_DEFINITIONS,
     getCategoryById,
     getCategoryIds,
+    PROTOCOL_PLUGIN_IDS,
 } from './categories';
+
 
 // Registry
 export {

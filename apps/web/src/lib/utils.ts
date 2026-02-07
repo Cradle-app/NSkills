@@ -92,6 +92,12 @@ export function nodeTypeToLabel(type: string): string {
     'dune-transaction-history': 'Dune Transaction History',
     'dune-gas-price': 'Dune Gas Price',
     'dune-protocol-tvl': 'Dune Protocol TVL',
+    // Protocol Plugins
+    'aave': 'Aave',
+    'compound': 'Compound',
+    'chainlink': 'Chainlink',
+    'pyth': 'Pyth',
+    'uniswap': 'Uniswap',
   };
   return labels[type] || type;
 }
@@ -162,7 +168,12 @@ export function nodeTypeToColor(type: string): string {
     'dune-transaction-history': 'accent-purple',
     'dune-gas-price': 'accent-purple',
     'dune-protocol-tvl': 'accent-purple',
-    // Telegram nodes
+    // Protocol Plugins
+    'aave': 'node-agents',
+    'compound': 'node-agents',
+    'chainlink': 'accent-purple',
+    'pyth': 'accent-purple',
+    'uniswap': 'node-agents',
   };
   return colors[type] || 'node-contracts';
 }

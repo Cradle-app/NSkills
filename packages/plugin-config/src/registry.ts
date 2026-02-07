@@ -325,7 +325,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         description: 'On-chain price feeds from Pyth Network',
         icon: 'TrendingUp',
         color: 'accent-purple',
-        category: 'analytics',
+        category: 'protocols',
         tags: ['pyth', 'oracle', 'prices', 'feeds', 'arbitrum'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'chain-data'],
@@ -342,7 +342,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         description: 'On-chain price feeds from Chainlink Data Feeds',
         icon: 'Link',
         color: 'accent-purple',
-        category: 'analytics',
+        category: 'protocols',
         tags: ['chainlink', 'oracle', 'prices', 'feeds', 'arbitrum', 'aggregator'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'chain-data', 'rpc-provider'],
@@ -360,7 +360,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         description: 'Supply, borrow, withdraw, and repay on Aave V3',
         icon: 'Coins',
         color: 'node-agents',
-        category: 'agents',
+        category: 'protocols',
         tags: ['aave', 'lending', 'borrow', 'supply', 'defi', 'arbitrum'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
@@ -377,7 +377,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         description: 'Supply, borrow, withdraw, and repay on Compound V3 (Comet)',
         icon: 'Zap',
         color: 'node-agents',
-        category: 'agents',
+        category: 'protocols',
         tags: ['compound', 'lending', 'borrow', 'supply', 'defi', 'arbitrum', 'comet'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],
@@ -394,7 +394,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         description: 'Swap tokens via Uniswap V3 across Arbitrum and Sepolia',
         icon: 'Coins',
         color: 'node-agents',
-        category: 'agents',
+        category: 'protocols',
         tags: ['uniswap', 'swap', 'dex', 'defi', 'arbitrum', 'sepolia'],
         compatibility: {
             compatibleWith: ['frontend-scaffold', 'wallet-auth', 'rpc-provider', 'chain-data'],

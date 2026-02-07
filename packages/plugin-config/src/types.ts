@@ -10,7 +10,8 @@ export type PluginCategory =
     | 'telegram'
     | 'intelligence'
     | 'superposition'
-    | 'analytics';
+    | 'analytics'
+    | 'protocols';
 
 /**
  * Lucide icon names used in the UI

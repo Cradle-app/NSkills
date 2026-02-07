@@ -663,12 +663,22 @@
     box-shadow: var(--shadow-lg);
   }
 
+  /* Force minimap to left-bottom position */
+  .react-flow .react-flow__minimap,
+  .react-flow__panel.bottom.left .react-flow__minimap {
+    left: 12px !important;
+    right: auto !important;
+    bottom: 12px !important;
+  }
+
   .react-flow__controls {
     background-color: hsl(var(--color-bg-muted));
     border: 1px solid hsl(var(--color-border-default));
     border-radius: var(--radius-xl);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
+    /* Hide default controls - we'll use custom ones */
+    display: none !important;
   }
 
   .react-flow__controls-button {

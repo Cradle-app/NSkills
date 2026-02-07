@@ -14,6 +14,12 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
         color: 'accent-green'
     },
     {
+        id: 'protocols',
+        name: 'Protocols',
+        icon: 'Globe',
+        color: 'accent-cyan'
+    },
+    {
         id: 'agents',
         name: 'AI Agents',
         icon: 'Bot',
@@ -64,3 +70,12 @@ export const getCategoryById = (id: PluginCategory): CategoryDefinition | undefi
 export const getCategoryIds = (): PluginCategory[] => {
     return CATEGORY_DEFINITIONS.map(category => category.id);
 };
+
+export const PROTOCOL_PLUGIN_IDS = [
+    'aave',
+    'compound',
+    'chainlink',
+    'pyth',
+    'uniswap',
+] as const;
+

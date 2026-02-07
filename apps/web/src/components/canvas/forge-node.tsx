@@ -7,53 +7,62 @@ import {
   Box, CreditCard, Bot, Layout, ShieldCheck, Trash2,
   Lock, Key, Wallet, Globe, ArrowLeftRight, Database,
   HardDrive, Layers, TrendingUp, Zap, Sparkles, Search,
-  DollarSign, Fuel, Send
+  DollarSign, Fuel, Send, Link, Coins
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBlueprintStore } from '@/store/blueprint';
 import { nodeTypeToLabel, nodeTypeToColor } from '@/lib/utils';
+import { PLUGIN_REGISTRY, type PluginIcon } from '@cradle/plugin-config';
 
-const iconMap: Record<string, typeof Box> = {
-  'stylus-contract': Box,
-  'stylus-zk-contract': Lock,
-  'stylus-rust-contract': Box,
-  'smartcache-caching': Database,
-  'auditware-analyzing': ShieldCheck,
-  'x402-paywall-api': CreditCard,
-  'erc8004-agent-runtime': Bot,
-  'repo-quality-gates': ShieldCheck,
-  'frontend-scaffold': Layout,
-  'sdk-generator': Layout,
-  'eip7702-smart-eoa': Key,
-  'wallet-auth': Wallet,
-  'rpc-provider': Globe,
-  'arbitrum-bridge': ArrowLeftRight,
-  'chain-data': Database,
-  'ipfs-storage': HardDrive,
-  'chain-abstraction': Layers,
-  'zk-primitives': Lock,
-  'ostium-trading': TrendingUp,
-  'maxxit': Bot,
-  'aixbt-momentum': TrendingUp,
-  'aixbt-signals': Zap,
-  'aixbt-indigo': Sparkles,
-  'aixbt-observer': Search,
-  // Telegram
-  'telegram-notifications': Send,
-  'telegram-commands': Send,
-  'telegram-wallet-link': Send,
-  'telegram-ai-agent': Send,
-  // Dune Analytics
-  'dune-execute-sql': Database,
-  'dune-token-price': DollarSign,
-  'dune-wallet-balances': Wallet,
-  'dune-dex-volume': TrendingUp,
-  'dune-nft-floor': Sparkles,
-  'dune-address-labels': Key,
-  'dune-transaction-history': Database,
-  'dune-gas-price': Fuel,
-  'dune-protocol-tvl': Lock,
+import AaveLogo from '@/assets/blocks/Aave.svg';
+import CompoundLogo from '@/assets/blocks/Compound.svg';
+import ChainlinkLogo from '@/assets/blocks/Chainlink.svg';
+import PythLogo from '@/assets/blocks/Pyth.svg';
+import UniswapLogo from '@/assets/blocks/Uniswap.svg';
+
+const ICON_MAP: Record<PluginIcon, React.ComponentType<any>> = {
+  Box, CreditCard, Bot, Layout, ShieldCheck,
+  Lock, Key, Wallet, Globe, ArrowLeftRight, Database,
+  HardDrive, Layers, TrendingUp, Zap, Sparkles, Search,
+  Link, Coins
 };
+
+// Protocol plugins use SVG assets
+const PROTOCOL_ICONS: Record<string, any> = {
+  'aave': AaveLogo,
+  'compound': CompoundLogo,
+  'chainlink': ChainlinkLogo,
+  'pyth': PythLogo,
+  'uniswap': UniswapLogo,
+};
+
+function getIconForNodeType(nodeType: string): React.ComponentType<any> | any {
+  // 1. Check if it's a protocol plugin (SVG)
+  if (PROTOCOL_ICONS[nodeType]) {
+    return PROTOCOL_ICONS[nodeType];
+  }
+
+  // 2. Check registry for Lucide icon
+  const registryEntry = PLUGIN_REGISTRY[nodeType];
+  if (registryEntry?.icon && ICON_MAP[registryEntry.icon]) {
+    return ICON_MAP[registryEntry.icon];
+  }
+
+  // 3. Fallback to hardcoded map (legacy) or Box
+  const legacyMap: Record<string, React.ComponentType<any>> = {
+    'dune-execute-sql': Database,
+    'dune-token-price': DollarSign,
+    'dune-wallet-balances': Wallet,
+    'dune-dex-volume': TrendingUp,
+    'dune-nft-floor': Sparkles,
+    'dune-address-labels': Key,
+    'dune-transaction-history': Database,
+    'dune-gas-price': Fuel,
+    'dune-protocol-tvl': Lock,
+  };
+
+  return legacyMap[nodeType] || Box;
+}
 
 /**
  * Node color mapping - Modern, refined palette
@@ -179,7 +188,7 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
   const nodeType = data.nodeType as string;
   const colorClass = nodeTypeToColor(nodeType);
   const colors = colorMap[colorClass] || colorMap['node-contracts'];
-  const Icon = iconMap[nodeType] || Box;
+  const Icon = getIconForNodeType(nodeType);
   const isSelected = selected || selectedNodeId === id;
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -265,10 +274,26 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
               colors.iconBg,
               'border border-[hsl(var(--color-border-subtle))]',
               'transition-all duration-200',
-              isSelected && 'border-transparent'
+              isSelected && 'border-transparent',
+              'overflow-hidden' // Ensure images don't overflow
             )}
           >
-            <Icon className={cn('w-4.5 h-4.5', colors.text)} />
+            {/* 
+              Distinguish between Protocol Plugins (Images) and Standard Plugins (Lucide Icons).
+              We check PROTOCOL_ICONS to see if this node type uses a custom image asset.
+            */}
+            {!PROTOCOL_ICONS[nodeType] ? (
+              <Icon className={cn('w-4.5 h-4.5', colors.text)} />
+            ) : (
+              <div className="relative w-5 h-5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={(Icon as any).src || Icon}
+                  alt={nodeType}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            )}
           </motion.div>
 
           {/* Label section */}
