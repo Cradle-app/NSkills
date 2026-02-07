@@ -46,13 +46,22 @@ import CompoundLogo from '@/assets/blocks/Compound.svg';
 import ChainlinkLogo from '@/assets/blocks/Chainlink.svg';
 import PythLogo from '@/assets/blocks/Pyth.svg';
 import UniswapLogo from '@/assets/blocks/Uniswap.svg';
+import CSLogo from '@/assets/blocks/CS_logo.png';
+import AuditwareLogo from '@/assets/blocks/auditware.png';
+import StylusLogo from '@/assets/blocks/stylus.svg';
+import OstiumLogo from '@/assets/blocks/Ostium.svg';
+import MaxxitLogo from '@/assets/blocks/MaxxitLogo.png';
+import AIbotLogo from '@/assets/blocks/AIbot.png';
+import WalletLogo from '@/assets/blocks/Wallet.svg';
+import SuperpositionLogo from '@/assets/blocks/superposition.png';
+import DuneLogo from '@/assets/blocks/dune.png';
 
 const PROTOCOL_PLUGIN_IDS = [
-  'aave',
-  'compound',
-  'chainlink',
-  'pyth',
-  'uniswap',
+  'aave-lending',
+  'compound-lending',
+  'chainlink-price-feed',
+  'pyth-oracle',
+  'uniswap-swap',
 ] as const;
 
 const PROTOCOL_PLUGIN_ID_SET = new Set<string>(PROTOCOL_PLUGIN_IDS);
@@ -60,11 +69,64 @@ const PROTOCOL_PLUGIN_ID_SET = new Set<string>(PROTOCOL_PLUGIN_IDS);
 type ProtocolPluginId = (typeof PROTOCOL_PLUGIN_IDS)[number];
 
 const PROTOCOL_PLUGIN_LOGOS: Record<ProtocolPluginId, any> = {
-  'aave': AaveLogo,
-  'compound': CompoundLogo,
-  'chainlink': ChainlinkLogo,
-  'pyth': PythLogo,
-  'uniswap': UniswapLogo,
+  'aave-lending': AaveLogo,
+  'compound-lending': CompoundLogo,
+  'chainlink-price-feed': ChainlinkLogo,
+  'pyth-oracle': PythLogo,
+  'uniswap-swap': UniswapLogo,
+};
+
+const PROTOCOL_PLUGIN_DISPLAY_NAMES: Record<ProtocolPluginId, string> = {
+  'aave-lending': 'aave',
+  'compound-lending': 'compound',
+  'chainlink-price-feed': 'chainlink',
+  'pyth-oracle': 'pyth network',
+  'uniswap-swap': 'uniswap',
+};
+
+/** Contract plugins with custom logos */
+const CONTRACT_PLUGIN_LOGOS: Record<string, { src: any; alt: string }> = {
+  'smartcache-caching': { src: CSLogo, alt: 'SmartCache' },
+  'auditware-analyzing': { src: AuditwareLogo, alt: 'Auditware' },
+  'erc20-stylus': { src: StylusLogo, alt: 'Stylus' },
+  'erc721-stylus': { src: StylusLogo, alt: 'Stylus' },
+  'erc1155-stylus': { src: StylusLogo, alt: 'Stylus' },
+  'stylus-contract': { src: StylusLogo, alt: 'Stylus' },
+  'stylus-zk-contract': { src: StylusLogo, alt: 'Stylus' },
+  'stylus-rust-contract': { src: StylusLogo, alt: 'Stylus' },
+};
+
+/** Agent plugins with custom logos */
+const AGENT_PLUGIN_LOGOS: Record<string, { src: any; alt: string }> = {
+  'ostium-trading': { src: OstiumLogo, alt: 'Ostium' },
+  'maxxit': { src: MaxxitLogo, alt: 'Maxxit' },
+  'erc8004-agent-runtime': { src: AIbotLogo, alt: 'AIbot' },
+  'onchain-activity': { src: WalletLogo, alt: 'Wallet' },
+};
+
+/** Superposition plugins with custom logos */
+const SUPERPOSITION_PLUGIN_LOGOS: Record<string, { src: any; alt: string }> = {
+  'superposition-network': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-bridge': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-longtail': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-super-assets': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-thirdweb': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-utility-mining': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-faucet': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-meow-domains': { src: SuperpositionLogo, alt: 'Superposition' },
+};
+
+/** Dune analytics plugins with custom logos */
+const DUNE_PLUGIN_LOGOS: Record<string, { src: any; alt: string }> = {
+  'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
+  'dune-token-price': { src: DuneLogo, alt: 'Dune' },
+  'dune-wallet-balances': { src: DuneLogo, alt: 'Dune' },
+  'dune-dex-volume': { src: DuneLogo, alt: 'Dune' },
+  'dune-nft-floor': { src: DuneLogo, alt: 'Dune' },
+  'dune-address-labels': { src: DuneLogo, alt: 'Dune' },
+  'dune-transaction-history': { src: DuneLogo, alt: 'Dune' },
+  'dune-gas-price': { src: DuneLogo, alt: 'Dune' },
+  'dune-protocol-tvl': { src: DuneLogo, alt: 'Dune' },
 };
 
 /**
@@ -355,64 +417,68 @@ export function NodePalette() {
                 </span>
               </div>
 
-              <div className="pl-6 pr-2 pb-2 pt-1 space-y-1.5">
-                {contractsCategory.plugins.map((plugin, pluginIndex) => {
-                  const PluginIcon = getIconComponent(plugin.icon);
-                  return (
-                    <motion.div
-                      key={plugin.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: pluginIndex * 0.03 }}
-                    >
-                      <div
-                        draggable
-                        onDragStart={(e) => onDragStart(e, plugin.id)}
-                        className={cn(
-                          'p-3 rounded-xl cursor-grab active:cursor-grabbing',
-                          'bg-forge-bg/50 border border-transparent',
-                          'hover:border-forge-border/50 hover:bg-forge-elevated/50',
-                          'hover:shadow-lg hover:shadow-black/20',
-                          'transition-all duration-200',
-                          'group'
-                        )}
+              <div className="pb-2 pt-1">
+                <div className="grid grid-cols-2 gap-2">
+                  {contractsCategory.plugins.map((plugin, pluginIndex) => {
+                    const PluginIcon = getIconComponent(plugin.icon);
+                    const logoInfo = CONTRACT_PLUGIN_LOGOS[plugin.id];
+                    return (
+                      <motion.div
+                        key={plugin.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: pluginIndex * 0.03 }}
                       >
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={cn(
-                              'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
-                              'bg-gradient-to-br transition-all duration-200',
-                              `from-${plugin.color}/20 to-${plugin.color}/5`,
-                              'group-hover:from-' + plugin.color + '/30 group-hover:to-' + plugin.color + '/10'
+                        <div
+                          draggable
+                          onDragStart={(e) => onDragStart(e, plugin.id)}
+                          className={cn(
+                            'group relative flex items-center gap-2 px-3 py-2 rounded-xl',
+                            'bg-forge-bg/60 border border-forge-border/40',
+                            'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
+                            'cursor-grab active:cursor-grabbing transition-all duration-200'
+                          )}
+                        >
+                          <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20 shrink-0 flex items-center justify-center">
+                            {logoInfo ? (
+                              <Image
+                                src={logoInfo.src}
+                                alt={logoInfo.alt}
+                                fill
+                                className="object-contain"
+                                unoptimized
+                              />
+                            ) : (
+                              <PluginIcon
+                                className={cn('w-4 h-4 shrink-0', `text-${plugin.color}`)}
+                              />
                             )}
-                          >
-                            <PluginIcon className={cn('w-4.5 h-4.5', `text-${plugin.color}`)} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate group-hover:text-accent-cyan transition-colors">
+                            <p className="text-xs font-medium text-white truncate">
                               {plugin.name}
                             </p>
-                            <p className="text-xs text-forge-muted truncate mt-0.5 leading-relaxed">
+                            {/* <p className="text-[10px] text-forge-muted truncate">
                               {plugin.description}
-                            </p>
+                            </p> */}
                           </div>
                           <button
                             onClick={(e) => toggleFavorite(plugin.id, e)}
                             className={cn(
-                              'p-1.5 rounded-lg shrink-0 transition-all opacity-0 group-hover:opacity-100',
+                              'p-1 rounded shrink-0 transition-all opacity-0 group-hover:opacity-100',
                               favorites.has(plugin.id)
                                 ? 'text-amber-400 opacity-100'
                                 : 'text-forge-muted hover:text-amber-400'
                             )}
                             title={favorites.has(plugin.id) ? 'Remove from favorites' : 'Add to favorites'}
                           >
-                            <Star className={cn('w-4 h-4', favorites.has(plugin.id) && 'fill-current')} />
+                            <Star className={cn('w-3.5 h-3.5', favorites.has(plugin.id) && 'fill-current')} />
                           </button>
                         </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
@@ -436,7 +502,7 @@ export function NodePalette() {
             <div className="space-y-3 pt-1">
               {/* Row 1: Aave, Compound */}
               <div className="grid grid-cols-2 gap-2">
-                {(['aave', 'compound'] as ProtocolPluginId[]).map((id) => {
+                {(['aave-lending', 'compound-lending'] as ProtocolPluginId[]).map((id) => {
                   const plugin = PLUGIN_REGISTRY[id];
                   if (!plugin) return null;
                   const logo = PROTOCOL_PLUGIN_LOGOS[id];
@@ -453,15 +519,15 @@ export function NodePalette() {
                       )}
                     >
                       <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                        <Image src={logo} alt={plugin.name} fill className="object-contain" />
+                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" unoptimized />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-white truncate">
-                          {plugin.name}
+                          {PROTOCOL_PLUGIN_DISPLAY_NAMES[id]}
                         </p>
-                        <p className="text-[10px] text-forge-muted truncate">
+                        {/* <p className="text-[10px] text-forge-muted truncate">
                           {plugin.description}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   );
@@ -469,7 +535,7 @@ export function NodePalette() {
               </div>
               {/* Row 2: Chainlink, Pyth */}
               <div className="grid grid-cols-2 gap-2">
-                {(['chainlink', 'pyth'] as ProtocolPluginId[]).map((id) => {
+                {(['chainlink-price-feed', 'pyth-oracle'] as ProtocolPluginId[]).map((id) => {
                   const plugin = PLUGIN_REGISTRY[id];
                   if (!plugin) return null;
                   const logo = PROTOCOL_PLUGIN_LOGOS[id];
@@ -486,15 +552,15 @@ export function NodePalette() {
                       )}
                     >
                       <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                        <Image src={logo} alt={plugin.name} fill className="object-contain" />
+                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" unoptimized />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-white truncate">
-                          {plugin.name}
+                          {PROTOCOL_PLUGIN_DISPLAY_NAMES[id]}
                         </p>
-                        <p className="text-[10px] text-forge-muted truncate">
+                        {/* <p className="text-[10px] text-forge-muted truncate">
                           {plugin.description}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   );
@@ -502,7 +568,7 @@ export function NodePalette() {
               </div>
               {/* Row 3: Uniswap (single) */}
               <div className="flex">
-                {(['uniswap'] as ProtocolPluginId[]).map((id) => {
+                {(['uniswap-swap'] as ProtocolPluginId[]).map((id) => {
                   const plugin = PLUGIN_REGISTRY[id];
                   if (!plugin) return null;
                   const logo = PROTOCOL_PLUGIN_LOGOS[id];
@@ -520,15 +586,15 @@ export function NodePalette() {
                       )}
                     >
                       <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                        <Image src={logo} alt={plugin.name} fill className="object-contain" />
+                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" unoptimized />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-white truncate">
-                          {plugin.name}
+                          {PROTOCOL_PLUGIN_DISPLAY_NAMES[id]}
                         </p>
-                        <p className="text-[10px] text-forge-muted truncate">
+                        {/* <p className="text-[10px] text-forge-muted truncate">
                           {plugin.description}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   );
@@ -567,65 +633,70 @@ export function NodePalette() {
                     </span>
                   </div>
 
-                  {/* Plugins (always visible) */}
-                  <div className="pl-6 pr-2 pb-2 pt-1 space-y-1.5">
-                    {category.plugins.map((plugin, pluginIndex) => {
-                      const PluginIcon = getIconComponent(plugin.icon);
-                      return (
-                        <motion.div
-                          key={plugin.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: pluginIndex * 0.03 }}
-                        >
-                          <div
-                            draggable
-                            onDragStart={(e) => onDragStart(e, plugin.id)}
-                            className={cn(
-                              'p-3 rounded-xl cursor-grab active:cursor-grabbing',
-                              'bg-forge-bg/50 border border-transparent',
-                              'hover:border-forge-border/50 hover:bg-forge-elevated/50',
-                              'hover:shadow-lg hover:shadow-black/20',
-                              'transition-all duration-200',
-                              'group'
-                            )}
+                  {/* Plugins (always visible) - 2 per row */}
+                  <div className="pb-2 pt-1">
+                    <div className="grid grid-cols-2 gap-2">
+                      {category.plugins.map((plugin, pluginIndex) => {
+                        const PluginIcon = getIconComponent(plugin.icon);
+                        const logoInfo =
+                          AGENT_PLUGIN_LOGOS[plugin.id] ||
+                          SUPERPOSITION_PLUGIN_LOGOS[plugin.id] ||
+                          DUNE_PLUGIN_LOGOS[plugin.id];
+                        return (
+                          <motion.div
+                            key={plugin.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: pluginIndex * 0.03 }}
                           >
-                            <div className="flex items-start gap-3">
+                            <div
+                              draggable
+                              onDragStart={(e) => onDragStart(e, plugin.id)}
+                              className={cn(
+                                'group relative flex items-center gap-2 px-3 py-2 rounded-xl',
+                                'bg-forge-bg/60 border border-forge-border/40',
+                                'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
+                                'cursor-grab active:cursor-grabbing transition-all duration-200'
+                              )}
+                            >
                               <div
                                 className={cn(
-                                  'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
-                                  'bg-gradient-to-br transition-all duration-200',
-                                  `from-${plugin.color}/20 to-${plugin.color}/5`,
-                                  'group-hover:from-' + plugin.color + '/30 group-hover:to-' + plugin.color + '/10'
+                                  'relative w-8 h-8 rounded-md flex items-center justify-center shrink-0 overflow-hidden',
+                                  logoInfo ? 'bg-black/20' : 'bg-gradient-to-br transition-all duration-200',
+                                  !logoInfo && `from-${plugin.color}/20 to-${plugin.color}/5`
                                 )}
                               >
-                                <PluginIcon className={cn('w-4.5 h-4.5', `text-${plugin.color}`)} />
+                                {logoInfo ? (
+                                  <Image src={logoInfo.src} alt={logoInfo.alt} fill className="object-contain" unoptimized />
+                                ) : (
+                                  <PluginIcon className={cn('w-4 h-4', `text-${plugin.color}`)} />
+                                )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white truncate group-hover:text-accent-cyan transition-colors">
+                                <p className="text-xs font-medium text-white truncate">
                                   {plugin.name}
                                 </p>
-                                <p className="text-xs text-forge-muted truncate mt-0.5 leading-relaxed">
+                                {/* <p className="text-[10px] text-forge-muted truncate">
                                   {plugin.description}
-                                </p>
+                                </p> */}
                               </div>
                               <button
                                 onClick={(e) => toggleFavorite(plugin.id, e)}
                                 className={cn(
-                                  'p-1.5 rounded-lg shrink-0 transition-all opacity-0 group-hover:opacity-100',
+                                  'p-1 rounded shrink-0 transition-all opacity-0 group-hover:opacity-100',
                                   favorites.has(plugin.id)
                                     ? 'text-amber-400 opacity-100'
                                     : 'text-forge-muted hover:text-amber-400'
                                 )}
                                 title={favorites.has(plugin.id) ? 'Remove from favorites' : 'Add to favorites'}
                               >
-                                <Star className={cn('w-4 h-4', favorites.has(plugin.id) && 'fill-current')} />
+                                <Star className={cn('w-3.5 h-3.5', favorites.has(plugin.id) && 'fill-current')} />
                               </button>
                             </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </motion.div>
               );
