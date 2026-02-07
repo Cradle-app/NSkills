@@ -51,83 +51,62 @@ import StylusLogo from '@/assets/blocks/stylus.svg';
 import OstiumLogo from '@/assets/blocks/Ostium.svg';
 import MaxxitLogo from '@/assets/blocks/MaxxitLogo.png';
 import AIbotLogo from '@/assets/blocks/AIbot.png';
-import WalletLogo from '@/assets/blocks/Wallet.svg';
+import WalletLogoSvg from '@/assets/blocks/Wallet.svg';
+import WalletLogoPng from '@/assets/blocks/Wallet.png';
 import SuperpositionLogo from '@/assets/blocks/superposition.png';
 import DuneLogo from '@/assets/blocks/dune.png';
-
-const PROTOCOL_PLUGIN_IDS = [
-  'aave-lending',
-  'compound-lending',
-  'chainlink-price-feed',
-  'pyth-oracle',
-  'uniswap-swap',
-] as const;
-
-const PROTOCOL_PLUGIN_ID_SET = new Set<string>(PROTOCOL_PLUGIN_IDS);
-
-type ProtocolPluginId = (typeof PROTOCOL_PLUGIN_IDS)[number];
+import AixbtLogo from '@/assets/blocks/aixbt.png';
+import TelegramLogo from '@/assets/blocks/Telegram.jpg';
+import IpfsLogo from '@/assets/blocks/Ipfs.svg';
+import PaymentLogo from '@/assets/blocks/payment.png';
+import ArbitrumLogo from '@/assets/blocks/arbitrum.svg';
+import NextjsLogo from '@/assets/blocks/Nextjs.png';
 
 
-const PROTOCOL_PLUGIN_LOGOS: Record<ProtocolPluginId, any> = {
-  'aave-lending': AaveLogo,
-  'compound-lending': CompoundLogo,
-  'chainlink-price-feed': ChainlinkLogo,
-  'pyth-oracle': PythLogo,
-  'uniswap-swap': UniswapLogo,
+/**
+ * Centralized logo asset mapping
+ * Maps logoAsset filenames (from plugin registry) to actual imported assets
+ */
+const LOGO_ASSETS: Record<string, any> = {
+  // Protocol logos
+  'Aave.svg': AaveLogo,
+  'Compound.svg': CompoundLogo,
+  'Chainlink.svg': ChainlinkLogo,
+  'Pyth.svg': PythLogo,
+  'Uniswap.svg': UniswapLogo,
+  // Contract logos
+  'CS_logo.png': CSLogo,
+  'auditware.png': AuditwareLogo,
+  'stylus.svg': StylusLogo,
+  // Agent logos
+  'Ostium.svg': OstiumLogo,
+  'MaxxitLogo.png': MaxxitLogo,
+  'AIbot.png': AIbotLogo,
+  'Wallet.svg': WalletLogoSvg,
+  'Wallet.png': WalletLogoPng,
+  // Superposition logos
+  'superposition.png': SuperpositionLogo,
+  // Dune logos
+  'dune.png': DuneLogo,
+  // Intelligence logos
+  'aixbt.png': AixbtLogo,
+  // Telegram logos
+  'Telegram.jpg': TelegramLogo,
+  // Application logos
+  'Ipfs.svg': IpfsLogo,
+  'payment.png': PaymentLogo,
+  'arbitrum.svg': ArbitrumLogo,
+  'Nextjs.png': NextjsLogo,
 };
 
-const PROTOCOL_PLUGIN_DISPLAY_NAMES: Record<ProtocolPluginId, string> = {
-  'aave-lending': 'aave',
-  'compound-lending': 'compound',
-  'chainlink-price-feed': 'chainlink',
-  'pyth-oracle': 'pyth network',
-  'uniswap-swap': 'uniswap',
-};
+/**
+ * Get logo asset from plugin's logoAsset field
+ */
+function getLogoAsset(logoAsset?: string): any | null {
+  if (!logoAsset) return null;
+  return LOGO_ASSETS[logoAsset] || null;
+}
 
-/** Contract plugins with custom logos */
-const CONTRACT_PLUGIN_LOGOS: Record<string, { src: any; alt: string }> = {
-  'smartcache-caching': { src: CSLogo, alt: 'SmartCache' },
-  'auditware-analyzing': { src: AuditwareLogo, alt: 'Auditware' },
-  'erc20-stylus': { src: StylusLogo, alt: 'Stylus' },
-  'erc721-stylus': { src: StylusLogo, alt: 'Stylus' },
-  'erc1155-stylus': { src: StylusLogo, alt: 'Stylus' },
-  'stylus-contract': { src: StylusLogo, alt: 'Stylus' },
-  'stylus-zk-contract': { src: StylusLogo, alt: 'Stylus' },
-  'stylus-rust-contract': { src: StylusLogo, alt: 'Stylus' },
-};
-
-/** Agent plugins with custom logos */
-const AGENT_PLUGIN_LOGOS: Record<string, { src: any; alt: string }> = {
-  'ostium-trading': { src: OstiumLogo, alt: 'Ostium' },
-  'maxxit': { src: MaxxitLogo, alt: 'Maxxit' },
-  'erc8004-agent-runtime': { src: AIbotLogo, alt: 'AIbot' },
-  'onchain-activity': { src: WalletLogo, alt: 'Wallet' },
-};
-
-/** Superposition plugins with custom logos */
-const SUPERPOSITION_PLUGIN_LOGOS: Record<string, { src: any; alt: string }> = {
-  'superposition-network': { src: SuperpositionLogo, alt: 'Superposition' },
-  'superposition-bridge': { src: SuperpositionLogo, alt: 'Superposition' },
-  'superposition-longtail': { src: SuperpositionLogo, alt: 'Superposition' },
-  'superposition-super-assets': { src: SuperpositionLogo, alt: 'Superposition' },
-  'superposition-thirdweb': { src: SuperpositionLogo, alt: 'Superposition' },
-  'superposition-utility-mining': { src: SuperpositionLogo, alt: 'Superposition' },
-  'superposition-faucet': { src: SuperpositionLogo, alt: 'Superposition' },
-  'superposition-meow-domains': { src: SuperpositionLogo, alt: 'Superposition' },
-};
-
-/** Dune analytics plugins with custom logos */
-const DUNE_PLUGIN_LOGOS: Record<string, { src: any; alt: string }> = {
-  'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
-  'dune-token-price': { src: DuneLogo, alt: 'Dune' },
-  'dune-wallet-balances': { src: DuneLogo, alt: 'Dune' },
-  'dune-dex-volume': { src: DuneLogo, alt: 'Dune' },
-  'dune-nft-floor': { src: DuneLogo, alt: 'Dune' },
-  'dune-address-labels': { src: DuneLogo, alt: 'Dune' },
-  'dune-transaction-history': { src: DuneLogo, alt: 'Dune' },
-  'dune-gas-price': { src: DuneLogo, alt: 'Dune' },
-  'dune-protocol-tvl': { src: DuneLogo, alt: 'Dune' },
-};
 
 /**
  * Map icon names to Lucide components
@@ -247,10 +226,16 @@ export function NodePalette() {
     [filteredCategories]
   );
 
-  const otherCategories = useMemo(
-    () => filteredCategories.filter((c) => c.id !== 'contracts'),
+  const protocolsCategory = useMemo(
+    () => filteredCategories.find((c) => c.id === 'protocols'),
     [filteredCategories]
   );
+
+  const otherCategories = useMemo(
+    () => filteredCategories.filter((c) => c.id !== 'contracts' && c.id !== 'protocols'),
+    [filteredCategories]
+  );
+
 
   return (
     <>
@@ -320,7 +305,7 @@ export function NodePalette() {
                 <div className="grid grid-cols-2 gap-2">
                   {contractsCategory.plugins.map((plugin, pluginIndex) => {
                     const PluginIcon = getIconComponent(plugin.icon);
-                    const logoInfo = CONTRACT_PLUGIN_LOGOS[plugin.id];
+                    const logoAsset = getLogoAsset(plugin.logoAsset);
                     return (
                       <motion.div
                         key={plugin.id}
@@ -332,17 +317,17 @@ export function NodePalette() {
                           draggable
                           onDragStart={(e) => onDragStart(e, plugin.id)}
                           className={cn(
-                            'group relative flex items-center gap-2 px-3 py-2 rounded-xl',
+                            'group relative flex items-start gap-2 px-3 py-2 rounded-xl',
                             'bg-forge-bg/60 border border-forge-border/40',
                             'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
                             'cursor-grab active:cursor-grabbing transition-all duration-200'
                           )}
                         >
                           <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20 shrink-0 flex items-center justify-center">
-                            {logoInfo ? (
+                            {logoAsset ? (
                               <Image
-                                src={logoInfo.src}
-                                alt={logoInfo.alt}
+                                src={logoAsset}
+                                alt={plugin.name}
                                 fill
                                 className="object-contain"
                                 unoptimized
@@ -354,7 +339,7 @@ export function NodePalette() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-white truncate">
+                            <p className="text-xs font-medium text-white line-clamp-2 leading-tight">
                               {plugin.name}
                             </p>
                             {/* <p className="text-[10px] text-forge-muted truncate">
@@ -382,125 +367,73 @@ export function NodePalette() {
             </div>
           )}
 
-          {/* Protocol plugins second */}
-          <div className="space-y-3 mt-6">
-            <div
-              className={cn(
-                'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl',
-                'bg-forge-elevated/20'
-              )}
-            >
-              <span className="text-sm font-medium text-white flex-1 text-left">
-                Protocol Plugins
-              </span>
-              <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-forge-elevated/60 text-forge-muted">
-                {PROTOCOL_PLUGIN_IDS.length}
-              </span>
-            </div>
 
-            <div className="space-y-3 pt-1">
-              {/* Row 1: Aave, Compound */}
-              <div className="grid grid-cols-2 gap-2">
-                {(['aave-lending', 'compound-lending'] as ProtocolPluginId[]).map((id) => {
-                  const plugin = PLUGIN_REGISTRY[id];
-                  if (!plugin) return null;
-                  const logo = PROTOCOL_PLUGIN_LOGOS[id];
-                  return (
-                    <div
-                      key={id}
-                      draggable
-                      onDragStart={(e) => onDragStart(e, id)}
-                      className={cn(
-                        'group relative flex items-center gap-2 px-3 py-2 rounded-xl',
-                        'bg-forge-bg/60 border border-forge-border/40',
-                        'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
-                        'cursor-grab active:cursor-grabbing transition-all duration-200'
-                      )}
-                    >
-                      <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" unoptimized />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-white truncate">
-                          {PROTOCOL_PLUGIN_DISPLAY_NAMES[id]}
-                        </p>
-                        {/* <p className="text-[10px] text-forge-muted truncate">
-                          {plugin.description}
-                        </p> */}
-                      </div>
-                    </div>
-                  );
-                })}
+          {/* Protocol plugins second */}
+          {protocolsCategory && protocolsCategory.plugins.length > 0 && (
+            <div className="space-y-3 mt-6">
+              <div
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl',
+                  'bg-forge-elevated/20'
+                )}
+              >
+                <span className="text-sm font-medium text-white flex-1 text-left">
+                  Protocol Plugins
+                </span>
+                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-forge-elevated/60 text-forge-muted">
+                  {protocolsCategory.plugins.length}
+                </span>
               </div>
-              {/* Row 2: Chainlink, Pyth */}
-              <div className="grid grid-cols-2 gap-2">
-                {(['chainlink-price-feed', 'pyth-oracle'] as ProtocolPluginId[]).map((id) => {
-                  const plugin = PLUGIN_REGISTRY[id];
-                  if (!plugin) return null;
-                  const logo = PROTOCOL_PLUGIN_LOGOS[id];
-                  return (
-                    <div
-                      key={id}
-                      draggable
-                      onDragStart={(e) => onDragStart(e, id)}
-                      className={cn(
-                        'group relative flex items-center gap-2 px-3 py-2 rounded-xl',
-                        'bg-forge-bg/60 border border-forge-border/40',
-                        'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
-                        'cursor-grab active:cursor-grabbing transition-all duration-200'
-                      )}
-                    >
-                      <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" unoptimized />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-white truncate">
-                          {PROTOCOL_PLUGIN_DISPLAY_NAMES[id]}
-                        </p>
-                        {/* <p className="text-[10px] text-forge-muted truncate">
-                          {plugin.description}
-                        </p> */}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {/* Row 3: Uniswap (single) */}
-              <div className="flex">
-                {(['uniswap-swap'] as ProtocolPluginId[]).map((id) => {
-                  const plugin = PLUGIN_REGISTRY[id];
-                  if (!plugin) return null;
-                  const logo = PROTOCOL_PLUGIN_LOGOS[id];
-                  return (
-                    <div
-                      key={id}
-                      draggable
-                      onDragStart={(e) => onDragStart(e, id)}
-                      className={cn(
-                        'group relative flex items-center gap-2 px-3 py-2 rounded-xl',
-                        'bg-forge-bg/60 border border-forge-border/40',
-                        'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
-                        'cursor-grab active:cursor-grabbing transition-all duration-200',
-                        'w-full'
-                      )}
-                    >
-                      <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                        <Image src={logo} alt={PROTOCOL_PLUGIN_DISPLAY_NAMES[id]} fill className="object-contain" unoptimized />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-white truncate">
-                          {PROTOCOL_PLUGIN_DISPLAY_NAMES[id]}
-                        </p>
-                        {/* <p className="text-[10px] text-forge-muted truncate">
-                          {plugin.description}
-                        </p> */}
-                      </div>
-                    </div>
-                  );
-                })}
+
+              <div className="pb-2 pt-1">
+                <div className="grid grid-cols-2 gap-2">
+                  {protocolsCategory.plugins.map((plugin, pluginIndex) => {
+                    const PluginIcon = getIconComponent(plugin.icon);
+                    const logoAsset = getLogoAsset(plugin.logoAsset);
+                    return (
+                      <motion.div
+                        key={plugin.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: pluginIndex * 0.03 }}
+                      >
+                        <div
+                          draggable
+                          onDragStart={(e) => onDragStart(e, plugin.id)}
+                          className={cn(
+                            'group relative flex items-start gap-2 px-3 py-2 rounded-xl',
+                            'bg-forge-bg/60 border border-forge-border/40',
+                            'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
+                            'cursor-grab active:cursor-grabbing transition-all duration-200'
+                          )}
+                        >
+                          <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
+                            {logoAsset ? (
+                              <Image
+                                src={logoAsset}
+                                alt={plugin.name}
+                                fill
+                                className="object-contain"
+                                unoptimized
+                              />
+                            ) : (
+                              <PluginIcon className={cn('w-4 h-4', `text-${plugin.color}`)} />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-white line-clamp-2 leading-tight">
+                              {plugin.name}
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
 
           {/* Remaining categories */}
           <div className="space-y-4 mt-6">
@@ -534,10 +467,7 @@ export function NodePalette() {
                     <div className="grid grid-cols-2 gap-2">
                       {category.plugins.map((plugin, pluginIndex) => {
                         const PluginIcon = getIconComponent(plugin.icon);
-                        const logoInfo =
-                          AGENT_PLUGIN_LOGOS[plugin.id] ||
-                          SUPERPOSITION_PLUGIN_LOGOS[plugin.id] ||
-                          DUNE_PLUGIN_LOGOS[plugin.id];
+                        const logoAsset = getLogoAsset(plugin.logoAsset);
                         return (
                           <motion.div
                             key={plugin.id}
@@ -549,7 +479,7 @@ export function NodePalette() {
                               draggable
                               onDragStart={(e) => onDragStart(e, plugin.id)}
                               className={cn(
-                                'group relative flex items-center gap-2 px-3 py-2 rounded-xl',
+                                'group relative flex items-start gap-2 px-3 py-2 rounded-xl',
                                 'bg-forge-bg/60 border border-forge-border/40',
                                 'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
                                 'cursor-grab active:cursor-grabbing transition-all duration-200'
@@ -558,18 +488,18 @@ export function NodePalette() {
                               <div
                                 className={cn(
                                   'relative w-8 h-8 rounded-md flex items-center justify-center shrink-0 overflow-hidden',
-                                  logoInfo ? 'bg-black/20' : 'bg-gradient-to-br transition-all duration-200',
-                                  !logoInfo && `from-${plugin.color}/20 to-${plugin.color}/5`
+                                  logoAsset ? 'bg-black/20' : 'bg-gradient-to-br transition-all duration-200',
+                                  !logoAsset && `from-${plugin.color}/20 to-${plugin.color}/5`
                                 )}
                               >
-                                {logoInfo ? (
-                                  <Image src={logoInfo.src} alt={logoInfo.alt} fill className="object-contain" unoptimized />
+                                {logoAsset ? (
+                                  <Image src={logoAsset} alt={plugin.name} fill className="object-contain" unoptimized />
                                 ) : (
                                   <PluginIcon className={cn('w-4 h-4', `text-${plugin.color}`)} />
                                 )}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-white truncate">
+                                <p className="text-xs font-medium text-white line-clamp-2 leading-tight">
                                   {plugin.name}
                                 </p>
                                 {/* <p className="text-[10px] text-forge-muted truncate">

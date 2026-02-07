@@ -171,19 +171,19 @@ import { useLazyTraderSetup } from '@cradle/maxxit-lazy-trader';
 
 // The component uses '/api/maxxit' by default
 // For production, use the Cradle API:
-const API_BASE_URL = 'https://cradle-web-eight.vercel.app/api/maxxit';
+const API_BASE_URL = 'https://www.nskills.xyz/api/maxxit';
 ```
 
 Or configure via environment variable:
 
 ```bash
 # .env.local
-NEXT_PUBLIC_MAXXIT_API_URL=https://cradle-web-eight.vercel.app/api/maxxit
+NEXT_PUBLIC_MAXXIT_API_URL=https://www.nskills.xyz/api/maxxit
 ```
 
 ## API Endpoints
 
-The following endpoints are available at `https://cradle-web-eight.vercel.app/api/maxxit`:
+The following endpoints are available at `https://www.nskills.xyz/api/maxxit`:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -195,4 +195,4 @@ The following endpoints are available at `https://cradle-web-eight.vercel.app/ap
 
 ---
 
-Generated with ❤️ by [Cradle](https://cradle-web-eight.vercel.app)
+Generated with ❤️ by [[N]skills](https://www.nskills.xyz)

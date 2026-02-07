@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
   },
-  metadataBase: new URL('https://cradle.dev'),
+  metadataBase: new URL('https://www.nskills.xyz'),
   openGraph: {
     title: '[N]skills - Web3 Skills Composer',
     description: 'Compose N skills for your Web3 project visually. Define architecture, generate a skills repo, then let Claude Code scaffold the full project.',

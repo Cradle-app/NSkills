@@ -422,6 +422,6 @@ ${config.ssrEnabled ? '- ✅ Server-side rendering' : ''}
 
 ---
 
-Generated with ❤️ by [Cradle](https://cradle-web-eight.vercel.app)
+Generated with ❤️ by [[N]skills](https://www.nskills.xyz)
 `;
 }
