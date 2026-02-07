@@ -306,9 +306,19 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
                 <p className="text-[13px] font-semibold truncate leading-tight text-[hsl(var(--color-text-primary))]">
                   {nodeTypeToLabel(nodeType)}
                 </p>
-                <p className={cn('text-[10px] mt-1 font-medium', 'text-[hsl(var(--color-accent-primary))]')}>
-                  Click to add
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className={cn('text-[10px] font-medium', 'text-[hsl(var(--color-accent-primary))]')}>
+                    Click to add
+                  </p>
+                  {data.suggestionReason && (
+                    <span className={cn(
+                      'text-[8px] px-1 py-0.5 rounded font-bold uppercase tracking-wider',
+                      'bg-[hsl(var(--color-accent-primary)/0.15)] text-[hsl(var(--color-accent-primary))] border border-[hsl(var(--color-accent-primary)/0.2)]'
+                    )}>
+                      {data.suggestionReason as string}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Plus icon */}
