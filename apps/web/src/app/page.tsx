@@ -68,7 +68,7 @@ export default function HomePage() {
         <PanelGroup orientation="horizontal" className="flex-1">
           {/* Left sidebar - Node palette */}
           <Panel
-            defaultSize="24%" 
+            defaultSize="30%" 
             minSize="300px" 
             maxSize="35%"
           >

@@ -110,9 +110,9 @@ export function Header({ setShowAI }: HeaderProps = {}) {
             <span className="text-base font-semibold text-[hsl(var(--color-text-primary))] leading-tight">
               <span className="text-[hsl(var(--color-accent-primary))]">[N]</span>skills
             </span>
-            <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
+            {/* <span className="text-[9px] uppercase tracking-wider text-forge-muted -mt-0.5">
               Compose N skills for your Web3 project
-            </span>
+            </span> */}
           </div>
         </motion.div>
 

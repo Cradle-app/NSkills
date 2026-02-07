@@ -25,17 +25,25 @@ import StylusLogo from '@/assets/blocks/stylus.svg';
 import OstiumLogo from '@/assets/blocks/Ostium.svg';
 import MaxxitLogo from '@/assets/blocks/MaxxitLogo.png';
 import AIbotLogo from '@/assets/blocks/AIbot.png';
-import WalletLogo from '@/assets/blocks/Wallet.svg';
+import WalletLogoPng from '@/assets/blocks/Wallet.png';
 import SuperpositionLogo from '@/assets/blocks/superposition.png';
 import DuneLogo from '@/assets/blocks/dune.png';
+import AixbtLogo from '@/assets/blocks/aixbt.png';
+import TelegramLogo from '@/assets/blocks/Telegram.jpg';
+import IpfsLogo from '@/assets/blocks/Ipfs.svg';
+import PaymentLogo from '@/assets/blocks/payment.png';
+import ArbitrumLogo from '@/assets/blocks/arbitrum.svg';
+import NextjsLogo from '@/assets/blocks/Nextjs.png';
 
 /** Node types with custom logos (matches palette) */
 const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
+  // Protocol plugins
   'aave-lending': { src: AaveLogo, alt: 'Aave' },
   'compound-lending': { src: CompoundLogo, alt: 'Compound' },
   'chainlink-price-feed': { src: ChainlinkLogo, alt: 'Chainlink' },
   'pyth-oracle': { src: PythLogo, alt: 'Pyth' },
   'uniswap-swap': { src: UniswapLogo, alt: 'Uniswap' },
+  // Contract plugins
   'smartcache-caching': { src: CSLogo, alt: 'SmartCache' },
   'auditware-analyzing': { src: AuditwareLogo, alt: 'Auditware' },
   'erc20-stylus': { src: StylusLogo, alt: 'Stylus' },
@@ -44,10 +52,47 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'stylus-contract': { src: StylusLogo, alt: 'Stylus' },
   'stylus-zk-contract': { src: StylusLogo, alt: 'Stylus' },
   'stylus-rust-contract': { src: StylusLogo, alt: 'Stylus' },
+  // Agent plugins
   'ostium-trading': { src: OstiumLogo, alt: 'Ostium' },
   'maxxit': { src: MaxxitLogo, alt: 'Maxxit' },
   'erc8004-agent-runtime': { src: AIbotLogo, alt: 'AIbot' },
-  'onchain-activity': { src: WalletLogo, alt: 'Wallet' },
+  'onchain-activity': { src: WalletLogoPng, alt: 'Wallet' },
+  // Intelligence plugins
+  'aixbt-momentum': { src: AixbtLogo, alt: 'AIXBT' },
+  'aixbt-signals': { src: AixbtLogo, alt: 'AIXBT' },
+  'aixbt-indigo': { src: AixbtLogo, alt: 'AIXBT' },
+  'aixbt-observer': { src: AixbtLogo, alt: 'AIXBT' },
+  // Telegram plugins
+  'telegram-notifications': { src: TelegramLogo, alt: 'Telegram' },
+  'telegram-commands': { src: TelegramLogo, alt: 'Telegram' },
+  'telegram-ai-agent': { src: TelegramLogo, alt: 'Telegram' },
+  'telegram-wallet-link': { src: TelegramLogo, alt: 'Telegram' },
+  // Application plugins
+  'wallet-auth': { src: WalletLogoPng, alt: 'Wallet' },
+  'ipfs-storage': { src: IpfsLogo, alt: 'IPFS' },
+  'frontend-scaffold': { src: NextjsLogo, alt: 'Next.js' },
+  'rpc-provider': { src: ArbitrumLogo, alt: 'Arbitrum' },
+  'arbitrum-bridge': { src: ArbitrumLogo, alt: 'Arbitrum' },
+  'chain-data': { src: ArbitrumLogo, alt: 'Arbitrum' },
+  'chain-abstraction': { src: ArbitrumLogo, alt: 'Arbitrum' },
+  'sdk-generator': { src: ArbitrumLogo, alt: 'Arbitrum' },
+  // Payment plugins
+  'x402-paywall-api': { src: PaymentLogo, alt: 'Payment' },
+  // Superposition plugins
+  'superposition-network': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-bridge': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-longtail': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-super-assets': { src: SuperpositionLogo, alt: 'Superposition' },
+  // Dune Analytics plugins
+  'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
+  'dune-token-price': { src: DuneLogo, alt: 'Dune' },
+  'dune-wallet-balances': { src: DuneLogo, alt: 'Dune' },
+  'dune-dex-volume': { src: DuneLogo, alt: 'Dune' },
+  'dune-nft-floor': { src: DuneLogo, alt: 'Dune' },
+  'dune-address-labels': { src: DuneLogo, alt: 'Dune' },
+  'dune-transaction-history': { src: DuneLogo, alt: 'Dune' },
+  'dune-gas-price': { src: DuneLogo, alt: 'Dune' },
+  'dune-protocol-tvl': { src: DuneLogo, alt: 'Dune' },
 };
 
 const iconMap: Record<string, typeof Box> = {
