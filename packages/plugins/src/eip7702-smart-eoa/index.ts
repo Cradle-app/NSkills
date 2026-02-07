@@ -7,7 +7,7 @@ import {
   type BlueprintNode,
   type ExecutionContext,
 } from '@dapp-forge/plugin-sdk';
-import { EIP7702SmartEOAConfig } from '@dapp-forge/blueprint-schema';
+import { EIP7702SmartEOAConfig, type PathCategory } from '@dapp-forge/blueprint-schema';
 import {
   generateDelegateContract,
   generateEIP7702Helpers,
@@ -64,46 +64,47 @@ export class EIP7702SmartEOAPlugin extends BasePlugin<z.infer<typeof EIP7702Smar
     const output = this.createEmptyOutput();
 
     const contractDir = `contracts/${config.delegateName.toLowerCase()}`;
-    const libDir = 'src/lib/eip7702';
-    const hooksDir = 'src/hooks';
-    const componentsDir = 'src/components/eip7702';
 
-    // Generate delegate contract (Solidity for EIP-7702 compatibility)
+    // Contract: no category so path stays contracts/<name>/src/<Name>.sol (Forge layout)
     this.addFile(
       output,
       `${contractDir}/src/${config.delegateName}.sol`,
       generateDelegateContract(config)
     );
 
-    // Generate EIP-7702 helpers (viem-based)
+    // Frontend lib: category-relative paths for path resolver (apps/web/src/lib when frontend-scaffold present)
     this.addFile(
       output,
-      `${libDir}/eip7702-helpers.ts`,
-      generateEIP7702Helpers(config)
+      'eip7702/eip7702-helpers.ts',
+      generateEIP7702Helpers(config),
+      'frontend-lib' as PathCategory
     );
 
-    // Generate authorization hooks
+    // Frontend hooks
     this.addFile(
       output,
-      `${hooksDir}/useEIP7702.ts`,
-      generateAuthorizationHooks(config)
+      'useEIP7702.ts',
+      generateAuthorizationHooks(config),
+      'frontend-hooks' as PathCategory
     );
 
-    // Generate security utilities
+    // Frontend lib: security utilities
     if (config.securityWarnings) {
       this.addFile(
         output,
-        `${libDir}/security.ts`,
-        generateSecurityUtils(config)
+        'eip7702/security.ts',
+        generateSecurityUtils(config),
+        'frontend-lib' as PathCategory
       );
     }
 
-    // Generate UI components if enabled
+    // Frontend components
     if (config.generateUI) {
       this.addFile(
         output,
-        `${componentsDir}/DelegationManager.tsx`,
-        generateDelegationUI(config)
+        'eip7702/DelegationManager.tsx',
+        generateDelegationUI(config),
+        'frontend-components' as PathCategory
       );
     }
 

@@ -86,6 +86,7 @@ const CONTRACT_TYPES = [
     'erc20-stylus',
     'erc721-stylus',
     'erc1155-stylus',
+    'eip7702-smart-eoa',
 ];
 
 /**
@@ -241,11 +242,12 @@ export function resolveOutputPath(
         }
     }
 
-    // Extract just the filename from the original path
-    const filename = getFilename(originalPath);
+    // When path contains '/', preserve subpath under category (e.g. eip7702/eip7702-helpers.ts -> apps/web/src/lib/eip7702/eip7702-helpers.ts)
+    const normalizedPath = originalPath.replace(/\\/g, '/').replace(/^\/+/, '');
+    const pathSegment = normalizedPath.includes('/') ? normalizedPath : getFilename(originalPath);
 
-    // Combine base path with filename
-    return basePath ? `${basePath}/${filename}` : filename;
+    // Combine base path with path segment (filename or subpath)
+    return basePath ? `${basePath}/${pathSegment}` : pathSegment;
 }
 
 /**
