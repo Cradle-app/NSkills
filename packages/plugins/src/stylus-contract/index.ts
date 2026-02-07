@@ -319,6 +319,122 @@ docs/
 
 ---
 
+## Stylus SDK Patterns
+
+### Storage with \`sol_storage!\`
+
+Define Solidity-compatible storage layouts:
+
+\`\`\`rust
+sol_storage! {
+    #[entrypoint]
+    pub struct MyContract {
+        uint256 count;
+        bool paused;
+        address owner;
+        mapping(address => uint256) balances;
+        address[] members;
+    }
+}
+\`\`\`
+
+**Supported types**: \`uint256\`, \`int256\`, \`bool\`, \`address\`, \`bytes32\`, \`mapping(K => V)\`, \`T[]\`, nested structs.
+
+**Access**: \`self.count.get()\` to read, \`self.count.set(value)\` to write.
+
+### Public and Payable Methods
+
+\`\`\`rust
+#[public]
+impl MyContract {
+    pub fn read_value(&self) -> U256 {
+        self.count.get()
+    }
+
+    pub fn write_value(&mut self, val: U256) {
+        self.count.set(val);
+    }
+
+    #[payable]
+    pub fn deposit(&mut self) {
+        let value = msg::value();
+        // handle deposit
+    }
+}
+\`\`\`
+
+### Events
+
+\`\`\`rust
+use alloy_sol_types::sol;
+
+sol! {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+}
+
+// Emit inside a method:
+evm::log(Transfer { from: caller, to: recipient, value: amount });
+\`\`\`
+
+### Error Handling
+
+\`\`\`rust
+#[derive(SolidityError)]
+pub enum MyError {
+    InsufficientBalance(InsufficientBalance),
+    Unauthorized(Unauthorized),
+}
+
+sol! {
+    error InsufficientBalance(uint256 available, uint256 required);
+    error Unauthorized(address caller);
+}
+\`\`\`
+
+### Cross-Contract Calls (Stylus <-> Solidity)
+
+Stylus and Solidity contracts share the same address space on Arbitrum. Use \`sol_interface!\` for type-safe calls:
+
+\`\`\`rust
+sol_interface! {
+    interface IERC20 {
+        function balanceOf(address owner) external view returns (uint256);
+        function transfer(address to, uint256 amount) external returns (bool);
+    }
+}
+
+let token = IERC20::new(token_address);
+let balance = token.balance_of(self, owner)?;
+\`\`\`
+
+### Testing (without deployment)
+
+Add to \`Cargo.toml\`:
+\`\`\`toml
+[dev-dependencies]
+stylus-sdk = { version = "0.10.0", features = ["stylus-test"] }
+\`\`\`
+
+Write tests:
+\`\`\`rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_increment() {
+        let mut contract = Counter::default();
+        contract.set_number(U256::from(0));
+        contract.increment();
+        assert_eq!(contract.number(), U256::from(1));
+    }
+}
+\`\`\`
+
+Run with \`cargo test\`. The \`stylus-test\` feature simulates tx context (\`msg::sender()\`, \`msg::value()\`) without deployment.
+
+---
+
 ## Deployment Steps
 
 ### 1. Prerequisites
@@ -370,6 +486,35 @@ cargo stylus deploy \\
 cd contracts/counter-contract
 cargo stylus export-abi --output=./abi.json --json
 \`\`\`
+
+---
+
+## Post-Deployment Checklist
+
+1. **Save deployed contract address** to \`.env\` or your config
+2. **Export ABI** for frontend consumption:
+   \`\`\`bash
+   cargo stylus export-abi --output=./abi.json --json
+   \`\`\`
+3. **Verify on Arbiscan** — Stylus contracts support hash-based verification. On deployment, a keccak256 hash is built from all Rust source files, \`rust-toolchain.toml\`, \`Cargo.toml\`, and \`Cargo.lock\`. Verify via:
+   - Navigate to your contract on [Arbiscan](https://arbiscan.io) (or [Sepolia Arbiscan](https://sepolia.arbiscan.io))
+   - Go to **Contract** tab → **Verify & Publish**
+   - Select **Stylus** as compiler type and upload source
+   - See the [official guide](https://docs.arbitrum.io/stylus/how-tos/verifying-contracts-arbiscan)
+4. **Test read/write** via \`cast\`:
+   \`\`\`bash
+   # Read
+   cast call <CONTRACT_ADDRESS> "number()" --rpc-url <RPC_URL>
+   # Write
+   cast send <CONTRACT_ADDRESS> "increment()" --private-key $PRIVATE_KEY --rpc-url <RPC_URL>
+   \`\`\`
+5. **Estimate gas** before mainnet:
+   \`\`\`bash
+   cargo stylus deploy --estimate-gas --endpoint="https://sepolia-rollup.arbitrum.io/rpc"
+   \`\`\`
+6. **Update frontend** contract addresses for the target network
+
+> **Note**: \`cargo stylus deploy\` handles contract activation automatically. No separate activation step needed.
 
 ---
 
