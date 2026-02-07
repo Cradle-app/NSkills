@@ -114,6 +114,7 @@ function BlueprintCanvasInner() {
       selected: node.id === selectedNodeId,
       data: {
         ...node.config,
+        ...(node as any).data,
         nodeType: node.type,
         label: node.config.label || node.config.contractName || node.config.agentName || node.type,
         isGhost: false,
@@ -128,6 +129,7 @@ function BlueprintCanvasInner() {
       selectable: false,
       data: {
         ...node.config,
+        ...(node as any).data,
         nodeType: node.type,
         label: node.config.label || node.config.contractName || node.config.agentName || node.type,
         isGhost: true,
