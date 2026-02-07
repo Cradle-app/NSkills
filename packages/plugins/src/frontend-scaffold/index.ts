@@ -422,6 +422,146 @@ ${config.ssrEnabled ? '- ✅ Server-side rendering' : ''}
 
 ---
 
+## Hydration Safety (wagmi + Next.js SSR)
+
+When using \`useAccount\`, \`useNetwork\`, or any wallet-dependent hook in a server-rendered Next.js app, the server has **no wallet state**. This creates a hydration mismatch where the server renders "disconnected" but the client immediately sees "connected".
+
+### The Pattern: mounted guard
+
+\`\`\`tsx
+'use client';
+import { useState, useEffect } from 'react';
+import { useAccount } from 'wagmi';
+
+export function WalletStatus() {
+  const [mounted, setMounted] = useState(false);
+  const { address, isConnected } = useAccount();
+
+  useEffect(() => setMounted(true), []);
+
+  // During SSR / first client render, return a placeholder
+  if (!mounted) return <div className="h-10 w-32 animate-pulse bg-gray-200 rounded" />;
+
+  return isConnected
+    ? <span>Connected: {address}</span>
+    : <span>Not connected</span>;
+}
+\`\`\`
+
+**Why**: React requires server and client HTML to match on first render. Without the guard, you get a console error and UI flicker.
+
+**Where to apply**: Any component that reads wallet/chain state and renders conditionally based on it. This includes:
+- Wallet connect buttons
+- Balance displays
+- Chain-specific UI (e.g., showing Superposition features)
+- Contract interaction forms
+
+### Alternative: Dynamic Import
+
+For components that are entirely client-side:
+\`\`\`tsx
+import dynamic from 'next/dynamic';
+const WalletPanel = dynamic(() => import('./WalletPanel'), { ssr: false });
+\`\`\`
+
+---
+
+## ABI Management
+
+### Recommended Structure
+
+\`\`\`
+src/
+└── abi/
+    ├── Counter.ts          # Stylus contract ABI
+    ├── ERC20.ts            # Pre-deployed token ABI
+    └── index.ts            # Re-exports all ABIs
+\`\`\`
+
+### Defining ABIs (as const for type safety)
+
+Always define ABIs with \`as const\` so wagmi/viem can infer argument and return types:
+
+\`\`\`typescript
+// src/abi/Counter.ts
+export const counterAbi = [
+  {
+    type: 'function',
+    name: 'number',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'increment',
+    inputs: [],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'setNumber',
+    inputs: [{ name: 'new_number', type: 'uint256' }],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+] as const;
+\`\`\`
+
+### Using ABIs with wagmi hooks
+
+\`\`\`typescript
+import { useReadContract, useWriteContract } from 'wagmi';
+import { counterAbi } from '@/abi/Counter';
+
+const CONTRACT_ADDRESS = '0x...' as const;
+
+// Read
+const { data: count } = useReadContract({
+  address: CONTRACT_ADDRESS,
+  abi: counterAbi,
+  functionName: 'number',  // ← fully typed, autocomplete works
+});
+
+// Write
+const { writeContract } = useWriteContract();
+writeContract({
+  address: CONTRACT_ADDRESS,
+  abi: counterAbi,
+  functionName: 'increment',
+});
+\`\`\`
+
+### Generating ABIs from Stylus contracts
+
+After deploying your Stylus contract, export the ABI and convert to TypeScript:
+
+\`\`\`bash
+# Export ABI JSON from cargo stylus
+cd contracts/counter-contract
+cargo stylus export-abi --output=./abi.json --json
+
+# Then create the TypeScript file:
+# Copy the JSON array into src/abi/Counter.ts with \`as const\`
+\`\`\`
+
+### Contract Address Management
+
+Store addresses per-network in a config file:
+
+\`\`\`typescript
+// src/lib/contracts.ts
+export const CONTRACTS = {
+  counter: {
+    421614: '0x...',  // Arbitrum Sepolia
+    42161: '0x...',   // Arbitrum One
+  },
+} as const;
+\`\`\`
+
+---
+
 Generated with ❤️ by [[N]skills](https://www.nskills.xyz)
 `;
 }

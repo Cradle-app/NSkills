@@ -121,7 +121,7 @@ export const TEMPLATES: Template[] = [
     explainer:
       'The Stylus contract is the on-chain core — SmartCache reduces latency and gas costs by warming the contract cache, while Auditware (Radar) scans the contract for vulnerabilities before deploy. The frontend consumes the contract through wallet auth and an RPC provider, with chain-data indexing events. Ghost blocks suggest adding an AI agent for automated interactions or a paywall for monetisation.',
     nodes: [
-      { type: 'stylus-contract', position: { x: 0, y: 150 } },         // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 150 } },         // 0  T0
       { type: 'smartcache-caching', position: { x: 300, y: 0 } },      // 1  T1
       { type: 'auditware-analyzing', position: { x: 300, y: 150 } },   // 2  T1
       { type: 'frontend-scaffold', position: { x: 300, y: 300 } },     // 3  T1
@@ -163,7 +163,7 @@ export const TEMPLATES: Template[] = [
     explainer:
       'A custom Stylus contract handles token governance and management logic alongside three pre-deployed token standards (ERC-20 fungible, ERC-721 NFT, ERC-1155 multi-token) that can be used directly without deployment. SmartCache reduces latency and gas costs by warming the custom contract cache, and Auditware (Radar) scans it for vulnerabilities. NFT metadata is pinned to IPFS. The frontend renders a unified token UI with wallet auth and chain-data indexing.',
     nodes: [
-      { type: 'stylus-contract', position: { x: 0, y: 0 } },            // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },            // 0  T0
       { type: 'erc20-stylus', position: { x: 0, y: 150 } },             // 1  T0
       { type: 'erc721-stylus', position: { x: 0, y: 300 } },            // 2  T0
       { type: 'erc1155-stylus', position: { x: 0, y: 450 } },           // 3  T0
@@ -301,7 +301,7 @@ export const TEMPLATES: Template[] = [
     explainer:
       'A custom Stylus vault contract executes trading strategies on-chain — SmartCache reduces latency and gas costs by warming the vault contract cache, and Auditware (Radar) scans it for vulnerabilities before deploy. Ostium handles leveraged perps, Maxxit automates lazy-trader strategies, and the pre-deployed ERC-20 (usable directly) is the settlement token. Chainlink supplies oracle prices, Dune tracks market activity and token value, and a Telegram bot relays alerts.',
     nodes: [
-      { type: 'stylus-contract', position: { x: 0, y: 0 } },            // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },            // 0  T0
       { type: 'ostium-trading', position: { x: 0, y: 150 } },           // 1  T0
       { type: 'maxxit', position: { x: 0, y: 300 } },                   // 2  T0
       { type: 'erc20-stylus', position: { x: 0, y: 450 } },             // 3  T0
@@ -394,7 +394,7 @@ export const TEMPLATES: Template[] = [
     explainer:
       'A custom Stylus marketplace contract handles listings, bids, and royalty splits — SmartCache reduces latency and gas costs by warming the marketplace contract cache, and Auditware (Radar) scans it for vulnerabilities. Pre-deployed ERC-721 and ERC-1155 (usable directly) handle NFT minting, with metadata pinned to IPFS. The frontend renders the marketplace UI with wallet auth, Dune NFT Floor tracks collection prices, chain-data indexes events, and the SDK generator creates a client library for integrations.',
     nodes: [
-      { type: 'stylus-contract', position: { x: 0, y: 0 } },            // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },            // 0  T0
       { type: 'erc721-stylus', position: { x: 0, y: 150 } },            // 1  T0
       { type: 'erc1155-stylus', position: { x: 0, y: 300 } },           // 2  T0
       { type: 'smartcache-caching', position: { x: 300, y: 0 } },       // 3  T1
@@ -445,7 +445,7 @@ export const TEMPLATES: Template[] = [
     explainer:
       'A custom Stylus contract handles dynamic NFT pricing and rarity scoring on-chain — SmartCache reduces latency and gas costs by warming the pricing contract cache, and Auditware (Radar) scans it for vulnerabilities. Pre-deployed ERC-721 (usable directly) mints NFTs with metadata on IPFS. AIXBT Momentum detects market trends feeding into Signals, which triggers Telegram alerts. Dune NFT Floor and Wallet Balances provide portfolio analytics. The frontend aggregates everything with wallet auth.',
     nodes: [
-      { type: 'stylus-contract', position: { x: 0, y: 0 } },             // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },             // 0  T0
       { type: 'erc721-stylus', position: { x: 0, y: 150 } },             // 1  T0
       { type: 'aixbt-momentum', position: { x: 0, y: 300 } },            // 2  T0
       { type: 'dune-wallet-balances', position: { x: 0, y: 450 } },      // 3  T0
@@ -500,7 +500,7 @@ export const TEMPLATES: Template[] = [
     nodes: [
       { type: 'erc8004-agent-runtime', position: { x: 0, y: 0 } },      // 0  T0
       { type: 'x402-paywall-api', position: { x: 0, y: 150 } },         // 1  T0
-      { type: 'stylus-contract', position: { x: 0, y: 300 } },          // 2  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 300 } },          // 2  T0
       { type: 'telegram-ai-agent', position: { x: 300, y: 0 } },        // 3  T1
       { type: 'telegram-commands', position: { x: 300, y: 150 } },      // 4  T1
       { type: 'smartcache-caching', position: { x: 300, y: 300 } },     // 5  T1
@@ -592,7 +592,7 @@ export const TEMPLATES: Template[] = [
     explainer:
       'A custom Stylus vault contract holds funds and executes trades on-chain — SmartCache reduces latency and gas costs by warming the vault contract cache, and Auditware (Radar) scans it for vulnerabilities before deploy. Ostium executes leveraged perps, Maxxit automates lazy-trader strategies. The ERC-8004 agent orchestrates trade logic. Dune DEX Volume provides market depth data, chain-data tracks on-chain fills, and Telegram relays signals.',
     nodes: [
-      { type: 'stylus-contract', position: { x: 0, y: 0 } },             // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },             // 0  T0
       { type: 'ostium-trading', position: { x: 0, y: 150 } },            // 1  T0
       { type: 'maxxit', position: { x: 0, y: 300 } },                    // 2  T0
       { type: 'erc8004-agent-runtime', position: { x: 0, y: 450 } },     // 3  T0
@@ -645,7 +645,7 @@ export const TEMPLATES: Template[] = [
       { type: 'telegram-ai-agent', position: { x: 0, y: 0 } },           // 0  T0
       { type: 'erc20-stylus', position: { x: 0, y: 150 } },              // 1  T0
       { type: 'dune-wallet-balances', position: { x: 0, y: 300 } },      // 2  T0
-      { type: 'stylus-contract', position: { x: 0, y: 450 } },           // 3  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 450 } },           // 3  T0
       { type: 'telegram-commands', position: { x: 300, y: 0 } },          // 4  T1
       { type: 'telegram-notifications', position: { x: 300, y: 150 } },   // 5  T1
       { type: 'telegram-wallet-link', position: { x: 300, y: 300 } },     // 6  T1
@@ -744,7 +744,7 @@ export const TEMPLATES: Template[] = [
       'Superposition Network is the L3 chain — the Stylus contract deploys natively on it. SmartCache reduces latency and gas costs by warming the contract cache on the L3, and Auditware (Radar) scans the contract for vulnerabilities. The Superposition Bridge handles L2↔L3 asset movement, and Longtail AMM provides on-chain liquidity. The frontend orchestrates all interactions through wallet auth. Ghost blocks suggest Meow Domains for on-chain identity and an agent for automated contract interactions.',
     nodes: [
       { type: 'superposition-network', position: { x: 0, y: 75 } },        // 0  T0
-      { type: 'stylus-contract', position: { x: 0, y: 225 } },            // 1  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 225 } },            // 1  T0
       { type: 'smartcache-caching', position: { x: 300, y: 0 } },         // 2  T1
       { type: 'auditware-analyzing', position: { x: 300, y: 150 } },      // 3  T1
       { type: 'superposition-bridge', position: { x: 300, y: 300 } },     // 4  T1
@@ -789,7 +789,7 @@ export const TEMPLATES: Template[] = [
       'Superposition Network hosts both the Stylus contract and DeFi primitives. SmartCache reduces latency and gas costs by warming the contract cache for optimised reads, and Auditware (Radar) scans the contract for vulnerabilities. Longtail AMM and Bridge provide on-chain liquidity and cross-chain movement. The ERC-8004 agent automates DeFi strategies across these components. Dune DEX Volume feeds market analytics into the frontend.',
     nodes: [
       { type: 'superposition-network', position: { x: 0, y: 0 } },        // 0  T0
-      { type: 'stylus-contract', position: { x: 0, y: 150 } },            // 1  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 150 } },            // 1  T0
       { type: 'erc8004-agent-runtime', position: { x: 0, y: 300 } },      // 2  T0
       { type: 'auditware-analyzing', position: { x: 300, y: 0 } },        // 3  T1
       { type: 'smartcache-caching', position: { x: 300, y: 150 } },       // 4  T1
@@ -840,7 +840,7 @@ export const TEMPLATES: Template[] = [
       { type: 'x402-paywall-api', position: { x: 0, y: 0 } },            // 0  T0
       { type: 'erc20-stylus', position: { x: 0, y: 150 } },              // 1  T0
       { type: 'erc8004-agent-runtime', position: { x: 0, y: 300 } },     // 2  T0
-      { type: 'stylus-contract', position: { x: 0, y: 450 } },           // 3  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 450 } },           // 3  T0
       { type: 'smartcache-caching', position: { x: 300, y: 0 } },        // 4  T1
       { type: 'auditware-analyzing', position: { x: 300, y: 150 } },     // 5  T1
       { type: 'frontend-scaffold', position: { x: 300, y: 300 } },       // 6  T1
@@ -927,7 +927,7 @@ export const TEMPLATES: Template[] = [
     explainer:
       'The Stylus contract is your core business logic — SmartCache reduces latency and gas costs by warming the contract cache, and Auditware (Radar) scans it for vulnerabilities before deploy. The x402 paywall monetises API access to your contract. The frontend provides the SaaS dashboard with wallet auth, RPC for transactions, and Dune Wallet Balances for user analytics. Ghost blocks suggest an agent for automated workflows, quality gates for CI/CD, and an SDK generator for third-party developer adoption.',
     nodes: [
-      { type: 'stylus-contract', position: { x: 0, y: 0 } },           // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },           // 0  T0
       { type: 'smartcache-caching', position: { x: 300, y: 0 } },      // 1  T1
       { type: 'auditware-analyzing', position: { x: 300, y: 150 } },   // 2  T1
       { type: 'x402-paywall-api', position: { x: 0, y: 150 } },        // 3  T0
