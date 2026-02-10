@@ -18,6 +18,7 @@
 export interface TemplateNode {
   type: string;
   position: { x: number; y: number };
+  config?: Record<string, any>;
 }
 
 export interface TemplateEdge {
@@ -287,55 +288,49 @@ export const TEMPLATES: Template[] = [
     ],
   },
 
-  // ── 5. Autonomous Trading Platform ──────────────────────────────────────
-  // Flow: {stylus, ostium, maxxit, erc20} → {smartcache, auditware, chainlink, dune-dex} → {dune-token, telegram, frontend} → wallet
+  // ── 5. Agentic Trading Platform ─────────────────────────────────────────
+  // Flow: wallet-auth → maxxit → ostium-trading → frontend-scaffold (with pyth/chainlink)
   {
-    id: 'autonomous-trading-platform',
-    name: 'Autonomous Trading Platform',
+    id: 'agentic-trading-platform',
+    name: 'Agentic Trading Platform',
     description:
-      'Custom Stylus vault contract + Ostium + Maxxit + ERC-20 + SmartCache + Radar + Chainlink + Dune + Telegram — agent + paywall as suggestions',
+      'Ostium + Maxxit + AIXBT Signals + Pyth/Chainlink oracles + frontend — Uniswap, IPFS, chain data, and Telegram as suggestions',
     icon: 'Coins',
     colorClass: 'warning',
     category: 'defi',
-    tags: ['Trading', 'Stylus', 'Caching', 'Radar', 'Analytics'],
+    tags: ['Trading', 'AI', 'Oracles', 'Agentic'],
     explainer:
-      'A custom Stylus vault contract executes trading strategies on-chain — SmartCache reduces latency and gas costs by warming the vault contract cache, and Auditware (Radar) scans it for vulnerabilities before deploy. Ostium handles leveraged perps, Maxxit automates lazy-trader strategies, and the pre-deployed ERC-20 (usable directly) is the settlement token. Chainlink supplies oracle prices, Dune tracks market activity and token value, and a Telegram bot relays alerts.',
+      'An agentic trading platform that connects wallet authentication to automated trading strategies. Wallet-auth feeds into Maxxit for lazy-trader automation, which orchestrates trades through Ostium for leveraged perps. AIXBT Signals provides AI-driven market intelligence. The frontend integrates with both Pyth (low-latency) and Chainlink (reliable) price oracles for comprehensive market data. Ghost nodes suggest Uniswap for additional swap capabilities, chain-data for on-chain activity monitoring, IPFS for data storage, and Telegram for notifications.',
     nodes: [
-      { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },            // 0  T0
-      { type: 'ostium-trading', position: { x: 0, y: 150 } },           // 1  T0
-      { type: 'maxxit', position: { x: 0, y: 300 } },                   // 2  T0
-      { type: 'erc20-stylus', position: { x: 0, y: 450 } },             // 3  T0
-      { type: 'smartcache-caching', position: { x: 300, y: 0 } },       // 4  T1
-      { type: 'auditware-analyzing', position: { x: 300, y: 150 } },    // 5  T1
-      { type: 'chainlink-price-feed', position: { x: 300, y: 300 } },   // 6  T1
-      { type: 'frontend-scaffold', position: { x: 300, y: 450 } },      // 7  T1
-      { type: 'dune-dex-volume', position: { x: 600, y: 0 } },          // 8  T2
-      { type: 'dune-token-price', position: { x: 600, y: 150 } },       // 9  T2
-      { type: 'telegram-ai-agent', position: { x: 600, y: 300 } },      // 10 T2
-      { type: 'wallet-auth', position: { x: 600, y: 450 } },            // 11 T2
+      { type: 'wallet-auth', position: { x: 0, y: 150 } },             // 0  T0
+      { type: 'maxxit', position: { x: 300, y: 150 } },                // 1  T1
+      { type: 'ostium-trading', position: { x: 600, y: 150 } },        // 2  T2
+      { type: 'frontend-scaffold', position: { x: 900, y: 150 } },     // 3  T3
+      // { type: 'aixbt-signals', position: { x: 300, y: 0 } },           // 4  T1
+      // Pyth Oracle - ETH/USD feed ID for Arbitrum Sepolia
+      { type: 'pyth-oracle', position: { x: 900, y: 0 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },  // 4  T3
+      // Chainlink Price Feed - ETH/USD on Arbitrum (https://docs.chain.link/data-feeds/price-feeds/addresses?network=arbitrum)
+      { type: 'chainlink-price-feed', position: { x: 900, y: 300 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },  // 5  T3
     ],
     edges: [
-      { source: 0, target: 4 },
-      { source: 0, target: 5 },
-      { source: 0, target: 7 },
-      { source: 1, target: 6 },
-      { source: 1, target: 8 },
-      { source: 1, target: 7 },
-      { source: 2, target: 7 },
-      { source: 2, target: 10 },
-      { source: 3, target: 9 },
-      { source: 3, target: 7 },
-      { source: 7, target: 11 },
+      { source: 0, target: 1 },   // wallet-auth → maxxit
+      { source: 1, target: 2 },   // maxxit → ostium-trading
+      { source: 2, target: 3 },   // ostium-trading → frontend-scaffold
+      // { source: 4, target: 1 },   // aixbt-signals → maxxit (REMOVED)
+      { source: 4, target: 3 },   // pyth-oracle → frontend-scaffold
+      { source: 5, target: 3 },   // chainlink-price-feed → frontend-scaffold
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 12)
-      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 13)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },    // g2 (idx 14)
+      { type: 'uniswap-swap', position: { x: 600, y: 300 } },          // g0 (idx 6)
+      { type: 'onchain-activity', position: { x: 0, y: 300 } },              // g1 (idx 7)
+      { type: 'ipfs-storage', position: { x: 300, y: 300 } },          // g2 (idx 8)
+      { type: 'telegram-notifications', position: { x: 900, y: 450 } }, // g3 (idx 9)
     ],
     ghostEdges: [
-      { source: 7, target: 12 },  // frontend → agent
-      { source: 7, target: 13 },  // frontend → paywall
-      { source: 0, target: 14 },  // stylus → quality-gates
+      { source: 2, target: 6 },   // ostium-trading → uniswap-swap
+      { source: 0, target: 7 },   // wallet-auth → onchain-activity
+      { source: 1, target: 8 },   // maxxit → ipfs-storage
+      { source: 3, target: 9 },   // frontend-scaffold → telegram-notifications
     ],
   },
 

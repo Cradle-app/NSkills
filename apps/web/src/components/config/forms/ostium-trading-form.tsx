@@ -178,22 +178,26 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
                         )}
                     </div>
                     <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                            <p className="text-sm font-medium text-[hsl(var(--color-text-primary))]">Enable Delegation</p>
-                            {delegation.status?.isDelegated ? (
-                                <span className="text-[10px] px-1.5 py-0.5 bg-[hsl(var(--color-success)/0.2)] text-[hsl(var(--color-success))] rounded">
+                        <p className="text-sm font-medium text-[hsl(var(--color-text-primary))] mb-2">Enable Delegation</p>
+                        {delegation.status?.isDelegated ? (
+                            <div className="flex items-center gap-2 mb-2">
+                                <CheckCircle2 className="w-4 h-4 text-[hsl(var(--color-success))]" />
+                                <span className="text-xs text-[hsl(var(--color-success))] font-semibold">
                                     Active
                                 </span>
-                            ) : (
-                                <button
-                                    onClick={() => delegation.enable()}
-                                    disabled={!isConnected || delegation.txState.status === 'pending' || !isValidDelegateAddress}
-                                    className={actionStyles.primary}
-                                >
-                                    {delegation.txState.status === 'pending' ? 'Signing...' : 'Enable'}
-                                </button>
-                            )}
-                        </div>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => delegation.enable()}
+                                disabled={!isConnected || delegation.txState.status === 'pending' || !isValidDelegateAddress}
+                                className={cn(
+                                    actionStyles.primary,
+                                    "w-full h-9 text-sm font-semibold mb-2"
+                                )}
+                            >
+                                {delegation.txState.status === 'pending' ? 'Signing...' : 'Enable'}
+                            </button>
+                        )}
                         <p className="text-xs text-[hsl(var(--color-text-muted))] mb-2">
                             Delegate signatures to enable gasless transactions.
                         </p>
@@ -280,22 +284,26 @@ export function OstiumTradingForm({ nodeId, config }: Props) {
                         )}
                     </div>
                     <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                            <p className="text-sm font-medium text-[hsl(var(--color-text-primary))]">Approve USDC</p>
-                            {approval.status?.hasApproval ? (
-                                <span className="text-[10px] px-1.5 py-0.5 bg-[hsl(var(--color-success)/0.2)] text-[hsl(var(--color-success))] rounded">
-                                    {approval.status.formattedAllowance} USDC
+                        <p className="text-sm font-medium text-[hsl(var(--color-text-primary))] mb-2">Approve USDC</p>
+                        {approval.status?.hasApproval ? (
+                            <div className="flex items-center gap-2 mb-2">
+                                <CheckCircle2 className="w-4 h-4 text-[hsl(var(--color-success))]" />
+                                <span className="text-xs text-[hsl(var(--color-success))] font-semibold">
+                                    {approval.status.formattedAllowance} USDC Approved
                                 </span>
-                            ) : (
-                                <button
-                                    onClick={() => approval.approve()}
-                                    disabled={!isConnected || approval.txState.status === 'pending'}
-                                    className={actionStyles.primary}
-                                >
-                                    {approval.txState.status === 'pending' ? 'Signing...' : 'Approve'}
-                                </button>
-                            )}
-                        </div>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => approval.approve()}
+                                disabled={!isConnected || approval.txState.status === 'pending'}
+                                className={cn(
+                                    actionStyles.primary,
+                                    "w-full h-9 text-sm font-semibold mb-2"
+                                )}
+                            >
+                                {approval.txState.status === 'pending' ? 'Signing...' : 'Approve'}
+                            </button>
+                        )}
                         <p className="text-xs text-[hsl(var(--color-text-muted))] mb-2">
                             Set USDC allowance for the Ostium storage contract.
                         </p>

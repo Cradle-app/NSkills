@@ -46,7 +46,7 @@ interface BlueprintState {
   ghostEdges: BlueprintEdge[];
 
   // Node operations
-  addNode: (type: string, position: { x: number; y: number }) => BlueprintNode;
+  addNode: (type: string, position: { x: number; y: number }, config?: Record<string, any>) => BlueprintNode;
   updateNode: (nodeId: string, updates: Partial<BlueprintNode>) => void;
   updateNodeConfig: (nodeId: string, config: Record<string, unknown>) => void;
   removeNode: (nodeId: string) => void;
@@ -149,7 +149,7 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
     });
   },
 
-  addNode: (type, position) => {
+  addNode: (type, position, config) => {
     // Save current state before mutation
     get()._saveToHistory();
 
@@ -157,7 +157,8 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
       id: generateUUID(),
       type: type as BlueprintNode['type'],
       position,
-      config: getDefaultConfig(type),
+      // Merge template config with defaults, with template config taking precedence
+      config: config ? { ...getDefaultConfig(type), ...config } : getDefaultConfig(type),
     };
 
     set((state) => ({
@@ -310,7 +311,7 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
 
       const edgesToPromote: BlueprintEdge[] = [];
       const remainingGhostEdges: BlueprintEdge[] = [];
-      
+
       for (const ge of state.ghostEdges) {
         if (realNodeIds.has(ge.source) && realNodeIds.has(ge.target)) {
           edgesToPromote.push(ge);
