@@ -584,47 +584,53 @@ export const TEMPLATES: Template[] = [
     id: 'trading-bot',
     name: 'Trading Bot',
     description:
-      'Custom Stylus vault contract + Ostium + Maxxit + SmartCache + Radar + ERC-8004 agent + Dune DEX + Telegram — paywall + token price as suggestions',
+      'Custom Stylus vault contract + Ostium + Maxxit + SmartCache + Radar + ERC-8004 agent + Dune DEX + Telegram + RPC — paywall + token price as suggestions',
     icon: 'CandlestickChart',
     colorClass: 'warning',
     category: 'ai',
     tags: ['Trading', 'Stylus', 'Caching', 'Radar', 'Agent'],
     explainer:
-      'A custom Stylus vault contract holds funds and executes trades on-chain — SmartCache reduces latency and gas costs by warming the vault contract cache, and Auditware (Radar) scans it for vulnerabilities before deploy. Ostium executes leveraged perps, Maxxit automates lazy-trader strategies. The ERC-8004 agent orchestrates trade logic. Dune DEX Volume provides market depth data, chain-data tracks on-chain fills, and Telegram relays signals.',
+      'A custom Stylus vault contract holds funds and executes trades on-chain — SmartCache reduces latency and gas costs by warming the vault contract cache, and Auditware (Radar) scans it for vulnerabilities. Ostium executes leveraged perps, while Maxxit and the ERC-8004 agent orchestrate automated trade logic and direct contract interactions. Dune DEX Volume, RPC, and chain-data provide market depth and connectivity. Telegram AI Agent relays signals and accepts user commands.',
     nodes: [
-      { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },             // 0  T0
-      { type: 'ostium-trading', position: { x: 0, y: 150 } },            // 1  T0
-      { type: 'maxxit', position: { x: 0, y: 300 } },                    // 2  T0
-      { type: 'erc8004-agent-runtime', position: { x: 0, y: 450 } },     // 3  T0
-      { type: 'smartcache-caching', position: { x: 300, y: 0 } },        // 4  T1
-      { type: 'auditware-analyzing', position: { x: 300, y: 150 } },     // 5  T1
-      { type: 'dune-dex-volume', position: { x: 300, y: 300 } },         // 6  T1
-      { type: 'chain-data', position: { x: 300, y: 450 } },              // 7  T1
-      { type: 'telegram-ai-agent', position: { x: 600, y: 0 } },         // 8  T2
-      { type: 'frontend-scaffold', position: { x: 600, y: 150 } },       // 9  T2
-      { type: 'wallet-auth', position: { x: 600, y: 300 } },             // 10 T2
+      { type: 'stylus-rust-contract', position: { x: 60, y: 0 } },        // 0  T0
+      { type: 'ostium-trading', position: { x: 80, y: 140 } },            // 1  T0
+      { type: 'maxxit', position: { x: -300, y: 300 } },                  // 2  T0
+      { type: 'erc8004-agent-runtime', position: { x: -280, y: 540 } },   // 3  T1
+      { type: 'smartcache-caching', position: { x: 600, y: 0 } },         // 4  T2
+      { type: 'auditware-analyzing', position: { x: 600, y: 150 } },      // 5  T2
+      { type: 'dune-dex-volume', position: { x: 600, y: 300 } },          // 6  T2
+      { type: 'chain-data', position: { x: 600, y: 450 } },               // 7  T2
+      { type: 'frontend-scaffold', position: { x: 900, y: 150 } },        // 8  T3
+      { type: 'wallet-auth', position: { x: 1200, y: 0 } },               // 9  T4
+      { type: 'rpc-provider', position: { x: 1200, y: 150 } },            // 10 T4
+      { type: 'telegram-ai-agent', position: { x: 1200, y: 300 } },       // 11 T4
     ],
     edges: [
       { source: 0, target: 4 },
       { source: 0, target: 5 },
-      { source: 0, target: 9 },
-      { source: 1, target: 6 },
-      { source: 1, target: 7 },
-      { source: 1, target: 9 },
-      { source: 2, target: 8 },
-      { source: 2, target: 9 },
-      { source: 3, target: 9 },
-      { source: 9, target: 10 },
+      { source: 3, target: 0 },
+      { source: 3, target: 1 },
+      { source: 2, target: 1 },
+      { source: 3, target: 11 },
+      { source: 8, target: 9 },
+      { source: 8, target: 10 },
+      { source: 0, target: 8 },
+      { source: 1, target: 8 },
+      { source: 4, target: 8 },
+      { source: 5, target: 8 },
+      { source: 6, target: 8 },
+      { source: 7, target: 8 },
+      { source: 3, target: 8 },
     ],
     ghostNodes: [
-      { type: 'x402-paywall-api', position: { x: 900, y: 0 } },            // g0 (idx 11)
-      { type: 'dune-token-price', position: { x: 900, y: 150 } },          // g1 (idx 12)
-      { type: 'telegram-notifications', position: { x: 900, y: 300 } },    // g2 (idx 13)
+      { type: 'x402-paywall-api', position: { x: 1500, y: 0 } },            // g0 (idx 12)
+      { type: 'dune-token-price', position: { x: 1500, y: 150 } },          // g1 (idx 13)
+      { type: 'telegram-notifications', position: { x: 1500, y: 300 } },    // g2 (idx 14)
     ],
     ghostEdges: [
-      { source: 9, target: 11 },  // frontend → paywall
-      { source: 9, target: 12 },  // frontend → dune-token-price
-      { source: 8, target: 13 },  // telegram-ai-agent → notifications
+      { source: 8, target: 12 },  // frontend → paywall
+      { source: 8, target: 13 },  // frontend → dune-token-price
+      { source: 11, target: 14 }, // telegram-ai-agent → notifications
     ],
   },
 
@@ -735,24 +741,27 @@ export const TEMPLATES: Template[] = [
     id: 'superposition-full-stack',
     name: 'Superposition Full Stack',
     description:
-      'Superposition L3 + Stylus contract + SmartCache + Radar + bridge + AMM + frontend — agent, paywall, Meow domains as suggestions',
+      'Superposition L3 + Stylus contract + SmartCache + Radar + bridge + AMM + frontend + RPC + chain data — agent, faucet, Meow domains as suggestions',
     icon: 'Rocket',
     colorClass: 'accent-secondary',
     category: 'superposition',
     tags: ['Superposition', 'Stylus', 'L3', 'Caching', 'Radar'],
     explainer:
-      'Superposition Network is the L3 chain — the Stylus contract deploys natively on it. SmartCache reduces latency and gas costs by warming the contract cache on the L3, and Auditware (Radar) scans the contract for vulnerabilities. The Superposition Bridge handles L2↔L3 asset movement, and Longtail AMM provides on-chain liquidity. The frontend orchestrates all interactions through wallet auth. Ghost blocks suggest Meow Domains for on-chain identity and an agent for automated contract interactions.',
+      'Superposition Network is the L3 chain — the Stylus contract deploys natively on it. SmartCache reduces latency and gas costs by warming the contract cache on the L3, and Auditware (Radar) scans the contract for vulnerabilities. The Superposition Bridge handles L2↔L3 asset movement, and Longtail AMM provides on-chain liquidity. The frontend orchestrates all interactions through wallet auth, RPC, and chain-data indexing. Ghost blocks suggest Meow Domains for on-chain identity, an agent for automated interactions, and a testnet faucet for development.',
     nodes: [
       { type: 'superposition-network', position: { x: 0, y: 75 } },        // 0  T0
-      { type: 'stylus-rust-contract', position: { x: 0, y: 225 } },            // 1  T0
-      { type: 'smartcache-caching', position: { x: 300, y: 0 } },         // 2  T1
-      { type: 'auditware-analyzing', position: { x: 300, y: 150 } },      // 3  T1
-      { type: 'superposition-bridge', position: { x: 300, y: 300 } },     // 4  T1
-      { type: 'superposition-longtail', position: { x: 300, y: 450 } },   // 5  T1
-      { type: 'frontend-scaffold', position: { x: 600, y: 150 } },        // 6  T2
-      { type: 'wallet-auth', position: { x: 900, y: 150 } },              // 7  T3
+      { type: 'stylus-rust-contract', position: { x: 300, y: 225 } },      // 1  T1
+      { type: 'smartcache-caching', position: { x: 600, y: 0 } },         // 2  T2
+      { type: 'auditware-analyzing', position: { x: 600, y: 150 } },      // 3  T2
+      { type: 'superposition-bridge', position: { x: 600, y: 300 } },     // 4  T2
+      { type: 'superposition-longtail', position: { x: 600, y: 450 } },   // 5  T2
+      { type: 'frontend-scaffold', position: { x: 900, y: 225 } },        // 6  T3
+      { type: 'rpc-provider', position: { x: 1200, y: 75 } },             // 7  T4
+      { type: 'chain-data', position: { x: 1200, y: 225 } },              // 8  T4
+      { type: 'wallet-auth', position: { x: 1200, y: 375 } },             // 9  T4
     ],
     edges: [
+      { source: 0, target: 1 },
       { source: 0, target: 4 },
       { source: 0, target: 5 },
       { source: 1, target: 2 },
@@ -761,16 +770,18 @@ export const TEMPLATES: Template[] = [
       { source: 4, target: 6 },
       { source: 5, target: 6 },
       { source: 6, target: 7 },
+      { source: 6, target: 8 },
+      { source: 6, target: 9 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 1200, y: 0 } },       // g0 (idx 8)
-      { type: 'x402-paywall-api', position: { x: 1200, y: 150 } },          // g1 (idx 9)
-      { type: 'superposition-meow-domains', position: { x: 1200, y: 300 } },// g2 (idx 10)
+      { type: 'erc8004-agent-runtime', position: { x: 1500, y: 0 } },       // g0 (idx 10)
+      { type: 'superposition-faucet', position: { x: 1500, y: 150 } },      // g1 (idx 11)
+      { type: 'superposition-meow-domains', position: { x: 1500, y: 300 } },// g2 (idx 12)
     ],
     ghostEdges: [
-      { source: 6, target: 8 },   // frontend → agent
-      { source: 6, target: 9 },   // frontend → paywall
-      { source: 0, target: 10 },  // network → meow-domains
+      { source: 6, target: 10 },  // frontend → agent
+      { source: 0, target: 11 },  // network → faucet
+      { source: 0, target: 12 },  // network → meow-domains
     ],
   },
 
@@ -780,46 +791,51 @@ export const TEMPLATES: Template[] = [
     id: 'superposition-defi-ai',
     name: 'Superposition DeFi + AI',
     description:
-      'Superposition L3 + Stylus contract + SmartCache + Radar + AMM + bridge + ERC-8004 agent + Dune DEX — paywall + Telegram as suggestions',
+      'Superposition L3 + Stylus contract + SmartCache + Radar + AMM + bridge + ERC-8004 agent + Dune DEX + RPC + chain data — faucet, super-assets, utility-mining as suggestions',
     icon: 'Zap',
     colorClass: 'warning',
     category: 'superposition',
     tags: ['Superposition', 'Stylus', 'Caching', 'Radar', 'Agent'],
     explainer:
-      'Superposition Network hosts both the Stylus contract and DeFi primitives. SmartCache reduces latency and gas costs by warming the contract cache for optimised reads, and Auditware (Radar) scans the contract for vulnerabilities. Longtail AMM and Bridge provide on-chain liquidity and cross-chain movement. The ERC-8004 agent automates DeFi strategies across these components. Dune DEX Volume feeds market analytics into the frontend.',
+      'Superposition Network hosts both the Stylus contract and DeFi primitives. SmartCache reduces latency and gas costs by warming the contract cache for optimised reads, and Auditware (Radar) scans the contract for vulnerabilities. Longtail AMM and Bridge provide on-chain liquidity and cross-chain movement. The ERC-8004 agent automates DeFi strategies across these components, including interaction with Longtail. Dune DEX Volume, RPC, and chain-data feed analytics and connectivity. Ghost suggestions include the Super Assets yield layer and Utility Mining rewards.',
     nodes: [
       { type: 'superposition-network', position: { x: 0, y: 0 } },        // 0  T0
-      { type: 'stylus-rust-contract', position: { x: 0, y: 150 } },            // 1  T0
+      { type: 'stylus-rust-contract', position: { x: 300, y: 150 } },      // 1  T1
       { type: 'erc8004-agent-runtime', position: { x: 0, y: 300 } },      // 2  T0
-      { type: 'auditware-analyzing', position: { x: 300, y: 0 } },        // 3  T1
-      { type: 'smartcache-caching', position: { x: 300, y: 150 } },       // 4  T1
-      { type: 'superposition-longtail', position: { x: 300, y: 300 } },   // 5  T1
-      { type: 'superposition-bridge', position: { x: 300, y: 450 } },     // 6  T1
-      { type: 'dune-dex-volume', position: { x: 600, y: 0 } },            // 7  T2
-      { type: 'frontend-scaffold', position: { x: 600, y: 225 } },        // 8  T2
-      { type: 'wallet-auth', position: { x: 900, y: 225 } },              // 9  T3
+      { type: 'auditware-analyzing', position: { x: 600, y: 0 } },        // 3  T2
+      { type: 'smartcache-caching', position: { x: 600, y: 150 } },       // 4  T2
+      { type: 'superposition-longtail', position: { x: 600, y: 300 } },   // 5  T2
+      { type: 'superposition-bridge', position: { x: 600, y: 450 } },     // 6  T2
+      { type: 'dune-dex-volume', position: { x: 900, y: 0 } },            // 7  T3
+      { type: 'rpc-provider', position: { x: 900, y: 150 } },             // 8  T3
+      { type: 'chain-data', position: { x: 900, y: 300 } },               // 9  T3
+      { type: 'frontend-scaffold', position: { x: 900, y: 450 } },        // 10 T3
+      { type: 'wallet-auth', position: { x: 1200, y: 225 } },             // 11 T4
     ],
     edges: [
-      { source: 0, target: 5 },
+      { source: 0, target: 1 },
       { source: 0, target: 6 },
       { source: 1, target: 3 },
       { source: 1, target: 4 },
-      { source: 1, target: 8 },
+      { source: 1, target: 10 },
+      { source: 2, target: 5 },
+      { source: 2, target: 10 },
       { source: 5, target: 7 },
-      { source: 5, target: 8 },
-      { source: 6, target: 8 },
-      { source: 2, target: 8 },
-      { source: 8, target: 9 },
+      { source: 5, target: 10 },
+      { source: 6, target: 10 },
+      { source: 10, target: 8 },
+      { source: 10, target: 9 },
+      { source: 10, target: 11 },
     ],
     ghostNodes: [
-      { type: 'x402-paywall-api', position: { x: 1200, y: 0 } },         // g0 (idx 10)
-      { type: 'dune-token-price', position: { x: 1200, y: 150 } },        // g1 (idx 11)
-      { type: 'telegram-ai-agent', position: { x: 1200, y: 300 } },       // g2 (idx 12)
+      { type: 'superposition-faucet', position: { x: 1500, y: 0 } },       // g0 (idx 12)
+      { type: 'superposition-super-assets', position: { x: 1500, y: 150 } },// g1 (idx 13)
+      { type: 'superposition-utility-mining', position: { x: 1500, y: 300 } },// g2 (idx 14)
     ],
     ghostEdges: [
-      { source: 8, target: 10 },  // frontend → paywall
-      { source: 8, target: 11 },  // frontend → dune-token-price
-      { source: 2, target: 12 },  // agent → telegram
+      { source: 0, target: 12 },  // network → faucet
+      { source: 5, target: 13 },  // longtail → super-assets
+      { source: 10, target: 14 }, // frontend → utility-mining
     ],
   },
 
