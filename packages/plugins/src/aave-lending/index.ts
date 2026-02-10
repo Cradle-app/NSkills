@@ -38,7 +38,10 @@ export class AaveLendingPlugin extends BasePlugin<z.infer<typeof AaveLendingSche
   readonly componentPackage = '@cradle/aave-lending';
   readonly componentPathMappings = {
     'src/hooks/**': 'frontend-hooks' as const,
-    'src/**': 'frontend-lib' as const,
+    'src/api.ts': 'frontend-lib' as const,
+    'src/constants.ts': 'frontend-lib' as const,
+    'src/types.ts': 'frontend-types' as const,
+    'src/index.ts': 'frontend-lib' as const,
   };
 
   readonly ports: PluginPort[] = [

@@ -42,8 +42,14 @@ export class ERC1155StylusPlugin extends BasePlugin<z.infer<typeof ERC1155Stylus
    * Copies the interaction panel and cn utility together
    */
   readonly componentPathMappings: Record<string, PathCategory> = {
+    'src/hooks/**': 'frontend-hooks',
     'src/ERC1155InteractionPanel.tsx': 'frontend-components',
     'src/cn.ts': 'frontend-lib',
+    'src/constants.ts': 'frontend-lib',
+    'src/deployment.ts': 'frontend-lib',
+    'src/interactions.ts': 'frontend-lib',
+    'src/types.ts': 'frontend-types',
+    'src/index.ts': 'frontend-lib',
     'contract/**': 'contract-source',
   };
 
