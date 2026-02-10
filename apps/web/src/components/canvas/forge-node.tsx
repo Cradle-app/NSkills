@@ -111,11 +111,15 @@ const iconMap: Record<string, typeof Box> = {
   'rpc-provider': Globe,
   'arbitrum-bridge': ArrowLeftRight,
   'chain-data': Database,
+  'onchain-activity': Database,
   'ipfs-storage': HardDrive,
   'chain-abstraction': Layers,
   'zk-primitives': Lock,
   'ostium-trading': TrendingUp,
   'maxxit': Bot,
+  'uniswap-swap': Coins,
+  'aave-lending': DollarSign,
+  'compound-lending': DollarSign,
   'aixbt-momentum': TrendingUp,
   'aixbt-signals': Zap,
   'aixbt-indigo': Sparkles,
@@ -335,15 +339,25 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
           {/* Node content */}
           <div className="relative p-3 opacity-50 group-hover:opacity-80 transition-opacity duration-200">
             <div className="flex items-start gap-2.5">
-              {/* Icon */}
+              {/* Icon / Logo */}
               <div
                 className={cn(
-                  'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
+                  'relative w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden',
                   colors.iconBg,
                   'border border-dashed border-[hsl(var(--color-border-subtle))]',
                 )}
               >
-                <Icon className={cn('w-4.5 h-4.5', colors.text)} />
+                {logoInfo ? (
+                  <Image
+                    src={logoInfo.src}
+                    alt={logoInfo.alt}
+                    fill
+                    className="object-contain p-0.5"
+                    unoptimized
+                  />
+                ) : (
+                  <Icon className={cn('w-4.5 h-4.5', colors.text)} />
+                )}
               </div>
 
               {/* Label */}
