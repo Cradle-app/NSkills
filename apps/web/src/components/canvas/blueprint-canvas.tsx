@@ -447,7 +447,7 @@ function BlueprintCanvasInner() {
             color="rgba(255,255,255, 0.15)"
           />
           {/* Minimap - positioned to left-bottom */}
-          {/* <MiniMap
+          <MiniMap
             position="bottom-left"
             pannable
             zoomable
@@ -469,7 +469,7 @@ function BlueprintCanvasInner() {
             maskColor="rgba(0, 0, 0, 0.85)"
             className="!bg-forge-surface/90 !border-forge-border !rounded-xl !shadow-sm cursor-pointer"
             style={{ left: 12, right: 'auto' }}
-          /> */}
+          />
         </ReactFlow>
 
         {/* Empty state */}
