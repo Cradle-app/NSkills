@@ -505,7 +505,7 @@ export const TEMPLATES: Template[] = [
       { type: 'telegram-commands', position: { x: 380, y: 20 } },      // 4  T1
       { type: 'smartcache-caching', position: { x: 380, y: 320 } },     // 5  T1
       { type: 'auditware-analyzing', position: { x: 380, y: 460 } },    // 6  T1
-      { type: 'telegram-wallet-link', position: { x: 680, y: -220} },   // 10 T1
+      { type: 'telegram-wallet-link', position: { x: 680, y: -220 } },   // 10 T1
       { type: 'telegram-notifications', position: { x: 380, y: -280 } },   // 7  T2
       { type: 'wallet-auth', position: { x: 380, y: 160 } },            // 8  T2
       { type: 'frontend-scaffold', position: { x: 680, y: -80 } },      // 9  T2
@@ -642,26 +642,28 @@ export const TEMPLATES: Template[] = [
     id: 'telegram-first-dapp',
     name: 'Telegram-First dApp',
     description:
-      'Full Telegram bot + ERC-8004 agent + Custom Stylus contract + SmartCache + Radar + ERC-20 token + Dune analytics — paywall + chain data as suggestions',
+      'Full Telegram bot + ERC-8004 agent + Custom Stylus contract + SmartCache + Radar + ERC-20 token + Dune analytics + RPC + Chain Data — paywall + quality gates as suggestions',
     icon: 'MessageSquare',
     colorClass: 'info',
     category: 'telegram',
     tags: ['Telegram', 'Stylus', 'Caching', 'Radar', 'Agent'],
     explainer:
-      'The Telegram AI Agent is the primary user interface — a custom Stylus contract lets the bot trigger on-chain actions directly. SmartCache reduces latency and gas costs by warming the contract cache for bot queries, and Auditware (Radar) scans the contract for vulnerabilities. Commands handle structured actions, Notifications send alerts, and Wallet Link connects on-chain identity. The ERC-8004 agent powers AI logic, pre-deployed ERC-20 (usable directly) is the native token, and Dune tracks holdings.',
+      'The Telegram AI Agent is the primary interface — feeding structured actions into the ERC-8004 brain. A custom Stylus contract handles on-chain logic, triggered by both AI decisions and manual Telegram commands. SmartCache and Radar ensure optimized performance and contract security. Chain-data indexes the outcomes of bot interactions, while the RPC provider handles transaction relay. Ghost blocks suggest gating features with a paywall or adding repo quality gates.',
     nodes: [
       { type: 'telegram-ai-agent', position: { x: 0, y: 0 } },           // 0  T0
       { type: 'erc20-stylus', position: { x: 0, y: 150 } },              // 1  T0
       { type: 'dune-wallet-balances', position: { x: 0, y: 300 } },      // 2  T0
-      { type: 'stylus-rust-contract', position: { x: 0, y: 450 } },           // 3  T0
-      { type: 'telegram-commands', position: { x: 300, y: 0 } },          // 4  T1
-      { type: 'telegram-notifications', position: { x: 300, y: 150 } },   // 5  T1
-      { type: 'telegram-wallet-link', position: { x: 300, y: 300 } },     // 6  T1
-      { type: 'erc8004-agent-runtime', position: { x: 300, y: 450 } },    // 7  T1
-      { type: 'smartcache-caching', position: { x: 300, y: 600 } },       // 8  T1
-      { type: 'auditware-analyzing', position: { x: 300, y: 750 } },      // 9  T1
-      { type: 'frontend-scaffold', position: { x: 600, y: 300 } },        // 10 T2
-      { type: 'wallet-auth', position: { x: 600, y: 450 } },              // 11 T2
+      { type: 'stylus-rust-contract', position: { x: 0, y: 450 } },      // 3  T0
+      { type: 'telegram-commands', position: { x: 300, y: 0 } },         // 4  T1
+      { type: 'telegram-notifications', position: { x: 300, y: 150 } },  // 5  T1
+      { type: 'telegram-wallet-link', position: { x: 300, y: 300 } },    // 6  T1
+      { type: 'erc8004-agent-runtime', position: { x: 300, y: 450 } },   // 7  T1
+      { type: 'smartcache-caching', position: { x: 300, y: 600 } },      // 8  T1
+      { type: 'auditware-analyzing', position: { x: 300, y: 750 } },     // 9  T1
+      { type: 'frontend-scaffold', position: { x: 600, y: 300 } },       // 10 T2
+      { type: 'wallet-auth', position: { x: 900, y: 150 } },             // 11 T3
+      { type: 'rpc-provider', position: { x: 900, y: 300 } },            // 12 T3
+      { type: 'chain-data', position: { x: 900, y: 450 } },              // 13 T3
     ],
     edges: [
       { source: 0, target: 4 },
@@ -673,19 +675,21 @@ export const TEMPLATES: Template[] = [
       { source: 3, target: 8 },
       { source: 3, target: 9 },
       { source: 3, target: 10 },
+      { source: 7, target: 3 },
+      { source: 4, target: 3 },
       { source: 7, target: 10 },
       { source: 10, target: 11 },
+      { source: 10, target: 12 },
+      { source: 10, target: 13 },
       { source: 6, target: 11 },
     ],
     ghostNodes: [
-      { type: 'x402-paywall-api', position: { x: 900, y: 0 } },          // g0 (idx 12)
-      { type: 'chain-data', position: { x: 900, y: 150 } },              // g1 (idx 13)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },      // g2 (idx 14)
+      { type: 'x402-paywall-api', position: { x: 1200, y: 0 } },         // g0 (idx 14)
+      { type: 'repo-quality-gates', position: { x: 1200, y: 300 } },     // g1 (idx 15)
     ],
     ghostEdges: [
-      { source: 10, target: 12 },  // frontend → paywall
-      { source: 10, target: 13 },  // frontend → chain-data
-      { source: 3, target: 14 },   // stylus → quality-gates
+      { source: 10, target: 14 },  // frontend → paywall
+      { source: 3, target: 15 },   // stylus → quality-gates
     ],
   },
 
@@ -898,36 +902,41 @@ export const TEMPLATES: Template[] = [
     id: 'eip7702-smart-account',
     name: 'EIP-7702 Smart Account',
     description:
-      'Smart EOA + chain abstraction + frontend + wallet + RPC — agent, paywall, and gas analytics as suggestions',
+      'Smart EOA + chain abstraction + frontend + wallet + RPC + Chain Data — agent, paywall, data insights and gas analytics as suggestions',
     icon: 'KeyRound',
     colorClass: 'info',
     category: 'infrastructure',
     tags: ['EIP-7702', 'Smart EOA', 'Chain Abstraction', 'Agent-Ready'],
     explainer:
-      'EIP-7702 upgrades a regular EOA into a smart account with batched transactions, gas sponsorship, and session keys. Chain Abstraction lets this smart account operate across multiple chains seamlessly. Both feed into the frontend and wallet auth for a unified UX. The RPC provider handles transaction relay. Ghost blocks suggest Dune Gas Price for fee estimation and an agent for automated multi-chain operations.',
+      'The frontend serves as the primary gateway, orchestrating user interactions through wallet authentication, transaction relayers (RPC), and event indexing (Chain Data). Wallet authentication then upgrades the experience by leveraging EIP-7702 smart accounts and cross-chain abstraction protocols. Ghost blocks suggest extending the app with AI agents, monetization, or deep on-chain analytics.',
     nodes: [
-      { type: 'eip7702-smart-eoa', position: { x: 0, y: 0 } },         // 0  T0
-      { type: 'chain-abstraction', position: { x: 0, y: 150 } },        // 1  T0
-      { type: 'frontend-scaffold', position: { x: 300, y: 0 } },        // 2  T1
-      { type: 'wallet-auth', position: { x: 300, y: 150 } },            // 3  T1
-      { type: 'rpc-provider', position: { x: 600, y: 75 } },            // 4  T2
+      { type: 'frontend-scaffold', position: { x: 0, y: 150 } },        // 0  T0
+      { type: 'wallet-auth', position: { x: 300, y: 0 } },             // 1  T1
+      { type: 'rpc-provider', position: { x: 300, y: 150 } },          // 2  T1
+      { type: 'chain-data', position: { x: 300, y: 300 } },            // 3  T1
+      { type: 'eip7702-smart-eoa', position: { x: 600, y: 50 } },      // 4  T2
+      { type: 'chain-abstraction', position: { x: 600, y: 150 } },     // 5  T2
     ],
     edges: [
+      { source: 0, target: 1 },
       { source: 0, target: 2 },
       { source: 0, target: 3 },
-      { source: 1, target: 2 },
-      { source: 1, target: 3 },
-      { source: 2, target: 4 },
+      { source: 1, target: 4 },
+      { source: 1, target: 5 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 5)
-      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 6)
-      { type: 'dune-gas-price', position: { x: 900, y: 300 } },        // g2 (idx 7)
+      { type: 'erc8004-agent-runtime', position: { x: 0, y: 450 } },   // g0 (idx 6)
+      { type: 'x402-paywall-api', position: { x: 300, y: 450 } },      // g1 (idx 7)
+      { type: 'dune-gas-price', position: { x: 600, y: 450 } },        // g2 (idx 8)
+      { type: 'onchain-activity', position: { x: 900, y: 100 } },      // g3 (idx 9)
+      { type: 'dune-wallet-balances', position: { x: 900, y: 250 } },  // g4 (idx 10)
     ],
     ghostEdges: [
-      { source: 2, target: 5 },  // frontend → agent
-      { source: 2, target: 6 },  // frontend → paywall
-      { source: 2, target: 7 },  // frontend → dune-gas-price
+      { source: 0, target: 6 },  // frontend → agent
+      { source: 0, target: 7 },  // frontend → paywall
+      { source: 0, target: 8 },  // frontend → dune-gas-price
+      { source: 3, target: 9 },  // chain-data → onchain-activity
+      { source: 3, target: 10 }, // chain-data → dune-wallet-balances
     ],
   },
 
