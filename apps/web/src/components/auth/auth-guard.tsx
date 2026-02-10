@@ -12,7 +12,7 @@ interface AuthGuardProps {
   children: ReactNode;
   fallback?: ReactNode;
   requireGitHub?: boolean;
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent) => void;
   className?: string;
   showStatusIndicator?: boolean;
 }
@@ -105,7 +105,7 @@ export function AuthGuard({
     }
 
     console.log('[AuthGuard] Calling onClick (auth passed)');
-    onClick?.();
+    onClick?.(e);
   }, [
     isConnected,
     address,
@@ -428,7 +428,7 @@ export function useAuthGuard() {
     }
     action?.();
     return true;
-  }, [isConnected, address, fullAuthStatus, isFullyAuthenticated,  openAuthModal]);
+  }, [isConnected, address, fullAuthStatus, isFullyAuthenticated, openAuthModal]);
 
   const connectionState = getConnectionState();
 

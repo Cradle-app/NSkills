@@ -290,7 +290,7 @@ export function GenerateDialog({ open, onOpenChange }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4 flex-1 overflow-y-auto pr-1">
+        <div className="space-y-4 py-4 px-6 flex-1 overflow-y-auto">
           {/* Output mode selector */}
           <div className="space-y-2">
             <p className="text-xs font-semibold text-[hsl(var(--color-text-muted))] uppercase tracking-wider">Output Mode</p>

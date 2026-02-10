@@ -40,6 +40,8 @@ import {
 } from '@cradle/plugin-config';
 import { useSuggestedPlugins } from '@/hooks/use-suggested-plugins';
 import { useBlueprintStore } from '@/store/blueprint';
+
+// Logo asset imports
 import AaveLogo from '@/assets/blocks/Aave.svg';
 import CompoundLogo from '@/assets/blocks/Compound.svg';
 import ChainlinkLogo from '@/assets/blocks/Chainlink.svg';
@@ -62,80 +64,44 @@ import PaymentLogo from '@/assets/blocks/payment.png';
 import ArbitrumLogo from '@/assets/blocks/arbitrum.svg';
 import NextjsLogo from '@/assets/blocks/Nextjs.png';
 
-
 /**
  * Centralized logo asset mapping
- * Maps logoAsset filenames (from plugin registry) to actual imported assets
  */
 const LOGO_ASSETS: Record<string, any> = {
-  // Protocol logos
   'Aave.svg': AaveLogo,
   'Compound.svg': CompoundLogo,
   'Chainlink.svg': ChainlinkLogo,
   'Pyth.svg': PythLogo,
   'Uniswap.svg': UniswapLogo,
-  // Contract logos
   'CS_logo.png': CSLogo,
   'auditware.png': AuditwareLogo,
   'stylus.svg': StylusLogo,
-  // Agent logos
   'Ostium.svg': OstiumLogo,
   'MaxxitLogo.png': MaxxitLogo,
   'AIbot.png': AIbotLogo,
   'Wallet.svg': WalletLogoSvg,
   'Wallet.png': WalletLogoPng,
-  // Superposition logos
   'superposition.png': SuperpositionLogo,
-  // Dune logos
   'dune.png': DuneLogo,
-  // Intelligence logos
   'aixbt.png': AixbtLogo,
-  // Telegram logos
   'Telegram.jpg': TelegramLogo,
-  // Application logos
   'Ipfs.svg': IpfsLogo,
   'payment.png': PaymentLogo,
   'arbitrum.svg': ArbitrumLogo,
   'Nextjs.png': NextjsLogo,
 };
 
-/**
- * Get logo asset from plugin's logoAsset field
- */
 function getLogoAsset(logoAsset?: string): any | null {
   if (!logoAsset) return null;
   return LOGO_ASSETS[logoAsset] || null;
 }
 
-
-/**
- * Map icon names to Lucide components
- */
 const ICON_MAP: Record<PluginIcon, LucideIcon> = {
-  Box,
-  CreditCard,
-  Bot,
-  Layout,
-  ShieldCheck,
-  Wallet,
-  Globe,
-  Database,
-  HardDrive,
-  Layers,
-  Lock,
-  Link,
-  ArrowLeftRight,
-  Key,
-  Sparkles,
-  TrendingUp,
-  Zap,
-  Coins,
-  Search,
+  Box, CreditCard, Bot, Layout, ShieldCheck, Wallet, Globe, Database,
+  HardDrive, Layers, Lock, Link, ArrowLeftRight, Key, Sparkles, TrendingUp,
+  Zap, Coins, Search,
 };
 
-/**
- * Get Lucide icon component from icon name
- */
 function getIconComponent(iconName: PluginIcon): LucideIcon {
   return ICON_MAP[iconName] || Box;
 }
@@ -148,9 +114,6 @@ interface NodeCategory {
   plugins: PluginRegistryEntry[];
 }
 
-/**
- * Build categories from centralized registry
- */
 function buildCategories(): NodeCategory[] {
   return CATEGORY_DEFINITIONS.map((cat) => ({
     id: cat.id,
@@ -164,12 +127,10 @@ function buildCategories(): NodeCategory[] {
 export function NodePalette() {
   const [searchQuery, setSearchQuery] = useState('');
   const { isConnected } = useAccount();
-  const { isWalletConnected, isFullyAuthenticated } = useAuthGuard();
-  const { showAuthModal, openAuthModal, closeAuthModal } = useAuthStore();
+  const { isWalletConnected } = useAuthGuard();
+  const { openAuthModal } = useAuthStore();
 
   const categories = useMemo(() => buildCategories(), []);
-  const { suggestions, hasSuggestions } = useSuggestedPlugins();
-  const addNode = useBlueprintStore((state) => state.addNode);
 
   const [favorites, setFavorites] = useState<Set<string>>(() => {
     if (typeof window !== 'undefined') {
@@ -208,7 +169,6 @@ export function NodePalette() {
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  /* filteredCategories logic simplified */
   const filteredCategories = useMemo(() => {
     return categories.map(category => ({
       ...category,
@@ -218,335 +178,248 @@ export function NodePalette() {
           plugin.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
           plugin.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       ),
-    })).filter(category => category.plugins.length > 0 || searchQuery === '');
+    })).filter(category => category.plugins.length > 0);
   }, [categories, searchQuery]);
 
-  const contractsCategory = useMemo(
-    () => filteredCategories.find((c) => c.id === 'contracts'),
-    [filteredCategories]
-  );
+  const favoritePlugins = useMemo(() => {
+    const allPlugins = categories.flatMap(c => c.plugins);
+    return allPlugins.filter(p => favorites.has(p.id));
+  }, [categories, favorites]);
 
-  const protocolsCategory = useMemo(
-    () => filteredCategories.find((c) => c.id === 'protocols'),
-    [filteredCategories]
-  );
-
-  const otherCategories = useMemo(
-    () => filteredCategories.filter((c) => c.id !== 'contracts' && c.id !== 'protocols'),
-    [filteredCategories]
-  );
-
+  const hasSearchResults = filteredCategories.length > 0;
 
   return (
-    <>
-      <aside
-        data-tour="palette"
-        className="h-full border-r border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-subtle))] flex flex-col overflow-hidden"
-      >
-        {/* Header */}
-        <div className="p-4 border-b border-[hsl(var(--color-border-default))]">
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="p-1.5 rounded-lg bg-[hsl(var(--color-accent-primary)/0.1)]">
-              <Sparkles className="w-4 h-4 text-[hsl(var(--color-accent-primary))]" />
+    <aside
+      data-tour="palette"
+      className="h-full border-r border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-subtle))] flex flex-col overflow-hidden select-none"
+    >
+      {/* Header Section */}
+      <div className="p-4 bg-[hsl(var(--color-bg-subtle)/0.8)] backdrop-blur-md z-20 border-b border-[hsl(var(--color-border-default)/0.5)]">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-[hsl(var(--color-accent-primary)/0.2)] to-[hsl(var(--color-accent-secondary)/0.2)] border border-[hsl(var(--color-accent-primary)/0.1)] shadow-glow-sm">
+              <Layers className="w-4 h-4 text-[hsl(var(--color-accent-primary))]" />
             </div>
-            <h2 className="text-sm font-semibold text-[hsl(var(--color-text-primary))] tracking-wide">
-              Components
-            </h2>
+            <div>
+              <h2 className="text-xs font-bold text-[hsl(var(--color-text-primary))] uppercase tracking-[0.15em]">
+                Registry
+              </h2>
+              <p className="text-[10px] text-[hsl(var(--color-text-muted))]">Component Library</p>
+            </div>
           </div>
+          {favorites.size > 0 && (
+            <div className="flex -space-x-1.5 overflow-hidden">
+              {[...favorites].slice(0, 3).map((id) => (
+                <div key={id} className="inline-block h-5 w-5 rounded-full ring-2 ring-[hsl(var(--color-bg-subtle))] bg-[hsl(var(--color-bg-elevated))] flex items-center justify-center border border-[hsl(var(--color-border-subtle))]">
+                  <Star className="w-2.5 h-2.5 text-amber-500 fill-current" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-          {/* Search */}
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--color-text-muted))] group-focus-within:text-[hsl(var(--color-accent-primary))] transition-colors" />
+        {/* Search Bar */}
+        <div className="relative group">
+          <div className="absolute inset-0 bg-[hsl(var(--color-accent-primary)/0.03)] rounded-xl blur-md group-focus-within:bg-[hsl(var(--color-accent-primary)/0.08)] transition-all" />
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--color-text-muted))] group-focus-within:text-[hsl(var(--color-accent-primary))] transition-colors" />
             <input
               type="text"
-              placeholder="Search components..."
+              placeholder="Search resources..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className={cn(
-                "w-full pl-9 pr-8 py-2.5 text-sm",
+                "w-full pl-10 pr-10 py-2.5 text-sm",
                 "bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))]",
-                "rounded-lg text-[hsl(var(--color-text-primary))]",
-                "placeholder:text-[hsl(var(--color-text-muted))]",
-                "focus:outline-none focus:border-[hsl(var(--color-accent-primary))]",
-                "focus:ring-2 focus:ring-[hsl(var(--color-accent-primary)/0.15)]",
-                "transition-all duration-150"
+                "rounded-xl text-[hsl(var(--color-text-primary))]",
+                "placeholder:text-[hsl(var(--color-text-muted)/0.7)]",
+                "focus:outline-none focus:border-[hsl(var(--color-accent-primary)/0.5)]",
+                "focus:ring-2 focus:ring-[hsl(var(--color-accent-primary)/0.05)]",
+                "transition-all duration-200"
               )}
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-[hsl(var(--color-bg-hover))] text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] transition-all"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
         </div>
+      </div>
 
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {/* Contracts category first */}
-          {contractsCategory && (
-            <div className="space-y-2 mt-2">
-              <div
-                className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl',
-                  'bg-forge-elevated/20'
-                )}
-              >
-                <span className="text-sm font-medium text-white flex-1 text-left">
-                  {contractsCategory.name}
-                </span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-forge-elevated/60 text-forge-muted">
-                  {contractsCategory.plugins.length}
-                </span>
-              </div>
+      {/* Categories Scroll Area */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-4">
 
-              <div className="pb-2 pt-1">
-                <div className="grid grid-cols-2 gap-2">
-                  {contractsCategory.plugins.map((plugin, pluginIndex) => {
-                    const PluginIcon = getIconComponent(plugin.icon);
-                    const logoAsset = getLogoAsset(plugin.logoAsset);
-                    return (
-                      <motion.div
-                        key={plugin.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: pluginIndex * 0.03 }}
-                      >
-                        <div
-                          draggable
-                          onDragStart={(e) => onDragStart(e, plugin.id)}
-                          className={cn(
-                            'group relative flex items-start gap-2 px-3 py-2 rounded-xl',
-                            'bg-forge-bg/60 border border-forge-border/40',
-                            'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
-                            'cursor-grab active:cursor-grabbing transition-all duration-200'
-                          )}
-                        >
-                          <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20 shrink-0 flex items-center justify-center">
-                            {logoAsset ? (
-                              <Image
-                                src={logoAsset}
-                                alt={plugin.name}
-                                fill
-                                className="object-contain"
-                                unoptimized
-                              />
-                            ) : (
-                              <PluginIcon
-                                className={cn('w-4 h-4 shrink-0', `text-${plugin.color}`)}
-                              />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-white line-clamp-2 leading-tight">
-                              {plugin.name}
-                            </p>
-                            {/* <p className="text-[10px] text-forge-muted truncate">
-                              {plugin.description}
-                            </p> */}
-                          </div>
-                          <button
-                            onClick={(e) => toggleFavorite(plugin.id, e)}
-                            className={cn(
-                              'p-1 rounded shrink-0 transition-all opacity-0 group-hover:opacity-100',
-                              favorites.has(plugin.id)
-                                ? 'text-amber-400 opacity-100'
-                                : 'text-forge-muted hover:text-amber-400'
-                            )}
-                            title={favorites.has(plugin.id) ? 'Remove from favorites' : 'Add to favorites'}
-                          >
-                            <Star className={cn('w-3.5 h-3.5', favorites.has(plugin.id) && 'fill-current')} />
-                          </button>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
+        {/* Pinned Blocks Section */}
+        {!searchQuery && favoritePlugins.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+              <span className="text-[11px] font-bold text-[hsl(var(--color-text-secondary))] tracking-wider uppercase">
+                Pinned Blocks
+              </span>
+              <div className="flex-1 h-px bg-gradient-to-r from-[hsl(var(--color-border-subtle))] to-transparent ml-2" />
             </div>
-          )}
-
-
-          {/* Protocol plugins second */}
-          {protocolsCategory && protocolsCategory.plugins.length > 0 && (
-            <div className="space-y-3 mt-6">
-              <div
-                className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl',
-                  'bg-forge-elevated/20'
-                )}
-              >
-                <span className="text-sm font-medium text-white flex-1 text-left">
-                  Protocol Plugins
-                </span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-forge-elevated/60 text-forge-muted">
-                  {protocolsCategory.plugins.length}
-                </span>
-              </div>
-
-              <div className="pb-2 pt-1">
-                <div className="grid grid-cols-2 gap-2">
-                  {protocolsCategory.plugins.map((plugin, pluginIndex) => {
-                    const PluginIcon = getIconComponent(plugin.icon);
-                    const logoAsset = getLogoAsset(plugin.logoAsset);
-                    return (
-                      <motion.div
-                        key={plugin.id}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: pluginIndex * 0.03 }}
-                      >
-                        <div
-                          draggable
-                          onDragStart={(e) => onDragStart(e, plugin.id)}
-                          className={cn(
-                            'group relative flex items-start gap-2 px-3 py-2 rounded-xl',
-                            'bg-forge-bg/60 border border-forge-border/40',
-                            'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
-                            'cursor-grab active:cursor-grabbing transition-all duration-200'
-                          )}
-                        >
-                          <div className="relative w-8 h-8 rounded-md overflow-hidden bg-black/20">
-                            {logoAsset ? (
-                              <Image
-                                src={logoAsset}
-                                alt={plugin.name}
-                                fill
-                                className="object-contain"
-                                unoptimized
-                              />
-                            ) : (
-                              <PluginIcon className={cn('w-4 h-4', `text-${plugin.color}`)} />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-white line-clamp-2 leading-tight">
-                              {plugin.name}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2">
+              {favoritePlugins.map((plugin, idx) => (
+                <PluginCard
+                  key={`fav-${plugin.id}`}
+                  plugin={plugin}
+                  index={idx}
+                  isFavorite
+                  onDragStart={onDragStart}
+                  toggleFavorite={toggleFavorite}
+                />
+              ))}
             </div>
-          )}
+          </div>
+        )}
 
+        {searchQuery && !hasSearchResults && (
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <Search className="w-8 h-8 text-[hsl(var(--color-text-disabled))] mb-3 opacity-20" />
+            <h3 className="text-sm font-medium text-[hsl(var(--color-text-primary))]">No blocks found</h3>
+            <p className="text-xs text-[hsl(var(--color-text-muted))] mt-1">Try a different search term</p>
+          </div>
+        )}
 
-          {/* Remaining categories */}
-          <div className="space-y-4 mt-6">
-            {otherCategories.map((category, categoryIndex) => {
-              const CategoryIcon = category.icon;
-              return (
-                <motion.div
-                  key={category.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: categoryIndex * 0.05 }}
-                  className="rounded-xl overflow-hidden"
-                >
-                  {/* Category header (always expanded, not clickable) */}
-                  <div
-                    className={cn(
-                      'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl',
-                      'bg-forge-elevated/20'
-                    )}
-                  >
-                    <span className="text-sm font-medium text-white flex-1 text-left">
-                      {category.name}
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-[hsl(var(--color-bg-elevated))] text-[hsl(var(--color-text-disabled))] border border-[hsl(var(--color-border-subtle))]">
-                      {category.plugins.length}
-                    </span>
-                  </div>
+        {filteredCategories.map((category) => (
+          <div key={category.id} className="space-y-3">
+            <div className="sticky top-0 bg-[hsl(var(--color-bg-subtle)/0.95)] backdrop-blur-sm z-10 py-1.5 flex items-center gap-2.5 px-1 -mx-1">
+              <div className={cn("p-1 rounded-md shrink-0", `bg-${category.color}/10 border border-${category.color}/20`)}>
+                <category.icon className={cn("w-3 h-3", `text-${category.color}`)} />
+              </div>
+              <span className="text-[9px] font-black text-[hsl(var(--color-text-secondary))] tracking-[0.1em] uppercase">
+                {category.name}
+              </span>
+              <div className="flex-1 h-px bg-[hsl(var(--color-border-subtle))] opacity-30 ml-1" />
+              <span className="text-[10px] tabular-nums font-mono text-[hsl(var(--color-text-muted))] opacity-60">
+                {category.plugins.length}
+              </span>
+            </div>
 
-                  {/* Plugins (always visible) - 2 per row */}
-                  <div className="pb-2 pt-1">
-                    <div className="grid grid-cols-2 gap-2">
-                      {category.plugins.map((plugin, pluginIndex) => {
-                        const PluginIcon = getIconComponent(plugin.icon);
-                        const logoAsset = getLogoAsset(plugin.logoAsset);
-                        return (
-                          <motion.div
-                            key={plugin.id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: pluginIndex * 0.03 }}
-                          >
-                            <div
-                              draggable
-                              onDragStart={(e) => onDragStart(e, plugin.id)}
-                              className={cn(
-                                'group relative flex items-start gap-2 px-3 py-2 rounded-xl',
-                                'bg-forge-bg/60 border border-forge-border/40',
-                                'hover:border-accent-cyan/60 hover:bg-forge-elevated/70',
-                                'cursor-grab active:cursor-grabbing transition-all duration-200'
-                              )}
-                            >
-                              <div
-                                className={cn(
-                                  'relative w-8 h-8 rounded-md flex items-center justify-center shrink-0 overflow-hidden',
-                                  logoAsset ? 'bg-black/20' : 'bg-gradient-to-br transition-all duration-200',
-                                  !logoAsset && `from-${plugin.color}/20 to-${plugin.color}/5`
-                                )}
-                              >
-                                {logoAsset ? (
-                                  <Image src={logoAsset} alt={plugin.name} fill className="object-contain" unoptimized />
-                                ) : (
-                                  <PluginIcon className={cn('w-4 h-4', `text-${plugin.color}`)} />
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs font-medium text-white line-clamp-2 leading-tight">
-                                  {plugin.name}
-                                </p>
-                                {/* <p className="text-[10px] text-forge-muted truncate">
-                                  {plugin.description}
-                                </p> */}
-                              </div>
-                              <button
-                                onClick={(e) => toggleFavorite(plugin.id, e)}
-                                className={cn(
-                                  'p-1 rounded shrink-0 transition-all opacity-0 group-hover:opacity-100',
-                                  favorites.has(plugin.id)
-                                    ? 'text-amber-400 opacity-100'
-                                    : 'text-forge-muted hover:text-amber-400'
-                                )}
-                                title={favorites.has(plugin.id) ? 'Remove from favorites' : 'Add to favorites'}
-                              >
-                                <Star className={cn('w-3.5 h-3.5', favorites.has(plugin.id) && 'fill-current')} />
-                              </button>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2">
+              {category.plugins.map((plugin, pluginIdx) => (
+                <PluginCard
+                  key={plugin.id}
+                  plugin={plugin}
+                  index={pluginIdx}
+                  onDragStart={onDragStart}
+                  toggleFavorite={toggleFavorite}
+                  isFavorite={favorites.has(plugin.id)}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Minimal Footer */}
+      <div className="p-4 bg-gradient-to-t from-[hsl(var(--color-bg-base))] to-transparent border-t border-[hsl(var(--color-border-default)/0.3)]">
+        <div className="flex items-center justify-center gap-3 py-2.5 px-3 rounded-xl bg-[hsl(var(--color-bg-elevated)/0.5)] border border-[hsl(var(--color-border-subtle)/0.5)] backdrop-blur-sm shadow-sm">
+          <Zap className="w-3.5 h-3.5 text-[hsl(var(--color-accent-primary))] fill-current animate-pulse" />
+          <span className="text-[10px] font-medium text-[hsl(var(--color-text-secondary))] tracking-tight">
+            Drag component to canvas
+          </span>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function PluginCard({
+  plugin,
+  index,
+  onDragStart,
+  toggleFavorite,
+  isFavorite
+}: {
+  plugin: PluginRegistryEntry,
+  index: number,
+  onDragStart?: (e: React.DragEvent, id: string) => void,
+  toggleFavorite?: (id: string, e: React.MouseEvent) => void,
+  isFavorite: boolean
+}) {
+  const PluginIcon = getIconComponent(plugin.icon);
+  const logoAsset = getLogoAsset(plugin.logoAsset);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{
+        duration: 0.4,
+        delay: index * 0.03,
+        ease: [0.16, 1, 0.3, 1]
+      }}
+    >
+      <div
+        draggable={!!onDragStart}
+        onDragStart={onDragStart ? (e) => onDragStart(e, plugin.id) : undefined}
+        className={cn(
+          'group relative flex flex-col items-center justify-center p-2 rounded-2xl border transition-all duration-300',
+          'bg-[hsl(var(--color-bg-base)/0.3)] border-[hsl(var(--color-border-default)/0.4)]',
+          'hover:bg-[hsl(var(--color-bg-elevated)/0.6)] hover:border-[hsl(var(--color-accent-primary)/0.2)]',
+          'hover:shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5),0_0_15px_-5px_hsl(var(--color-accent-primary)/0.15)]',
+          'cursor-grab active:cursor-grabbing active:scale-95',
+          'overflow-hidden'
+        )}
+      >
+        {/* Favorite Button - Positioned in top-right */}
+        {toggleFavorite && (
+          <button
+            onClick={(e) => toggleFavorite(plugin.id, e)}
+            className={cn(
+              'absolute top-2 right-2 p-1 rounded-md transition-all duration-200 z-10',
+              isFavorite
+                ? 'text-amber-400 bg-amber-400/10 opacity-100 scale-100'
+                : 'text-white/20 opacity-0 group-hover:opacity-100 hover:bg-white/5 hover:scale-110'
+            )}
+          >
+            <Star className={cn('w-3 h-3', isFavorite && 'fill-current')} />
+          </button>
+        )}
+
+        {/* Icon Section - Focal point */}
+        <div className="relative w-12 h-12 flex items-center justify-center mt-1">
+          {/* Subtle glow behind icon */}
+          <div className={cn(
+            "absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500",
+            `bg-${plugin.color}`
+          )} />
+
+          <div className={cn(
+            "relative w-full h-full flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-1",
+            !logoAsset && `text-${plugin.color}`
+          )}>
+            {logoAsset ? (
+              <div className="relative w-11 h-11 p-1">
+                <Image
+                  src={logoAsset}
+                  alt={plugin.name}
+                  fill
+                  className="object-contain drop-shadow-sm transition-all"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="p-3 w-full h-full opacity-80 group-hover:opacity-100">
+                <PluginIcon className="w-full h-full" />
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Footer hint */}
-        <div className="p-4 border-t border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-base)/0.5)]">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 text-xs text-[hsl(var(--color-text-muted))] mb-1.5">
-              <div className="w-5 h-5 rounded bg-[hsl(var(--color-bg-elevated))] flex items-center justify-center">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
-                </svg>
-              </div>
-              <span>Drag to compose your blueprint</span>
-            </div>
-            <p className="text-[10px] text-[hsl(var(--color-text-disabled))]">
-              Connect blocks, configure, then build
-            </p>
-          </div>
+        {/* Text Section - Integrated */}
+        <div className="mt-2 w-full text-center px-1">
+          <h4 className="text-[10px] font-semibold text-[hsl(var(--color-text-secondary))] leading-tight truncate group-hover:text-[hsl(var(--color-text-primary))] transition-colors">
+            {plugin.name}
+          </h4>
         </div>
-      </aside>
-    </>
+      </div>
+    </motion.div>
   );
 }

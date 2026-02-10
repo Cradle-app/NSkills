@@ -386,25 +386,25 @@ export const TEMPLATES: Template[] = [
     id: 'nft-marketplace',
     name: 'NFT Marketplace',
     description:
-      'Custom Stylus marketplace contract + ERC-721/1155 + SmartCache + Radar + IPFS + analytics + SDK — agent + paywall as suggestions',
+      'Custom Stylus marketplace contract + ERC-721/1155 + SmartCache + Radar + IPFS + analytics + history — agent + paywall as suggestions',
     icon: 'Image',
     colorClass: 'accent-secondary',
     category: 'nft',
     tags: ['NFT', 'Stylus', 'Marketplace', 'Caching', 'Radar'],
     explainer:
-      'A custom Stylus marketplace contract handles listings, bids, and royalty splits — SmartCache reduces latency and gas costs by warming the marketplace contract cache, and Auditware (Radar) scans it for vulnerabilities. Pre-deployed ERC-721 and ERC-1155 (usable directly) handle NFT minting, with metadata pinned to IPFS. The frontend renders the marketplace UI with wallet auth, Dune NFT Floor tracks collection prices, chain-data indexes events, and the SDK generator creates a client library for integrations.',
+      'A custom Stylus marketplace contract handles listings, bids, and royalty splits — SmartCache reduces latency and gas costs by warming the marketplace contract cache, and Auditware (Radar) scans it for vulnerabilities. Pre-deployed ERC-721 and ERC-1155 (usable directly) handle NFT minting, with metadata pinned to IPFS. The frontend renders the marketplace UI with wallet auth, Dune NFT Floor tracks collection prices, chain-data indexes events, and Transaction History provides a full audit trail of activity.',
     nodes: [
       { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },            // 0  T0
-      { type: 'erc721-stylus', position: { x: 0, y: 150 } },            // 1  T0
-      { type: 'erc1155-stylus', position: { x: 0, y: 300 } },           // 2  T0
-      { type: 'smartcache-caching', position: { x: 300, y: 0 } },       // 3  T1
-      { type: 'auditware-analyzing', position: { x: 300, y: 150 } },    // 4  T1
-      { type: 'ipfs-storage', position: { x: 300, y: 300 } },           // 5  T1
-      { type: 'frontend-scaffold', position: { x: 300, y: 450 } },      // 6  T1
-      { type: 'dune-nft-floor', position: { x: 300, y: 600 } },         // 7  T1
-      { type: 'sdk-generator', position: { x: 300, y: 750 } },          // 8  T1
-      { type: 'wallet-auth', position: { x: 600, y: 300 } },            // 9  T2
-      { type: 'chain-data', position: { x: 600, y: 450 } },             // 10 T2
+      { type: 'erc721-stylus', position: { x: 0, y: 340 } },            // 1  T0
+      { type: 'erc1155-stylus', position: { x: 0, y: 160 } },           // 2  T0
+      { type: 'smartcache-caching', position: { x: 360, y: -160 } },       // 3  T1
+      { type: 'auditware-analyzing', position: { x: 360, y: -60 } },    // 4  T1
+      { type: 'ipfs-storage', position: { x: 360, y: 320 } },           // 5  T1
+      { type: 'frontend-scaffold', position: { x: 360, y: 140 } },      // 6  T1
+      { type: 'dune-nft-floor', position: { x: 360, y: 600 } },         // 7  T1
+      { type: 'dune-transaction-history', position: { x: 360, y: 400 } }, // 8  T1
+      { type: 'wallet-auth', position: { x: 680, y: 40 } },            // 9  T2
+      { type: 'chain-data', position: { x: 700, y: 220 } },             // 10 T2
     ],
     edges: [
       { source: 0, target: 3 },
@@ -496,18 +496,19 @@ export const TEMPLATES: Template[] = [
     category: 'ai',
     tags: ['AI', 'Agent', 'Stylus', 'Caching', 'Radar'],
     explainer:
-      'The ERC-8004 agent is the brain — the Stylus contract gives it direct on-chain execution power for triggering transactions and state changes. SmartCache reduces latency and gas costs by warming the contract cache for agent queries, and Auditware (Radar) scans the contract for vulnerabilities. Telegram AI Agent handles conversational interactions, Commands handles structured actions, and Notifications relay outputs. The x402 paywall gates premium features behind micro-payments.',
+      'The ERC-8004 agent is the brain — the Stylus contract gives it direct on-chain execution power for triggering transactions and state changes. SmartCache reduces latency and gas costs by warming the contract cache for agent queries, and Auditware (Radar) scans the contract for vulnerabilities. Telegram AI Agent handles conversational interactions, Commands handles structured actions, and Notifications relay outputs. Wallet Link connects on-chain identity for execution. The x402 paywall gates premium features.',
     nodes: [
       { type: 'erc8004-agent-runtime', position: { x: 0, y: 0 } },      // 0  T0
       { type: 'x402-paywall-api', position: { x: 0, y: 150 } },         // 1  T0
       { type: 'stylus-rust-contract', position: { x: 0, y: 300 } },          // 2  T0
-      { type: 'telegram-ai-agent', position: { x: 300, y: 0 } },        // 3  T1
-      { type: 'telegram-commands', position: { x: 300, y: 150 } },      // 4  T1
-      { type: 'smartcache-caching', position: { x: 300, y: 300 } },     // 5  T1
-      { type: 'auditware-analyzing', position: { x: 300, y: 450 } },    // 6  T1
-      { type: 'telegram-notifications', position: { x: 600, y: 0 } },   // 7  T2
-      { type: 'wallet-auth', position: { x: 600, y: 150 } },            // 8  T2
-      { type: 'frontend-scaffold', position: { x: 600, y: 300 } },      // 9  T2
+      { type: 'telegram-ai-agent', position: { x: 380, y: -160 } },        // 3  T1
+      { type: 'telegram-commands', position: { x: 380, y: 20 } },      // 4  T1
+      { type: 'smartcache-caching', position: { x: 380, y: 320 } },     // 5  T1
+      { type: 'auditware-analyzing', position: { x: 380, y: 460 } },    // 6  T1
+      { type: 'telegram-wallet-link', position: { x: 680, y: -220} },   // 10 T1
+      { type: 'telegram-notifications', position: { x: 380, y: -280 } },   // 7  T2
+      { type: 'wallet-auth', position: { x: 380, y: 160 } },            // 8  T2
+      { type: 'frontend-scaffold', position: { x: 680, y: -80 } },      // 9  T2
     ],
     edges: [
       { source: 0, target: 3 },
@@ -519,10 +520,11 @@ export const TEMPLATES: Template[] = [
       { source: 2, target: 6 },
       { source: 2, target: 9 },
       { source: 3, target: 7 },
+      { source: 3, target: 10 },
     ],
     ghostNodes: [
-      { type: 'chain-data', position: { x: 900, y: 0 } },              // g0 (idx 10)
-      { type: 'dune-wallet-balances', position: { x: 900, y: 150 } },   // g1 (idx 11)
+      { type: 'chain-data', position: { x: 680, y: 150 } },              // g0 (idx 10)
+      { type: 'dune-wallet-balances', position: { x: 900, y: 0 } },   // g1 (idx 11)
       { type: 'repo-quality-gates', position: { x: 900, y: 300 } },     // g2 (idx 12)
     ],
     ghostEdges: [
@@ -590,7 +592,7 @@ export const TEMPLATES: Template[] = [
     category: 'ai',
     tags: ['Trading', 'Stylus', 'Caching', 'Radar', 'Agent'],
     explainer:
-      'A custom Stylus vault contract holds funds and executes trades on-chain — SmartCache reduces latency and gas costs by warming the vault contract cache, and Auditware (Radar) scans it for vulnerabilities before deploy. Ostium executes leveraged perps, Maxxit automates lazy-trader strategies. The ERC-8004 agent orchestrates trade logic. Dune DEX Volume provides market depth data, chain-data tracks on-chain fills, and Telegram relays signals.',
+      'A custom Stylus vault contract holds funds and executes trades on-chain — SmartCache reduces latency and gas costs by warming the vault contract cache, and Auditware (Radar) scans it for vulnerabilities before deploy. Ostium executes leveraged perps, Maxxit automates lazy-trader strategies. The ERC-8004 agent orchestrates trade logic. Telegram Agent provides interface, with Commands for actions and Wallet Link for execution. Dune DEX Volume provides market depth.',
     nodes: [
       { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },             // 0  T0
       { type: 'ostium-trading', position: { x: 0, y: 150 } },            // 1  T0
@@ -603,6 +605,8 @@ export const TEMPLATES: Template[] = [
       { type: 'telegram-ai-agent', position: { x: 600, y: 0 } },         // 8  T2
       { type: 'frontend-scaffold', position: { x: 600, y: 150 } },       // 9  T2
       { type: 'wallet-auth', position: { x: 600, y: 300 } },             // 10 T2
+      { type: 'telegram-commands', position: { x: 600, y: 450 } },       // 11 T2
+      { type: 'telegram-wallet-link', position: { x: 600, y: 600 } },    // 12 T2
     ],
     edges: [
       { source: 0, target: 4 },
@@ -615,6 +619,8 @@ export const TEMPLATES: Template[] = [
       { source: 2, target: 9 },
       { source: 3, target: 9 },
       { source: 9, target: 10 },
+      { source: 8, target: 11 },
+      { source: 8, target: 12 },
     ],
     ghostNodes: [
       { type: 'x402-paywall-api', position: { x: 900, y: 0 } },            // g0 (idx 11)

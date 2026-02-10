@@ -25,6 +25,7 @@ import { SimpleTooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import logo from '@/assets/logo.png';
+import { useToast } from '@/components/ui/toaster';
 
 interface HeaderProps {
   showAI?: boolean;
@@ -42,6 +43,7 @@ export function Header({ setShowAI }: HeaderProps = {}) {
     importBlueprint,
   } = useBlueprintStore();
   const { addRecent } = useRecentBlueprints();
+  const { error } = useToast();
 
   // Persist current blueprint into "Recent Blueprints"
   useEffect(() => {
@@ -61,6 +63,11 @@ export function Header({ setShowAI }: HeaderProps = {}) {
   }, [blueprint.updatedAt]);
 
   const handleExport = () => {
+    if (blueprint.nodes.length === 0) {
+      error("Empty Blueprint", "Add some nodes to the canvas before exporting.");
+      return;
+    }
+
     const json = exportBlueprint();
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -188,7 +195,7 @@ export function Header({ setShowAI }: HeaderProps = {}) {
               onClick={handleImport}
               className="text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]"
             >
-              <Upload className="w-4 h-4" />
+              <Download className="w-4 h-4" />
             </Button>
           </SimpleTooltip>
 
@@ -199,7 +206,7 @@ export function Header({ setShowAI }: HeaderProps = {}) {
               onClick={handleExport}
               className="text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]"
             >
-              <Download className="w-4 h-4" />
+              <Upload className="w-4 h-4" />
             </Button>
           </SimpleTooltip>
         </div>

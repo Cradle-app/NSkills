@@ -153,6 +153,11 @@ const config: Config = {
         'float': 'float 6s ease-in-out infinite',
         'ghost-pulse': 'ghostPulse 3s ease-in-out infinite',
         'ghost-shimmer': 'ghostShimmer 2.5s ease-in-out infinite',
+        'loading-in': 'loading-in 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+        'loading-aura': 'loading-aura 3s ease-in-out infinite',
+        'loading-float': 'loading-float 4s ease-in-out infinite',
+        'loading-progress': 'loading-progress 2s ease-in-out infinite',
+        'loading-text': 'loading-text 1.5s ease-in-out infinite',
       },
 
       keyframes: {
@@ -199,6 +204,26 @@ const config: Config = {
         'ghostShimmer': {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(200%)' },
+        },
+        'loading-in': {
+          '0%': { opacity: '0', transform: 'scale(0.95) translateY(10px)' },
+          '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+        },
+        'loading-aura': {
+          '0%, 100%': { transform: 'scale(1.5)', opacity: '0.15' },
+          '50%': { transform: 'scale(1.8)', opacity: '0.3' },
+        },
+        'loading-float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        'loading-progress': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        'loading-text': {
+          '0%, 100%': { opacity: '0.5' },
+          '50%': { opacity: '1' },
         },
       },
 
