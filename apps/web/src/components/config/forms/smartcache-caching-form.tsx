@@ -60,8 +60,8 @@ function addCachingToContract(code: string): string {
         modified = `${CACHE_IMPORTS}\n\n${modified}`;
     }
 
-    // Find ALL #[public] impl blocks
-    const implRegex = /#\[public\]\s*(?!#\[implements)impl\s+(\w+)(?:\s+for\s+\w+)?\s*\{/g;
+    // Find ALL #[public] impl blocks (handling intermediate attributes and comments)
+    const implRegex = /#\[public\](?:\s*(?:#\[[^\]]+\]|\/\/.*|\/\*[\s\S]*?\*\/))*\s*impl\s+(\w+)(?:\s+for\s+\w+)?\s*\{/g;
     const implMatches: { index: number; match: string; structName: string }[] = [];
     let match;
 

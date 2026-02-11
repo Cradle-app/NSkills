@@ -44,7 +44,7 @@ function addCachingToContract(contractCode: string): string {
         modified = cachingImports + modified;
     }
 
-    const implRegex = /#\[public\](?:\s*#\[[^\]]*\])*\s*impl\s+(?:\w+\s+for\s+)?(\w+)\s*\{/g;
+    const implRegex = /#\[public\](?:\s*(?:#\[[^\]]+\]|\/\/.*|\/\*[\s\S]*?\*\/))*\s*impl\s+(\w+)(?:\s+for\s+\w+)?\s*\{/g;
     let implMatch;
     const matches: { index: number; structName: string }[] = [];
     while ((implMatch = implRegex.exec(modified)) !== null) {
@@ -136,12 +136,12 @@ const DOS2UNIX_NOTE = `# If you see "bad interpreter" or CRLF errors on Windows,
 
 `;
 
-    /**
-     * SmartCache Caching Plugin
-     * - mycontract/: original contract (no cache helper)
-     * - cached-contract/: contract with is_cacheable() helper added
-     * Both use counter-contract folder structure. Scripts include dos2unix for Windows.
-     */
+/**
+ * SmartCache Caching Plugin
+ * - mycontract/: original contract (no cache helper)
+ * - cached-contract/: contract with is_cacheable() helper added
+ * Both use counter-contract folder structure. Scripts include dos2unix for Windows.
+ */
 export class SmartCacheCachingPlugin extends BasePlugin<z.infer<typeof SmartCacheCachingConfig>> {
     readonly metadata: PluginMetadata = {
         id: 'smartcache-caching',
