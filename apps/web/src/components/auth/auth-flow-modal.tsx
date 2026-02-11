@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -278,30 +278,34 @@ export function AuthFlowModal({
     <>
       <div
         className={cn(
-          'fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity',
-          isWalletStep ? 'z-[40] opacity-20' : 'z-30'
+          'fixed inset-0 bg-black/80 backdrop-blur-md z-[1550]'
         )}
         onClick={() => onOpenChange(false)}
       />
       <div
         className={cn(
-          'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg',
-          isWalletStep ? 'z-[50]' : 'z-50'
+          'fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-[1600]'
         )}
         aria-modal="true"
         role="dialog"
       >
+        {/* Glow Effect */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-accent-cyan/20 to-accent-purple/20 rounded-[2.2rem] blur-2xl opacity-50" />
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           className={cn(
-            'relative rounded-2xl overflow-hidden',
+            'relative rounded-[2rem] overflow-hidden',
             'bg-gradient-to-b from-forge-surface to-forge-bg',
-            'border border-forge-border/50',
-            'shadow-2xl shadow-black/40'
+            'border border-forge-border/40',
+            'shadow-[0_20px_50px_rgba(0,0,0,0.5)]'
           )}
         >
+          {/* Decorative Top Bar */}
+          {/* <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent-cyan/40 via-accent-purple/40 to-accent-cyan/40" /> */}
+
           {/* Close button */}
           <button
             onClick={() => onOpenChange(false)}
@@ -315,43 +319,62 @@ export function AuthFlowModal({
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-8 text-center"
+              className="p-10 text-center"
             >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
-                className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-accent-lime/20 to-accent-lime/5 border border-accent-lime/30 flex items-center justify-center"
-              >
-                <CheckCircle2 className="w-10 h-10 text-accent-lime" />
-              </motion.div>
-              <h2 className="text-2xl font-semibold text-white mb-2">
-                Authentication Complete!
+              <div className="relative inline-block mb-8">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
+                  className="w-24 h-24 rounded-3xl bg-gradient-to-br from-accent-lime/20 to-accent-lime/5 border border-accent-lime/30 flex items-center justify-center relative z-10"
+                >
+                  <CheckCircle2 className="w-12 h-12 text-accent-lime" />
+                </motion.div>
+                {/* Status Glow */}
+                <div className="absolute inset-0 bg-accent-lime/20 blur-2xl rounded-full" />
+              </div>
+
+              <h2 className="text-3xl font-bold text-white mb-3">
+                All Set!
               </h2>
-              <p className="text-sm text-forge-muted mb-6">
-                You now have full access to all platform features.
+              <p className="text-forge-muted mb-8 max-w-xs mx-auto">
+                Your account is now fully verified and ready for deep building.
               </p>
-              <div className="flex items-center justify-center gap-4">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-forge-elevated/30 border border-forge-border/30">
-                  <Wallet className="w-4 h-4 text-accent-cyan" />
-                  <span className="text-sm text-white font-mono">
+
+              <div className="flex flex-col gap-3 max-w-sm mx-auto">
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-forge-elevated/20 border border-forge-border/40 backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-accent-cyan/10 flex items-center justify-center">
+                      <Wallet className="w-4 h-4 text-accent-cyan" />
+                    </div>
+                    <span className="text-sm font-medium text-white">Wallet</span>
+                  </div>
+                  <span className="text-sm text-forge-muted font-mono bg-black/20 px-2 py-1 rounded-md">
                     {address?.slice(0, 6)}...{address?.slice(-4)}
                   </span>
                 </div>
+
                 {session.github && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-forge-elevated/30 border border-forge-border/30">
-                    <img
-                      src={session.github.avatar}
-                      alt={session.github.username}
-                      className="w-5 h-5 rounded-full"
-                    />
-                    <span className="text-sm text-white">{session.github.username}</span>
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-forge-elevated/20 border border-forge-border/40 backdrop-blur-sm">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={session.github.avatar}
+                        alt={session.github.username}
+                        className="w-8 h-8 rounded-lg shadow-lg"
+                      />
+                      <span className="text-sm font-medium text-white">GitHub</span>
+                    </div>
+                    <span className="text-sm text-forge-muted bg-black/20 px-2 py-1 rounded-md">
+                      @{session.github.username}
+                    </span>
                   </div>
                 )}
               </div>
-              <p className="text-xs text-forge-muted mt-6">
-                This window will close automatically...
-              </p>
+
+              <div className="mt-10 flex items-center justify-center gap-2 text-xs text-forge-muted">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                <span>Redirecting back to your workflow...</span>
+              </div>
             </motion.div>
           ) : (
             <>
@@ -369,43 +392,51 @@ export function AuthFlowModal({
               </div>
 
               {/* Progress Steps */}
-              <div className="px-6 mb-6">
-                <div className="flex items-center justify-center gap-2">
+              <div className="px-10 mb-8">
+                <div className="flex items-center justify-center gap-3">
                   {steps.map((step, index) => (
-                    <div key={step.id} className="flex items-center">
-                      <div
-                        className={cn(
-                          'w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300',
-                          step.completed
-                            ? 'bg-accent-cyan text-black'
-                            : step.error
-                              ? 'bg-red-500/20 border-2 border-red-500 text-red-500'
-                              : step.loading
-                                ? 'bg-accent-cyan/20 border-2 border-accent-cyan text-accent-cyan animate-pulse'
-                                : currentStep === step.id
-                                  ? 'bg-accent-cyan/20 border-2 border-accent-cyan text-accent-cyan'
-                                  : 'bg-forge-elevated text-forge-muted'
-                        )}
-                      >
-                        {step.completed ? (
-                          <Check className="w-4 h-4" />
-                        ) : step.loading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : step.error ? (
-                          <AlertCircle className="w-4 h-4" />
-                        ) : (
-                          <step.icon className="w-4 h-4" />
-                        )}
+                    <React.Fragment key={step.id}>
+                      <div className="flex flex-col items-center gap-2">
+                        <div
+                          className={cn(
+                            'w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300',
+                            step.completed
+                              ? 'bg-accent-cyan text-black shadow-[0_0_15px_rgba(var(--color-accent-primary),0.3)]'
+                              : step.error
+                                ? 'bg-red-500/20 border border-red-500/50 text-red-500'
+                                : step.loading
+                                  ? 'bg-accent-cyan/10 border-2 border-accent-cyan text-accent-cyan shadow-[0_0_15px_rgba(var(--color-accent-primary),0.2)] animate-pulse'
+                                  : currentStep === step.id
+                                    ? 'bg-accent-cyan/10 border border-accent-cyan/50 text-accent-cyan shadow-[0_0_10px_rgba(var(--color-accent-primary),0.1)]'
+                                    : 'bg-forge-elevated/50 text-forge-muted border border-forge-border/30'
+                          )}
+                        >
+                          {step.completed ? (
+                            <Check className="w-5 h-5 stroke-[2.5px]" />
+                          ) : step.loading ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : step.error ? (
+                            <AlertCircle className="w-5 h-5" />
+                          ) : (
+                            <step.icon className="w-5 h-5" />
+                          )}
+                        </div>
+                        <span className={cn(
+                          "text-[10px] uppercase tracking-widest font-bold transition-colors",
+                          currentStep === step.id ? "text-accent-cyan" : "text-forge-muted"
+                        )}>
+                          {step.id}
+                        </span>
                       </div>
                       {index < steps.length - 1 && (
                         <div
                           className={cn(
-                            'w-12 h-0.5 mx-2 transition-colors duration-300',
-                            step.completed ? 'bg-accent-cyan' : 'bg-forge-border'
+                            'w-16 h-[2px] mb-6 transition-colors duration-300 rounded-full',
+                            step.completed ? 'bg-accent-cyan shadow-[0_0_8px_rgba(var(--color-accent-primary),0.3)]' : 'bg-forge-border/30'
                           )}
                         />
                       )}
-                    </div>
+                    </React.Fragment>
                   ))}
                 </div>
               </div>
@@ -421,12 +452,22 @@ export function AuthFlowModal({
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-4"
                     >
-                      <div className="p-4 rounded-xl bg-forge-elevated/30 border border-forge-border/30">
-                        <h3 className="text-lg font-medium text-white mb-2">
-                          Connect Your Wallet
-                        </h3>
-                        <p className="text-sm text-forge-muted mb-4">
-                          Connect your Ethereum wallet to authenticate and access [N]skills&apos; features.
+                      <div className="p-5 rounded-2xl bg-forge-elevated/20 border border-forge-border/40 backdrop-blur-sm shadow-inner group transition-all hover:bg-forge-elevated/30">
+                        <div className="flex items-center gap-4 mb-4">
+                          <div className="w-12 h-12 rounded-xl bg-accent-cyan/10 border border-accent-cyan/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Wallet className="w-6 h-6 text-accent-cyan" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-white">
+                              Connect Your Wallet
+                            </h3>
+                            <p className="text-sm text-forge-muted">
+                              Secure authentication via Ethereum
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-sm text-forge-muted leading-relaxed mb-6">
+                          Connect your preferred wallet to authenticate your identity and access [N]skills features.
                         </p>
 
                         {/* Wallet Error */}
@@ -434,21 +475,16 @@ export function AuthFlowModal({
                           <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-3"
+                            className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3"
                           >
                             <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                             <div className="flex-1">
                               <p className="text-sm text-red-400">{walletError.message}</p>
-                              {walletError.retryable && (
-                                <p className="text-xs text-red-400/70 mt-1">
-                                  Please try again.
-                                </p>
-                              )}
                             </div>
                           </motion.div>
                         )}
 
-                        <WalletConnectButton variant="full" className="w-full" />
+                        <WalletConnectButton variant="full" className="w-full h-12 rounded-xl text-md font-bold shadow-lg shadow-black/20" />
                       </div>
                     </motion.div>
                   )}
@@ -462,107 +498,101 @@ export function AuthFlowModal({
                       className="space-y-4"
                     >
                       {/* Wallet Connected Badge */}
-                      <div className="p-4 rounded-xl bg-forge-elevated/30 border border-forge-border/30">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-full bg-accent-cyan/10 flex items-center justify-center">
-                            <Check className="w-5 h-5 text-accent-cyan" />
+                      <div className="p-4 rounded-2xl bg-accent-cyan/5 border border-accent-cyan/20 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-accent-cyan/10 flex items-center justify-center shadow-inner">
+                            <Wallet className="w-5 h-5 text-accent-cyan" />
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-white">Wallet Connected</p>
-                            <p className="text-xs text-forge-muted font-mono">
+                            <p className="text-sm font-bold text-white">Wallet Connected</p>
+                            <p className="text-xs text-forge-muted font-mono leading-none mt-0.5">
                               {address?.slice(0, 6)}...{address?.slice(-4)}
                             </p>
                           </div>
                         </div>
+                        <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-accent-cyan/20 border border-accent-cyan/30">
+                          <Check className="w-3 h-3 text-accent-cyan" />
+                          <span className="text-[10px] uppercase font-bold text-accent-cyan">Active</span>
+                        </div>
                       </div>
 
                       {/* GitHub Section */}
-                      <div className="p-4 rounded-xl bg-forge-elevated/30 border border-forge-border/30">
-                        <h3 className="text-lg font-medium text-white mb-2">
-                          Connect GitHub
-                        </h3>
-                        <p className="text-sm text-forge-muted mb-4">
-                          Link your GitHub account to enable code generation and repository creation.
-                        </p>
+                      <div className="p-5 rounded-3xl bg-forge-elevated/20 border border-forge-border/40 backdrop-blur-sm shadow-inner overflow-hidden relative">
+                        <div className="absolute top-0 right-0 p-8 -mr-4 -mt-4 bg-accent-purple/5 blur-3xl rounded-full" />
 
-                        {/* GitHub Error */}
-                        {githubError && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-3"
-                          >
-                            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                            <div className="flex-1">
-                              <p className="text-sm text-red-400">{githubError.message}</p>
+                        <div className="relative z-10">
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="w-12 h-12 rounded-xl bg-[#24292e] border border-white/10 flex items-center justify-center shadow-lg">
+                              <Github className="w-6 h-6 text-white" />
                             </div>
-                          </motion.div>
-                        )}
-
-                        {/* GitHub Success */}
-                        {githubSuccess && isGitHubConnected && session.github && (
-                          <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mb-4 p-3 rounded-lg bg-accent-lime/10 border border-accent-lime/30 flex items-center gap-3"
-                          >
-                            <CheckCircle2 className="w-5 h-5 text-accent-lime" />
-                            <p className="text-sm text-accent-lime">GitHub connected successfully!</p>
-                          </motion.div>
-                        )}
-
-                        {isGitHubConnected && session.github ? (
-                          <div className="flex items-center gap-3 p-3 rounded-lg bg-accent-cyan/10 border border-accent-cyan/30">
-                            <img
-                              src={session.github.avatar}
-                              alt={session.github.username}
-                              className="w-8 h-8 rounded-full"
-                            />
                             <div>
-                              <p className="text-sm font-medium text-white">
-                                {session.github.username}
+                              <h3 className="text-lg font-semibold text-white">
+                                Connect GitHub
+                              </h3>
+                              <p className="text-sm text-forge-muted">
+                                Required for repository management
                               </p>
-                              <p className="text-xs text-forge-muted">Connected</p>
                             </div>
-                            <Check className="w-5 h-5 text-accent-cyan ml-auto" />
                           </div>
-                        ) : (
-                          <div className="space-y-3">
-                            {githubError?.retryable ? (
+
+                          <p className="text-sm text-forge-muted leading-relaxed mb-6">
+                            Linking your GitHub account allows [N]skills to push code and create repositories on your behalf.
+                          </p>
+
+                          {/* GitHub Error */}
+                          {githubError && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-start gap-3"
+                            >
+                              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1">
+                                <p className="text-sm text-red-400">{githubError.message}</p>
+                              </div>
+                            </motion.div>
+                          )}
+
+                          {isGitHubConnected && session.github ? (
+                            <div className="flex items-center gap-4 p-4 rounded-2xl bg-accent-lime/10 border border-accent-lime/20 shadow-inner">
+                              <img
+                                src={session.github.avatar}
+                                alt={session.github.username}
+                                className="w-10 h-10 rounded-xl border border-white/10 shadow-lg"
+                              />
+                              <div className="flex-1">
+                                <p className="text-sm font-bold text-white">
+                                  @{session.github.username}
+                                </p>
+                                <p className="text-xs text-accent-lime font-medium">Account Linked</p>
+                              </div>
+                              <div className="w-8 h-8 rounded-full bg-accent-lime/20 flex items-center justify-center">
+                                <Check className="w-4 h-4 text-accent-lime stroke-[3px]" />
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
                               <Button
-                                onClick={handleRetryGitHub}
+                                onClick={githubError?.retryable ? handleRetryGitHub : handleGitHubConnect}
                                 disabled={githubLoading}
-                                className="w-full gap-2 bg-[#24292e] hover:bg-[#2f363d] text-white"
+                                className={cn(
+                                  "w-full h-12 rounded-2xl gap-3 text-md font-bold transition-all shadow-xl",
+                                  githubError?.retryable ? "bg-accent-purple hover:bg-accent-purple/90" : "bg-[#24292e] hover:bg-[#333940] text-white shadow-black/40"
+                                )}
                               >
                                 {githubLoading ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  <Loader2 className="w-5 h-5 animate-spin" />
+                                ) : githubError?.retryable ? (
+                                  <RefreshCw className="w-5 h-5" />
                                 ) : (
-                                  <RefreshCw className="w-4 h-4" />
+                                  <Github className="w-5 h-5" />
                                 )}
-                                Retry GitHub Connection
+                                {githubLoading ? "Connecting..." : githubError?.retryable ? "Retry Connection" : "Connect GitHub"}
+                                {!githubLoading && <ArrowRight className="w-4 h-4 ml-auto opacity-50" />}
                               </Button>
-                            ) : (
-                              <Button
-                                onClick={handleGitHubConnect}
-                                disabled={githubLoading}
-                                className="w-full gap-2 bg-[#24292e] hover:bg-[#2f363d] text-white"
-                              >
-                                {githubLoading ? (
-                                  <>
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    Connecting...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Github className="w-4 h-4" />
-                                    Connect GitHub
-                                    <ArrowRight className="w-4 h-4 ml-auto" />
-                                  </>
-                                )}
-                              </Button>
-                            )}
-                          </div>
-                        )}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Finish button when GitHub is connected */}
