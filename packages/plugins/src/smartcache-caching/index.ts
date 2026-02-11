@@ -81,28 +81,56 @@ function addCachingToContract(contractCode: string): string {
 }
 
 function getDefaultContract(): string {
-    return `//! Counter Contract
+    // Same default counter as the stylus-rust-contract form's TEMPLATES.counter.code
+    return `//!
+//! Stylus Hello World
+//!
+//! The following contract implements the Counter example from Foundry.
+//!
 
+// Allow \`cargo stylus export-abi\` to generate a main function.
 #![cfg_attr(not(feature = "export-abi"), no_main)]
 extern crate alloc;
 
-use stylus_sdk::{alloy_primitives::U256, prelude::*, storage::StorageU256};
+/// Import items from the SDK. The prelude contains common traits and macros.
+use stylus_sdk::{alloy_primitives::U256, prelude::*};
 
+// Define some persistent storage using the Solidity ABI.
+// \`Counter\` will be the entrypoint.
 sol_storage! {
     #[entrypoint]
     pub struct Counter {
-        StorageU256 count;
+        uint256 number;
     }
 }
 
+/// Declare that \`Counter\` is a contract with the following external methods.
 #[public]
 impl Counter {
-    pub fn get_count(&self) -> U256 {
-        self.count.get()
+    /// Gets the number from storage.
+    pub fn number(&self) -> U256 {
+        self.number.get()
     }
 
-    pub fn set_count(&mut self, value: U256) {
-        self.count.set(value);
+    /// Sets a number in storage to a user-specified value.
+    pub fn set_number(&mut self, new_number: U256) {
+        self.number.set(new_number);
+    }
+
+    /// Sets a number in storage to a user-specified value.
+    pub fn mul_number(&mut self, new_number: U256) {
+        self.number.set(new_number * self.number.get());
+    }
+
+    /// Sets a number in storage to a user-specified value.
+    pub fn add_number(&mut self, new_number: U256) {
+        self.number.set(new_number + self.number.get());
+    }
+
+    /// Increments \`number\` and updates its value in storage.
+    pub fn increment(&mut self) {
+        let number = self.number.get();
+        self.set_number(number + U256::from(1));
     }
 }
 `;
@@ -144,7 +172,11 @@ export class SmartCacheCachingPlugin extends BasePlugin<z.infer<typeof SmartCach
         const config = this.configSchema.parse(node.config);
         const output = this.createEmptyOutput();
 
-        const rawContract = config.contractCode || getDefaultContract();
+        // Try to read the user's selected contract from the connected stylus-rust-contract node.
+        // The execution engine runs nodes in topological order, so the stylus-rust-contract
+        // output should already be in context.nodeOutputs by the time smartcache runs.
+        const connectedContractCode = this.extractConnectedContractCode(context);
+        const rawContract = connectedContractCode || config.contractCode || getDefaultContract();
         const originalLibRs = rawContract.trim();
         const hasCaching = hasCachingFunctions(originalLibRs);
         const cachedLibRs = hasCaching ? originalLibRs : addCachingToContract(originalLibRs);
@@ -206,9 +238,15 @@ export class SmartCacheCachingPlugin extends BasePlugin<z.infer<typeof SmartCach
 
             walk(COUNTER_CONTRACT_TEMPLATE_PATH, '');
         } else {
-            // Fallback: minimal structure
-            this.addFile(output, `${basePath}/Cargo.toml`, generateMinimalCargoToml(folderName, crateName, includeCacheSdk));
+            // Fallback: generate the full counter-contract template structure inline
+            // (used when COUNTER_CONTRACT_TEMPLATE_PATH is not found at orchestrator runtime)
+            this.addFile(output, `${basePath}/Cargo.toml`, generateFullCargoToml(folderName, includeCacheSdk));
             this.addFile(output, `${basePath}/src/lib.rs`, libRsContent);
+            this.addFile(output, `${basePath}/src/main.rs`, generateMainRs(crateName));
+            this.addFile(output, `${basePath}/rust-toolchain.toml`, RUST_TOOLCHAIN_TOML);
+            this.addFile(output, `${basePath}/.cargo/config.toml`, CARGO_CONFIG_TOML);
+            this.addFile(output, `${basePath}/.gitignore`, CONTRACT_GITIGNORE);
+            this.addFile(output, `${basePath}/.env.example`, CONTRACT_ENV_EXAMPLE);
         }
     }
 
@@ -219,32 +257,124 @@ export class SmartCacheCachingPlugin extends BasePlugin<z.infer<typeof SmartCach
         }
         return content;
     }
+
+    /**
+     * Look through previously-generated node outputs to find the contract code
+     * produced by a connected stylus-rust-contract node.
+     * The execution engine stores each node's CodegenOutput in context.nodeOutputs
+     * keyed by node ID. We scan all outputs for a file matching contracts/ * /src/lib.rs.
+     */
+    private extractConnectedContractCode(context: ExecutionContext): string | null {
+        if (!context.nodeOutputs || context.nodeOutputs.size === 0) return null;
+
+        for (const [, nodeOutput] of context.nodeOutputs) {
+            for (const file of nodeOutput.files) {
+                // Match any contracts/<name>/src/lib.rs generated by stylus-rust-contract
+                if (/^contracts\/[^/]+\/src\/lib\.rs$/.test(file.path) && file.content) {
+                    return file.content;
+                }
+            }
+        }
+
+        return null;
+    }
 }
 
-function generateMinimalCargoToml(folderName: string, _crateName: string, includeCacheSdk: boolean): string {
-    let deps = `stylus-sdk = "0.6"
-alloy-primitives = "0.7"`;
-    if (includeCacheSdk) deps += `\nstylus-cache-sdk = "0.1"`;
+// ── Embedded template file constants ─────────────────────────────────────────
+// These mirror apps/web/src/components/counter-contract/* so the fallback
+// path (when the template directory is not on disk) generates the same output.
+
+const RUST_TOOLCHAIN_TOML = `[toolchain]
+channel = "1.87.0"
+`;
+
+const CARGO_CONFIG_TOML = `[target.wasm32-unknown-unknown]
+rustflags = [
+  "-C", "link-arg=-zstack-size=32768",
+  "-C", "target-feature=-reference-types",
+  "-C", "target-feature=+bulk-memory",
+]
+
+[target.aarch64-apple-darwin]
+rustflags = [
+"-C", "link-arg=-undefined",
+"-C", "link-arg=dynamic_lookup",
+]
+
+[target.x86_64-apple-darwin]
+rustflags = [
+"-C", "link-arg=-undefined",
+"-C", "link-arg=dynamic_lookup",
+]
+`;
+
+const CONTRACT_GITIGNORE = `/target
+.env
+`;
+
+const CONTRACT_ENV_EXAMPLE = `RPC_URL=
+STYLUS_CONTRACT_ADDRESS=
+PRIV_KEY_PATH=
+`;
+
+function generateMainRs(crateName: string): string {
+    return `#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+
+#[cfg(not(any(test, feature = "export-abi")))]
+#[no_mangle]
+pub extern "C" fn main() {}
+
+#[cfg(feature = "export-abi")]
+fn main() {
+    ${crateName}::print_from_args();
+}
+`;
+}
+
+function generateFullCargoToml(folderName: string, includeCacheSdk: boolean): string {
+    let cacheDep = '';
+    if (includeCacheSdk) cacheDep = `\nstylus-cache-sdk = "0.1"`;
     return `[package]
 name = "${folderName}"
-version = "0.1.0"
+version = "0.1.11"
 edition = "2021"
-
-[lib]
-crate-type = ["cdylib"]
+license = "MIT OR Apache-2.0"
+keywords = ["arbitrum", "ethereum", "stylus", "alloy"]
+description = "Stylus smart contract"
 
 [dependencies]
-${deps}
+alloy-primitives = "=0.8.20"
+alloy-sol-types = "=0.8.20"
+stylus-sdk = "0.9.0"
+hex = { version = "0.4", default-features = false }${cacheDep}
+
+[dev-dependencies]
+alloy-primitives = { version = "=0.8.20", features = ["sha3-keccak"] }
+tokio = { version = "1.12.0", features = ["full"] }
+ethers = "2.0"
+eyre = "0.6.8"
+stylus-sdk = { version = "0.9.0", features = ["stylus-test"] }
+dotenv = "0.15.0"
 
 [features]
+default = ["mini-alloc"]
 export-abi = ["stylus-sdk/export-abi"]
+debug = ["stylus-sdk/debug"]
+mini-alloc = ["stylus-sdk/mini-alloc"]
+
+[[bin]]
+name = "${folderName}"
+path = "src/main.rs"
+
+[lib]
+crate-type = ["lib", "cdylib"]
 
 [profile.release]
 codegen-units = 1
 strip = true
 lto = true
 panic = "abort"
-opt-level = "s"
+opt-level = 3
 `;
 }
 

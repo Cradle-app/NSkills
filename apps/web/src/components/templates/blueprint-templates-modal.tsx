@@ -206,7 +206,7 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
                 x: ghostRowStartX + (i * HORIZONTAL_SPACING),
                 y: ghostRowY,
             };
-            const ghost = addGhostNode(gn.type, position);
+            const ghost = addGhostNode(gn.type, position, { config: gn.config });
             ghostIds.push(ghost.id);
         }
 

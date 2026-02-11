@@ -109,7 +109,7 @@ export const TEMPLATE_CATEGORIES: { id: TemplateCategory | 'all'; label: string 
 
 export const TEMPLATES: Template[] = [
   // ── 1. Full Stack dApp ──────────────────────────────────────────────────
-  // Flow: contract → {smartcache, auditware, frontend} → {wallet, rpc, chain-data}
+  // Flow: contract → {smartcache, auditware, frontend} → {wallet, rpc}
   {
     id: 'full-stack-dapp',
     name: 'Full Stack dApp',
@@ -120,15 +120,14 @@ export const TEMPLATES: Template[] = [
     category: 'contracts',
     tags: ['Full Stack', 'Stylus', 'Caching', 'Radar', 'Agent-Ready'],
     explainer:
-      'The Stylus contract is the on-chain core — SmartCache reduces latency and gas costs by warming the contract cache, while Auditware (Radar) scans the contract for vulnerabilities before deploy. The frontend consumes the contract through wallet auth and an RPC provider, with chain-data indexing events. Ghost blocks suggest adding an AI agent for automated interactions or a paywall for monetisation.',
+      'The Stylus contract is the on-chain core — SmartCache reduces latency and gas costs by warming the contract cache, while Auditware (Radar) scans the contract for vulnerabilities before deploy. The frontend consumes the contract through wallet auth and an RPC provider. Ghost blocks suggest adding an AI agent for automated interactions, on-chain analytics, IPFS off-chain storage, or a paywall for monetisation.',
     nodes: [
-      { type: 'stylus-rust-contract', position: { x: 0, y: 150 } },         // 0  T0
-      { type: 'smartcache-caching', position: { x: 300, y: 0 } },      // 1  T1
-      { type: 'auditware-analyzing', position: { x: 300, y: 150 } },   // 2  T1
-      { type: 'frontend-scaffold', position: { x: 300, y: 300 } },     // 3  T1
-      { type: 'wallet-auth', position: { x: 600, y: 0 } },             // 4  T2
-      { type: 'rpc-provider', position: { x: 600, y: 150 } },          // 5  T2
-      { type: 'chain-data', position: { x: 600, y: 300 } },            // 6  T2
+      { type: 'stylus-rust-contract', position: { x: 0, y: 150 } },   // 0  T0
+      { type: 'smartcache-caching', position: { x: 300, y: 0 } },     // 1  T1
+      { type: 'auditware-analyzing', position: { x: 300, y: 150 } },  // 2  T1
+      { type: 'frontend-scaffold', position: { x: 300, y: 300 } },    // 3  T1
+      { type: 'wallet-auth', position: { x: 600, y: 0 } },            // 4  T2
+      { type: 'rpc-provider', position: { x: 600, y: 150 } },         // 5  T2
     ],
     edges: [
       { source: 0, target: 1 },
@@ -136,17 +135,18 @@ export const TEMPLATES: Template[] = [
       { source: 0, target: 3 },
       { source: 3, target: 4 },
       { source: 3, target: 5 },
-      { source: 3, target: 6 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 7)
-      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 8)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },    // g2 (idx 9)
+      { type: 'onchain-activity', position: { x: 900, y: 450 } },        // g0 (idx 6)
+      { type: 'ipfs-storage', position: { x: 900, y: 600 } },            // g1 (idx 7)
+      { type: 'chainlink-price-feed', position: { x: 900, y: 750 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },    // g2 (idx 8) - ETH/USD on Arbitrum
+      { type: 'pyth-oracle', position: { x: 900, y: 900 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },             // g3 (idx 9) - ETH/USD on Arbitrum Sepolia
     ],
     ghostEdges: [
-      { source: 3, target: 7 },  // frontend → agent
-      { source: 3, target: 8 },  // frontend → paywall
-      { source: 0, target: 9 },  // contract → quality-gates
+      { source: 4, target: 6 }, // wallet-auth → onchain-activity
+      { source: 0, target: 7 }, // contract (MyContract) → ipfs-storage
+      { source: 0, target: 8 }, // contract (MyContract) → chainlink-price-feed
+      { source: 0, target: 9 }, // contract (MyContract) → pyth-oracle
     ],
   },
 
@@ -258,8 +258,8 @@ export const TEMPLATES: Template[] = [
       { type: 'aave-lending', position: { x: 0, y: 0 } },              // 0  T0
       { type: 'compound-lending', position: { x: 0, y: 150 } },       // 1  T0
       { type: 'uniswap-swap', position: { x: 0, y: 300 } },           // 2  T0
-      { type: 'chainlink-price-feed', position: { x: 300, y: 0 } },   // 3  T1
-      { type: 'pyth-oracle', position: { x: 300, y: 150 } },          // 4  T1
+      { type: 'chainlink-price-feed', position: { x: 300, y: 0 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },   // 3  T1 - ETH/USD on Arbitrum
+      { type: 'pyth-oracle', position: { x: 300, y: 150 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },          // 4  T1 - ETH/USD on Arbitrum Sepolia
       { type: 'frontend-scaffold', position: { x: 300, y: 300 } },    // 5  T1
       { type: 'wallet-auth', position: { x: 600, y: 0 } },            // 6  T2
       { type: 'rpc-provider', position: { x: 600, y: 150 } },         // 7  T2

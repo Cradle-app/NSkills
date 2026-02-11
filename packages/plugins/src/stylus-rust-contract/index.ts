@@ -52,14 +52,15 @@ export class StylusRustContractPlugin extends BasePlugin<z.infer<typeof StylusRu
         const contractName = config.contractName || 'MyContract';
         const contractDir = `contracts/${contractName.toLowerCase()}`;
 
-        // Generate Cargo.toml for Stylus
-        this.addFile(
-            output,
-            `${contractDir}/Cargo.toml`,
-            generateStylusCargoToml(contractName)
-        );
+        // Check if smartcache-caching is also in the blueprint.
+        // When smartcache is present, it takes over generating the contracts/ folder
+        // (mycontract/ + cached-contract/) using the full counter-contract template.
+        // In that case we only emit the lib.rs so smartcache can pick it up from
+        // context.nodeOutputs, plus env vars. We skip deploy scripts and setup guide
+        // because smartcache generates its own.
+        const hasSmartCache = context.pathContext?.nodeTypes?.has('smartcache-caching') ?? false;
 
-        // Generate contract source
+        // Always generate the contract source — smartcache reads it from nodeOutputs
         const contractCode = config.contractCode || getExampleContract(config.exampleType);
         this.addFile(
             output,
@@ -67,14 +68,32 @@ export class StylusRustContractPlugin extends BasePlugin<z.infer<typeof StylusRu
             contractCode
         );
 
-        // Generate setup guide
-        this.addFile(
-            output,
-            `${contractDir}/STYLUS_SETUP.md`,
-            generateSetupGuide(config)
-        );
+        if (!hasSmartCache) {
+            const crateName = contractName.toLowerCase().replace(/-/g, '_');
 
-        // Add environment variables
+            // Generate full counter-contract template structure
+            this.addFile(output, `${contractDir}/Cargo.toml`, generateStylusCargoToml(contractName));
+            this.addFile(output, `${contractDir}/src/main.rs`, generateMainRs(crateName));
+            this.addFile(output, `${contractDir}/rust-toolchain.toml`, RUST_TOOLCHAIN_TOML);
+            this.addFile(output, `${contractDir}/.cargo/config.toml`, CARGO_CONFIG_TOML);
+            this.addFile(output, `${contractDir}/.gitignore`, CONTRACT_GITIGNORE);
+            this.addFile(output, `${contractDir}/.env.example`, CONTRACT_ENV_EXAMPLE);
+
+            // Generate setup guide
+            this.addFile(output, `${contractDir}/STYLUS_SETUP.md`, generateSetupGuide(config));
+
+            // Generate deployment scripts
+            this.addFile(output, 'scripts/deploy-sepolia.sh', generateDeployScript('sepolia'));
+            this.addFile(output, 'scripts/deploy-mainnet.sh', generateDeployScript('mainnet'));
+
+            // Add scripts
+            this.addScript(output, 'stylus:build', `cd ${contractDir} && cargo build --release --target wasm32-unknown-unknown`);
+            this.addScript(output, 'stylus:check', `cd ${contractDir} && cargo stylus check`);
+            this.addScript(output, 'deploy:sepolia', 'bash scripts/deploy-sepolia.sh');
+            this.addScript(output, 'deploy:mainnet', 'bash scripts/deploy-mainnet.sh');
+        }
+
+        // Always add environment variables so they appear in .env.example
         this.addEnvVar(output, 'STYLUS_RPC_URL', 'Arbitrum RPC URL for deployment', {
             required: true,
             defaultValue: config.network === 'arbitrum'
@@ -86,32 +105,65 @@ export class StylusRustContractPlugin extends BasePlugin<z.infer<typeof StylusRu
             secret: true,
         });
 
-        // Generate deployment scripts
-        this.addFile(
-            output,
-            'scripts/deploy-sepolia.sh',
-            generateDeployScript('sepolia')
-        );
-
-        this.addFile(
-            output,
-            'scripts/deploy-mainnet.sh',
-            generateDeployScript('mainnet')
-        );
-
-        // Add scripts
-        this.addScript(output, 'stylus:build', `cd ${contractDir} && cargo build --release --target wasm32-unknown-unknown`);
-        this.addScript(output, 'stylus:check', `cd ${contractDir} && cargo stylus check`);
-        this.addScript(output, 'deploy:sepolia', 'bash scripts/deploy-sepolia.sh');
-        this.addScript(output, 'deploy:mainnet', 'bash scripts/deploy-mainnet.sh');
-
         context.logger.info(`Generated Stylus Rust Contract: ${contractName}`, {
             nodeId: node.id,
             network: config.network,
+            smartCachePresent: hasSmartCache,
         });
 
         return output;
     }
+}
+
+// ── Embedded template file constants ─────────────────────────────────────────
+// These mirror apps/web/src/components/counter-contract/* so the generated
+// output always contains the full project structure.
+
+const RUST_TOOLCHAIN_TOML = `[toolchain]
+channel = "1.87.0"
+`;
+
+const CARGO_CONFIG_TOML = `[target.wasm32-unknown-unknown]
+rustflags = [
+  "-C", "link-arg=-zstack-size=32768",
+  "-C", "target-feature=-reference-types",
+  "-C", "target-feature=+bulk-memory",
+]
+
+[target.aarch64-apple-darwin]
+rustflags = [
+"-C", "link-arg=-undefined",
+"-C", "link-arg=dynamic_lookup",
+]
+
+[target.x86_64-apple-darwin]
+rustflags = [
+"-C", "link-arg=-undefined",
+"-C", "link-arg=dynamic_lookup",
+]
+`;
+
+const CONTRACT_GITIGNORE = `/target
+.env
+`;
+
+const CONTRACT_ENV_EXAMPLE = `RPC_URL=
+STYLUS_CONTRACT_ADDRESS=
+PRIV_KEY_PATH=
+`;
+
+function generateMainRs(crateName: string): string {
+    return `#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+
+#[cfg(not(any(test, feature = "export-abi")))]
+#[no_mangle]
+pub extern "C" fn main() {}
+
+#[cfg(feature = "export-abi")]
+fn main() {
+    ${crateName}::print_from_args();
+}
+`;
 }
 
 function generateDeployScript(network: 'sepolia' | 'mainnet'): string {
@@ -223,93 +275,438 @@ echo "Deployment completed successfully on ${networkName}!"
 }
 
 function generateStylusCargoToml(name: string): string {
+    const folderName = name.toLowerCase();
     return `[package]
-name = "${name.toLowerCase()}"
-version = "0.1.0"
+name = "${folderName}"
+version = "0.1.11"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+keywords = ["arbitrum", "ethereum", "stylus", "alloy"]
+description = "Stylus smart contract"
 
 [dependencies]
-stylus-sdk = "0.6.0"
-alloy-primitives = "0.7"
-alloy-sol-types = "0.7"
+alloy-primitives = "=0.8.20"
+alloy-sol-types = "=0.8.20"
+stylus-sdk = "0.9.0"
+hex = { version = "0.4", default-features = false }
+
+[dev-dependencies]
+alloy-primitives = { version = "=0.8.20", features = ["sha3-keccak"] }
+tokio = { version = "1.12.0", features = ["full"] }
+ethers = "2.0"
+eyre = "0.6.8"
+stylus-sdk = { version = "0.9.0", features = ["stylus-test"] }
+dotenv = "0.15.0"
 
 [features]
+default = ["mini-alloc"]
 export-abi = ["stylus-sdk/export-abi"]
+debug = ["stylus-sdk/debug"]
+mini-alloc = ["stylus-sdk/mini-alloc"]
+
+[[bin]]
+name = "${folderName}"
+path = "src/main.rs"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["lib", "cdylib"]
 
 [profile.release]
 codegen-units = 1
 strip = true
 lto = true
 panic = "abort"
-opt-level = "s"
+opt-level = 3
 `;
 }
 
+/**
+ * Returns the exact same contract code that the UI form shows for each template type.
+ * This ensures the generated output matches the preview the user sees in the
+ * stylus-rust-contract-form.tsx TEMPLATES object.
+ */
 function getExampleContract(type: string): string {
     if (type === 'counter') {
-        return `//! Stylus Counter Contract
-//! A simple counter that can be incremented and read.
+        return `//!
+//! Stylus Hello World
+//!
+//! The following contract implements the Counter example from Foundry.
+//!
+
+// Allow \`cargo stylus export-abi\` to generate a main function.
+#![cfg_attr(not(feature = "export-abi"), no_main)]
+extern crate alloc;
+
+/// Import items from the SDK. The prelude contains common traits and macros.
+use stylus_sdk::{alloy_primitives::U256, prelude::*};
+
+// Define some persistent storage using the Solidity ABI.
+// \`Counter\` will be the entrypoint.
+sol_storage! {
+    #[entrypoint]
+    pub struct Counter {
+        uint256 number;
+    }
+}
+
+/// Declare that \`Counter\` is a contract with the following external methods.
+#[public]
+impl Counter {
+    /// Gets the number from storage.
+    pub fn number(&self) -> U256 {
+        self.number.get()
+    }
+
+    /// Sets a number in storage to a user-specified value.
+    pub fn set_number(&mut self, new_number: U256) {
+        self.number.set(new_number);
+    }
+
+    /// Sets a number in storage to a user-specified value.
+    pub fn mul_number(&mut self, new_number: U256) {
+        self.number.set(new_number * self.number.get());
+    }
+
+    /// Sets a number in storage to a user-specified value.
+    pub fn add_number(&mut self, new_number: U256) {
+        self.number.set(new_number + self.number.get());
+    }
+
+    /// Increments \`number\` and updates its value in storage.
+    pub fn increment(&mut self) {
+        let number = self.number.get();
+        self.set_number(number + U256::from(1));
+    }
+}
+`;
+    }
+
+    if (type === 'vending-machine') {
+        return `//!
+//! Stylus Cupcake Example
+//!
 
 #![cfg_attr(not(feature = "export-abi"), no_main)]
 extern crate alloc;
 
-use stylus_sdk::{alloy_primitives::U256, prelude::*, storage::StorageU256};
+use alloy_primitives::{Address, Uint};
+use stylus_sdk::alloy_primitives::U256;
+use stylus_sdk::prelude::*;
+use stylus_sdk::{block, console};
 
 sol_storage! {
     #[entrypoint]
-    pub struct Counter {
-        StorageU256 count;
+    pub struct VendingMachine {
+        mapping(address => uint256) cupcake_balances;
+        mapping(address => uint256) cupcake_distribution_times;
     }
 }
 
 #[public]
-impl Counter {
-    /// Gets the current count value
-    pub fn get_count(&self) -> U256 {
-        self.count.get()
+impl VendingMachine {
+    pub fn give_cupcake_to(&mut self, user_address: Address) -> bool {
+        let last_distribution = self.cupcake_distribution_times.get(user_address);
+        let five_seconds_from_last_distribution = last_distribution + U256::from(5);
+        let current_time = block::timestamp();
+        let user_can_receive_cupcake =
+            five_seconds_from_last_distribution <= Uint::<256, 4>::from(current_time);
+
+        if user_can_receive_cupcake {
+            let mut balance_accessor = self.cupcake_balances.setter(user_address);
+            let balance = balance_accessor.get() + U256::from(1);
+            balance_accessor.set(balance);
+
+            let mut time_accessor = self.cupcake_distribution_times.setter(user_address);
+            let new_distribution_time = block::timestamp();
+            time_accessor.set(Uint::<256, 4>::from(new_distribution_time));
+            return true;
+        } else {
+            console!(
+                "HTTP 429: Too Many Cupcakes (wait at least 5 seconds between cupcakes)"
+            );
+            return false;
+        }
     }
 
-    /// Increments the count by 1
-    pub fn increment(&mut self) {
-        let current = self.count.get();
-        self.count.set(current + U256::from(1));
+    pub fn get_cupcake_balance_for(&self, user_address: Address) -> Uint<256, 4> {
+        return self.cupcake_balances.get(user_address);
+    }
+}
+`;
     }
 
-    /// Sets the count to a specific value
-    pub fn set_count(&mut self, value: U256) {
-        self.count.set(value);
+    if (type === 'erc20') {
+        return `// SPDX-License-Identifier: MIT
+// Compatible with OpenZeppelin Contracts for Stylus ^0.3.0
+
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+extern crate alloc;
+
+use alloc::vec::Vec;
+use openzeppelin_stylus::token::erc20::extensions::burnable::IErc20Burnable;
+use openzeppelin_stylus::token::erc20::{self, Erc20, IErc20};
+use stylus_sdk::alloy_primitives::{Address, U256};
+use stylus_sdk::prelude::*;
+
+#[entrypoint]
+#[storage]
+struct MyToken {
+    erc20: Erc20,
+}
+
+#[public]
+#[implements(IErc20<Error = erc20::Error>, IErc20Burnable<Error = erc20::Error>)]
+impl MyToken {}
+
+#[public]
+impl IErc20 for MyToken {
+    type Error = erc20::Error;
+
+    fn total_supply(&self) -> U256 {
+        self.erc20.total_supply()
+    }
+
+    fn balance_of(&self, account: Address) -> U256 {
+        self.erc20.balance_of(account)
+    }
+
+    fn transfer(&mut self, to: Address, value: U256) -> Result<bool, Self::Error> {
+        Ok(self.erc20.transfer(to, value)?)
+    }
+
+    fn allowance(&self, owner: Address, spender: Address) -> U256 {
+        self.erc20.allowance(owner, spender)
+    }
+
+    fn approve(&mut self, spender: Address, value: U256) -> Result<bool, Self::Error> {
+        Ok(self.erc20.approve(spender, value)?)
+    }
+
+    fn transfer_from(&mut self, from: Address, to: Address, value: U256) -> Result<bool, Self::Error> {
+        Ok(self.erc20.transfer_from(from, to, value)?)
+    }
+}
+
+#[public]
+impl IErc20Burnable for MyToken {
+    type Error = erc20::Error;
+
+    fn burn(&mut self, value: U256) -> Result<(), Self::Error> {
+        Ok(self.erc20.burn(value)?)
+    }
+
+    fn burn_from(&mut self, account: Address, value: U256) -> Result<(), Self::Error> {
+        Ok(self.erc20.burn_from(account, value)?)
+    }
+}
+`;
+    }
+
+    if (type === 'erc721') {
+        return `// SPDX-License-Identifier: MIT
+// Compatible with OpenZeppelin Contracts for Stylus ^0.3.0
+
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+extern crate alloc;
+
+use alloc::vec::Vec;
+use openzeppelin_stylus::token::erc721::extensions::burnable::IErc721Burnable;
+use openzeppelin_stylus::token::erc721::{self, Erc721, IErc721};
+use openzeppelin_stylus::utils::introspection::erc165::IErc165;
+use stylus_sdk::abi::Bytes;
+use stylus_sdk::alloy_primitives::{Address, FixedBytes, U256};
+use stylus_sdk::prelude::*;
+
+#[entrypoint]
+#[storage]
+struct MyToken {
+    erc721: Erc721,
+}
+
+#[public]
+#[implements(IErc721<Error = erc721::Error>, IErc721Burnable<Error = erc721::Error>, IErc165)]
+impl MyToken {}
+
+#[public]
+impl IErc721 for MyToken {
+    type Error = erc721::Error;
+
+    fn balance_of(&self, owner: Address) -> Result<U256, Self::Error> {
+        Ok(self.erc721.balance_of(owner)?)
+    }
+
+    fn owner_of(&self, token_id: U256) -> Result<Address, Self::Error> {
+        Ok(self.erc721.owner_of(token_id)?)
+    }
+
+    fn safe_transfer_from(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Self::Error> {
+        Ok(self.erc721.safe_transfer_from(from, to, token_id)?)
+    }
+
+    #[selector(name = "safeTransferFrom")]
+    fn safe_transfer_from_with_data(&mut self, from: Address, to: Address, token_id: U256, data: Bytes) -> Result<(), Self::Error> {
+        Ok(self.erc721.safe_transfer_from_with_data(from, to, token_id, data)?)
+    }
+
+    fn transfer_from(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Self::Error> {
+        Ok(self.erc721.transfer_from(from, to, token_id)?)
+    }
+
+    fn approve(&mut self, to: Address, token_id: U256) -> Result<(), Self::Error> {
+        Ok(self.erc721.approve(to, token_id)?)
+    }
+
+    fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<(), Self::Error> {
+        Ok(self.erc721.set_approval_for_all(operator, approved)?)
+    }
+
+    fn get_approved(&self, token_id: U256) -> Result<Address, Self::Error> {
+        Ok(self.erc721.get_approved(token_id)?)
+    }
+
+    fn is_approved_for_all(&self, owner: Address, operator: Address) -> bool {
+        self.erc721.is_approved_for_all(owner, operator)
+    }
+}
+
+#[public]
+impl IErc721Burnable for MyToken {
+    type Error = erc721::Error;
+
+    fn burn(&mut self, token_id: U256) -> Result<(), Self::Error> {
+        Ok(self.erc721.burn(token_id)?)
+    }
+}
+
+#[public]
+impl IErc165 for MyToken {
+    fn supports_interface(&self, interface_id: FixedBytes<4>) -> bool {
+        self.erc721.supports_interface(interface_id)
+    }
+}
+`;
+    }
+
+    if (type === 'erc1155') {
+        return `// SPDX-License-Identifier: MIT
+// Compatible with OpenZeppelin Contracts for Stylus ^0.3.0
+
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+extern crate alloc;
+
+use alloc::vec::Vec;
+use openzeppelin_stylus::token::erc1155::extensions::{
+    Erc1155Supply, IErc1155Burnable, IErc1155Supply
+};
+use openzeppelin_stylus::token::erc1155::{self, IErc1155};
+use openzeppelin_stylus::utils::introspection::erc165::IErc165;
+use stylus_sdk::abi::Bytes;
+use stylus_sdk::alloy_primitives::{Address, FixedBytes, U256};
+use stylus_sdk::prelude::*;
+
+#[entrypoint]
+#[storage]
+struct MyToken {
+    erc1155_supply: Erc1155Supply,
+}
+
+#[public]
+#[implements(IErc1155<Error = erc1155::Error>, IErc1155Burnable<Error = erc1155::Error>, IErc1155Supply, IErc165)]
+impl MyToken {}
+
+#[public]
+impl IErc1155 for MyToken {
+    type Error = erc1155::Error;
+
+    fn balance_of(&self, account: Address, id: U256) -> U256 {
+        self.erc1155_supply.balance_of(account, id)
+    }
+
+    fn balance_of_batch(&self, accounts: Vec<Address>, ids: Vec<U256>) -> Result<Vec<U256>, Self::Error> {
+        Ok(self.erc1155_supply.balance_of_batch(accounts, ids)?)
+    }
+
+    fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<(), Self::Error> {
+        Ok(self.erc1155_supply.set_approval_for_all(operator, approved)?)
+    }
+
+    fn is_approved_for_all(&self, account: Address, operator: Address) -> bool {
+        self.erc1155_supply.is_approved_for_all(account, operator)
+    }
+
+    fn safe_transfer_from(&mut self, from: Address, to: Address, id: U256, value: U256, data: Bytes) -> Result<(), Self::Error> {
+        Ok(self.erc1155_supply.safe_transfer_from(from, to, id, value, data)?)
+    }
+
+    fn safe_batch_transfer_from(
+        &mut self,
+        from: Address,
+        to: Address,
+        ids: Vec<U256>,
+        values: Vec<U256>,
+        data: Bytes,
+    ) -> Result<(), Self::Error> {
+        Ok(self.erc1155_supply.safe_batch_transfer_from(from, to, ids, values, data)?)
+    }
+}
+
+#[public]
+impl IErc1155Burnable for MyToken {
+    type Error = erc1155::Error;
+
+    fn burn(&mut self, account: Address, token_id: U256, value: U256) -> Result<(), Self::Error> {
+        Ok(self.erc1155_supply._burn(account, token_id, value)?)
+    }
+
+    fn burn_batch(&mut self, account: Address, token_ids: Vec<U256>, values: Vec<U256>) -> Result<(), Self::Error> {
+        Ok(self.erc1155_supply._burn_batch(account, token_ids, values)?)
+    }
+}
+
+#[public]
+impl IErc1155Supply for MyToken {
+    fn total_supply(&self, id: U256) -> U256 {
+        self.erc1155_supply.total_supply(id)
+    }
+
+    #[selector(name = "totalSupply")]
+    fn total_supply_all(&self) -> U256 {
+        self.erc1155_supply.total_supply_all()
+    }
+
+    fn exists(&self, id: U256) -> bool {
+        self.erc1155_supply.exists(id)
+    }
+}
+
+#[public]
+impl IErc165 for MyToken {
+    fn supports_interface(&self, interface_id: FixedBytes<4>) -> bool {
+        self.erc1155_supply.supports_interface(interface_id)
     }
 }
 `;
     }
 
     if (type === 'storage') {
-        return `//! Stylus Storage Contract
-//! A simple key-value storage contract.
-
-#![cfg_attr(not(feature = "export-abi"), no_main)]
+        return `#![cfg_attr(not(feature = "export-abi"), no_main)]
 extern crate alloc;
 
-use stylus_sdk::{alloy_primitives::{U256, Address}, prelude::*, storage::StorageMap};
+use stylus_sdk::{alloy_primitives::{U256, Address}, prelude::*};
 
 sol_storage! {
     #[entrypoint]
     pub struct Storage {
-        StorageMap<Address, U256> balances;
+        mapping(address => uint256) balances;
     }
 }
 
 #[public]
 impl Storage {
-    /// Gets the balance for an address
     pub fn get_balance(&self, addr: Address) -> U256 {
         self.balances.get(addr)
     }
 
-    /// Sets the balance for an address
     pub fn set_balance(&mut self, addr: Address, value: U256) {
         self.balances.insert(addr, value);
     }
@@ -317,7 +714,7 @@ impl Storage {
 `;
     }
 
-    // Custom template
+    // Custom template fallback
     return `//! Custom Stylus Contract
 //! Add your contract logic here.
 

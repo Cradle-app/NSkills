@@ -264,11 +264,12 @@ export const useBlueprintStore = create<BlueprintState>((set, get) => ({
 
   // ── Ghost operations ──────────────────────────────────────────────────
   addGhostNode: (type, position, data = {}) => {
+    const defaultConfig = getDefaultConfig(type);
     const node: DecoratedBlueprintNode = {
       id: generateUUID(),
       type: type as BlueprintNode['type'],
       position,
-      config: getDefaultConfig(type),
+      config: { ...defaultConfig, ...(data?.config || {}) },
       data: { ...data },
     };
     set((state) => ({ ghostNodes: [...state.ghostNodes, node] }));
