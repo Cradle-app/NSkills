@@ -401,7 +401,10 @@ function PluginCard({
                   src={logoAsset}
                   alt={plugin.name}
                   fill
-                  className="object-contain drop-shadow-sm transition-all"
+                  className={cn(
+                    "object-contain drop-shadow-sm transition-all",
+                    plugin.logoAsset === 'Telegram.jpg' && "rounded-full"
+                  )}
                   unoptimized
                 />
               </div>

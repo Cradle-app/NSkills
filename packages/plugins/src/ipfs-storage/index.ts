@@ -63,7 +63,8 @@ export class IPFSStoragePlugin extends BasePlugin<z.infer<typeof IPFSStorageConf
 
     // Add environment variables
     if (config.provider === 'pinata') {
-      this.addEnvVar(output, 'PINATA_JWT', 'Pinata JWT token', { required: true, secret: true });
+      this.addEnvVar(output, 'PINATA_API_KEY', 'Pinata API key', { required: true, secret: true });
+      this.addEnvVar(output, 'PINATA_SECRET_KEY', 'Pinata secret API key', { required: true, secret: true });
       this.addEnvVar(output, 'NEXT_PUBLIC_PINATA_GATEWAY', 'Pinata gateway URL', {
         required: false,
         defaultValue: 'https://gateway.pinata.cloud',

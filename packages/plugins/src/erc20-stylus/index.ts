@@ -42,8 +42,14 @@ export class ERC20StylusPlugin extends BasePlugin<z.infer<typeof ERC20StylusConf
    * Copies the interaction panel and cn utility together
    */
   readonly componentPathMappings: Record<string, PathCategory> = {
+    'src/hooks/**': 'frontend-hooks',
     'src/ERC20InteractionPanel.tsx': 'frontend-components',
     'src/cn.ts': 'frontend-lib',
+    'src/constants.ts': 'frontend-lib',
+    'src/deployment.ts': 'frontend-lib',
+    'src/interactions.ts': 'frontend-lib',
+    'src/types.ts': 'frontend-types',
+    'src/index.ts': 'frontend-lib',
     'contract/**': 'contract-source',
   };
 

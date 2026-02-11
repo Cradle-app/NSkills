@@ -193,6 +193,22 @@ export function CanvasSuggestions() {
     const lastSuggestionsRef = useRef<string>('');
 
     useEffect(() => {
+        // ===================================================================
+        // IMPORTANT: Disable auto-suggestions if template ghosts exist
+        // ===================================================================
+        // If the blueprint was loaded with template-defined ghost nodes
+        // (nodes without isSuggestion: true), we should NOT add contextual
+        // suggestions on top. This ensures templates display only their
+        // curated ghost nodes without interference from auto-suggestions.
+        // ===================================================================
+
+        const hasTemplateGhosts = ghostNodes.some(n => !n.data?.isSuggestion);
+
+        // If template has its own ghost nodes, skip auto-suggestions
+        if (hasTemplateGhosts) {
+            return;
+        }
+
         // We only want to update ghost nodes when the source node changes
         // OR when the set of suggestions (ids) changes for the same node.
         const suggestionsKey = suggestions.map(s => s.id).join(',');

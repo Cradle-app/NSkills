@@ -143,7 +143,7 @@ export function BlueprintTemplatesModal({ isOpen, onClose }: BlueprintTemplatesM
         const nodeIds: string[] = [];
         const nodePositions: { x: number; y: number }[] = [];
         for (const nodeConfig of template.nodes) {
-            const node = addNode(nodeConfig.type, nodeConfig.position);
+            const node = addNode(nodeConfig.type, nodeConfig.position, nodeConfig.config);
             nodeIds.push(node.id);
             nodePositions.push(nodeConfig.position);
         }

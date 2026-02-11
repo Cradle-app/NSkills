@@ -61,6 +61,9 @@ export async function POST(request: Request) {
     const result = validateBlueprint(body.blueprint);
     // #region agent log
     console.error('[DEBUG-D] validate/route.ts:21 - After validateBlueprint', { valid: result.valid, errorCount: result.errors.length });
+    if (!result.valid) {
+      console.error('[VALIDATION-ERROR] Validation errors:', JSON.stringify(result.errors, null, 2));
+    }
     // #endregion
 
     // Transform errors to be more user-friendly

@@ -14,9 +14,6 @@ import {
   getDefaultRegistry,
   buildPathContext,
   rewriteOutputPaths,
-  resolveOutputPath,
-  shouldMergeFile,
-  mergeFileContents,
   type NodePlugin,
   type PathContext,
 } from "@dapp-forge/plugin-sdk";
@@ -302,16 +299,23 @@ export class ExecutionEngine {
 
     console.log(`Copying component from: ${sourcePath}`);
 
+    // Derive a namespace from the package name to avoid file collisions
+    // e.g., "@cradle/maxxit-lazy-trader" → "maxxit-lazy-trader"
+    const componentNamespace = packageName.includes("/")
+      ? packageName.split("/").pop()!
+      : packageName;
+
     // If path mappings are provided and we have a frontend scaffold, use intelligent routing
     if (pathMappings && pathContext.hasFrontend) {
-      console.log(`Using path mappings for ${packageName}`);
+      console.log(`Using path mappings for ${packageName} (namespace: ${componentNamespace})`);
       this.copyWithPathMappings(
         realFs,
         memFs,
         sourcePath,
         outputPath,
         pathMappings,
-        pathContext
+        pathContext,
+        componentNamespace
       );
       return;
     }
@@ -336,7 +340,17 @@ export class ExecutionEngine {
   }
 
   /**
-   * Copy component files using path mappings for intelligent routing
+   * Copy component files using path mappings for intelligent routing.
+   *
+   * Strategy: Copy the component's src/ directory into a namespaced subdirectory
+   * under the frontend lib path (e.g., apps/web/src/lib/maxxit-lazy-trader/).
+   * This preserves all internal relative imports between component files.
+   *
+   * Special handling:
+   * - contract-source files: copied to contracts/ preserving structure
+   * - Hook files: copied to apps/web/src/hooks/ with import rewriting
+   * - types.ts, constants.ts: merged into shared location AND copied to namespace
+   * - README/docs: copied to docs/
    */
   private copyWithPathMappings(
     sourceFs: typeof realFs,
@@ -344,34 +358,66 @@ export class ExecutionEngine {
     sourcePath: string,
     outputPath: string,
     pathMappings: Record<string, PathCategory>,
-    pathContext: PathContext
+    pathContext: PathContext,
+    componentNamespace: string
   ): void {
-    this.copyDirectoryWithMappings(
+    // Phase 1: Copy ALL src/ files to the namespaced lib directory
+    // e.g., apps/web/src/lib/maxxit-lazy-trader/
+    // This preserves internal relative imports (../api, ./types, etc.)
+    const srcPath = path.join(sourcePath, "src");
+    if (sourceFs.existsSync(srcPath)) {
+      const namespacedLibPath = pathContext.hasFrontend
+        ? `${outputPath}/${pathContext.frontendPath}/${pathContext.frontendSrcPath}/lib/${componentNamespace}`
+        : `${outputPath}/src/lib/${componentNamespace}`;
+
+      console.log(`  Phase 1: Copying src/ → ${namespacedLibPath.replace(outputPath + "/", "")}`);
+      this.copyDirectoryToMemfs(sourceFs, targetFs, srcPath, namespacedLibPath);
+    }
+
+    // Phase 2: Handle contract-source files (outside src/)
+    this.copyContractFiles(
       sourceFs,
       targetFs,
       sourcePath,
       outputPath,
       "",
-      pathMappings,
-      pathContext
+      pathMappings
     );
+
+    // Phase 3: Create re-exports in standard hook/type barrel files
+    // so hooks are discoverable from apps/web/src/hooks/ and types from apps/web/src/types/
+    if (pathContext.hasFrontend && sourceFs.existsSync(srcPath)) {
+      this.createComponentReExports(
+        sourceFs,
+        targetFs,
+        srcPath,
+        outputPath,
+        pathContext,
+        componentNamespace
+      );
+    }
+
+    // Phase 4: Copy README/docs
+    this.copyComponentDocs(sourceFs, targetFs, sourcePath, outputPath);
   }
 
   /**
-   * Recursively copy directory with path mapping resolution
+   * Copy contract-source files from a component (if any) to the contracts/ directory
    */
-  private copyDirectoryWithMappings(
+  private copyContractFiles(
     sourceFs: typeof realFs,
     targetFs: ReturnType<typeof createFsFromVolume>,
     sourcePath: string,
     outputPath: string,
     relativePath: string,
-    pathMappings: Record<string, PathCategory>,
-    pathContext: PathContext
+    pathMappings: Record<string, PathCategory>
   ): void {
     const currentPath = relativePath
       ? path.join(sourcePath, relativePath)
       : sourcePath;
+
+    if (!sourceFs.existsSync(currentPath)) return;
+
     const items = sourceFs.readdirSync(currentPath);
 
     for (const item of items) {
@@ -379,6 +425,7 @@ export class ExecutionEngine {
         item === "node_modules" ||
         item === "dist" ||
         item === "target" ||
+        item === "src" ||
         item.startsWith(".")
       ) {
         continue;
@@ -389,100 +436,187 @@ export class ExecutionEngine {
       const stat = sourceFs.statSync(sourceItem);
 
       if (stat.isDirectory()) {
-        this.copyDirectoryWithMappings(
+        this.copyContractFiles(
           sourceFs,
           targetFs,
           sourcePath,
           outputPath,
           relativeItem,
-          pathMappings,
-          pathContext
+          pathMappings
         );
       } else {
         const category = this.findPathCategory(relativeItem, pathMappings);
 
-        if (category) {
-          let targetPath: string;
-
-          if (category === "contract-source") {
-            // For contract source files, preserve directory structure under contracts/
-            // e.g., contract/erc20/src/lib.rs -> contracts/erc20/src/lib.rs
-            const contractRelativePath = relativeItem.replace(
-              /^contract\//,
-              ""
-            );
-            targetPath = `${outputPath}/contracts/${contractRelativePath}`;
-          } else {
-            const resolvedPath = resolveOutputPath(item, category, pathContext);
-            targetPath = `${outputPath}/${resolvedPath}`;
-          }
-
-          const targetDir = path.dirname(targetPath);
-
-          targetFs.mkdirSync(targetDir, { recursive: true });
-          const incomingContent = sourceFs.readFileSync(sourceItem, "utf-8");
-
-          // Check if target file exists and needs merging
-          let finalContent: string;
-          let action = "created";
-
-          try {
-            const existingContent = targetFs.readFileSync(
-              targetPath,
-              "utf-8"
-            ) as string;
-
-            // File exists - check if we should merge
-            if (shouldMergeFile(item)) {
-              const mergeResult = mergeFileContents(
-                existingContent,
-                incomingContent,
-                item
-              );
-
-              if (mergeResult.success) {
-                finalContent = mergeResult.content;
-                action = "merged";
-
-                if (mergeResult.warnings.length > 0) {
-                  console.log(
-                    `    ⚠️ Merge warnings: ${mergeResult.warnings.join(", ")}`
-                  );
-                }
-              } else {
-                console.warn(
-                  `    ⚠️ Could not merge ${item}, keeping existing`
-                );
-                finalContent = existingContent;
-                action = "kept-existing";
-              }
-            } else {
-              // Not a mergeable file type - keep existing and warn
-              console.warn(
-                `    ⚠️ File conflict: ${item} - keeping existing (consider using unique names)`
-              );
-              finalContent = existingContent;
-              action = "kept-existing";
-            }
-          } catch {
-            // File doesn't exist - write new content
-            finalContent = incomingContent;
-          }
-
-          targetFs.writeFileSync(targetPath, finalContent);
-          console.log(
-            `  ${relativeItem} -> ${targetPath.replace(
-              outputPath + "/",
-              ""
-            )} (${category}) [${action}]`
+        if (category === "contract-source") {
+          const contractRelativePath = relativeItem.replace(
+            /^contract\//,
+            ""
           );
-        } else {
-          if (item === "README.md" || item.endsWith(".md")) {
-            const docsPath = `${outputPath}/docs`;
-            targetFs.mkdirSync(docsPath, { recursive: true });
-            const content = sourceFs.readFileSync(sourceItem);
-            targetFs.writeFileSync(`${docsPath}/${item}`, content);
+          const targetPath = `${outputPath}/contracts/${contractRelativePath}`;
+          const targetDir = path.dirname(targetPath);
+          targetFs.mkdirSync(targetDir, { recursive: true });
+          const content = sourceFs.readFileSync(sourceItem);
+          targetFs.writeFileSync(targetPath, content);
+          console.log(
+            `  ${relativeItem} -> contracts/${contractRelativePath} (contract-source) [created]`
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * Create re-exports in barrel files (hooks/index.ts, types/types.ts, lib/constants.ts)
+   * so component hooks, types, and constants are discoverable from standard import paths.
+   *
+   * For example, after copying maxxit-lazy-trader to lib/maxxit-lazy-trader/,
+   * this adds to hooks/index.ts:
+   *   export * from '../lib/maxxit-lazy-trader/hooks';
+   *
+   * And to types/types.ts:
+   *   export * from '../lib/maxxit-lazy-trader/types';
+   *
+   * And to lib/constants.ts:
+   *   export * from './maxxit-lazy-trader/constants';
+   */
+  private createComponentReExports(
+    sourceFs: typeof realFs,
+    targetFs: ReturnType<typeof createFsFromVolume>,
+    srcPath: string,
+    outputPath: string,
+    pathContext: PathContext,
+    componentNamespace: string
+  ): void {
+    const frontendBase = `${outputPath}/${pathContext.frontendPath}/${pathContext.frontendSrcPath}`;
+
+    // --- Hook re-exports ---
+    const hooksDir = path.join(srcPath, "hooks");
+    if (sourceFs.existsSync(hooksDir)) {
+      const hooksIndexPath = path.join(hooksDir, "index.ts");
+      const targetHooksIndex = `${frontendBase}/hooks/index.ts`;
+      targetFs.mkdirSync(path.dirname(targetHooksIndex), { recursive: true });
+
+      let existingContent = "";
+      try {
+        existingContent = targetFs.readFileSync(targetHooksIndex, "utf-8") as string;
+      } catch {
+        // File doesn't exist yet
+      }
+
+      if (sourceFs.existsSync(hooksIndexPath)) {
+        // Component has hooks/index.ts — re-export the barrel
+        const reExportLine = `\n// Re-exports from ${componentNamespace}\nexport * from '../lib/${componentNamespace}/hooks';\n`;
+
+        if (!existingContent.includes(`from '../lib/${componentNamespace}/hooks'`)) {
+          targetFs.writeFileSync(
+            targetHooksIndex,
+            existingContent + reExportLine
+          );
+          console.log(
+            `  hooks/index.ts -> Added re-export for ${componentNamespace} hooks`
+          );
+        }
+      } else {
+        // No hooks/index.ts — scan individual hook files and re-export each one
+        const hookFiles = (sourceFs.readdirSync(hooksDir) as string[]).filter(
+          (f: string) => f.endsWith(".ts") && f !== "index.ts"
+        );
+
+        if (hookFiles.length > 0) {
+          const reExportLines = hookFiles
+            .map((f: string) => {
+              const hookName = f.replace(/\.ts$/, "");
+              return `export * from '../lib/${componentNamespace}/hooks/${hookName}';`;
+            })
+            .join("\n");
+
+          const block = `\n// Re-exports from ${componentNamespace}\n${reExportLines}\n`;
+
+          if (!existingContent.includes(`from '../lib/${componentNamespace}/hooks/`)) {
+            targetFs.writeFileSync(
+              targetHooksIndex,
+              existingContent + block
+            );
+            console.log(
+              `  hooks/index.ts -> Added individual re-exports for ${componentNamespace} hooks (${hookFiles.join(", ")})`
+            );
           }
+        }
+      }
+    }
+
+    // --- Type re-exports ---
+    const typesFile = path.join(srcPath, "types.ts");
+    if (sourceFs.existsSync(typesFile)) {
+      const targetTypesPath = `${frontendBase}/types/types.ts`;
+      targetFs.mkdirSync(path.dirname(targetTypesPath), { recursive: true });
+
+      let existingTypes = "";
+      try {
+        existingTypes = targetFs.readFileSync(targetTypesPath, "utf-8") as string;
+      } catch {
+        // File doesn't exist yet
+      }
+
+      const reExportLine = `\n// Re-exports from ${componentNamespace}\nexport * from '../lib/${componentNamespace}/types';\n`;
+
+      if (!existingTypes.includes(`from '../lib/${componentNamespace}/types'`)) {
+        targetFs.writeFileSync(
+          targetTypesPath,
+          existingTypes + reExportLine
+        );
+        console.log(
+          `  types/types.ts -> Added re-export for ${componentNamespace} types`
+        );
+      }
+    }
+
+    // --- Constants re-exports ---
+    const constantsFile = path.join(srcPath, "constants.ts");
+    if (sourceFs.existsSync(constantsFile)) {
+      const targetConstantsPath = `${frontendBase}/lib/constants.ts`;
+      targetFs.mkdirSync(path.dirname(targetConstantsPath), { recursive: true });
+
+      let existingConstants = "";
+      try {
+        existingConstants = targetFs.readFileSync(targetConstantsPath, "utf-8") as string;
+      } catch {
+        // File doesn't exist yet
+      }
+
+      const reExportLine = `\n// Re-exports from ${componentNamespace}\nexport * from './${componentNamespace}/constants';\n`;
+
+      if (!existingConstants.includes(`from './${componentNamespace}/constants'`)) {
+        targetFs.writeFileSync(
+          targetConstantsPath,
+          existingConstants + reExportLine
+        );
+        console.log(
+          `  lib/constants.ts -> Added re-export for ${componentNamespace} constants`
+        );
+      }
+    }
+  }
+
+  /**
+   * Copy README and doc files from a component to the docs/ directory
+   */
+  private copyComponentDocs(
+    sourceFs: typeof realFs,
+    targetFs: ReturnType<typeof createFsFromVolume>,
+    sourcePath: string,
+    outputPath: string
+  ): void {
+    const items = sourceFs.readdirSync(sourcePath);
+    for (const item of items) {
+      if (item === "README.md" || item.endsWith(".md")) {
+        const sourceItem = path.join(sourcePath, item);
+        const stat = sourceFs.statSync(sourceItem);
+        if (!stat.isDirectory()) {
+          const docsPath = `${outputPath}/docs`;
+          targetFs.mkdirSync(docsPath, { recursive: true });
+          const content = sourceFs.readFileSync(sourceItem);
+          targetFs.writeFileSync(`${docsPath}/${item}`, content);
         }
       }
     }
@@ -636,47 +770,47 @@ function generateRootFiles(
   // Adjust scripts based on whether we need monorepo structure
   const packageJson = needsMonorepo
     ? {
-        name: project.name.toLowerCase().replace(/\s+/g, "-"),
-        version: project.version,
-        description: project.description,
-        private: true,
-        scripts: {
-          dev: "next dev",
-          build: "next build",
-          start: "next start",
-          lint: "next lint",
-          ...Object.fromEntries(scripts.map((s) => [s.name, s.command])),
-        },
-        dependencies: {},
-        devDependencies: {
-          typescript: "^5.3.0",
-        },
-        packageManager: "pnpm@9.0.0",
-        author: project.author,
-        license: project.license,
-        keywords: project.keywords,
-      }
+      name: project.name.toLowerCase().replace(/\s+/g, "-"),
+      version: project.version,
+      description: project.description,
+      private: true,
+      scripts: {
+        dev: "next dev",
+        build: "next build",
+        start: "next start",
+        lint: "next lint",
+        ...Object.fromEntries(scripts.map((s) => [s.name, s.command])),
+      },
+      dependencies: {},
+      devDependencies: {
+        typescript: "^5.3.0",
+      },
+      packageManager: "pnpm@9.0.0",
+      author: project.author,
+      license: project.license,
+      keywords: project.keywords,
+    }
     : {
-        // Standalone frontend - simpler package.json pointing to apps/web
-        name: project.name.toLowerCase().replace(/\s+/g, "-"),
-        version: project.version,
-        description: project.description,
-        private: true,
-        scripts: {
-          dev: "next dev",
-          build: "next build",
-          start: "next start",
-          lint: "next lint",
-          ...Object.fromEntries(scripts.map((s) => [s.name, s.command])),
-        },
-        dependencies: {},
-        devDependencies: {
-          typescript: "^5.3.0",
-        },
-        packageManager: "pnpm@9.0.0",
-        license: project.license,
-        keywords: project.keywords,
-      };
+      // Standalone frontend - simpler package.json pointing to apps/web
+      name: project.name.toLowerCase().replace(/\s+/g, "-"),
+      version: project.version,
+      description: project.description,
+      private: true,
+      scripts: {
+        dev: "next dev",
+        build: "next build",
+        start: "next start",
+        lint: "next lint",
+        ...Object.fromEntries(scripts.map((s) => [s.name, s.command])),
+      },
+      dependencies: {},
+      devDependencies: {
+        typescript: "^5.3.0",
+      },
+      packageManager: "pnpm@9.0.0",
+      license: project.license,
+      keywords: project.keywords,
+    };
 
   fs.writeFileSync(
     `${basePath}/package.json`,
@@ -691,8 +825,7 @@ function generateRootFiles(
   const envVarsContent = dedupedEnvVars
     .map(
       (v) =>
-        `# ${v.description}${v.required ? " (required)" : ""}${
-          v.secret ? " [secret]" : ""
+        `# ${v.description}${v.required ? " (required)" : ""}${v.secret ? " [secret]" : ""
         }\n${v.key}=${v.defaultValue || ""}`
     )
     .join("\n\n");
@@ -864,10 +997,9 @@ function generateReadme(
 
   return `# ${project.name}
 
-${
-  project.description ||
-  "A Web3 dApp composed with [[N]skills](https://www.nskills.xyz)."
-}
+${project.description ||
+    "A Web3 dApp composed with [[N]skills](https://www.nskills.xyz)."
+    }
 
 ## 📁 Project Structure
 
@@ -900,12 +1032,11 @@ ${structureBlock}
    \`\`\`
 
    Edit \`.env\` and configure:
-   ${
-     envVars
-       .filter((v) => v.required)
-       .map((v) => `   - \`${v.key}\`: ${v.description}`)
-       .join("\n") || "   - No required variables"
-   }
+   ${envVars
+      .filter((v) => v.required)
+      .map((v) => `   - \`${v.key}\`: ${v.description}`)
+      .join("\n") || "   - No required variables"
+    }
 
 4. **Deploy contracts** (from repo root): \`pnpm deploy:sepolia\` or \`pnpm deploy:mainnet\`
 
