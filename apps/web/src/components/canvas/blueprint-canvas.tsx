@@ -104,6 +104,7 @@ function BlueprintCanvasInner() {
 
   // Templates modal state
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   // Zoom controls
   const { fitView, zoomIn, zoomOut, screenToFlowPosition } = useReactFlow();
@@ -288,6 +289,7 @@ function BlueprintCanvasInner() {
     // Actually delete all nodes and ghosts
     clearAllNodes();
     setShowDeleteConfirm(false);
+    setShowOnboarding(false);
   }, [showDeleteConfirm, clearAllNodes]);
 
   // Show auth error notification
@@ -473,7 +475,7 @@ function BlueprintCanvasInner() {
         </ReactFlow>
 
         {/* Empty state */}
-        {nodes.length === 0 && (
+        {nodes.length === 0 && showOnboarding && (
           <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -574,7 +576,6 @@ function BlueprintCanvasInner() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 13a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z" />
                     </svg>
                     Use Templates
-                    <span className="text-xs opacity-80">(18 available)</span>
                   </span>
                 </motion.button>
 
@@ -582,6 +583,10 @@ function BlueprintCanvasInner() {
                 <motion.button
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    clearAllNodes();
+                    setShowOnboarding(false);
+                  }}
                   className="group px-6 py-3 rounded-xl font-semibold text-sm bg-forge-elevated/80 text-white border border-forge-border/50 hover:bg-forge-elevated hover:border-accent-purple/50 transition-all duration-300 shadow-md hover:shadow-lg backdrop-blur-sm"
                 >
                   <span className="flex items-center gap-2">
@@ -648,16 +653,20 @@ function BlueprintCanvasInner() {
           // Get current state and update the blueprint directly
           const currentState = useBlueprintStore.getState();
 
-          // Update blueprint with new nodes and edges (append to existing)
+          // Replace blueprint with new nodes and edges
           useBlueprintStore.setState({
             ...currentState,
             blueprint: {
               ...currentState.blueprint,
-              nodes: [...currentState.blueprint.nodes, ...blueprintNodes],
-              edges: [...currentState.blueprint.edges, ...blueprintEdges],
+              nodes: blueprintNodes,
+              edges: blueprintEdges,
               updatedAt: new Date().toISOString(),
             },
+            // Also clear any ghosts
+            ghostNodes: [],
+            ghostEdges: [],
           });
+          setShowOnboarding(false);
         }}
       />
 

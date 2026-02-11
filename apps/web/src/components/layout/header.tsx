@@ -175,15 +175,14 @@ export function Header({ setShowAI }: HeaderProps = {}) {
         {/* Toolbar: Templates, Import, Export, AI */}
         <div className="flex items-center p-1 rounded-lg bg-[hsl(var(--color-bg-muted)/0.5)] border border-[hsl(var(--color-border-subtle))]">
           <SimpleTooltip content="Templates">
-            <AuthGuard onClick={() => setShowTemplates(true)} requireGitHub={true}>
               <Button
                 variant="ghost"
                 size="icon-sm"
                 className="text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))]"
+                onClick={() => setShowTemplates(true)}
               >
                 <LayoutTemplate className="w-4 h-4" />
               </Button>
-            </AuthGuard>
           </SimpleTooltip>
 
           <div className="w-px h-4 bg-[hsl(var(--color-border-subtle))] mx-0.5" />

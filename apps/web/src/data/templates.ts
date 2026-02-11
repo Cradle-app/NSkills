@@ -689,18 +689,19 @@ export const TEMPLATES: Template[] = [
   },
 
   // ── 13. Analytics Hub ──────────────────────────────────────────────────
-  // Flow: {sql..labels} (2 cols of 4) → tx-history → frontend
+  // Flow: {sql..labels} (2 cols of 4) → tx-history → frontend → wallet-auth
+  //       Ghost: agent, paywall
   {
     id: 'analytics-hub',
     name: 'Analytics Hub',
     description:
-      'All nine Dune analytics modules + frontend — agent, paywall, and wallet as suggestions',
+      'All nine Dune analytics modules + frontend + wallet auth — agent and paywall as suggestions',
     icon: 'BarChart3',
     colorClass: 'accent-primary',
     category: 'analytics',
     tags: ['Dune', 'Analytics', 'Full Suite', 'Agent-Ready'],
     explainer:
-      'Nine Dune modules cover every analytics angle: SQL for custom queries, Token Price and DEX Volume for market data, Wallet Balances and Address Labels for user profiling, NFT Floor for collections, Gas Price for cost estimation, Protocol TVL for DeFi health, and Transaction History for audit trails. Address Labels feeds into Transaction History for enriched data. Everything converges in the frontend. Ghost blocks suggest an agent for automated reporting and a paywall to monetise the dashboard.',
+      'Nine Dune modules cover every analytics angle: SQL for custom queries, Token Price and DEX Volume for market data, Wallet Balances and Address Labels for user profiling, NFT Floor for collections, Gas Price for cost estimation, Protocol TVL for DeFi health, and Transaction History for audit trails. Address Labels feeds into Transaction History for enriched data. Wallet Auth enables personalized analytics by connecting user wallets. Everything converges in the frontend. Ghost blocks suggest an agent for AI-powered query generation and automated reporting, and a paywall to monetise premium analytics tiers.',
     nodes: [
       { type: 'dune-execute-sql', position: { x: 0, y: 0 } },             // 0  T0a
       { type: 'dune-token-price', position: { x: 0, y: 150 } },           // 1  T0a
@@ -712,6 +713,7 @@ export const TEMPLATES: Template[] = [
       { type: 'dune-address-labels', position: { x: 300, y: 450 } },      // 7  T0b
       { type: 'dune-transaction-history', position: { x: 600, y: 225 } }, // 8  T1
       { type: 'frontend-scaffold', position: { x: 900, y: 225 } },        // 9  T2
+      { type: 'wallet-auth', position: { x: 1200, y: 225 } },             // 10 T3
     ],
     edges: [
       { source: 0, target: 9 },
@@ -723,16 +725,15 @@ export const TEMPLATES: Template[] = [
       { source: 6, target: 9 },
       { source: 7, target: 8 },
       { source: 8, target: 9 },
+      { source: 9, target: 10 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 1200, y: 75 } },  // g0 (idx 10)
-      { type: 'x402-paywall-api', position: { x: 1200, y: 225 } },      // g1 (idx 11)
-      { type: 'wallet-auth', position: { x: 1200, y: 375 } },           // g2 (idx 12)
+      { type: 'erc8004-agent-runtime', position: { x: 1500, y: 75 } },    // g0 (idx 11)
+      { type: 'x402-paywall-api', position: { x: 1500, y: 225 } },        // g1 (idx 12)
     ],
     ghostEdges: [
-      { source: 9, target: 10 },  // frontend → agent
-      { source: 9, target: 11 },  // frontend → paywall
-      { source: 9, target: 12 },  // frontend → wallet-auth
+      { source: 9, target: 11 },  // frontend → agent
+      { source: 9, target: 12 },  // frontend → paywall
     ],
   },
 
@@ -841,34 +842,33 @@ export const TEMPLATES: Template[] = [
   },
 
   // ── 16. AI-Powered Paywall dApp ─────────────────────────────────────────
-  // Flow: {paywall, erc20, agent, stylus} → {smartcache, auditware, frontend, dune-token} → {wallet, rpc, chain-data}
+  // Flow: {paywall, erc20, agent, stylus} → {smartcache, auditware, frontend, dune-token} → {wallet, rpc}
+  //       Ghost: telegram-ai, telegram-notifications, quality-gates, dune-sql
   {
     id: 'ai-powered-paywall',
     name: 'AI-Powered Paywall dApp',
     description:
-      'x402 paywall + Custom Stylus subscription contract + SmartCache + Radar + ERC-20 + ERC-8004 agent + Dune token price — Telegram + analytics as suggestions',
+      'x402 paywall + Custom Stylus subscription contract + SmartCache + Radar + ERC-20 + ERC-8004 agent + Dune token price — Telegram bot, quality gates, and custom analytics as suggestions',
     icon: 'CreditCard',
     colorClass: 'warning',
     category: 'payments',
     tags: ['Paywall', 'Stylus', 'Caching', 'Radar', 'Agent'],
     explainer:
-      'A custom Stylus subscription contract manages access tiers and payment streaming on-chain — SmartCache reduces latency and gas costs by warming the subscription contract cache, and Auditware (Radar) scans it for vulnerabilities. The x402 paywall gates API endpoints behind HTTP 402 micro-payments using the pre-deployed ERC-20 token (usable directly). The ERC-8004 agent handles content decisions and payment verification. Dune Token Price monitors the payment token value.',
+      'A custom Stylus subscription contract manages access tiers and payment streaming on-chain — SmartCache reduces latency and gas costs by warming the subscription contract cache, and Auditware (Radar) scans it for vulnerabilities. The x402 paywall gates API endpoints behind HTTP 402 micro-payments using the pre-deployed ERC-20 token. The ERC-8004 agent handles content decisions and payment verification. Dune Token Price monitors the payment token value. Ghost blocks suggest a Telegram bot for conversational AI and payment notifications, quality gates for CI/CD, and Dune SQL for custom revenue analytics.',
     nodes: [
       { type: 'x402-paywall-api', position: { x: 0, y: 0 } },            // 0  T0
       { type: 'erc20-stylus', position: { x: 0, y: 150 } },              // 1  T0
       { type: 'erc8004-agent-runtime', position: { x: 0, y: 300 } },     // 2  T0
-      { type: 'stylus-rust-contract', position: { x: 0, y: 450 } },           // 3  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 450 } },      // 3  T0
       { type: 'smartcache-caching', position: { x: 300, y: 0 } },        // 4  T1
       { type: 'auditware-analyzing', position: { x: 300, y: 150 } },     // 5  T1
       { type: 'frontend-scaffold', position: { x: 300, y: 300 } },       // 6  T1
       { type: 'dune-token-price', position: { x: 300, y: 450 } },        // 7  T1
       { type: 'wallet-auth', position: { x: 600, y: 0 } },               // 8  T2
       { type: 'rpc-provider', position: { x: 600, y: 150 } },            // 9  T2
-      { type: 'chain-data', position: { x: 600, y: 300 } },              // 10 T2
     ],
     edges: [
       { source: 0, target: 6 },
-      { source: 0, target: 8 },
       { source: 1, target: 6 },
       { source: 1, target: 7 },
       { source: 2, target: 6 },
@@ -877,17 +877,18 @@ export const TEMPLATES: Template[] = [
       { source: 3, target: 6 },
       { source: 6, target: 8 },
       { source: 6, target: 9 },
-      { source: 6, target: 10 },
     ],
     ghostNodes: [
-      { type: 'telegram-ai-agent', position: { x: 900, y: 0 } },        // g0 (idx 11)
-      { type: 'repo-quality-gates', position: { x: 900, y: 150 } },     // g1 (idx 12)
-      { type: 'dune-wallet-balances', position: { x: 900, y: 300 } },   // g2 (idx 13)
+      { type: 'telegram-ai-agent', position: { x: 900, y: 0 } },         // g0 (idx 10)
+      { type: 'telegram-notifications', position: { x: 900, y: 150 } },  // g1 (idx 11)
+      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },      // g2 (idx 12)
+      { type: 'dune-execute-sql', position: { x: 900, y: 450 } },        // g3 (idx 13)
     ],
     ghostEdges: [
-      { source: 2, target: 11 },  // agent → telegram
-      { source: 3, target: 12 },  // stylus → quality-gates
-      { source: 6, target: 13 },  // frontend → dune-wallets
+      { source: 2, target: 10 },   // agent → telegram-ai
+      { source: 10, target: 11 },  // telegram-ai → telegram-notifications
+      { source: 3, target: 12 },   // stylus → quality-gates
+      { source: 6, target: 13 },   // frontend → dune-execute-sql
     ],
   },
 
@@ -937,17 +938,18 @@ export const TEMPLATES: Template[] = [
 
   // ── 18. Web3 SaaS Starter ──────────────────────────────────────────────
   // Flow: {stylus, paywall} → {smartcache, auditware, frontend} → {wallet, rpc, dune-wallet}
+  //       Ghost: agent, quality-gates, chain-data, tx-history, bridge, eip7702
   {
     id: 'web3-saas-starter',
     name: 'Web3 SaaS Starter',
     description:
-      'Stylus contract + SmartCache + Radar + x402 paywall + Dune analytics + frontend — agent, quality gates, SDK as suggestions',
+      'Stylus contract + SmartCache + Radar + x402 paywall + Dune analytics + frontend — agent, quality gates, chain data, transaction history, bridge, and smart EOA as suggestions',
     icon: 'Wrench',
     colorClass: 'info',
     category: 'contracts',
     tags: ['SaaS', 'Stylus', 'Paywall', 'Radar', 'Caching'],
     explainer:
-      'The Stylus contract is your core business logic — SmartCache reduces latency and gas costs by warming the contract cache, and Auditware (Radar) scans it for vulnerabilities before deploy. The x402 paywall monetises API access to your contract. The frontend provides the SaaS dashboard with wallet auth, RPC for transactions, and Dune Wallet Balances for user analytics. Ghost blocks suggest an agent for automated workflows, quality gates for CI/CD, and an SDK generator for third-party developer adoption.',
+      'The Stylus contract is your core business logic — SmartCache reduces latency and gas costs by warming the contract cache, and Auditware (Radar) scans it for vulnerabilities before deploy. The x402 paywall monetises API access to your contract. The frontend provides the SaaS dashboard with wallet auth, RPC for transactions, and Dune Wallet Balances for user analytics. Ghost blocks suggest an agent for automated workflows, quality gates for CI/CD, chain-data for on-chain event indexing, transaction history for payment audit trails, Arbitrum Bridge for asset onboarding, and EIP-7702 smart EOA for gasless user experience.',
     nodes: [
       { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },           // 0  T0
       { type: 'smartcache-caching', position: { x: 300, y: 0 } },      // 1  T1
@@ -968,14 +970,20 @@ export const TEMPLATES: Template[] = [
       { source: 4, target: 7 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 8)
-      { type: 'repo-quality-gates', position: { x: 900, y: 150 } },    // g1 (idx 9)
-      { type: 'sdk-generator', position: { x: 900, y: 300 } },         // g2 (idx 10)
+      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },           // g0 (idx 8)
+      { type: 'repo-quality-gates', position: { x: 900, y: 150 } },            // g1 (idx 9)
+      { type: 'chain-data', position: { x: 900, y: 300 } },                    // g2 (idx 10)
+      { type: 'dune-transaction-history', position: { x: 1200, y: 0 } },       // g3 (idx 11)
+      { type: 'arbitrum-bridge', position: { x: 1200, y: 150 } },              // g4 (idx 12)
+      { type: 'eip7702-smart-eoa', position: { x: 1200, y: 300 } },            // g5 (idx 13)
     ],
     ghostEdges: [
-      { source: 4, target: 8 },  // frontend → agent
-      { source: 0, target: 9 },  // contract → quality-gates
-      { source: 0, target: 10 }, // contract → sdk-generator
+      { source: 4, target: 8 },   // frontend → agent
+      { source: 0, target: 9 },   // contract → quality-gates
+      { source: 4, target: 10 },  // frontend → chain-data
+      { source: 4, target: 11 },  // frontend → dune-transaction-history
+      { source: 4, target: 12 },  // frontend → arbitrum-bridge
+      { source: 5, target: 13 },  // wallet-auth → eip7702-smart-eoa
     ],
   },
 ];
