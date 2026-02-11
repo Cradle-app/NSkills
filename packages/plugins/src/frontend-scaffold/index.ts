@@ -422,6 +422,106 @@ ${config.ssrEnabled ? '- ✅ Server-side rendering' : ''}
 
 ---
 
+## Interacting with Rust/Stylus Contracts from the Frontend
+
+This section explains the **universal pattern** for building a UI to interact with **any** Rust/Stylus smart contract. Use this as a reference when creating contract interaction panels for your dApp.
+
+### Core Concepts
+
+1. **camelCase ABI strings**: Stylus contracts export a Solidity-compatible ABI. Define it as an array of function signatures:
+
+   \`\`\`ts
+   const MY_CONTRACT_ABI = [
+     "function myReadFunction(uint256 input) view returns (string)",
+     "function myWriteFunction(address to, uint256 amount)",
+     // ... one entry per public function
+   ];
+   \`\`\`
+
+   - Use **camelCase** for function names (e.g., \`balanceOf\`, \`mintTo\`, \`getCount\`) to match the Rust contract's exported interface.
+   - Mark read-only functions with \`view\` or \`pure\`.
+
+2. **Network configuration**: Define your supported chains (RPC URL, chain ID, explorer URL):
+
+   \`\`\`ts
+   const NETWORKS = {
+     'arbitrum-sepolia': {
+       rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
+       chainId: 421614,
+       explorerUrl: 'https://sepolia.arbiscan.io',
+     },
+     // ... add more networks as needed
+   };
+   \`\`\`
+
+3. **Contract address**: Hard-code a default address for each network, or let users input a custom address with validation:
+
+   - Supports multiple networks (Arbitrum Sepolia, Arbitrum One, Superposition, Superposition Testnet) via a simple \`NETWORKS\` map.
+   - Has a **default contract address per network** and a “use custom contract” flow that:
+     - Validates the address format (\`ethers.isAddress\`)
+     - Checks that bytecode exists at the address via \`provider.getCode(address)\`
+
+### Read Operations (View/Pure Functions)
+
+Use a **read-only provider** to call view functions without gas or wallet connection:
+
+\`\`\`ts
+const provider = new ethers.JsonRpcProvider(rpcUrl);
+const contract = new ethers.Contract(contractAddress, MY_CONTRACT_ABI, provider);
+
+// Call view functions
+const result = await contract.myReadFunction(inputValue);
+\`\`\`
+
+**Use cases**: Fetching contract state (balance, owner, metadata), checking user permissions, reading configuration.
+
+4. **Write path (wallet + signer)**
+
+   - Ensures the wallet is connected via **wagmi** hooks:
+     - \`useAccount\`, \`usePublicClient\`, \`useWalletClient\`, \`useSwitchChain\`
+   - Switches (or adds) the correct chain in the user’s wallet using \`wallet_switchEthereumChain\` / \`wallet_addEthereumChain\`.
+   - Builds a **signer-connected** contract with \`ethers.BrowserProvider\`:
+
+   \`\`\`ts
+   const ethereum = (window as any).ethereum;
+   const provider = new ethers.BrowserProvider(ethereum);
+   const signer = await provider.getSigner();
+   const writeContract = new ethers.Contract(contractAddress, MY_CONTRACT_ABI, signer);
+   
+   // Execute any write function from your contract
+   const tx = await writeContract.myWriteFunction(arg1, arg2);
+   await tx.wait(); // Wait for confirmation
+   \`\`\`
+
+   - Works for **any** write method: transfers, deposits, withdrawals, mints, burns, configuration updates, etc.
+
+5. **Error handling + UX**
+
+   - Normalizes RPC and contract errors into user-friendly messages (e.g. “Contract not found on Arbitrum Sepolia”, “User rejected chain switch”).
+   - Tracks transaction status in a small state machine: \`idle → pending → success / error\`.
+   - Renders helpful hints for:
+     - Network mismatch
+     - Missing contract
+     - Failed calls or reverts
+
+### Building Your Contract Interaction UI
+
+When building a UI for **your** Stylus Rust contract:
+
+1. **Follow the interaction pattern** above:
+   - Separate **read** and **write** contract helpers.
+   - Handle chain switching and wallet connection before writes.
+2. **Replace the ABI** with your contract’s camelCase ABI:
+   - One entry per public function (view + write).
+   - Keep names consistent with the interface you exported from Rust.
+3. **Add focused UI sections per function group**:
+   - Read panels for “view” calls (e.g., balances, state snapshots).
+   - Forms + buttons for writes (e.g., mint, transfer, configure).
+
+This generic pattern can be adapted to **any Rust/Stylus contract** by swapping out the ABI and the function-specific UI forms. If your repository includes example panels like \`ERC721InteractionPanel.tsx\` or \`ERC20InteractionPanel.tsx\`, use them as reference implementations.
+
+---
+
 ## Hydration Safety (wagmi + Next.js SSR)
 
 When using \`useAccount\`, \`useNetwork\`, or any wallet-dependent hook in a server-rendered Next.js app, the server has **no wallet state**. This creates a hydration mismatch where the server renders "disconnected" but the client immediately sees "connected".

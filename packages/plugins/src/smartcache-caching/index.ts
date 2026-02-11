@@ -18,25 +18,20 @@ const __dirname = path.dirname(__filename);
 const COUNTER_CONTRACT_TEMPLATE_PATH = path.resolve(__dirname, '../../../../apps/web/src/components/counter-contract');
 
 function hasCachingFunctions(code: string): boolean {
-    return /is_cacheable|opt_in_to_cache/.test(code);
+    return /is_cacheable/.test(code);
 }
 
 function addCachingToContract(contractCode: string): string {
     if (!contractCode.trim()) return contractCode;
     if (contractCode.includes('stylus_cache_sdk')) return contractCode;
 
-    const cachingImports = `use stylus_cache_sdk::{is_contract_cacheable, AutoCacheOptIn, emit_cache_opt_in};
+    const cachingImports = `use stylus_cache_sdk::{is_contract_cacheable};
 
 `;
     const cacheableFunction = `
     /// Returns whether this contract is cacheable
     pub fn is_cacheable(&self) -> bool {
         is_contract_cacheable()
-    }
-
-    /// Opt-in to caching (call once after deployment)
-    pub fn opt_in_to_cache(&mut self) {
-        emit_cache_opt_in();
     }
 `;
 
@@ -141,12 +136,12 @@ const DOS2UNIX_NOTE = `# If you see "bad interpreter" or CRLF errors on Windows,
 
 `;
 
-/**
- * SmartCache Caching Plugin
- * - mycontract/: original contract (without is_cacheable/opt_in_to_cache)
- * - cached-contract/: contract with caching functions added
- * Both use counter-contract folder structure. Scripts include dos2unix for Windows.
- */
+    /**
+     * SmartCache Caching Plugin
+     * - mycontract/: original contract (no cache helper)
+     * - cached-contract/: contract with is_cacheable() helper added
+     * Both use counter-contract folder structure. Scripts include dos2unix for Windows.
+     */
 export class SmartCacheCachingPlugin extends BasePlugin<z.infer<typeof SmartCacheCachingConfig>> {
     readonly metadata: PluginMetadata = {
         id: 'smartcache-caching',
@@ -181,9 +176,9 @@ export class SmartCacheCachingPlugin extends BasePlugin<z.infer<typeof SmartCach
         const hasCaching = hasCachingFunctions(originalLibRs);
         const cachedLibRs = hasCaching ? originalLibRs : addCachingToContract(originalLibRs);
 
-        // mycontract = original (without caching)
+        // mycontract = original (without caching helper)
         this.copyContractFolder(output, 'mycontract', originalLibRs, false);
-        // cached-contract = with is_cacheable + opt_in_to_cache
+        // cached-contract = with is_cacheable helper
         this.copyContractFolder(output, 'cached-contract', cachedLibRs, true);
 
         // Markdown guide
@@ -384,7 +379,7 @@ function generateDeployScript(network: 'sepolia' | 'mainnet'): string {
 
     return `#!/bin/bash
 # Cached Contract ${networkName} Deployment
-# Deploys from contracts/cached-contract/ (contract with is_cacheable + opt_in_to_cache)
+# Deploys from contracts/cached-contract/ (contract with is_cacheable helper)
 
 set -euo pipefail
 
@@ -403,7 +398,7 @@ fi
 cd "\${CONTRACT_DIR}"
 cargo stylus deploy -e "\${RPC_URL}" --private-key "\${PRIVATE_KEY}" --no-verify
 
-echo "After deployment, call opt_in_to_cache() to enable caching, or re-run cargo stylus deploy (contract auto-caches on deploy)."
+echo "Deployment completed. Use is_cacheable() to verify cacheable status."
 `;
 }
 
@@ -414,25 +409,56 @@ function generateCachingGuide(config: z.infer<typeof SmartCacheCachingConfig>, a
 
 \`\`\`
 contracts/
-├── mycontract/           # Original contract (without is_cacheable / opt_in_to_cache)
+├── cached-contract/          # Contract WITH is_cacheable helper (and stylus-cache-sdk)
 │   ├── .cargo/
-│   ├── Cargo.toml
 │   ├── src/
-│   │   ├── lib.rs        # Your selected contract (counter, erc20, vending-machine, etc.)
+│   │   ├── lib.rs            # Contract + is_cacheable() injected
 │   │   └── main.rs
-│   └── ...
-└── cached-contract/      # Same contract WITH is_cacheable + opt_in_to_cache
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── Cargo.toml            # Includes stylus-cache-sdk
+│   └── rust-toolchain.toml
+└── mycontract/               # Original contract (no caching helper)
     ├── .cargo/
-    ├── Cargo.toml        # Includes stylus-cache-sdk
     ├── src/
-    │   ├── lib.rs        # Contract + caching functions
+    │   ├── lib.rs            # Your selected contract (counter, erc20, vending-machine, etc.)
     │   └── main.rs
-    └── ...
+    ├── .env.example
+    ├── .gitignore
+    ├── Cargo.toml
+    └── rust-toolchain.toml
 \`\`\`
+
+## Quick 3-step setup
+
+1. **Import the cache SDK**
+
+   Add the crate to your \`Cargo.toml\` and import it in your contract:
+
+   \`\`\`rust
+   use stylus_cache_sdk::{is_contract_cacheable};
+   \`\`\`
+
+2. **Add the helper to your contract**
+
+   \`\`\`rust
+   /// Returns whether this contract is cacheable
+   pub fn is_cacheable(&self) -> bool {
+       is_contract_cacheable()
+   }
+   \`\`\`
+
+3. **Deploy on Arbitrum Sepolia or Arbitrum One**
+
+   Use the standard Stylus deploy command (replace the endpoint for mainnet):
+
+   \`\`\`bash
+   cargo stylus deploy --private-key "\${PRIVATE_KEY}" --endpoint "https://sepolia-rollup.arbitrum.io/rpc"
+   \`\`\`
 
 ## After Adding is_cacheable
 
-Once your contract has \`is_cacheable()\` and \`opt_in_to_cache()\` (as in \`cached-contract/\`):
+Once your contract has \`is_cacheable()\` (as in \`cached-contract/\`):
 
 1. **Deploy** with \`cargo stylus deploy\`:
    \`\`\`bash
@@ -440,9 +466,9 @@ Once your contract has \`is_cacheable()\` and \`opt_in_to_cache()\` (as in \`cac
    cargo stylus deploy --private-key "\${PRIVATE_KEY}" --endpoint "https://sepolia-rollup.arbitrum.io/rpc"
    \`\`\`
 
-2. **Auto-cache**: Running \`cargo stylus deploy\` will deploy and activate your contract. The contract is then cacheable. Call \`opt_in_to_cache()\` once after deployment to opt in:
+2. **Cache check**: Running \`cargo stylus deploy\` will deploy and activate your contract. Use \`is_cacheable()\` to check whether the contract is cacheable:
    \`\`\`bash
-   cast send <CONTRACT_ADDRESS> "opt_in_to_cache()" --private-key $PRIVATE_KEY --rpc-url <RPC_URL>
+   cast call <CONTRACT_ADDRESS> "is_cacheable()" --rpc-url <RPC_URL>
    \`\`\`
 
 ## Scripts (Windows CRLF)
@@ -467,7 +493,7 @@ SmartCache reduces gas costs and latency for Stylus contracts by **warming frequ
 
 ## Verifying Cache Status
 
-After deploying and calling \`opt_in_to_cache()\`, verify the cache is active:
+After deploying, verify the cache is active:
 
 ### 1. Check if contract is cacheable
 
@@ -477,16 +503,7 @@ cast call <CONTRACT_ADDRESS> "is_cacheable()" --rpc-url <RPC_URL>
 
 Expected output: \`0x0000...0001\` (true)
 
-### 2. Verify opt-in was recorded
-
-\`\`\`bash
-# Check the opt-in transaction receipt
-cast receipt <OPT_IN_TX_HASH> --rpc-url <RPC_URL>
-\`\`\`
-
-Look for \`status: 1\` (success) in the receipt.
-
-### 3. Compare gas usage (before vs after)
+### 2. Compare gas usage (before vs after)
 
 \`\`\`bash
 # Call a read function and check gasUsed
@@ -500,7 +517,6 @@ cast call <CONTRACT_ADDRESS> "get_count()" --rpc-url <RPC_URL> --trace
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | \`is_cacheable()\` returns false | Cache SDK not linked | Ensure \`stylus-cache-sdk\` is in Cargo.toml dependencies |
-| \`opt_in_to_cache()\` reverts | Already opted in or contract not cacheable | Check \`is_cacheable()\` first |
 | No gas improvement | Cache not yet warm | Caching improves on repeated calls within a block or across consecutive blocks |
 
 ## Resources

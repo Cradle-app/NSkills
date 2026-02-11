@@ -967,7 +967,7 @@ function generateReadme(
   if (nodeTypes.has("smartcache-caching")) {
     contractsStructure += `│   ├── mycontract/            # Original contract (no caching)\n`;
     contractsStructure += `│   │   └── src/lib.rs\n`;
-    contractsStructure += `│   └── cached-contract/       # Contract with is_cacheable + opt_in_to_cache\n`;
+    contractsStructure += `│   └── cached-contract/       # Contract with is_cacheable helper\n`;
     contractsStructure += `│       └── src/lib.rs\n`;
   } else if (nodeTypes.has("stylus-contract")) {
     contractsStructure += `│   └── counter-contract/      # Stylus template (edit src/lib.rs per docs)\n`;
