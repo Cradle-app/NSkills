@@ -155,6 +155,19 @@ export class ExecutionEngine {
           );
         }
 
+        // Copy API routes if plugin declares a dependency on them
+        if (plugin.apiRoutesPath) {
+          logger.info(`Copying API routes from: ${plugin.apiRoutesPath}`, {
+            nodeId: node.id,
+          });
+          this.copyApiRoutesToOutput(
+            fs,
+            "/output",
+            plugin.apiRoutesPath,
+            pathContext
+          );
+        }
+
         // Collect env vars and scripts
         allEnvVars.push(...output.envVars);
         allScripts.push(...output.scripts);
@@ -704,6 +717,69 @@ export class ExecutionEngine {
       const content = sourceFs.readFileSync(readmePath);
       targetFs.writeFileSync(`${docsPath}/README.md`, content);
     }
+  }
+
+  /**
+   * Copy API route files that a plugin depends on into the generated output.
+   *
+   * Resolves the source directory from the project root and copies it into
+   * the correct Next.js App Router location:
+   *   - With frontend scaffold: apps/web/src/app/api/<namespace>/
+   *   - Without frontend scaffold: src/app/api/<namespace>/
+   *
+   * The namespace is derived from the last segment of the apiRoutesPath
+   * (e.g., 'apps/web/src/app/api/maxxit' → 'maxxit').
+   */
+  private copyApiRoutesToOutput(
+    memFs: ReturnType<typeof createFsFromVolume>,
+    outputPath: string,
+    apiRoutesPath: string,
+    pathContext: PathContext
+  ): void {
+    // Resolve project root using the same strategy as copyComponentToOutput
+    const currentFileDir = dirname(fileURLToPath(import.meta.url));
+    let projectRoot = process.env.PROJECT_ROOT;
+
+    if (!projectRoot) {
+      let currentDir = currentFileDir;
+      const rootMarker = "pnpm-workspace.yaml";
+      while (currentDir !== path.parse(currentDir).root) {
+        if (realFs.existsSync(path.join(currentDir, rootMarker))) {
+          projectRoot = currentDir;
+          break;
+        }
+        currentDir = path.dirname(currentDir);
+      }
+    }
+
+    if (!projectRoot) {
+      projectRoot = path.resolve(
+        currentFileDir,
+        currentFileDir.includes("dist") ? "../../../" : "../../../../"
+      );
+    }
+
+    const sourcePath = path.join(projectRoot, apiRoutesPath);
+
+    if (!realFs.existsSync(sourcePath)) {
+      console.warn(`API routes path not found: ${sourcePath}`);
+      return;
+    }
+
+    // Derive namespace from the last path segment (e.g., 'maxxit')
+    const namespace = path.basename(apiRoutesPath);
+
+    // Determine the target path inside the generated project
+    let targetPath: string;
+    if (pathContext.hasFrontend) {
+      const srcPath = pathContext.frontendSrcPath ? `/${pathContext.frontendSrcPath}` : '';
+      targetPath = `${outputPath}/${pathContext.frontendPath}${srcPath}/app/api/${namespace}`;
+    } else {
+      targetPath = `${outputPath}/src/app/api/${namespace}`;
+    }
+
+    console.log(`Copying API routes: ${apiRoutesPath} → ${targetPath.replace(outputPath + "/", "")}`);
+    this.copyDirectoryToMemfs(realFs, memFs, sourcePath, targetPath);
   }
 
   /**

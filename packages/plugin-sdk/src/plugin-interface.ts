@@ -110,6 +110,16 @@ export interface NodePlugin<TConfig = Record<string, unknown>> {
   readonly componentPathMappings?: Record<string, import('@dapp-forge/blueprint-schema').PathCategory>;
 
   /**
+   * Optional: Path to a directory of Next.js API routes (relative to project root)
+   * that this plugin depends on. When set, the orchestrator will copy the entire
+   * directory into the generated project's app/api/ folder.
+   *
+   * Example: 'apps/web/src/app/api/maxxit'
+   * This copies all route.ts files under that directory to the output.
+   */
+  readonly apiRoutesPath?: string;
+
+  /**
    * Validate the node configuration
    * Called before generation to ensure config is valid
    */

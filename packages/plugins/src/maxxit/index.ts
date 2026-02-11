@@ -48,6 +48,12 @@ export class MaxxitLazyTradingPlugin extends BasePlugin<z.infer<typeof MaxxitLaz
     'src/example.tsx': 'frontend-components' as const,
   };
 
+  /**
+   * API routes that the component depends on (Next.js App Router routes).
+   * The orchestrator will copy this directory to the output's app/api/ folder.
+   */
+  readonly apiRoutesPath = 'apps/web/src/app/api/maxxit';
+
   readonly ports: PluginPort[] = [
     {
       id: 'api-key',
