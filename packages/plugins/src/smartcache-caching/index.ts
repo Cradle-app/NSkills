@@ -393,11 +393,7 @@ function generateDeployScript(network: 'sepolia' | 'mainnet', folderName: string
 
     return `#!/bin/bash
 # Cached Contract ${networkName} Deployment
-<<<<<<< HEAD
-# Deploys from contracts/${folderName}/ (contract with is_cacheable + opt_in_to_cache)
-=======
-# Deploys from contracts/cached-contract/ (contract with is_cacheable helper)
->>>>>>> f97544e6af3451b21b8d1e8ba385e505da2403ba
+# Deploys from contracts/cached-contract/ (contract with is_cacheable + opt_in_to_cache)
 
 set -euo pipefail
 
@@ -432,6 +428,7 @@ contracts/
 =======
 ├── cached-contract/          # Contract WITH is_cacheable helper (and stylus-cache-sdk)
 >>>>>>> f97544e6af3451b21b8d1e8ba385e505da2403ba
+├── cached-contract/          # Contract WITH is_cacheable helper (and stylus-cache-sdk)
 │   ├── .cargo/
 │   ├── src/
 │   │   ├── lib.rs            # Contract + is_cacheable() injected
@@ -446,6 +443,11 @@ contracts/
 │   └── rust-toolchain.toml
 └── mycontract/               # Original contract (no caching helper)
 >>>>>>> f97544e6af3451b21b8d1e8ba385e505da2403ba
+│   ├── .env.example
+│   ├── .gitignore
+│   ├── Cargo.toml            # Includes stylus-cache-sdk
+│   └── rust-toolchain.toml
+└── mycontract/               # Original contract (no caching helper)
     ├── .cargo/
     ├── src/
     │   ├── lib.rs            # Your selected contract (counter, erc20, vending-machine, etc.)

@@ -180,6 +180,19 @@ export class ExecutionEngine {
           );
         }
 
+        // Copy API routes if plugin declares a dependency on them
+        if (plugin.apiRoutesPath) {
+          logger.info(`Copying API routes from: ${plugin.apiRoutesPath}`, {
+            nodeId: node.id,
+          });
+          this.copyApiRoutesToOutput(
+            fs,
+            "/output",
+            plugin.apiRoutesPath,
+            pathContext
+          );
+        }
+
         // Collect env vars and scripts
         allEnvVars.push(...output.envVars);
         allScripts.push(...output.scripts);
