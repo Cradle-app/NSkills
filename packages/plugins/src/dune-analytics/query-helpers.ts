@@ -120,11 +120,18 @@ export function buildDuneSql(
     }
 
     case 'dune-dex-volume': {
+      // NOTE: dex.trades typically only covers mainnets. Testnets may return empty results.
       const blockchain = normalizeChain(String(config.blockchain ?? 'arbitrum'));
       const timeRange = String(config.timeRange ?? '24h');
       const days = timeRange === '30d' ? 30 : timeRange === '7d' ? 7 : 1;
       const protocol = String(config.protocol ?? '').trim();
       const protocolFilter = protocol ? `AND project = '${sqlLiteral(protocol)}'` : '';
+
+      // Fallback/Warning for testnets if they try to query dex.trades
+      if (blockchain.includes('sepolia') || blockchain.includes('amoy') || blockchain.includes('testnet')) {
+        return { sql: `-- DEX volume data is typically not available for testnets in the abstracted 'dex.trades' table.\n-- Please try a mainnet (Ethereum, Arbitrum, etc.) or write a custom SQL query targeting raw tables.` };
+      }
+
       const sql = `
         SELECT
           DATE(block_time) as date,
@@ -227,6 +234,12 @@ export function buildDuneSql(
     case 'dune-protocol-tvl': {
       const blockchain = normalizeChain(String(config.blockchain ?? 'arbitrum'));
       const protocol = String(config.protocol ?? '').trim();
+
+      // Fallback/Warning for testnets
+      if (blockchain.includes('sepolia') || blockchain.includes('amoy') || blockchain.includes('testnet')) {
+        return { sql: `-- Protocol TVL data is typically not available for testnets in abstracted tables.\n-- Please try a mainnet or write a custom SQL query.` };
+      }
+
       const sql = `
         SELECT
           '${sqlLiteral(protocol)}' as protocol,

@@ -694,7 +694,7 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     name: "Quality Gates",
     description: "CI/CD, testing, linting",
     icon: "ShieldCheck",
-    logoAsset: "gitHub-actions.png",
+    logoAsset: "github-actions.png",
     color: "node-secondary",
     category: "quality",
     tags: ["ci", "cd", "testing", "linting", "quality"],

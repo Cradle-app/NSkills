@@ -634,8 +634,6 @@ export const TEMPLATES: Template[] = [
     ],
   },
 
-
-
   // ── 8. Intelligence-Driven NFT Platform ─────────────────────────────────
   // Flow: {stylus, erc721, aixbt-momentum, dune-wallet} → {smartcache, auditware, ipfs, signals, nft-floor} → {telegram, frontend} → wallet
   {
@@ -689,8 +687,6 @@ export const TEMPLATES: Template[] = [
     ],
   },
 
-
-
   // ── 10. AI Intelligence Hub ─────────────────────────────────────────────
   // Flow: momentum → signals → {indigo, observer, telegram} → {agent, chain-data} → frontend
   {
@@ -736,7 +732,6 @@ export const TEMPLATES: Template[] = [
       { source: 7, target: 10 },  // frontend → wallet-auth
     ],
   },
-
 
 
   // ── 12. Telegram-First dApp ─────────────────────────────────────────────
@@ -844,6 +839,7 @@ export const TEMPLATES: Template[] = [
       { source: 9, target: 12 },  // frontend → paywall
     ],
   },
+
 
   // ── 16. AI-Powered Paywall dApp ─────────────────────────────────────────
   // Flow: {paywall, erc20, agent, stylus} → {smartcache, auditware, frontend, dune-token} → {wallet, rpc}

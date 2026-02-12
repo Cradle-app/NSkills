@@ -162,6 +162,18 @@ export class FrontendScaffoldPlugin extends BasePlugin<z.infer<typeof FrontendSc
             generateTsConfig(config)
         );
 
+        // next-env.d.ts - Next.js TypeScript declarations (referenced by tsconfig.json)
+        this.addFile(
+            output,
+            `${srcBase ? 'apps/web' : ''}/next-env.d.ts`,
+            `/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/basic-features/typescript for more information
+`
+        );
+
         // =========================================================================
         // Generate App Router Structure
         // =========================================================================

@@ -16,8 +16,8 @@ export const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as cons
 // Contract addresses per network
 export const CONTRACTS = {
     'arbitrum': {
-        trading: '0x567c6A0eBC4e20b3612c82b2D0698Fc80FAb4C0d' as const,
-        storage: '0x2b90103cdc42d6B6c3a09C56A87d2c44e8F0a345' as const,
+        trading: '0x6D0bA1f9996DBD8885827e1b2e8f6593e7702411' as const,
+        storage: '0xcCd5891083A8acD2074690F65d3024E7D13d66E7' as const,
         usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831' as const,
     },
     'arbitrum-sepolia': {

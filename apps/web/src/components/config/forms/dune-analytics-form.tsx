@@ -392,10 +392,15 @@ export function DuneAnalyticsForm({ nodeId, type, config }: Props) {
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="ethereum">Ethereum</SelectItem>
+              <SelectItem value="sepolia">Sepolia (Ethereum Testnet)</SelectItem>
               <SelectItem value="arbitrum">Arbitrum</SelectItem>
+              <SelectItem value="arbitrum_sepolia">Arbitrum Sepolia</SelectItem>
               <SelectItem value="optimism">Optimism</SelectItem>
+              <SelectItem value="optimism_sepolia">Optimism Sepolia</SelectItem>
               <SelectItem value="polygon">Polygon</SelectItem>
+              <SelectItem value="polygon_amoy">Polygon Amoy</SelectItem>
               <SelectItem value="base">Base</SelectItem>
+              <SelectItem value="base_sepolia">Base Sepolia</SelectItem>
             </SelectContent>
           </Select>
         </div>
