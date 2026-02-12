@@ -121,253 +121,6 @@ impl VendingMachine {
     }
 }`,
     },
-    erc20: {
-        code: `// SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts for Stylus ^0.3.0
-
-#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
-extern crate alloc;
-
-use alloc::vec::Vec;
-use openzeppelin_stylus::token::erc20::extensions::burnable::IErc20Burnable;
-use openzeppelin_stylus::token::erc20::{self, Erc20, IErc20};
-use stylus_sdk::alloy_primitives::{Address, U256};
-use stylus_sdk::prelude::*;
-
-#[entrypoint]
-#[storage]
-struct MyToken {
-    erc20: Erc20,
-}
-
-#[public]
-#[implements(IErc20<Error = erc20::Error>, IErc20Burnable<Error = erc20::Error>)]
-impl MyToken {}
-
-#[public]
-impl IErc20 for MyToken {
-    type Error = erc20::Error;
-
-    fn total_supply(&self) -> U256 {
-        self.erc20.total_supply()
-    }
-
-    fn balance_of(&self, account: Address) -> U256 {
-        self.erc20.balance_of(account)
-    }
-
-    fn transfer(&mut self, to: Address, value: U256) -> Result<bool, Self::Error> {
-        Ok(self.erc20.transfer(to, value)?)
-    }
-
-    fn allowance(&self, owner: Address, spender: Address) -> U256 {
-        self.erc20.allowance(owner, spender)
-    }
-
-    fn approve(&mut self, spender: Address, value: U256) -> Result<bool, Self::Error> {
-        Ok(self.erc20.approve(spender, value)?)
-    }
-
-    fn transfer_from(&mut self, from: Address, to: Address, value: U256) -> Result<bool, Self::Error> {
-        Ok(self.erc20.transfer_from(from, to, value)?)
-    }
-}
-
-#[public]
-impl IErc20Burnable for MyToken {
-    type Error = erc20::Error;
-
-    fn burn(&mut self, value: U256) -> Result<(), Self::Error> {
-        Ok(self.erc20.burn(value)?)
-    }
-
-    fn burn_from(&mut self, account: Address, value: U256) -> Result<(), Self::Error> {
-        Ok(self.erc20.burn_from(account, value)?)
-    }
-}`,
-    },
-    erc721: {
-        code: `// SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts for Stylus ^0.3.0
-
-#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
-extern crate alloc;
-
-use alloc::vec::Vec;
-use openzeppelin_stylus::token::erc721::extensions::burnable::IErc721Burnable;
-use openzeppelin_stylus::token::erc721::{self, Erc721, IErc721};
-use openzeppelin_stylus::utils::introspection::erc165::IErc165;
-use stylus_sdk::abi::Bytes;
-use stylus_sdk::alloy_primitives::{Address, FixedBytes, U256};
-use stylus_sdk::prelude::*;
-
-#[entrypoint]
-#[storage]
-struct MyToken {
-    erc721: Erc721,
-}
-
-#[public]
-#[implements(IErc721<Error = erc721::Error>, IErc721Burnable<Error = erc721::Error>, IErc165)]
-impl MyToken {}
-
-#[public]
-impl IErc721 for MyToken {
-    type Error = erc721::Error;
-
-    fn balance_of(&self, owner: Address) -> Result<U256, Self::Error> {
-        Ok(self.erc721.balance_of(owner)?)
-    }
-
-    fn owner_of(&self, token_id: U256) -> Result<Address, Self::Error> {
-        Ok(self.erc721.owner_of(token_id)?)
-    }
-
-    fn safe_transfer_from(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Self::Error> {
-        Ok(self.erc721.safe_transfer_from(from, to, token_id)?)
-    }
-
-    #[selector(name = "safeTransferFrom")]
-    fn safe_transfer_from_with_data(&mut self, from: Address, to: Address, token_id: U256, data: Bytes) -> Result<(), Self::Error> {
-        Ok(self.erc721.safe_transfer_from_with_data(from, to, token_id, data)?)
-    }
-
-    fn transfer_from(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Self::Error> {
-        Ok(self.erc721.transfer_from(from, to, token_id)?)
-    }
-
-    fn approve(&mut self, to: Address, token_id: U256) -> Result<(), Self::Error> {
-        Ok(self.erc721.approve(to, token_id)?)
-    }
-
-    fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<(), Self::Error> {
-        Ok(self.erc721.set_approval_for_all(operator, approved)?)
-    }
-
-    fn get_approved(&self, token_id: U256) -> Result<Address, Self::Error> {
-        Ok(self.erc721.get_approved(token_id)?)
-    }
-
-    fn is_approved_for_all(&self, owner: Address, operator: Address) -> bool {
-        self.erc721.is_approved_for_all(owner, operator)
-    }
-}
-
-#[public]
-impl IErc721Burnable for MyToken {
-    type Error = erc721::Error;
-
-    fn burn(&mut self, token_id: U256) -> Result<(), Self::Error> {
-        Ok(self.erc721.burn(token_id)?)
-    }
-}
-
-#[public]
-impl IErc165 for MyToken {
-    fn supports_interface(&self, interface_id: FixedBytes<4>) -> bool {
-        self.erc721.supports_interface(interface_id)
-    }
-}`,
-    },
-    erc1155: {
-        code: `// SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts for Stylus ^0.3.0
-
-#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
-extern crate alloc;
-
-use alloc::vec::Vec;
-use openzeppelin_stylus::token::erc1155::extensions::{
-    Erc1155Supply, IErc1155Burnable, IErc1155Supply
-};
-use openzeppelin_stylus::token::erc1155::{self, IErc1155};
-use openzeppelin_stylus::utils::introspection::erc165::IErc165;
-use stylus_sdk::abi::Bytes;
-use stylus_sdk::alloy_primitives::{Address, FixedBytes, U256};
-use stylus_sdk::prelude::*;
-
-#[entrypoint]
-#[storage]
-struct MyToken {
-    erc1155_supply: Erc1155Supply,
-}
-
-#[public]
-#[implements(IErc1155<Error = erc1155::Error>, IErc1155Burnable<Error = erc1155::Error>, IErc1155Supply, IErc165)]
-impl MyToken {}
-
-#[public]
-impl IErc1155 for MyToken {
-    type Error = erc1155::Error;
-
-    fn balance_of(&self, account: Address, id: U256) -> U256 {
-        self.erc1155_supply.balance_of(account, id)
-    }
-
-    fn balance_of_batch(&self, accounts: Vec<Address>, ids: Vec<U256>) -> Result<Vec<U256>, Self::Error> {
-        Ok(self.erc1155_supply.balance_of_batch(accounts, ids)?)
-    }
-
-    fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply.set_approval_for_all(operator, approved)?)
-    }
-
-    fn is_approved_for_all(&self, account: Address, operator: Address) -> bool {
-        self.erc1155_supply.is_approved_for_all(account, operator)
-    }
-
-    fn safe_transfer_from(&mut self, from: Address, to: Address, id: U256, value: U256, data: Bytes) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply.safe_transfer_from(from, to, id, value, data)?)
-    }
-
-    fn safe_batch_transfer_from(
-        &mut self,
-        from: Address,
-        to: Address,
-        ids: Vec<U256>,
-        values: Vec<U256>,
-        data: Bytes,
-    ) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply.safe_batch_transfer_from(from, to, ids, values, data)?)
-    }
-}
-
-#[public]
-impl IErc1155Burnable for MyToken {
-    type Error = erc1155::Error;
-
-    fn burn(&mut self, account: Address, token_id: U256, value: U256) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply._burn(account, token_id, value)?)
-    }
-
-    fn burn_batch(&mut self, account: Address, token_ids: Vec<U256>, values: Vec<U256>) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply._burn_batch(account, token_ids, values)?)
-    }
-}
-
-#[public]
-impl IErc1155Supply for MyToken {
-    fn total_supply(&self, id: U256) -> U256 {
-        self.erc1155_supply.total_supply(id)
-    }
-
-    #[selector(name = "totalSupply")]
-    fn total_supply_all(&self) -> U256 {
-        self.erc1155_supply.total_supply_all()
-    }
-
-    fn exists(&self, id: U256) -> bool {
-        self.erc1155_supply.exists(id)
-    }
-}
-
-#[public]
-impl IErc165 for MyToken {
-    fn supports_interface(&self, interface_id: FixedBytes<4>) -> bool {
-        self.erc1155_supply.supports_interface(interface_id)
-    }
-}`,
-    },
     storage: {
         code: `sol_storage! {
     #[entrypoint]
@@ -392,9 +145,6 @@ impl Storage {
 const TEMPLATE_OPTIONS = [
     { value: 'counter', label: 'Counter' },
     { value: 'vending-machine', label: 'Vending Machine' },
-    { value: 'erc20', label: 'ERC-20 Token' },
-    { value: 'erc721', label: 'ERC-721 NFT' },
-    { value: 'erc1155', label: 'ERC-1155 Multi-Token' },
     { value: 'storage', label: 'Storage Mapping' },
     { value: 'custom', label: 'Custom Contract' },
 ];
@@ -437,9 +187,9 @@ export function StylusRustContractForm({ nodeId, config }: Props) {
             {/* Template Selection */}
             <div>
                 <label className="text-xs text-forge-muted mb-1.5 block">Contract Template</label>
-                <Select 
+                <Select
                     key={`template-select-${nodeId}`}
-                    value={exampleType} 
+                    value={exampleType}
                     onValueChange={handleTemplateChange}
                 >
                     <SelectTrigger className="h-8 text-xs">
@@ -493,9 +243,9 @@ export function StylusRustContractForm({ nodeId, config }: Props) {
                             <span className="text-xs font-medium text-white">Need More Contracts?</span>
                         </div>
                         <p className="text-[10px] text-forge-muted leading-relaxed mb-2">
-                            For custom contracts or additional templates, check out OpenZeppelin's official 
-                            Rust contracts library for Arbitrum Stylus - featuring security-audited implementations 
-                            of ERC-20, ERC-721, ERC-1155, and more.
+                            For custom contracts or additional templates, check out OpenZeppelin's official
+                            Rust contracts library for Arbitrum Stylus - featuring security-audited implementations
+                            of various contract standards and utilities.
                         </p>
                         <a
                             href="https://github.com/OpenZeppelin/rust-contracts-stylus"

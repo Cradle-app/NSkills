@@ -17,10 +17,10 @@ interface Props {
 const TEMPLATE_LABELS: Record<string, string> = {
     'counter': 'Counter',
     'vending-machine': 'Vending Machine',
-    'erc20': 'ERC-20 Token',
-    'erc721': 'ERC-721 NFT',
-    'erc1155': 'ERC-1155 Multi-Token',
     'storage': 'Storage Mapping',
+    'erc20-stylus': 'ERC-20 Stylus',
+    'erc721-stylus': 'ERC-721 Stylus',
+    'erc1155-stylus': 'ERC-1155 Stylus',
     'custom': 'Custom Contract',
 };
 
@@ -31,18 +31,13 @@ const RPC_ENDPOINTS: Record<string, string> = {
 };
 
 // The caching imports to add
-const CACHE_IMPORTS = `use stylus_cache_sdk::{is_contract_cacheable, AutoCacheOptIn, emit_cache_opt_in};`;
+const CACHE_IMPORTS = `use stylus_cache_sdk::{is_contract_cacheable};`;
 
-// The caching functions to add to existing impl
+// The caching function to add to existing impl
 const CACHE_FUNCTIONS = `
     /// Returns whether this contract is cacheable
     pub fn is_cacheable(&self) -> bool {
         is_contract_cacheable()
-    }
-
-    /// Opt-in to caching (call once after deployment)
-    pub fn opt_in_to_cache(&mut self) {
-        emit_cache_opt_in();
     }`;
 
 function addCachingToContract(code: string): string {
@@ -65,19 +60,17 @@ function addCachingToContract(code: string): string {
         modified = `${CACHE_IMPORTS}\n\n${modified}`;
     }
 
-    // Strategy: Find OpenZeppelin trait impl blocks (IErc20, IErc721, IErc1155) first
-    // These are the preferred targets for ERC token contracts
-    const traitImplRegex = /#\[public\]\s*impl\s+I(?:Erc20|Erc721|Erc1155)\s+for\s+(\w+)\s*\{/g;
-    const traitMatches: { index: number; match: string; traitName: string }[] = [];
+    // Find ALL #[public] impl blocks (handling intermediate attributes and comments)
+    const implRegex = /#\[public\](?:\s*(?:#\[[^\]]+\]|\/\/.*|\/\*[\s\S]*?\*\/))*\s*impl\s+(\w+)(?:\s+for\s+\w+)?\s*\{/g;
+    const implMatches: { index: number; match: string; structName: string }[] = [];
     let match;
-    
-    while ((match = traitImplRegex.exec(modified)) !== null) {
-        // Check if this impl block has actual content (not just {})
+
+    while ((match = implRegex.exec(modified)) !== null) {
         const afterMatch = modified.slice(match.index);
         let braceCount = 0;
         let implContent = '';
         let foundOpenBrace = false;
-        
+
         for (let i = 0; i < afterMatch.length; i++) {
             if (afterMatch[i] === '{') {
                 if (!foundOpenBrace) foundOpenBrace = true;
@@ -91,24 +84,23 @@ function addCachingToContract(code: string): string {
                 }
             }
         }
-        
+
         // Only add if impl has actual function content
         if (implContent.includes('fn ')) {
-            traitMatches.push({
+            implMatches.push({
                 index: match.index,
                 match: match[0],
-                traitName: match[1]
+                structName: match[1]
             });
         }
     }
 
-    // If we found an OpenZeppelin trait impl, use the FIRST one (IErc20/IErc721/IErc1155)
-    if (traitMatches.length > 0) {
-        const targetImpl = traitMatches[0]; // Use first trait impl (main interface)
-        const implStart = targetImpl.index;
+    // Add to the LAST valid impl block
+    if (implMatches.length > 0) {
+        const lastImpl = implMatches[implMatches.length - 1];
+        const implStart = lastImpl.index;
         const afterImpl = modified.slice(implStart);
 
-        // Find matching closing brace
         let braceCount = 0;
         let implEnd = -1;
         for (let i = 0; i < afterImpl.length; i++) {
@@ -126,68 +118,11 @@ function addCachingToContract(code: string): string {
             modified = modified.slice(0, implEnd) + CACHE_FUNCTIONS + '\n' + modified.slice(implEnd);
         }
     } else {
-        // Fallback: Find ALL #[public] impl blocks (for non-OpenZeppelin contracts)
-        const implRegex = /#\[public\]\s*(?!#\[implements)impl\s+(\w+)(?:\s+for\s+\w+)?\s*\{/g;
-        const implMatches: { index: number; match: string; structName: string }[] = [];
-        
-        while ((match = implRegex.exec(modified)) !== null) {
-            const afterMatch = modified.slice(match.index);
-            let braceCount = 0;
-            let implContent = '';
-            let foundOpenBrace = false;
-            
-            for (let i = 0; i < afterMatch.length; i++) {
-                if (afterMatch[i] === '{') {
-                    if (!foundOpenBrace) foundOpenBrace = true;
-                    braceCount++;
-                }
-                if (afterMatch[i] === '}') {
-                    braceCount--;
-                    if (braceCount === 0 && foundOpenBrace) {
-                        implContent = afterMatch.slice(match[0].length, i);
-                        break;
-                    }
-                }
-            }
-            
-            // Only add if impl has actual function content
-            if (implContent.includes('fn ')) {
-                implMatches.push({
-                    index: match.index,
-                    match: match[0],
-                    structName: match[1]
-                });
-            }
-        }
-
-        // Add to the LAST valid impl block for non-OpenZeppelin contracts
-        if (implMatches.length > 0) {
-            const lastImpl = implMatches[implMatches.length - 1];
-            const implStart = lastImpl.index;
-            const afterImpl = modified.slice(implStart);
-
-            let braceCount = 0;
-            let implEnd = -1;
-            for (let i = 0; i < afterImpl.length; i++) {
-                if (afterImpl[i] === '{') braceCount++;
-                if (afterImpl[i] === '}') {
-                    braceCount--;
-                    if (braceCount === 0) {
-                        implEnd = implStart + i;
-                        break;
-                    }
-                }
-            }
-
-            if (implEnd > 0) {
-                modified = modified.slice(0, implEnd) + CACHE_FUNCTIONS + '\n' + modified.slice(implEnd);
-            }
-        } else {
-            // Last resort: create a new impl block
-            const structMatch = modified.match(/#\[entrypoint\]\s*(?:#\[storage\])?\s*(?:pub\s+)?struct\s+(\w+)/);
-            if (structMatch) {
-                const structName = structMatch[1];
-                const newImplBlock = `
+        // Last resort: create a new impl block
+        const structMatch = modified.match(/#\[entrypoint\]\s*(?:#\[storage\])?\s*(?:pub\s+)?struct\s+(\w+)/);
+        if (structMatch) {
+            const structName = structMatch[1];
+            const newImplBlock = `
 /// Caching functions added by SmartCache
 #[public]
 impl ${structName} {
@@ -195,14 +130,8 @@ impl ${structName} {
     pub fn is_cacheable(&self) -> bool {
         is_contract_cacheable()
     }
-
-    /// Opt-in to caching (call once after deployment)
-    pub fn opt_in_to_cache(&mut self) {
-        emit_cache_opt_in();
-    }
 }`;
-                modified = modified + newImplBlock;
-            }
+            modified = modified + newImplBlock;
         }
     }
 
@@ -312,247 +241,6 @@ impl VendingMachine {
         return self.cupcake_balances.get(user_address);
     }
 }`,
-    erc20: `// SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts for Stylus ^0.3.0
-
-#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
-extern crate alloc;
-
-use alloc::vec::Vec;
-use openzeppelin_stylus::token::erc20::extensions::burnable::IErc20Burnable;
-use openzeppelin_stylus::token::erc20::{self, Erc20, IErc20};
-use stylus_sdk::alloy_primitives::{Address, U256};
-use stylus_sdk::prelude::*;
-
-#[entrypoint]
-#[storage]
-struct MyToken {
-    erc20: Erc20,
-}
-
-#[public]
-#[implements(IErc20<Error = erc20::Error>, IErc20Burnable<Error = erc20::Error>)]
-impl MyToken {}
-
-#[public]
-impl IErc20 for MyToken {
-    type Error = erc20::Error;
-
-    fn total_supply(&self) -> U256 {
-        self.erc20.total_supply()
-    }
-
-    fn balance_of(&self, account: Address) -> U256 {
-        self.erc20.balance_of(account)
-    }
-
-    fn transfer(&mut self, to: Address, value: U256) -> Result<bool, Self::Error> {
-        Ok(self.erc20.transfer(to, value)?)
-    }
-
-    fn allowance(&self, owner: Address, spender: Address) -> U256 {
-        self.erc20.allowance(owner, spender)
-    }
-
-    fn approve(&mut self, spender: Address, value: U256) -> Result<bool, Self::Error> {
-        Ok(self.erc20.approve(spender, value)?)
-    }
-
-    fn transfer_from(&mut self, from: Address, to: Address, value: U256) -> Result<bool, Self::Error> {
-        Ok(self.erc20.transfer_from(from, to, value)?)
-    }
-}
-
-#[public]
-impl IErc20Burnable for MyToken {
-    type Error = erc20::Error;
-
-    fn burn(&mut self, value: U256) -> Result<(), Self::Error> {
-        Ok(self.erc20.burn(value)?)
-    }
-
-    fn burn_from(&mut self, account: Address, value: U256) -> Result<(), Self::Error> {
-        Ok(self.erc20.burn_from(account, value)?)
-    }
-}`,
-    erc721: `// SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts for Stylus ^0.3.0
-
-#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
-extern crate alloc;
-
-use alloc::vec::Vec;
-use openzeppelin_stylus::token::erc721::extensions::burnable::IErc721Burnable;
-use openzeppelin_stylus::token::erc721::{self, Erc721, IErc721};
-use openzeppelin_stylus::utils::introspection::erc165::IErc165;
-use stylus_sdk::abi::Bytes;
-use stylus_sdk::alloy_primitives::{Address, FixedBytes, U256};
-use stylus_sdk::prelude::*;
-
-#[entrypoint]
-#[storage]
-struct MyToken {
-    erc721: Erc721,
-}
-
-#[public]
-#[implements(IErc721<Error = erc721::Error>, IErc721Burnable<Error = erc721::Error>, IErc165)]
-impl MyToken {}
-
-#[public]
-impl IErc721 for MyToken {
-    type Error = erc721::Error;
-
-    fn balance_of(&self, owner: Address) -> Result<U256, Self::Error> {
-        Ok(self.erc721.balance_of(owner)?)
-    }
-
-    fn owner_of(&self, token_id: U256) -> Result<Address, Self::Error> {
-        Ok(self.erc721.owner_of(token_id)?)
-    }
-
-    fn safe_transfer_from(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Self::Error> {
-        Ok(self.erc721.safe_transfer_from(from, to, token_id)?)
-    }
-
-    #[selector(name = "safeTransferFrom")]
-    fn safe_transfer_from_with_data(&mut self, from: Address, to: Address, token_id: U256, data: Bytes) -> Result<(), Self::Error> {
-        Ok(self.erc721.safe_transfer_from_with_data(from, to, token_id, data)?)
-    }
-
-    fn transfer_from(&mut self, from: Address, to: Address, token_id: U256) -> Result<(), Self::Error> {
-        Ok(self.erc721.transfer_from(from, to, token_id)?)
-    }
-
-    fn approve(&mut self, to: Address, token_id: U256) -> Result<(), Self::Error> {
-        Ok(self.erc721.approve(to, token_id)?)
-    }
-
-    fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<(), Self::Error> {
-        Ok(self.erc721.set_approval_for_all(operator, approved)?)
-    }
-
-    fn get_approved(&self, token_id: U256) -> Result<Address, Self::Error> {
-        Ok(self.erc721.get_approved(token_id)?)
-    }
-
-    fn is_approved_for_all(&self, owner: Address, operator: Address) -> bool {
-        self.erc721.is_approved_for_all(owner, operator)
-    }
-}
-
-#[public]
-impl IErc721Burnable for MyToken {
-    type Error = erc721::Error;
-
-    fn burn(&mut self, token_id: U256) -> Result<(), Self::Error> {
-        Ok(self.erc721.burn(token_id)?)
-    }
-}
-
-#[public]
-impl IErc165 for MyToken {
-    fn supports_interface(&self, interface_id: FixedBytes<4>) -> bool {
-        self.erc721.supports_interface(interface_id)
-    }
-}`,
-    erc1155: `// SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts for Stylus ^0.3.0
-
-#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
-extern crate alloc;
-
-use alloc::vec::Vec;
-use openzeppelin_stylus::token::erc1155::extensions::{
-    Erc1155Supply, IErc1155Burnable, IErc1155Supply
-};
-use openzeppelin_stylus::token::erc1155::{self, IErc1155};
-use openzeppelin_stylus::utils::introspection::erc165::IErc165;
-use stylus_sdk::abi::Bytes;
-use stylus_sdk::alloy_primitives::{Address, FixedBytes, U256};
-use stylus_sdk::prelude::*;
-
-#[entrypoint]
-#[storage]
-struct MyToken {
-    erc1155_supply: Erc1155Supply,
-}
-
-#[public]
-#[implements(IErc1155<Error = erc1155::Error>, IErc1155Burnable<Error = erc1155::Error>, IErc1155Supply, IErc165)]
-impl MyToken {}
-
-#[public]
-impl IErc1155 for MyToken {
-    type Error = erc1155::Error;
-
-    fn balance_of(&self, account: Address, id: U256) -> U256 {
-        self.erc1155_supply.balance_of(account, id)
-    }
-
-    fn balance_of_batch(&self, accounts: Vec<Address>, ids: Vec<U256>) -> Result<Vec<U256>, Self::Error> {
-        Ok(self.erc1155_supply.balance_of_batch(accounts, ids)?)
-    }
-
-    fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply.set_approval_for_all(operator, approved)?)
-    }
-
-    fn is_approved_for_all(&self, account: Address, operator: Address) -> bool {
-        self.erc1155_supply.is_approved_for_all(account, operator)
-    }
-
-    fn safe_transfer_from(&mut self, from: Address, to: Address, id: U256, value: U256, data: Bytes) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply.safe_transfer_from(from, to, id, value, data)?)
-    }
-
-    fn safe_batch_transfer_from(
-        &mut self,
-        from: Address,
-        to: Address,
-        ids: Vec<U256>,
-        values: Vec<U256>,
-        data: Bytes,
-    ) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply.safe_batch_transfer_from(from, to, ids, values, data)?)
-    }
-}
-
-#[public]
-impl IErc1155Burnable for MyToken {
-    type Error = erc1155::Error;
-
-    fn burn(&mut self, account: Address, token_id: U256, value: U256) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply._burn(account, token_id, value)?)
-    }
-
-    fn burn_batch(&mut self, account: Address, token_ids: Vec<U256>, values: Vec<U256>) -> Result<(), Self::Error> {
-        Ok(self.erc1155_supply._burn_batch(account, token_ids, values)?)
-    }
-}
-
-#[public]
-impl IErc1155Supply for MyToken {
-    fn total_supply(&self, id: U256) -> U256 {
-        self.erc1155_supply.total_supply(id)
-    }
-
-    #[selector(name = "totalSupply")]
-    fn total_supply_all(&self) -> U256 {
-        self.erc1155_supply.total_supply_all()
-    }
-
-    fn exists(&self, id: U256) -> bool {
-        self.erc1155_supply.exists(id)
-    }
-}
-
-#[public]
-impl IErc165 for MyToken {
-    fn supports_interface(&self, interface_id: FixedBytes<4>) -> bool {
-        self.erc1155_supply.supports_interface(interface_id)
-    }
-}`,
     storage: `sol_storage! {
     #[entrypoint]
     pub struct Storage {
@@ -568,6 +256,207 @@ impl Storage {
 
     pub fn set_balance(&mut self, addr: Address, value: U256) {
         self.balances.insert(addr, value);
+    }
+}`,
+    'erc20-stylus': `// Only run this as a WASM if the export-abi feature is not set.
+#![cfg_attr(not(any(feature = "export-abi", test)), no_main)]
+extern crate alloc;
+
+// Modules and imports
+mod erc20;
+
+use alloy_primitives::{Address, U256};
+use stylus_sdk::{
+    msg,
+    prelude::*
+};
+use crate::erc20::{Erc20, Erc20Params, Erc20Error};
+
+/// Immutable definitions
+struct SuperPositionTokenParams;
+impl Erc20Params for SuperPositionTokenParams {
+    const NAME: &'static str = "SuperPositionToken";
+    const SYMBOL: &'static str = "SPT";
+    const DECIMALS: u8 = 18;
+}
+
+// Define the entrypoint as a Solidity storage object. The sol_storage! macro
+// will generate Rust-equivalent structs with all fields mapped to Solidity-equivalent
+// storage slots and types.
+sol_storage! {
+    #[entrypoint]
+    struct SuperPositionToken {
+        // Allows erc20 to access SuperPositionToken's storage and make calls
+        #[borrow]
+        Erc20<SuperPositionTokenParams> erc20;
+    }
+}
+
+#[public]
+#[inherit(Erc20<SuperPositionTokenParams>)]
+impl SuperPositionToken {
+    /// Mints tokens
+    pub fn mint(&mut self, value: U256) -> Result<(), Erc20Error> {
+        self.erc20.mint(msg::sender(), value)?;
+        Ok(())
+    }
+
+    /// Mints tokens to another address
+    pub fn mint_to(&mut self, to: Address, value: U256) -> Result<(), Erc20Error> {
+        self.erc20.mint(to, value)?;
+        Ok(())
+    }
+
+    /// Burns tokens
+    pub fn burn(&mut self, value: U256) -> Result<(), Erc20Error> {
+        self.erc20.burn(msg::sender(), value)?;
+        Ok(())
+    }
+}`,
+    'erc721-stylus': `extern crate alloc;
+
+// Modules and imports
+mod erc721;
+
+/// Import the Stylus SDK along with alloy primitive types for use in our program.
+use stylus_sdk::{
+    abi::Bytes,
+    call::Call,
+    contract,
+    msg,
+    prelude::*,
+    alloy_primitives::{Address, U256}
+};
+use alloy_sol_types::sol;
+use crate::erc721::{Erc721, Erc721Params};
+
+// Interfaces for the Art contract and the ERC20 contract
+sol_interface! {
+    interface NftArt {
+        function initialize(address token_contract_address) external;
+        function generateArt(uint256 token_id, address owner) external returns(string);
+    }
+}
+
+struct SuperPositionNFTParams;
+
+/// Immutable definitions
+impl Erc721Params for SuperPositionNFTParams {
+    const NAME: &'static str = "SuperPositionNFT";
+    const SYMBOL: &'static str = "SPTNFT";
+}
+
+// Define the entrypoint as a Solidity storage object. The sol_storage! macro
+// will generate Rust-equivalent structs with all fields mapped to Solidity-equivalent
+// storage slots and types.
+sol_storage! {
+    #[entrypoint]
+    struct SuperPositionNFT {
+        address art_contract_address;
+
+        #[borrow] // Allows erc721 to access MyToken's storage and make calls
+        Erc721<SuperPositionNFTParams> erc721;
+    }
+}
+
+// Declare Solidity error types
+sol! {
+    /// Contract has already been initialized
+    error AlreadyInitialized();
+    /// A call to an external contract failed
+    error ExternalCallFailed();
+}
+
+/// Represents the ways methods may fail.
+#[derive(SolidityError)]
+pub enum SuperPositionNFTError {
+    AlreadyInitialized(AlreadyInitialized),
+    ExternalCallFailed(ExternalCallFailed),
+}
+
+#[public]
+#[inherit(Erc721<SuperPositionNFTParams>)]
+impl SuperPositionNFT {
+    /// Mints an NFT, but does not call onErc712Received
+    pub fn mint(&mut self) -> Result<(), Vec<u8>> {
+        let minter = msg::sender();
+        self.erc721.mint(minter)?;
+        Ok(())
+    }
+
+    /// Mints an NFT to the specified address, and does not call onErc712Received
+    pub fn mint_to(&mut self, to: Address) -> Result<(), Vec<u8>> {
+        self.erc721.mint(to)?;
+        Ok(())
+    }
+
+    /// Mints an NFT and calls onErc712Received with empty data
+    pub fn safe_mint(&mut self, to: Address) -> Result<(), Vec<u8>> {
+        Erc721::safe_mint(self, to, Vec::new())?;
+        Ok(())
+    }
+
+    /// Burns an NFT
+    pub fn burn(&mut self, token_id: U256) -> Result<(), Vec<u8>> {
+        // This function checks that msg::sender() owns the specified token_id
+        self.erc721.burn(msg::sender(), token_id)?;
+        Ok(())
+    }
+}`,
+    'erc1155-stylus': `// SPDX-License-Identifier: MIT
+#![cfg_attr(not(any(test, feature = "export-abi")), no_main)]
+extern crate alloc;
+
+pub mod erc1155;
+
+use alloc::vec::Vec;
+use erc1155::Erc1155;
+use stylus_sdk::{alloy_primitives::{Address, U256}, prelude::*};
+
+#[entrypoint]
+#[storage]
+pub struct My1155 {
+    erc1155: Erc1155,
+}
+
+#[public]
+impl My1155 {
+    pub fn balance_of(&self, account: Address, id: U256) -> U256 {
+        self.erc1155.balance_of(account, id)
+    }
+
+    pub fn balance_of_batch(&self, accounts: Vec<Address>, ids: Vec<U256>) -> Result<Vec<U256>, Vec<u8>> {
+        self.erc1155.balance_of_batch(accounts, ids).map_err(|e| e.into())
+    }
+
+    pub fn set_approval_for_all(&mut self, operator: Address, approved: bool) -> Result<(), Vec<u8>> {
+        self.erc1155.set_approval_for_all(operator, approved).map_err(|e| e.into())
+    }
+
+    pub fn is_approved_for_all(&self, account: Address, operator: Address) -> bool {
+        self.erc1155.is_approved_for_all(account, operator)
+    }
+
+    pub fn safe_transfer_from(
+        &mut self,
+        from: Address,
+        to: Address,
+        id: U256,
+        value: U256,
+        data: Vec<u8>,
+    ) -> Result<(), Vec<u8>> {
+        self.erc1155.safe_transfer_from(from, to, id, value, data).map_err(|e| e.into())
+    }
+
+    pub fn safe_batch_transfer_from(
+        &mut self,
+        from: Address,
+        to: Address,
+        ids: Vec<U256>,
+        values: Vec<U256>,
+        data: Vec<u8>,
+    ) -> Result<(), Vec<u8>> {
+        self.erc1155.safe_batch_transfer_from(from, to, ids, values, data).map_err(|e| e.into())
     }
 }`,
 };
@@ -587,11 +476,24 @@ export function SmartCacheCachingForm({ nodeId, config }: Props) {
         // Find edges where this node is the target (receiving input)
         const incomingEdges = blueprint.edges.filter(edge => edge.target === nodeId);
 
-        // Find the source nodes that are stylus-rust-contract type
+        // Find the source nodes that are contract types
         for (const edge of incomingEdges) {
             const sourceNode = blueprint.nodes.find(n => n.id === edge.source);
-            if (sourceNode?.type === 'stylus-rust-contract') {
-                const nodeConfig = sourceNode.config as Record<string, unknown>;
+            if (!sourceNode) continue;
+
+            const nodeConfig = sourceNode.config as Record<string, unknown>;
+
+            // Handle specialized token nodes
+            if (['erc20-stylus', 'erc721-stylus', 'erc1155-stylus'].includes(sourceNode.type)) {
+                const templateName = TEMPLATE_LABELS[sourceNode.type] || sourceNode.type;
+                const code = TEMPLATES[sourceNode.type];
+                if (code) {
+                    return { code, templateName, exampleType: sourceNode.type };
+                }
+            }
+
+            // Handle general stylus-rust-contract nodes
+            if (sourceNode.type === 'stylus-rust-contract') {
                 const exampleType = (nodeConfig.exampleType as string) ?? 'counter';
                 const contractCode = nodeConfig.contractCode as string;
                 const templateLabel = TEMPLATE_LABELS[exampleType] || exampleType;
@@ -700,8 +602,8 @@ export function SmartCacheCachingForm({ nodeId, config }: Props) {
             {/* Auto Opt-in */}
             <div className="flex items-center justify-between p-3 rounded-lg border border-forge-border/30 bg-forge-elevated/50">
                 <div>
-                    <span className="text-xs text-white">Auto Opt-in to Cache</span>
-                    <p className="text-[10px] text-forge-muted">Call opt_in_to_cache after deployment</p>
+                    <span className="text-xs text-white">Cache Awareness</span>
+                    <p className="text-[10px] text-forge-muted">Track whether your contract is cacheable via is_cacheable()</p>
                 </div>
                 <Switch
                     checked={autoOptIn}
@@ -716,9 +618,9 @@ export function SmartCacheCachingForm({ nodeId, config }: Props) {
                         <Rocket className="w-4 h-4 text-accent-cyan" />
                         <span className="text-xs font-medium text-white">Deploy Your Contract</span>
                     </div>
-                    
+
                     <p className="text-[10px] text-forge-muted">
-                        After adding the caching code and <code className="text-accent-cyan">stylus_cache_sdk</code> crate, 
+                        After adding the caching code and <code className="text-accent-cyan">stylus_cache_sdk</code> crate,
                         deploy your contract using the command below. The contract will be automatically cached.
                     </p>
 
@@ -769,7 +671,6 @@ export function SmartCacheCachingForm({ nodeId, config }: Props) {
                     <ul className="text-[10px] text-forge-muted space-y-1">
                         <li>• <code className="text-accent-cyan">stylus_cache_sdk</code> import</li>
                         <li>• <code className="text-accent-cyan">is_cacheable()</code> function</li>
-                        <li>• <code className="text-accent-cyan">opt_in_to_cache()</code> function</li>
                     </ul>
                 </div>
             )}
