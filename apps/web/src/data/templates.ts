@@ -109,44 +109,53 @@ export const TEMPLATE_CATEGORIES: { id: TemplateCategory | 'all'; label: string 
 
 export const TEMPLATES: Template[] = [
   // ── 1. Full Stack dApp ──────────────────────────────────────────────────
-  // Flow: contract → {smartcache, auditware, frontend} → {wallet, rpc}
+  // Flow: {contract, chainlink, erc1155} → {smartcache, auditware, frontend} → {wallet, rpc, dune}
   {
     id: 'full-stack-dapp',
     name: 'Full Stack dApp',
     description:
-      'Stylus contract with SmartCache + Radar audit, frontend, wallet, RPC, chain data — agent + paywall ready via suggestions',
+      'Stylus contract + Chainlink + ERC-1155 + SmartCache + Radar + Frontend + Dune Analytics — ERC tokens, agent + paywall ready via suggestions',
     icon: 'Layout',
     colorClass: 'success',
     category: 'contracts',
-    tags: ['Full Stack', 'Stylus', 'Caching', 'Radar', 'Agent-Ready'],
+    tags: ['Full Stack', 'Stylus', 'Chainlink', 'Dune', 'ERC-1155'],
     explainer:
-      'The Stylus contract is the on-chain core — SmartCache reduces latency and gas costs by warming the contract cache, while Auditware (Radar) scans the contract for vulnerabilities before deploy. The frontend consumes the contract through wallet auth and an RPC provider. Ghost blocks suggest adding an AI agent for automated interactions, on-chain analytics, IPFS off-chain storage, or a paywall for monetisation.',
+      'A comprehensive startup stack: a Stylus contract core supported by Chainlink oracles and an ERC-1155 token. SmartCache optimizes performance, and Auditware (Radar) ensures security. The frontend provides the interface, while Dune Analytics tracks transactions. Wallet Auth and RPC Provider handle blockchain interactions. Ghost blocks suggest additional tokens, IPFS storage, or an AI agent.',
     nodes: [
-      { type: 'stylus-rust-contract', position: { x: 0, y: 150 } },   // 0  T0
-      { type: 'smartcache-caching', position: { x: 300, y: 0 } },     // 1  T1
-      { type: 'auditware-analyzing', position: { x: 300, y: 150 } },  // 2  T1
-      { type: 'frontend-scaffold', position: { x: 300, y: 300 } },    // 3  T1
-      { type: 'wallet-auth', position: { x: 600, y: 0 } },            // 4  T2
-      { type: 'rpc-provider', position: { x: 600, y: 150 } },         // 5  T2
+      { type: 'stylus-rust-contract', position: { x: 0, y: 150 } },               // 0  T0
+      { type: 'smartcache-caching', position: { x: 300, y: 0 } },                 // 1  T1
+      { type: 'auditware-analyzing', position: { x: 300, y: 150 } },              // 2  T1
+      { type: 'frontend-scaffold', position: { x: 300, y: 300 } },                // 3  T1
+      { type: 'wallet-auth', position: { x: 600, y: 0 } },                        // 4  T2
+      { type: 'rpc-provider', position: { x: 600, y: 150 } },                     // 5  T2
+      { type: 'dune-transaction-history', position: { x: 600, y: 300 } },         // 6  T2
+      { type: 'chainlink-price-feed', position: { x: 0, y: 0 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },   // 7  T0
+      { type: 'erc1155-stylus', position: { x: 0, y: 300 } },                     // 8  T0
     ],
     edges: [
       { source: 0, target: 1 },
       { source: 0, target: 2 },
       { source: 0, target: 3 },
+      { source: 1, target: 2 },
       { source: 3, target: 4 },
       { source: 3, target: 5 },
+      { source: 3, target: 6 },
+      { source: 0, target: 7 }, // contract -> chainlink
+      { source: 8, target: 1 }, // erc1155 -> smartcache
     ],
     ghostNodes: [
-      { type: 'onchain-activity', position: { x: 900, y: 450 } },        // g0 (idx 6)
-      { type: 'ipfs-storage', position: { x: 900, y: 600 } },            // g1 (idx 7)
-      { type: 'chainlink-price-feed', position: { x: 900, y: 750 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },    // g2 (idx 8) - ETH/USD on Arbitrum
-      { type: 'pyth-oracle', position: { x: 900, y: 900 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },             // g3 (idx 9) - ETH/USD on Arbitrum Sepolia
+      { type: 'onchain-activity', position: { x: 900, y: 0 } },                  // g0 (idx 9)
+      { type: 'ipfs-storage', position: { x: 900, y: 150 } },                    // g1 (idx 10)
+      { type: 'pyth-oracle', position: { x: 900, y: 300 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } }, // g2 (idx 11)
+      { type: 'erc20-stylus', position: { x: 0, y: 450 } },                       // g3 (idx 12)
+      { type: 'erc721-stylus', position: { x: 0, y: 600 } },                      // g4 (idx 13)
     ],
     ghostEdges: [
-      { source: 4, target: 6 }, // wallet-auth → onchain-activity
-      { source: 0, target: 7 }, // contract (MyContract) → ipfs-storage
-      { source: 0, target: 8 }, // contract (MyContract) → chainlink-price-feed
-      { source: 0, target: 9 }, // contract (MyContract) → pyth-oracle
+      { source: 4, target: 9 },  // wallet-auth → onchain-activity
+      { source: 0, target: 10 }, // contract → ipfs-storage
+      { source: 0, target: 11 }, // contract → pyth-oracle
+      { source: 12, target: 1 }, // erc20 → smartcache
+      { source: 13, target: 1 }, // erc721 → smartcache
     ],
   },
 
@@ -294,43 +303,43 @@ export const TEMPLATES: Template[] = [
     id: 'agentic-trading-platform',
     name: 'Agentic Trading Platform',
     description:
-      'Ostium + Maxxit + AIXBT Signals + Pyth/Chainlink oracles + frontend — Uniswap, IPFS, chain data, and Telegram as suggestions',
+      'Ostium + Maxxit + Uniswap + AIXBT Signals + Oracles + On-chain Activity + frontend — Dune, IPFS, and Telegram as suggestions',
     icon: 'Coins',
     colorClass: 'warning',
     category: 'defi',
-    tags: ['Trading', 'AI', 'Oracles', 'Agentic'],
+    tags: ['Trading', 'AI', 'Oracles', 'Uniswap', 'Dune'],
     explainer:
-      'An agentic trading platform that connects wallet authentication to automated trading strategies. Wallet-auth feeds into Maxxit for lazy-trader automation, which orchestrates trades through Ostium for leveraged perps. AIXBT Signals provides AI-driven market intelligence. The frontend integrates with both Pyth (low-latency) and Chainlink (reliable) price oracles for comprehensive market data. Ghost nodes suggest Uniswap for additional swap capabilities, chain-data for on-chain activity monitoring, IPFS for data storage, and Telegram for notifications.',
+      'An agentic trading platform that connects wallet authentication to automated trading strategies and on-chain activity tracking. Wallet-auth feeds into Maxxit for automation, which orchestrates trades through Ostium for leveraged perps and Uniswap for AMM swaps. AIXBT Signals provides intelligence. The frontend integrates with Pyth and Chainlink oracles. Ghost blocks suggest Dune DEX volume and Protocol TVL analytics for Ostium, IPFS for storage, and Telegram for notifications.',
     nodes: [
       { type: 'wallet-auth', position: { x: 0, y: 150 } },             // 0  T0
-      { type: 'maxxit', position: { x: 300, y: 150 } },                // 1  T1
-      { type: 'ostium-trading', position: { x: 600, y: 150 } },        // 2  T2
-      { type: 'frontend-scaffold', position: { x: 900, y: 150 } },     // 3  T3
-      // { type: 'aixbt-signals', position: { x: 300, y: 0 } },           // 4  T1
-      // Pyth Oracle - ETH/USD feed ID for Arbitrum Sepolia
-      { type: 'pyth-oracle', position: { x: 900, y: 0 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },  // 4  T3
-      // Chainlink Price Feed - ETH/USD on Arbitrum (https://docs.chain.link/data-feeds/price-feeds/addresses?network=arbitrum)
-      { type: 'chainlink-price-feed', position: { x: 900, y: 300 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },  // 5  T3
+      { type: 'onchain-activity', position: { x: 0, y: 300 } },        // 1  T0
+      { type: 'maxxit', position: { x: 300, y: 150 } },                // 2  T1
+      { type: 'ostium-trading', position: { x: 600, y: 150 } },        // 3  T2
+      { type: 'uniswap-swap', position: { x: 600, y: 300 } },          // 4  T2
+      { type: 'frontend-scaffold', position: { x: 900, y: 150 } },     // 5  T3
+      { type: 'pyth-oracle', position: { x: 900, y: 0 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },  // 6  T3
+      { type: 'chainlink-price-feed', position: { x: 900, y: 300 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },  // 7  T3
     ],
     edges: [
-      { source: 0, target: 1 },   // wallet-auth → maxxit
-      { source: 1, target: 2 },   // maxxit → ostium-trading
-      { source: 2, target: 3 },   // ostium-trading → frontend-scaffold
-      // { source: 4, target: 1 },   // aixbt-signals → maxxit (REMOVED)
-      { source: 4, target: 3 },   // pyth-oracle → frontend-scaffold
-      { source: 5, target: 3 },   // chainlink-price-feed → frontend-scaffold
+      { source: 0, target: 2 },   // wallet-auth → maxxit
+      { source: 0, target: 1 },   // wallet-auth → onchain-activity
+      { source: 2, target: 3 },   // maxxit → ostium-trading
+      { source: 3, target: 5 },   // ostium-trading → frontend-scaffold
+      { source: 3, target: 4 },   // ostium-trading → uniswap-swap
+      { source: 6, target: 5 },   // pyth-oracle → frontend-scaffold
+      { source: 7, target: 5 },   // chainlink-price-feed → frontend-scaffold
     ],
     ghostNodes: [
-      { type: 'uniswap-swap', position: { x: 600, y: 300 } },          // g0 (idx 6)
-      { type: 'onchain-activity', position: { x: 0, y: 300 } },              // g1 (idx 7)
-      { type: 'ipfs-storage', position: { x: 300, y: 300 } },          // g2 (idx 8)
-      { type: 'telegram-notifications', position: { x: 900, y: 450 } }, // g3 (idx 9)
+      { type: 'ipfs-storage', position: { x: 300, y: 300 } },          // g0 (idx 8)
+      { type: 'telegram-notifications', position: { x: 900, y: 450 } }, // g1 (idx 9)
+      { type: 'dune-dex-volume', position: { x: 1200, y: 0 } },        // g2 (idx 10)
+      { type: 'dune-protocol-tvl', position: { x: 1200, y: 150 } },     // g3 (idx 11)
     ],
     ghostEdges: [
-      { source: 2, target: 6 },   // ostium-trading → uniswap-swap
-      { source: 0, target: 7 },   // wallet-auth → onchain-activity
-      { source: 1, target: 8 },   // maxxit → ipfs-storage
-      { source: 3, target: 9 },   // frontend-scaffold → telegram-notifications
+      { source: 2, target: 8 },   // maxxit → ipfs-storage
+      { source: 5, target: 9 },   // frontend-scaffold → telegram-notifications
+      { source: 3, target: 10 },  // ostium-trading → dune-dex-volume
+      { source: 3, target: 11 },  // ostium-trading → dune-protocol-tvl
     ],
   },
 
@@ -738,52 +747,53 @@ export const TEMPLATES: Template[] = [
   },
 
   // ── 14. Superposition Full Stack ────────────────────────────────────────
-  // Flow: {network, stylus} → {smartcache, auditware, bridge, longtail} → frontend → wallet
+  // Flow: network → {frontend, bridge, longtail} | stylus → {auditware, frontend} | erc20 → {auditware, frontend} | frontend → {analytics, wallet, ipfs, onchain}
   {
     id: 'superposition-full-stack',
     name: 'Superposition Full Stack',
     description:
-      'Superposition L3 + Stylus contract + SmartCache + Radar + bridge + AMM + frontend + RPC + chain data — agent, faucet, Meow domains as suggestions',
+      'Superposition L3 + Stylus contract + ERC-20 + Radar + bridge + AMM + frontend + analytics — faucet, storage, onchain activity, and Meow domains as suggestions',
     icon: 'Rocket',
     colorClass: 'accent-secondary',
     category: 'superposition',
-    tags: ['Superposition', 'Stylus', 'L3', 'Caching', 'Radar'],
+    tags: ['Superposition', 'Stylus', 'L3', 'Analytics'],
     explainer:
-      'Superposition Network is the L3 chain — the Stylus contract deploys natively on it. SmartCache reduces latency and gas costs by warming the contract cache on the L3, and Auditware (Radar) scans the contract for vulnerabilities. The Superposition Bridge handles L2↔L3 asset movement, and Longtail AMM provides on-chain liquidity. The frontend orchestrates all interactions through wallet auth, RPC, and chain-data indexing. Ghost blocks suggest Meow Domains for on-chain identity, an agent for automated interactions, and a testnet faucet for development.',
+      'Superposition Network is the L3 chain — the Superposition Bridge handles L2↔L3 asset movement and Longtail AMM provides on-chain liquidity. The Stylus contract deploys natively on the network with an ERC-20 token alongside. Auditware (Radar) scans both the contract and the token for vulnerabilities. The frontend orchestrates interactions through wallet auth and integrates with Dune transaction history. Ghost blocks suggest Meow Domains for identity, a faucet for development, IPFS for storage, and on-chain activity tracking.',
     nodes: [
-      { type: 'superposition-network', position: { x: 0, y: 75 } },        // 0  T0
-      { type: 'stylus-rust-contract', position: { x: 300, y: 225 } },      // 1  T1
-      { type: 'smartcache-caching', position: { x: 600, y: 0 } },         // 2  T2
-      { type: 'auditware-analyzing', position: { x: 600, y: 150 } },      // 3  T2
-      { type: 'superposition-bridge', position: { x: 600, y: 300 } },     // 4  T2
-      { type: 'superposition-longtail', position: { x: 600, y: 450 } },   // 5  T2
-      { type: 'frontend-scaffold', position: { x: 900, y: 225 } },        // 6  T3
-      { type: 'rpc-provider', position: { x: 1200, y: 75 } },             // 7  T4
-      { type: 'chain-data', position: { x: 1200, y: 225 } },              // 8  T4
-      { type: 'wallet-auth', position: { x: 1200, y: 375 } },             // 9  T4
+      { type: 'superposition-network', position: { x: 0, y: 75 } },              // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 300, y: 225 } },            // 1  T1
+      { type: 'erc20-stylus', position: { x: 600, y: 0 } },                      // 2  T2
+      { type: 'auditware-analyzing', position: { x: 600, y: 150 } },             // 3  T2
+      { type: 'superposition-bridge', position: { x: 600, y: 300 } },            // 4  T2
+      { type: 'superposition-longtail', position: { x: 600, y: 450 } },          // 5  T2
+      { type: 'frontend-scaffold', position: { x: 900, y: 225 } },               // 6  T3
+      { type: 'dune-transaction-history', position: { x: 1200, y: 75 } },        // 7  T4
+      { type: 'wallet-auth', position: { x: 1200, y: 375 } },                    // 8  T4
     ],
     edges: [
-      { source: 0, target: 1 },
       { source: 0, target: 4 },
       { source: 0, target: 5 },
-      { source: 1, target: 2 },
+      { source: 0, target: 6 },
       { source: 1, target: 3 },
       { source: 1, target: 6 },
+      { source: 2, target: 3 },
+      { source: 2, target: 6 },
       { source: 4, target: 6 },
       { source: 5, target: 6 },
       { source: 6, target: 7 },
       { source: 6, target: 8 },
-      { source: 6, target: 9 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 1500, y: 0 } },       // g0 (idx 10)
-      { type: 'superposition-faucet', position: { x: 1500, y: 150 } },      // g1 (idx 11)
-      { type: 'superposition-meow-domains', position: { x: 1500, y: 300 } },// g2 (idx 12)
+      { type: 'superposition-faucet', position: { x: 1500, y: 150 } },           // g0 (idx 9)
+      { type: 'superposition-meow-domains', position: { x: 1500, y: 300 } },     // g1 (idx 10)
+      { type: 'ipfs-storage', position: { x: 1200, y: 225 } },                   // g2 (idx 11)
+      { type: 'onchain-activity', position: { x: 1200, y: 525 } },               // g3 (idx 12)
     ],
     ghostEdges: [
-      { source: 6, target: 10 },  // frontend → agent
-      { source: 0, target: 11 },  // network → faucet
-      { source: 0, target: 12 },  // network → meow-domains
+      { source: 0, target: 9 },   // network → faucet
+      { source: 0, target: 10 },  // network → meow-domains
+      { source: 6, target: 11 },  // frontend → ipfs
+      { source: 6, target: 12 },  // frontend → onchain-activity
     ],
   },
 

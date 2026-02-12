@@ -83,6 +83,10 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'superposition-bridge': { src: SuperpositionLogo, alt: 'Superposition' },
   'superposition-longtail': { src: SuperpositionLogo, alt: 'Superposition' },
   'superposition-super-assets': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-thirdweb': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-utility-mining': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-faucet': { src: SuperpositionLogo, alt: 'Superposition' },
+  'superposition-meow-domains': { src: SuperpositionLogo, alt: 'Superposition' },
   // Dune Analytics plugins
   'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
   'dune-token-price': { src: DuneLogo, alt: 'Dune' },
