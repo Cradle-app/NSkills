@@ -96,6 +96,7 @@ export const CONTRACT_TYPES = [
     'erc721-stylus',
     'erc1155-stylus',
     'eip7702-smart-eoa',
+    'erc8004-agent-runtime',
 ];
 
 /**

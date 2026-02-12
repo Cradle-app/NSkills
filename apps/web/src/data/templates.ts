@@ -150,6 +150,310 @@ export const TEMPLATES: Template[] = [
     ],
   },
 
+    // ── 5. Agentic Trading Platform ─────────────────────────────────────────
+  // Flow: wallet-auth → maxxit → ostium-trading → frontend-scaffold (with pyth/chainlink)
+  {
+    id: 'agentic-trading-platform',
+    name: 'Agentic Trading Platform',
+    description:
+      'Ostium + Maxxit + AIXBT Signals + Pyth/Chainlink oracles + frontend — Uniswap, IPFS, chain data, and Telegram as suggestions',
+    icon: 'Coins',
+    colorClass: 'warning',
+    category: 'defi',
+    tags: ['Trading', 'AI', 'Oracles', 'Agentic'],
+    explainer:
+      'An agentic trading platform that connects wallet authentication to automated trading strategies. Wallet-auth feeds into Maxxit for lazy-trader automation, which orchestrates trades through Ostium for leveraged perps. AIXBT Signals provides AI-driven market intelligence. The frontend integrates with both Pyth (low-latency) and Chainlink (reliable) price oracles for comprehensive market data. Ghost nodes suggest Uniswap for additional swap capabilities, chain-data for on-chain activity monitoring, IPFS for data storage, and Telegram for notifications.',
+    nodes: [
+      { type: 'wallet-auth', position: { x: 0, y: 150 } },             // 0  T0
+      { type: 'maxxit', position: { x: 300, y: 150 } },                // 1  T1
+      { type: 'ostium-trading', position: { x: 600, y: 150 } },        // 2  T2
+      { type: 'frontend-scaffold', position: { x: 900, y: 150 } },     // 3  T3
+      // { type: 'aixbt-signals', position: { x: 300, y: 0 } },           // 4  T1
+      // Pyth Oracle - ETH/USD feed ID for Arbitrum Sepolia
+      { type: 'pyth-oracle', position: { x: 900, y: 0 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },  // 4  T3
+      // Chainlink Price Feed - ETH/USD on Arbitrum (https://docs.chain.link/data-feeds/price-feeds/addresses?network=arbitrum)
+      { type: 'chainlink-price-feed', position: { x: 900, y: 300 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },  // 5  T3
+    ],
+    edges: [
+      { source: 0, target: 1 },   // wallet-auth → maxxit
+      { source: 1, target: 2 },   // maxxit → ostium-trading
+      { source: 2, target: 3 },   // ostium-trading → frontend-scaffold
+      // { source: 4, target: 1 },   // aixbt-signals → maxxit (REMOVED)
+      { source: 4, target: 3 },   // pyth-oracle → frontend-scaffold
+      { source: 5, target: 3 },   // chainlink-price-feed → frontend-scaffold
+    ],
+    ghostNodes: [
+      { type: 'uniswap-swap', position: { x: 600, y: 300 } },          // g0 (idx 6)
+      { type: 'onchain-activity', position: { x: 0, y: 300 } },              // g1 (idx 7)
+      { type: 'ipfs-storage', position: { x: 300, y: 300 } },          // g2 (idx 8)
+      { type: 'telegram-notifications', position: { x: 900, y: 450 } }, // g3 (idx 9)
+    ],
+    ghostEdges: [
+      { source: 2, target: 6 },   // ostium-trading → uniswap-swap
+      { source: 0, target: 7 },   // wallet-auth → onchain-activity
+      { source: 1, target: 8 },   // maxxit → ipfs-storage
+      { source: 3, target: 9 },   // frontend-scaffold → telegram-notifications
+    ],
+  },
+
+    // ── 7. NFT Marketplace ─────────────────────────────────────────────────
+  // Flow: {stylus, erc721, erc1155} → {smartcache, auditware, ipfs, frontend, dune-nft, sdk} → {wallet, chain-data}
+  {
+    id: 'nft-marketplace',
+    name: 'NFT Marketplace',
+    description:
+      'Custom Stylus marketplace contract + ERC-721/1155 + SmartCache + Radar + IPFS + analytics + history — agent + paywall as suggestions',
+    icon: 'Image',
+    colorClass: 'accent-secondary',
+    category: 'nft',
+    tags: ['NFT', 'Stylus', 'Marketplace', 'Caching', 'Radar'],
+    explainer:
+      'A custom Stylus marketplace contract handles listings, bids, and royalty splits — SmartCache reduces latency and gas costs by warming the marketplace contract cache, and Auditware (Radar) scans it for vulnerabilities. Pre-deployed ERC-721 and ERC-1155 (usable directly) handle NFT minting, with metadata pinned to IPFS. The frontend renders the marketplace UI with wallet auth, Dune NFT Floor tracks collection prices, chain-data indexes events, and Transaction History provides a full audit trail of activity.',
+    nodes: [
+      // { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },            // 0  T0
+      { type: 'erc721-stylus', position: { x: 0, y: 340 } },            // 0  T0
+      // { type: 'erc1155-stylus', position: { x: 0, y: 160 } },           // 2  T0
+      { type: 'smartcache-caching', position: { x: 360, y: -160 } },       // 1  T1
+      { type: 'auditware-analyzing', position: { x: 650, y: -160 } },    // 2  T1
+      { type: 'ipfs-storage', position: { x: 360, y: 320 } },           // 3  T1
+      { type: 'frontend-scaffold', position: { x: 360, y: 140 } },      // 4  T1
+      { type: 'dune-nft-floor', position: { x: 360, y: 600 } },         // 5  T1
+      { type: 'dune-transaction-history', position: { x: 360, y: 450 } }, // 6  T1
+      { type: 'wallet-auth', position: { x: 680, y: 40 } },            // 7  T2
+      { type: 'chain-data', position: { x: 700, y: 220 } },             // 8 T2
+    ],
+    edges: [
+      { source: 0, target: 1 },
+      { source: 1, target: 2 },
+      { source: 0, target: 3 },
+      { source: 0, target: 4 },
+      { source: 0, target: 5 },
+      { source: 0, target: 6 },
+      { source: 4, target: 7 },
+      { source: 4, target: 8 },
+    ],
+    ghostNodes: [
+      { type: 'x402-paywall-api', position: { x: 900, y: 0 } },          // g0 (idx 9)
+      { type: 'erc8004-agent-runtime', position: { x: 900, y: 150 } },    // g1 (idx 10)
+      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },       // g2 (idx 11)
+    ],
+    ghostEdges: [
+      { source: 4, target: 9 },  // frontend → paywall
+      { source: 4, target: 10 },  // frontend → agent
+      { source: 0, target: 11 },  // stylus → quality-gates
+    ],
+  },
+
+    // ── 9. AI Agent + Telegram Suite ────────────────────────────────────────
+  // Flow: {agent, paywall, stylus} → {telegram-ai, commands, smartcache, auditware} → {notifications, wallet, frontend}
+  {
+    id: 'ai-agent-telegram-suite',
+    name: 'AI Agent + Telegram Suite',
+    description:
+      'ERC-8004 agent + x402 paywall + Stylus contract + SmartCache + Radar + full Telegram bot suite + frontend — chain data + analytics as suggestions',
+    icon: 'Bot',
+    colorClass: 'accent-primary',
+    category: 'ai',
+    tags: ['AI', 'Agent', 'Stylus', 'Caching', 'Radar'],
+    explainer:
+      'The ERC-8004 agent is the brain — the Stylus contract gives it direct on-chain execution power for triggering transactions and state changes. SmartCache reduces latency and gas costs by warming the contract cache for agent queries, and Auditware (Radar) scans the contract for vulnerabilities. Telegram AI Agent handles conversational interactions, Commands handles structured actions, and Notifications relay outputs. Wallet Link connects on-chain identity for execution. The x402 paywall gates premium features.',
+    nodes: [
+      { type: 'erc8004-agent-runtime', position: { x: 0, y: 0 } },      // 0  T0
+      // { type: 'x402-paywall-api', position: { x: 0, y: 150 } },         // 1  T0
+      { type: 'stylus-rust-contract', position: { x: 0, y: 300 } },          // 1  T0
+      { type: 'telegram-ai-agent', position: { x: 380, y: -160 } },        // 2  T1
+      { type: 'telegram-commands', position: { x: 380, y: 20 } },      // 3  T1
+      { type: 'smartcache-caching', position: { x: 380, y: 320 } },     // 4  T1
+      { type: 'auditware-analyzing', position: { x: 380, y: 460 } },    // 5  T1
+      { type: 'telegram-wallet-link', position: { x: 680, y: -220 } },   // 6  T1
+      { type: 'telegram-notifications', position: { x: 380, y: -280 } },   // 7  T2
+      { type: 'wallet-auth', position: { x: 380, y: 160 } },            // 8  T2
+      { type: 'frontend-scaffold', position: { x: 680, y: -80 } },      // 9  T2
+    ],
+    edges: [
+      { source: 0, target: 2 },
+      { source: 0, target: 3 },
+      { source: 0, target: 7 },
+      { source: 0, target: 8 },
+      // { source: 1, target: 9 },
+      { source: 1, target: 4 },
+      { source: 1, target: 5 },
+      { source: 1, target: 8 },
+      { source: 2, target: 6 },
+      { source: 2, target: 9 },
+    ],
+    ghostNodes: [
+      { type: 'chain-data', position: { x: 680, y: 150 } },              // g0 (idx 10)
+      { type: 'dune-wallet-balances', position: { x: 900, y: 0 } },   // g1 (idx 11)
+      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },     // g2 (idx 12)
+    ],
+    ghostEdges: [
+      { source: 9, target: 10 },  // frontend → chain-data
+      { source: 9, target: 11 },  // frontend → dune-wallet-balances
+      { source: 1, target: 12 },  // stylus → quality-gates
+    ],
+  },
+
+    // ── 11. Trading Bot ─────────────────────────────────────────────────────
+  // Flow: {stylus, ostium, maxxit, agent} → {smartcache, auditware, dune-dex, chain-data} → {telegram, frontend, wallet}
+  {
+    id: 'trading-bot',
+    name: 'Trading Bot',
+    description:
+      'Custom Stylus vault contract + Ostium + Maxxit + SmartCache + Radar + ERC-8004 agent + Dune DEX + Telegram + RPC — paywall + token price as suggestions',
+    icon: 'CandlestickChart',
+    colorClass: 'warning',
+    category: 'ai',
+    tags: ['Trading', 'Stylus', 'Caching', 'Radar', 'Agent'],
+    explainer:
+      'A custom Stylus vault contract holds funds and executes trades on-chain — SmartCache reduces latency and gas costs by warming the vault contract cache, and Auditware (Radar) scans it for vulnerabilities. Ostium executes leveraged perps, while Maxxit and the ERC-8004 agent orchestrate automated trade logic and direct contract interactions. Dune DEX Volume, RPC, and chain-data provide market depth and connectivity. Telegram AI Agent relays signals and accepts user commands.',
+    nodes: [
+      { type: 'stylus-rust-contract', position: { x: 60, y: 0 } },        // 0  T0
+      { type: 'ostium-trading', position: { x: 80, y: 140 } },            // 1  T0
+      { type: 'maxxit', position: { x: -300, y: 300 } },                  // 2  T0
+      { type: 'erc8004-agent-runtime', position: { x: -280, y: 540 } },   // 3  T1
+      { type: 'smartcache-caching', position: { x: 600, y: 0 } },         // 4  T2
+      { type: 'auditware-analyzing', position: { x: 600, y: 150 } },      // 5  T2
+      { type: 'dune-dex-volume', position: { x: 600, y: 300 } },          // 6  T2
+      { type: 'chain-data', position: { x: 600, y: 450 } },               // 7  T2
+      { type: 'frontend-scaffold', position: { x: 900, y: 150 } },        // 8  T3
+      { type: 'wallet-auth', position: { x: 1200, y: 0 } },               // 9  T4
+      { type: 'rpc-provider', position: { x: 1200, y: 150 } },            // 10 T4
+      { type: 'telegram-ai-agent', position: { x: 1200, y: 300 } },       // 11 T4
+    ],
+    edges: [
+      { source: 0, target: 4 },
+      { source: 0, target: 5 },
+      { source: 3, target: 0 },
+      { source: 3, target: 1 },
+      { source: 2, target: 1 },
+      { source: 3, target: 11 },
+      { source: 8, target: 9 },
+      { source: 8, target: 10 },
+      { source: 0, target: 8 },
+      { source: 1, target: 8 },
+      { source: 4, target: 8 },
+      { source: 5, target: 8 },
+      { source: 6, target: 8 },
+      { source: 7, target: 8 },
+      { source: 3, target: 8 },
+    ],
+    ghostNodes: [
+      { type: 'x402-paywall-api', position: { x: 1500, y: 0 } },            // g0 (idx 12)
+      { type: 'dune-token-price', position: { x: 1500, y: 150 } },          // g1 (idx 13)
+      { type: 'telegram-notifications', position: { x: 1500, y: 300 } },    // g2 (idx 14)
+    ],
+    ghostEdges: [
+      { source: 8, target: 12 },  // frontend → paywall
+      { source: 8, target: 13 },  // frontend → dune-token-price
+      { source: 11, target: 14 }, // telegram-ai-agent → notifications
+    ],
+  },
+
+    // ── 14. Superposition Full Stack ────────────────────────────────────────
+  // Flow: {network, stylus} → {smartcache, auditware, bridge, longtail} → frontend → wallet
+  {
+    id: 'superposition-full-stack',
+    name: 'Superposition Full Stack',
+    description:
+      'Superposition L3 + Stylus contract + SmartCache + Radar + bridge + AMM + frontend + RPC + chain data — agent, faucet, Meow domains as suggestions',
+    icon: 'Rocket',
+    colorClass: 'accent-secondary',
+    category: 'superposition',
+    tags: ['Superposition', 'Stylus', 'L3', 'Caching', 'Radar'],
+    explainer:
+      'Superposition Network is the L3 chain — the Stylus contract deploys natively on it. SmartCache reduces latency and gas costs by warming the contract cache on the L3, and Auditware (Radar) scans the contract for vulnerabilities. The Superposition Bridge handles L2↔L3 asset movement, and Longtail AMM provides on-chain liquidity. The frontend orchestrates all interactions through wallet auth, RPC, and chain-data indexing. Ghost blocks suggest Meow Domains for on-chain identity, an agent for automated interactions, and a testnet faucet for development.',
+    nodes: [
+      { type: 'superposition-network', position: { x: 0, y: 75 } },        // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 300, y: 225 } },      // 1  T1
+      { type: 'smartcache-caching', position: { x: 600, y: 0 } },         // 2  T2
+      { type: 'auditware-analyzing', position: { x: 600, y: 150 } },      // 3  T2
+      { type: 'superposition-bridge', position: { x: 600, y: 300 } },     // 4  T2
+      { type: 'superposition-longtail', position: { x: 600, y: 450 } },   // 5  T2
+      { type: 'frontend-scaffold', position: { x: 900, y: 225 } },        // 6  T3
+      { type: 'rpc-provider', position: { x: 1200, y: 75 } },             // 7  T4
+      { type: 'chain-data', position: { x: 1200, y: 225 } },              // 8  T4
+      { type: 'wallet-auth', position: { x: 1200, y: 375 } },             // 9  T4
+    ],
+    edges: [
+      { source: 0, target: 1 },
+      { source: 0, target: 4 },
+      { source: 0, target: 5 },
+      { source: 1, target: 2 },
+      { source: 1, target: 3 },
+      { source: 1, target: 6 },
+      { source: 4, target: 6 },
+      { source: 5, target: 6 },
+      { source: 6, target: 7 },
+      { source: 6, target: 8 },
+      { source: 6, target: 9 },
+    ],
+    ghostNodes: [
+      { type: 'erc8004-agent-runtime', position: { x: 1500, y: 0 } },       // g0 (idx 10)
+      { type: 'superposition-faucet', position: { x: 1500, y: 150 } },      // g1 (idx 11)
+      { type: 'superposition-meow-domains', position: { x: 1500, y: 300 } },// g2 (idx 12)
+    ],
+    ghostEdges: [
+      { source: 6, target: 10 },  // frontend → agent
+      { source: 0, target: 11 },  // network → faucet
+      { source: 0, target: 12 },  // network → meow-domains
+    ],
+  },
+
+  // ── 15. Superposition DeFi + AI ─────────────────────────────────────────
+  // Flow: {network, stylus, agent} → {auditware, smartcache, longtail, bridge} → {dune-dex, frontend} → wallet
+  {
+    id: 'superposition-defi-ai',
+    name: 'Superposition DeFi + AI',
+    description:
+      'Superposition L3 + Stylus contract + SmartCache + Radar + AMM + bridge + ERC-8004 agent + Dune DEX + RPC + chain data — faucet, super-assets, utility-mining as suggestions',
+    icon: 'Zap',
+    colorClass: 'warning',
+    category: 'superposition',
+    tags: ['Superposition', 'Stylus', 'Caching', 'Radar', 'Agent'],
+    explainer:
+      'Superposition Network hosts both the Stylus contract and DeFi primitives. SmartCache reduces latency and gas costs by warming the contract cache for optimised reads, and Auditware (Radar) scans the contract for vulnerabilities. Longtail AMM and Bridge provide on-chain liquidity and cross-chain movement. The ERC-8004 agent automates DeFi strategies across these components, including interaction with Longtail. Dune DEX Volume, RPC, and chain-data feed analytics and connectivity. Ghost suggestions include the Super Assets yield layer and Utility Mining rewards.',
+    nodes: [
+      { type: 'superposition-network', position: { x: 0, y: 0 } },        // 0  T0
+      { type: 'stylus-rust-contract', position: { x: 300, y: 150 } },      // 1  T1
+      { type: 'erc8004-agent-runtime', position: { x: 0, y: 300 } },      // 2  T0
+      { type: 'auditware-analyzing', position: { x: 600, y: 0 } },        // 3  T2
+      { type: 'smartcache-caching', position: { x: 600, y: 150 } },       // 4  T2
+      { type: 'superposition-longtail', position: { x: 600, y: 300 } },   // 5  T2
+      { type: 'superposition-bridge', position: { x: 600, y: 450 } },     // 6  T2
+      { type: 'dune-dex-volume', position: { x: 900, y: 0 } },            // 7  T3
+      { type: 'rpc-provider', position: { x: 900, y: 150 } },             // 8  T3
+      { type: 'chain-data', position: { x: 900, y: 300 } },               // 9  T3
+      { type: 'frontend-scaffold', position: { x: 900, y: 450 } },        // 10 T3
+      { type: 'wallet-auth', position: { x: 1200, y: 225 } },             // 11 T4
+    ],
+    edges: [
+      { source: 0, target: 1 },
+      { source: 0, target: 6 },
+      { source: 1, target: 3 },
+      { source: 1, target: 4 },
+      { source: 1, target: 10 },
+      { source: 2, target: 5 },
+      { source: 2, target: 10 },
+      { source: 5, target: 7 },
+      { source: 5, target: 10 },
+      { source: 6, target: 10 },
+      { source: 10, target: 8 },
+      { source: 10, target: 9 },
+      { source: 10, target: 11 },
+    ],
+    ghostNodes: [
+      { type: 'superposition-faucet', position: { x: 1500, y: 0 } },       // g0 (idx 12)
+      { type: 'superposition-super-assets', position: { x: 1500, y: 150 } },// g1 (idx 13)
+      { type: 'superposition-utility-mining', position: { x: 1500, y: 300 } },// g2 (idx 14)
+    ],
+    ghostEdges: [
+      { source: 0, target: 12 },  // network → faucet
+      { source: 5, target: 13 },  // longtail → super-assets
+      { source: 10, target: 14 }, // frontend → utility-mining
+    ],
+  },
+
   // ── 2. Multi-Token Platform ─────────────────────────────────────────────
   // Flow: {stylus, erc20, erc721, erc1155} → {smartcache, auditware, frontend, ipfs} → {wallet, chain-data}
   {
@@ -288,51 +592,6 @@ export const TEMPLATES: Template[] = [
     ],
   },
 
-  // ── 5. Agentic Trading Platform ─────────────────────────────────────────
-  // Flow: wallet-auth → maxxit → ostium-trading → frontend-scaffold (with pyth/chainlink)
-  {
-    id: 'agentic-trading-platform',
-    name: 'Agentic Trading Platform',
-    description:
-      'Ostium + Maxxit + AIXBT Signals + Pyth/Chainlink oracles + frontend — Uniswap, IPFS, chain data, and Telegram as suggestions',
-    icon: 'Coins',
-    colorClass: 'warning',
-    category: 'defi',
-    tags: ['Trading', 'AI', 'Oracles', 'Agentic'],
-    explainer:
-      'An agentic trading platform that connects wallet authentication to automated trading strategies. Wallet-auth feeds into Maxxit for lazy-trader automation, which orchestrates trades through Ostium for leveraged perps. AIXBT Signals provides AI-driven market intelligence. The frontend integrates with both Pyth (low-latency) and Chainlink (reliable) price oracles for comprehensive market data. Ghost nodes suggest Uniswap for additional swap capabilities, chain-data for on-chain activity monitoring, IPFS for data storage, and Telegram for notifications.',
-    nodes: [
-      { type: 'wallet-auth', position: { x: 0, y: 150 } },             // 0  T0
-      { type: 'maxxit', position: { x: 300, y: 150 } },                // 1  T1
-      { type: 'ostium-trading', position: { x: 600, y: 150 } },        // 2  T2
-      { type: 'frontend-scaffold', position: { x: 900, y: 150 } },     // 3  T3
-      // { type: 'aixbt-signals', position: { x: 300, y: 0 } },           // 4  T1
-      // Pyth Oracle - ETH/USD feed ID for Arbitrum Sepolia
-      { type: 'pyth-oracle', position: { x: 900, y: 0 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },  // 4  T3
-      // Chainlink Price Feed - ETH/USD on Arbitrum (https://docs.chain.link/data-feeds/price-feeds/addresses?network=arbitrum)
-      { type: 'chainlink-price-feed', position: { x: 900, y: 300 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },  // 5  T3
-    ],
-    edges: [
-      { source: 0, target: 1 },   // wallet-auth → maxxit
-      { source: 1, target: 2 },   // maxxit → ostium-trading
-      { source: 2, target: 3 },   // ostium-trading → frontend-scaffold
-      // { source: 4, target: 1 },   // aixbt-signals → maxxit (REMOVED)
-      { source: 4, target: 3 },   // pyth-oracle → frontend-scaffold
-      { source: 5, target: 3 },   // chainlink-price-feed → frontend-scaffold
-    ],
-    ghostNodes: [
-      { type: 'uniswap-swap', position: { x: 600, y: 300 } },          // g0 (idx 6)
-      { type: 'onchain-activity', position: { x: 0, y: 300 } },              // g1 (idx 7)
-      { type: 'ipfs-storage', position: { x: 300, y: 300 } },          // g2 (idx 8)
-      { type: 'telegram-notifications', position: { x: 900, y: 450 } }, // g3 (idx 9)
-    ],
-    ghostEdges: [
-      { source: 2, target: 6 },   // ostium-trading → uniswap-swap
-      { source: 0, target: 7 },   // wallet-auth → onchain-activity
-      { source: 1, target: 8 },   // maxxit → ipfs-storage
-      { source: 3, target: 9 },   // frontend-scaffold → telegram-notifications
-    ],
-  },
 
   // ── 6. Cross-Chain Bridge dApp ──────────────────────────────────────────
   // Flow: {bridge, chain-abstraction} → {frontend, wallet, rpc} → chain-data
@@ -375,56 +634,7 @@ export const TEMPLATES: Template[] = [
     ],
   },
 
-  // ── 7. NFT Marketplace ─────────────────────────────────────────────────
-  // Flow: {stylus, erc721, erc1155} → {smartcache, auditware, ipfs, frontend, dune-nft, sdk} → {wallet, chain-data}
-  {
-    id: 'nft-marketplace',
-    name: 'NFT Marketplace',
-    description:
-      'Custom Stylus marketplace contract + ERC-721/1155 + SmartCache + Radar + IPFS + analytics + history — agent + paywall as suggestions',
-    icon: 'Image',
-    colorClass: 'accent-secondary',
-    category: 'nft',
-    tags: ['NFT', 'Stylus', 'Marketplace', 'Caching', 'Radar'],
-    explainer:
-      'A custom Stylus marketplace contract handles listings, bids, and royalty splits — SmartCache reduces latency and gas costs by warming the marketplace contract cache, and Auditware (Radar) scans it for vulnerabilities. Pre-deployed ERC-721 and ERC-1155 (usable directly) handle NFT minting, with metadata pinned to IPFS. The frontend renders the marketplace UI with wallet auth, Dune NFT Floor tracks collection prices, chain-data indexes events, and Transaction History provides a full audit trail of activity.',
-    nodes: [
-      { type: 'stylus-rust-contract', position: { x: 0, y: 0 } },            // 0  T0
-      { type: 'erc721-stylus', position: { x: 0, y: 340 } },            // 1  T0
-      { type: 'erc1155-stylus', position: { x: 0, y: 160 } },           // 2  T0
-      { type: 'smartcache-caching', position: { x: 360, y: -160 } },       // 3  T1
-      { type: 'auditware-analyzing', position: { x: 360, y: -60 } },    // 4  T1
-      { type: 'ipfs-storage', position: { x: 360, y: 320 } },           // 5  T1
-      { type: 'frontend-scaffold', position: { x: 360, y: 140 } },      // 6  T1
-      { type: 'dune-nft-floor', position: { x: 360, y: 600 } },         // 7  T1
-      { type: 'dune-transaction-history', position: { x: 360, y: 400 } }, // 8  T1
-      { type: 'wallet-auth', position: { x: 680, y: 40 } },            // 9  T2
-      { type: 'chain-data', position: { x: 700, y: 220 } },             // 10 T2
-    ],
-    edges: [
-      { source: 0, target: 3 },
-      { source: 0, target: 4 },
-      { source: 0, target: 6 },
-      { source: 1, target: 5 },
-      { source: 2, target: 5 },
-      { source: 1, target: 6 },
-      { source: 2, target: 6 },
-      { source: 1, target: 7 },
-      { source: 1, target: 8 },
-      { source: 6, target: 9 },
-      { source: 6, target: 10 },
-    ],
-    ghostNodes: [
-      { type: 'x402-paywall-api', position: { x: 900, y: 0 } },          // g0 (idx 11)
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 150 } },    // g1 (idx 12)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },       // g2 (idx 13)
-    ],
-    ghostEdges: [
-      { source: 6, target: 11 },  // frontend → paywall
-      { source: 6, target: 12 },  // frontend → agent
-      { source: 0, target: 13 },  // stylus → quality-gates
-    ],
-  },
+
 
   // ── 8. Intelligence-Driven NFT Platform ─────────────────────────────────
   // Flow: {stylus, erc721, aixbt-momentum, dune-wallet} → {smartcache, auditware, ipfs, signals, nft-floor} → {telegram, frontend} → wallet
@@ -479,55 +689,7 @@ export const TEMPLATES: Template[] = [
     ],
   },
 
-  // ── 9. AI Agent + Telegram Suite ────────────────────────────────────────
-  // Flow: {agent, paywall, stylus} → {telegram-ai, commands, smartcache, auditware} → {notifications, wallet, frontend}
-  {
-    id: 'ai-agent-telegram-suite',
-    name: 'AI Agent + Telegram Suite',
-    description:
-      'ERC-8004 agent + x402 paywall + Stylus contract + SmartCache + Radar + full Telegram bot suite + frontend — chain data + analytics as suggestions',
-    icon: 'Bot',
-    colorClass: 'accent-primary',
-    category: 'ai',
-    tags: ['AI', 'Agent', 'Stylus', 'Caching', 'Radar'],
-    explainer:
-      'The ERC-8004 agent is the brain — the Stylus contract gives it direct on-chain execution power for triggering transactions and state changes. SmartCache reduces latency and gas costs by warming the contract cache for agent queries, and Auditware (Radar) scans the contract for vulnerabilities. Telegram AI Agent handles conversational interactions, Commands handles structured actions, and Notifications relay outputs. Wallet Link connects on-chain identity for execution. The x402 paywall gates premium features.',
-    nodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 0, y: 0 } },      // 0  T0
-      { type: 'x402-paywall-api', position: { x: 0, y: 150 } },         // 1  T0
-      { type: 'stylus-rust-contract', position: { x: 0, y: 300 } },          // 2  T0
-      { type: 'telegram-ai-agent', position: { x: 380, y: -160 } },        // 3  T1
-      { type: 'telegram-commands', position: { x: 380, y: 20 } },      // 4  T1
-      { type: 'smartcache-caching', position: { x: 380, y: 320 } },     // 5  T1
-      { type: 'auditware-analyzing', position: { x: 380, y: 460 } },    // 6  T1
-      { type: 'telegram-wallet-link', position: { x: 680, y: -220 } },   // 10 T1
-      { type: 'telegram-notifications', position: { x: 380, y: -280 } },   // 7  T2
-      { type: 'wallet-auth', position: { x: 380, y: 160 } },            // 8  T2
-      { type: 'frontend-scaffold', position: { x: 680, y: -80 } },      // 9  T2
-    ],
-    edges: [
-      { source: 0, target: 3 },
-      { source: 0, target: 4 },
-      { source: 0, target: 8 },
-      { source: 0, target: 9 },
-      { source: 1, target: 9 },
-      { source: 2, target: 5 },
-      { source: 2, target: 6 },
-      { source: 2, target: 9 },
-      { source: 3, target: 7 },
-      { source: 3, target: 10 },
-    ],
-    ghostNodes: [
-      { type: 'chain-data', position: { x: 680, y: 150 } },              // g0 (idx 10)
-      { type: 'dune-wallet-balances', position: { x: 900, y: 0 } },   // g1 (idx 11)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },     // g2 (idx 12)
-    ],
-    ghostEdges: [
-      { source: 9, target: 10 },  // frontend → chain-data
-      { source: 9, target: 11 },  // frontend → dune-wallet-balances
-      { source: 2, target: 12 },  // stylus → quality-gates
-    ],
-  },
+
 
   // ── 10. AI Intelligence Hub ─────────────────────────────────────────────
   // Flow: momentum → signals → {indigo, observer, telegram} → {agent, chain-data} → frontend
@@ -575,61 +737,7 @@ export const TEMPLATES: Template[] = [
     ],
   },
 
-  // ── 11. Trading Bot ─────────────────────────────────────────────────────
-  // Flow: {stylus, ostium, maxxit, agent} → {smartcache, auditware, dune-dex, chain-data} → {telegram, frontend, wallet}
-  {
-    id: 'trading-bot',
-    name: 'Trading Bot',
-    description:
-      'Custom Stylus vault contract + Ostium + Maxxit + SmartCache + Radar + ERC-8004 agent + Dune DEX + Telegram + RPC — paywall + token price as suggestions',
-    icon: 'CandlestickChart',
-    colorClass: 'warning',
-    category: 'ai',
-    tags: ['Trading', 'Stylus', 'Caching', 'Radar', 'Agent'],
-    explainer:
-      'A custom Stylus vault contract holds funds and executes trades on-chain — SmartCache reduces latency and gas costs by warming the vault contract cache, and Auditware (Radar) scans it for vulnerabilities. Ostium executes leveraged perps, while Maxxit and the ERC-8004 agent orchestrate automated trade logic and direct contract interactions. Dune DEX Volume, RPC, and chain-data provide market depth and connectivity. Telegram AI Agent relays signals and accepts user commands.',
-    nodes: [
-      { type: 'stylus-rust-contract', position: { x: 60, y: 0 } },        // 0  T0
-      { type: 'ostium-trading', position: { x: 80, y: 140 } },            // 1  T0
-      { type: 'maxxit', position: { x: -300, y: 300 } },                  // 2  T0
-      { type: 'erc8004-agent-runtime', position: { x: -280, y: 540 } },   // 3  T1
-      { type: 'smartcache-caching', position: { x: 600, y: 0 } },         // 4  T2
-      { type: 'auditware-analyzing', position: { x: 600, y: 150 } },      // 5  T2
-      { type: 'dune-dex-volume', position: { x: 600, y: 300 } },          // 6  T2
-      { type: 'chain-data', position: { x: 600, y: 450 } },               // 7  T2
-      { type: 'frontend-scaffold', position: { x: 900, y: 150 } },        // 8  T3
-      { type: 'wallet-auth', position: { x: 1200, y: 0 } },               // 9  T4
-      { type: 'rpc-provider', position: { x: 1200, y: 150 } },            // 10 T4
-      { type: 'telegram-ai-agent', position: { x: 1200, y: 300 } },       // 11 T4
-    ],
-    edges: [
-      { source: 0, target: 4 },
-      { source: 0, target: 5 },
-      { source: 3, target: 0 },
-      { source: 3, target: 1 },
-      { source: 2, target: 1 },
-      { source: 3, target: 11 },
-      { source: 8, target: 9 },
-      { source: 8, target: 10 },
-      { source: 0, target: 8 },
-      { source: 1, target: 8 },
-      { source: 4, target: 8 },
-      { source: 5, target: 8 },
-      { source: 6, target: 8 },
-      { source: 7, target: 8 },
-      { source: 3, target: 8 },
-    ],
-    ghostNodes: [
-      { type: 'x402-paywall-api', position: { x: 1500, y: 0 } },            // g0 (idx 12)
-      { type: 'dune-token-price', position: { x: 1500, y: 150 } },          // g1 (idx 13)
-      { type: 'telegram-notifications', position: { x: 1500, y: 300 } },    // g2 (idx 14)
-    ],
-    ghostEdges: [
-      { source: 8, target: 12 },  // frontend → paywall
-      { source: 8, target: 13 },  // frontend → dune-token-price
-      { source: 11, target: 14 }, // telegram-ai-agent → notifications
-    ],
-  },
+
 
   // ── 12. Telegram-First dApp ─────────────────────────────────────────────
   // Flow: {tg-ai, erc20, dune-wallet, stylus} → {commands, notifs, wallet-link, agent, smartcache, auditware} → frontend → wallet
@@ -734,110 +842,6 @@ export const TEMPLATES: Template[] = [
     ghostEdges: [
       { source: 9, target: 11 },  // frontend → agent
       { source: 9, target: 12 },  // frontend → paywall
-    ],
-  },
-
-  // ── 14. Superposition Full Stack ────────────────────────────────────────
-  // Flow: {network, stylus} → {smartcache, auditware, bridge, longtail} → frontend → wallet
-  {
-    id: 'superposition-full-stack',
-    name: 'Superposition Full Stack',
-    description:
-      'Superposition L3 + Stylus contract + SmartCache + Radar + bridge + AMM + frontend + RPC + chain data — agent, faucet, Meow domains as suggestions',
-    icon: 'Rocket',
-    colorClass: 'accent-secondary',
-    category: 'superposition',
-    tags: ['Superposition', 'Stylus', 'L3', 'Caching', 'Radar'],
-    explainer:
-      'Superposition Network is the L3 chain — the Stylus contract deploys natively on it. SmartCache reduces latency and gas costs by warming the contract cache on the L3, and Auditware (Radar) scans the contract for vulnerabilities. The Superposition Bridge handles L2↔L3 asset movement, and Longtail AMM provides on-chain liquidity. The frontend orchestrates all interactions through wallet auth, RPC, and chain-data indexing. Ghost blocks suggest Meow Domains for on-chain identity, an agent for automated interactions, and a testnet faucet for development.',
-    nodes: [
-      { type: 'superposition-network', position: { x: 0, y: 75 } },        // 0  T0
-      { type: 'stylus-rust-contract', position: { x: 300, y: 225 } },      // 1  T1
-      { type: 'smartcache-caching', position: { x: 600, y: 0 } },         // 2  T2
-      { type: 'auditware-analyzing', position: { x: 600, y: 150 } },      // 3  T2
-      { type: 'superposition-bridge', position: { x: 600, y: 300 } },     // 4  T2
-      { type: 'superposition-longtail', position: { x: 600, y: 450 } },   // 5  T2
-      { type: 'frontend-scaffold', position: { x: 900, y: 225 } },        // 6  T3
-      { type: 'rpc-provider', position: { x: 1200, y: 75 } },             // 7  T4
-      { type: 'chain-data', position: { x: 1200, y: 225 } },              // 8  T4
-      { type: 'wallet-auth', position: { x: 1200, y: 375 } },             // 9  T4
-    ],
-    edges: [
-      { source: 0, target: 1 },
-      { source: 0, target: 4 },
-      { source: 0, target: 5 },
-      { source: 1, target: 2 },
-      { source: 1, target: 3 },
-      { source: 1, target: 6 },
-      { source: 4, target: 6 },
-      { source: 5, target: 6 },
-      { source: 6, target: 7 },
-      { source: 6, target: 8 },
-      { source: 6, target: 9 },
-    ],
-    ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 1500, y: 0 } },       // g0 (idx 10)
-      { type: 'superposition-faucet', position: { x: 1500, y: 150 } },      // g1 (idx 11)
-      { type: 'superposition-meow-domains', position: { x: 1500, y: 300 } },// g2 (idx 12)
-    ],
-    ghostEdges: [
-      { source: 6, target: 10 },  // frontend → agent
-      { source: 0, target: 11 },  // network → faucet
-      { source: 0, target: 12 },  // network → meow-domains
-    ],
-  },
-
-  // ── 15. Superposition DeFi + AI ─────────────────────────────────────────
-  // Flow: {network, stylus, agent} → {auditware, smartcache, longtail, bridge} → {dune-dex, frontend} → wallet
-  {
-    id: 'superposition-defi-ai',
-    name: 'Superposition DeFi + AI',
-    description:
-      'Superposition L3 + Stylus contract + SmartCache + Radar + AMM + bridge + ERC-8004 agent + Dune DEX + RPC + chain data — faucet, super-assets, utility-mining as suggestions',
-    icon: 'Zap',
-    colorClass: 'warning',
-    category: 'superposition',
-    tags: ['Superposition', 'Stylus', 'Caching', 'Radar', 'Agent'],
-    explainer:
-      'Superposition Network hosts both the Stylus contract and DeFi primitives. SmartCache reduces latency and gas costs by warming the contract cache for optimised reads, and Auditware (Radar) scans the contract for vulnerabilities. Longtail AMM and Bridge provide on-chain liquidity and cross-chain movement. The ERC-8004 agent automates DeFi strategies across these components, including interaction with Longtail. Dune DEX Volume, RPC, and chain-data feed analytics and connectivity. Ghost suggestions include the Super Assets yield layer and Utility Mining rewards.',
-    nodes: [
-      { type: 'superposition-network', position: { x: 0, y: 0 } },        // 0  T0
-      { type: 'stylus-rust-contract', position: { x: 300, y: 150 } },      // 1  T1
-      { type: 'erc8004-agent-runtime', position: { x: 0, y: 300 } },      // 2  T0
-      { type: 'auditware-analyzing', position: { x: 600, y: 0 } },        // 3  T2
-      { type: 'smartcache-caching', position: { x: 600, y: 150 } },       // 4  T2
-      { type: 'superposition-longtail', position: { x: 600, y: 300 } },   // 5  T2
-      { type: 'superposition-bridge', position: { x: 600, y: 450 } },     // 6  T2
-      { type: 'dune-dex-volume', position: { x: 900, y: 0 } },            // 7  T3
-      { type: 'rpc-provider', position: { x: 900, y: 150 } },             // 8  T3
-      { type: 'chain-data', position: { x: 900, y: 300 } },               // 9  T3
-      { type: 'frontend-scaffold', position: { x: 900, y: 450 } },        // 10 T3
-      { type: 'wallet-auth', position: { x: 1200, y: 225 } },             // 11 T4
-    ],
-    edges: [
-      { source: 0, target: 1 },
-      { source: 0, target: 6 },
-      { source: 1, target: 3 },
-      { source: 1, target: 4 },
-      { source: 1, target: 10 },
-      { source: 2, target: 5 },
-      { source: 2, target: 10 },
-      { source: 5, target: 7 },
-      { source: 5, target: 10 },
-      { source: 6, target: 10 },
-      { source: 10, target: 8 },
-      { source: 10, target: 9 },
-      { source: 10, target: 11 },
-    ],
-    ghostNodes: [
-      { type: 'superposition-faucet', position: { x: 1500, y: 0 } },       // g0 (idx 12)
-      { type: 'superposition-super-assets', position: { x: 1500, y: 150 } },// g1 (idx 13)
-      { type: 'superposition-utility-mining', position: { x: 1500, y: 300 } },// g2 (idx 14)
-    ],
-    ghostEdges: [
-      { source: 0, target: 12 },  // network → faucet
-      { source: 5, target: 13 },  // longtail → super-assets
-      { source: 10, target: 14 }, // frontend → utility-mining
     ],
   },
 

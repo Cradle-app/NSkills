@@ -34,6 +34,7 @@ import IpfsLogo from '@/assets/blocks/Ipfs.svg';
 import PaymentLogo from '@/assets/blocks/payment.png';
 import ArbitrumLogo from '@/assets/blocks/arbitrum.svg';
 import NextjsLogo from '@/assets/blocks/Nextjs.png';
+import GithubActionsLogo from '@/assets/blocks/gitHub-actions.png';
 
 /** Node types with custom logos (matches palette) */
 const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
@@ -52,6 +53,8 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'stylus-contract': { src: StylusLogo, alt: 'Stylus' },
   'stylus-zk-contract': { src: StylusLogo, alt: 'Stylus' },
   'stylus-rust-contract': { src: StylusLogo, alt: 'Stylus' },
+  'eip7702-smart-eoa': { src: WalletLogoPng, alt: 'Wallet' },
+  'zk-primitives': { src: StylusLogo, alt: 'ZK Primitives' },
   // Agent plugins
   'ostium-trading': { src: OstiumLogo, alt: 'Ostium' },
   'maxxit': { src: MaxxitLogo, alt: 'Maxxit' },
@@ -76,6 +79,7 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'chain-data': { src: ArbitrumLogo, alt: 'Arbitrum' },
   'chain-abstraction': { src: ArbitrumLogo, alt: 'Arbitrum' },
   'sdk-generator': { src: ArbitrumLogo, alt: 'Arbitrum' },
+  'repo-quality-gates': { src: GithubActionsLogo, alt: 'GitHub Actions' },
   // Payment plugins
   'x402-paywall-api': { src: PaymentLogo, alt: 'Payment' },
   // Superposition plugins

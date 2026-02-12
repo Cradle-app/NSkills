@@ -49,6 +49,7 @@ export class ERC8004AgentPlugin extends BasePlugin<z.infer<typeof ERC8004AgentCo
     'src/registry.ts': 'frontend-lib' as const,
     'src/openrouter-client.ts': 'frontend-lib' as const,
     'src/index.ts': 'frontend-lib' as const,
+    'contracts/**': 'contract-source' as const,
   };
 
   readonly ports: PluginPort[] = [

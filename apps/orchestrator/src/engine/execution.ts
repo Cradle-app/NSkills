@@ -463,7 +463,7 @@ export class ExecutionEngine {
             // For contract source files, preserve directory structure under contracts/
             // e.g., contract/erc20/src/lib.rs -> contracts/erc20/src/lib.rs
             const contractRelativePath = relativeItem.replace(
-              /^contract\//,
+              /^contracts?\//,
               ""
             );
             targetPath = `${outputPath}/contracts/${contractRelativePath}`;
