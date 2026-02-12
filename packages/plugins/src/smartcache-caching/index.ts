@@ -152,7 +152,7 @@ export class SmartCacheCachingPlugin extends BasePlugin<z.infer<typeof SmartCach
         id: 'smartcache-caching',
         name: 'SmartCache Caching',
         version: '0.2.0',
-        description: 'Enable contract caching for cheaper gas - mycontract (original) + cached-contract (with caching)',
+        description: 'Enable contract caching for cheaper gas - mycontracts (original) + cached-contracts (with caching)',
         category: 'contracts',
         tags: ['caching', 'gas-optimization', 'stylus', 'smartcache'],
     };
@@ -172,33 +172,45 @@ export class SmartCacheCachingPlugin extends BasePlugin<z.infer<typeof SmartCach
         const config = this.configSchema.parse(node.config);
         const output = this.createEmptyOutput();
 
-        // Try to read the user's selected contract from the connected stylus-rust-contract node.
-        // The execution engine runs nodes in topological order, so the stylus-rust-contract
-        // output should already be in context.nodeOutputs by the time smartcache runs.
-        const connectedContractCode = this.extractConnectedContractCode(context);
-        const rawContract = connectedContractCode || config.contractCode || getDefaultContract();
-        const originalLibRs = rawContract.trim();
-        const hasCaching = hasCachingFunctions(originalLibRs);
-        const cachedLibRs = hasCaching ? originalLibRs : addCachingToContract(originalLibRs);
+        // Check if stylus-rust-contract is also in the blueprint.
+        // We only generate the multiple contract folders (mycontracts/cached-contracts)
+        // when a dedicated Stylus Rust contract node is present to avoid confusion
+        // when only using other contract types or utilities.
+        const hasStylusRustContract = context.pathContext?.nodeTypes?.has('stylus-rust-contract') ?? false;
 
-        // mycontract = original (without caching)
-        this.copyContractFolder(output, 'mycontract', originalLibRs, false);
-        // cached-contract = with is_cacheable + opt_in_to_cache
-        this.copyContractFolder(output, 'cached-contract', cachedLibRs, true);
+        if (hasStylusRustContract) {
+            // Try to read the user's selected contract from the connected stylus-rust-contract node.
+            const connectedInfo = this.extractConnectedContractInfo(context);
+            const folderName = connectedInfo?.folder || 'mycontracts';
+            const rawContract = connectedInfo?.code || config.contractCode || getDefaultContract();
+            const originalLibRs = rawContract.trim();
+            const hasCaching = hasCachingFunctions(originalLibRs);
+            const cachedLibRs = hasCaching ? originalLibRs : addCachingToContract(originalLibRs);
 
-        // Markdown guide
-        this.addFile(output, 'docs/SMARTCACHE_INTEGRATION.md', generateCachingGuide(config, hasCaching));
+            // Generate folders based on detected name (already pluralized by stylus-rust-contract)
+            this.copyContractFolder(output, folderName, originalLibRs, false);
+            this.copyContractFolder(output, 'cached-contracts', cachedLibRs, true);
 
-        // Deploy scripts (with dos2unix)
-        this.addFile(output, 'scripts/deploy-sepolia.sh', DOS2UNIX_NOTE + generateDeployScript('sepolia'));
-        this.addFile(output, 'scripts/deploy-mainnet.sh', DOS2UNIX_NOTE + generateDeployScript('mainnet'));
+            // Markdown guide
+            this.addFile(output, 'docs/SMARTCACHE_INTEGRATION.md', generateCachingGuide(config, hasCaching, folderName));
 
-        this.addScript(output, 'deploy:sepolia', 'bash scripts/deploy-sepolia.sh');
-        this.addScript(output, 'deploy:mainnet', 'bash scripts/deploy-mainnet.sh');
+            // Deploy scripts (with dos2unix)
+            this.addFile(output, 'scripts/deploy-sepolia.sh', DOS2UNIX_NOTE + generateDeployScript('sepolia', 'cached-contracts'));
+            this.addFile(output, 'scripts/deploy-mainnet.sh', DOS2UNIX_NOTE + generateDeployScript('mainnet', 'cached-contracts'));
+
+            this.addScript(output, 'deploy:sepolia', 'bash scripts/deploy-sepolia.sh');
+            this.addScript(output, 'deploy:mainnet', 'bash scripts/deploy-mainnet.sh');
+
+            context.logger.info('Generated SmartCache: mycontracts + cached-contracts', { nodeId: node.id });
+        } else {
+            // If other contracts are used instead of Stylus Rust contracts, or if no contract node
+            // is present, generate a README instead explaining how to use is_cacheable().
+            this.addFile(output, 'docs/SMARTCACHE_USAGE.md', generateSmartCacheUsageReadme());
+            context.logger.info('Generated SmartCache usage README (no stylus-rust-contract detected)', { nodeId: node.id });
+        }
 
         this.addScript(output, 'fix-scripts', 'command -v dos2unix >/dev/null && dos2unix scripts/*.sh 2>/dev/null || echo "Run: dos2unix scripts/*.sh (install with: apt install dos2unix / brew install dos2unix)"');
 
-        context.logger.info('Generated SmartCache: mycontract + cached-contract', { nodeId: node.id });
         return output;
     }
 
@@ -261,17 +273,19 @@ export class SmartCacheCachingPlugin extends BasePlugin<z.infer<typeof SmartCach
     /**
      * Look through previously-generated node outputs to find the contract code
      * produced by a connected stylus-rust-contract node.
-     * The execution engine stores each node's CodegenOutput in context.nodeOutputs
-     * keyed by node ID. We scan all outputs for a file matching contracts/ * /src/lib.rs.
      */
-    private extractConnectedContractCode(context: ExecutionContext): string | null {
+    private extractConnectedContractInfo(context: ExecutionContext): { code: string; folder: string } | null {
         if (!context.nodeOutputs || context.nodeOutputs.size === 0) return null;
 
         for (const [, nodeOutput] of context.nodeOutputs) {
             for (const file of nodeOutput.files) {
                 // Match any contracts/<name>/src/lib.rs generated by stylus-rust-contract
-                if (/^contracts\/[^/]+\/src\/lib\.rs$/.test(file.path) && file.content) {
-                    return file.content;
+                const match = file.path.match(/^contracts\/([^/]+)\/src\/lib\.rs$/);
+                if (match && file.content) {
+                    return {
+                        code: file.content,
+                        folder: match[1],
+                    };
                 }
             }
         }
@@ -378,13 +392,13 @@ opt-level = 3
 `;
 }
 
-function generateDeployScript(network: 'sepolia' | 'mainnet'): string {
+function generateDeployScript(network: 'sepolia' | 'mainnet', folderName: string): string {
     const rpcUrl = network === 'sepolia' ? 'https://sepolia-rollup.arbitrum.io/rpc' : 'https://arb1.arbitrum.io/rpc';
     const networkName = network === 'sepolia' ? 'Arbitrum Sepolia' : 'Arbitrum One';
 
     return `#!/bin/bash
 # Cached Contract ${networkName} Deployment
-# Deploys from contracts/cached-contract/ (contract with is_cacheable + opt_in_to_cache)
+# Deploys from contracts/${folderName}/ (contract with is_cacheable + opt_in_to_cache)
 
 set -euo pipefail
 
@@ -393,7 +407,7 @@ if [ -f .env ]; then
 fi
 
 RPC_URL="${rpcUrl}"
-CONTRACT_DIR="contracts/cached-contract"
+CONTRACT_DIR="contracts/${folderName}"
 
 if [[ -z "\${PRIVATE_KEY:-}" ]]; then
   echo "Error: PRIVATE_KEY not set."
@@ -407,21 +421,21 @@ echo "After deployment, call opt_in_to_cache() to enable caching, or re-run carg
 `;
 }
 
-function generateCachingGuide(config: z.infer<typeof SmartCacheCachingConfig>, alreadyHasCaching: boolean): string {
+function generateCachingGuide(config: z.infer<typeof SmartCacheCachingConfig>, alreadyHasCaching: boolean, originalFolder: string): string {
     return `# SmartCache Integration Guide
 
 ## Folder Structure
 
 \`\`\`
 contracts/
-├── mycontract/           # Original contract (without is_cacheable / opt_in_to_cache)
+├── ${originalFolder}/    # Original contract (without is_cacheable / opt_in_to_cache)
 │   ├── .cargo/
 │   ├── Cargo.toml
 │   ├── src/
 │   │   ├── lib.rs        # Your selected contract (counter, erc20, vending-machine, etc.)
 │   │   └── main.rs
 │   └── ...
-└── cached-contract/      # Same contract WITH is_cacheable + opt_in_to_cache
+└── cached-contracts/     # Same contract WITH is_cacheable + opt_in_to_cache
     ├── .cargo/
     ├── Cargo.toml        # Includes stylus-cache-sdk
     ├── src/
@@ -436,7 +450,7 @@ Once your contract has \`is_cacheable()\` and \`opt_in_to_cache()\` (as in \`cac
 
 1. **Deploy** with \`cargo stylus deploy\`:
    \`\`\`bash
-   cd contracts/cached-contract
+   cd contracts/cached-contracts
    cargo stylus deploy --private-key "\${PRIVATE_KEY}" --endpoint "https://sepolia-rollup.arbitrum.io/rpc"
    \`\`\`
 
@@ -508,5 +522,60 @@ cast call <CONTRACT_ADDRESS> "get_count()" --rpc-url <RPC_URL> --trace
 - [SmartCache Documentation](https://smartcache.gitbook.io/smartcache-docs)
 - [stylus-cache-sdk](https://crates.io/crates/stylus-cache-sdk)
 - [Stylus Gas & Caching Deep Dive](https://docs.arbitrum.io/stylus/reference/opcode-gas-pricing)
+`;
+}
+
+function generateSmartCacheUsageReadme(): string {
+    return `# SmartCache is_cacheable() Usage Guide
+
+SmartCache is a gas optimization layer for Arbitrum Stylus that warms storage slots for frequently accessed contracts.
+
+## The is_cacheable Function
+
+To enable your contract for SmartCache, you must implement the \`is_cacheable\` function. This function tells the Arbitrum sequencer that your contract is compatible with the caching layer.
+
+### Implementation Pattern (Stylus Rust)
+
+\`\`\`rust
+use stylus_sdk::prelude::*;
+
+#[public]
+impl MyContract {
+    /// Returns whether this contract is cacheable
+    /// SmartCache sequencer checks this to decide if storage should be warmed
+    pub fn is_cacheable(&self) -> bool {
+        true
+    }
+}
+\`\`\`
+
+### Why use is_cacheable?
+
+1. **Lower Gas Costs**: Repeated access to storage slots becomes significantly cheaper (up to 95% reduction).
+2. **Improved Latency**: Faster response times for read-heavy operations.
+3. **Optimized for Stylus**: Specifically designed for the WASM-based Stylus runtime.
+
+### Integrating with stylus-cache-sdk
+
+For more advanced caching controls, use the \`stylus-cache-sdk\`:
+
+\`\`\`rust
+use stylus_cache_sdk::{is_contract_cacheable, AutoCacheOptIn, emit_cache_opt_in};
+
+#[public]
+impl MyContract {
+    pub fn is_cacheable(&self) -> bool {
+        is_contract_cacheable() // Dynamically controlled by SDK
+    }
+
+    pub fn opt_in_to_cache(&mut self) {
+        emit_cache_opt_in(); // One-time opt-in event
+    }
+}
+\`\`\`
+
+## Supported Contract Types
+
+Currently, SmartCache is optimally supported for **Stylus Rust Contracts**. If you are using other contract types (like Solidity), you may still see benefits from general L2 caching, but the explicit \`is_cacheable\` hook is a Stylus-specific feature.
 `;
 }

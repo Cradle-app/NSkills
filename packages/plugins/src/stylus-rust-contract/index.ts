@@ -50,15 +50,13 @@ export class StylusRustContractPlugin extends BasePlugin<z.infer<typeof StylusRu
         const output = this.createEmptyOutput();
 
         const contractName = config.contractName || 'MyContract';
-        const contractDir = `contracts/${contractName.toLowerCase()}`;
-
-        // Check if smartcache-caching is also in the blueprint.
-        // When smartcache is present, it takes over generating the contracts/ folder
-        // (mycontract/ + cached-contract/) using the full counter-contract template.
-        // In that case we only emit the lib.rs so smartcache can pick it up from
-        // context.nodeOutputs, plus env vars. We skip deploy scripts and setup guide
-        // because smartcache generates its own.
         const hasSmartCache = context.pathContext?.nodeTypes?.has('smartcache-caching') ?? false;
+        
+        // Use plural folder name if SmartCache is taking over, matching its 'mycontracts' output
+        const folderBase = contractName.toLowerCase();
+        const contractDir = hasSmartCache 
+            ? `contracts/${folderBase}${folderBase.endsWith('s') ? '' : 's'}` 
+            : `contracts/${folderBase}`;
 
         // Always generate the contract source — smartcache reads it from nodeOutputs
         const contractCode = config.contractCode || getExampleContract(config.exampleType);
