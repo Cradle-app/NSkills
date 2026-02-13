@@ -34,7 +34,7 @@ import IpfsLogo from '@/assets/blocks/Ipfs.svg';
 import PaymentLogo from '@/assets/blocks/payment.png';
 import ArbitrumLogo from '@/assets/blocks/arbitrum.svg';
 import NextjsLogo from '@/assets/blocks/Nextjs.png';
-import GithubActionsLogo from '@/assets/blocks/github-actions.png';
+import GithubLogo from '@/assets/blocks/github.png';
 
 /** Node types with custom logos (matches palette) */
 const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
@@ -79,7 +79,7 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'chain-data': { src: ArbitrumLogo, alt: 'Arbitrum' },
   'chain-abstraction': { src: ArbitrumLogo, alt: 'Arbitrum' },
   'sdk-generator': { src: ArbitrumLogo, alt: 'Arbitrum' },
-  'repo-quality-gates': { src: GithubActionsLogo, alt: 'GitHub Actions' },
+  'repo-quality-gates': { src: GithubLogo, alt: 'GitHub' },
   // Payment plugins
   'x402-paywall-api': { src: PaymentLogo, alt: 'Payment' },
   // Superposition plugins

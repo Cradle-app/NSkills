@@ -126,7 +126,7 @@ const DEFAULT_NODE_CONFIGS: Record<string, Record<string, unknown>> = {
     },
   },
   'repo-quality-gates': {
-    ciProvider: 'github-actions',
+    ciProvider: 'github',
     testFramework: 'vitest',
     linter: 'biome',
     formatter: 'biome',

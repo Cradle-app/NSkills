@@ -214,7 +214,7 @@ export type StylusZKContractConfig = z.infer<typeof StylusZKContractConfig>;
  * Repository quality gates configuration
  */
 export const RepoQualityGatesConfig = BaseNodeConfig.extend({
-  ciProvider: z.enum(['github-actions', 'gitlab-ci', 'circleci']).default('github-actions'),
+  ciProvider: z.enum(['github', 'gitlab-ci', 'circleci']).default('github'),
   testFramework: z.enum(['vitest', 'jest', 'mocha']).default('vitest'),
   linter: z.enum(['eslint', 'biome']).default('biome'),
   formatter: z.enum(['prettier', 'biome']).default('biome'),

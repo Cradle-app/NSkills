@@ -16,7 +16,7 @@
       "type": "repo-quality-gates",
       "position": { "x": 100, "y": 400 },
       "config": {
-        "ciProvider": "github-actions",
+        "ciProvider": "github",
         "testFramework": "vitest",
         "linter": "biome",
         "formatter": "biome",

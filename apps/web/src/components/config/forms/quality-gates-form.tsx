@@ -17,7 +17,7 @@ interface Props {
 }
 
 const CI_PROVIDERS = [
-  { value: 'github-actions', label: 'GitHub Actions' },
+  { value: 'github', label: 'GitHub Actions' },
   { value: 'gitlab-ci', label: 'GitLab CI' },
   { value: 'circleci', label: 'CircleCI' },
 ];
@@ -50,7 +50,7 @@ export function QualityGatesForm({ nodeId, config }: Props) {
       {/* CI Provider */}
       <div className={formStyles.section}>
         <Select
-          value={(config.ciProvider as string) || 'github-actions'}
+          value={(config.ciProvider as string) || 'github'}
           onValueChange={(value) => handleChange('ciProvider', value)}
         >
           <SelectTrigger label="CI Provider">

@@ -46,7 +46,7 @@ export class RepoQualityGatesPlugin extends BasePlugin<z.infer<typeof RepoQualit
 
   getDefaultConfig(): Partial<z.infer<typeof RepoQualityGatesConfig>> {
     return {
-      ciProvider: 'github-actions',
+      ciProvider: 'github',
       testFramework: 'vitest',
       linter: 'biome',
       formatter: 'biome',
@@ -66,7 +66,7 @@ export class RepoQualityGatesPlugin extends BasePlugin<z.infer<typeof RepoQualit
     const output = this.createEmptyOutput();
 
     // Generate CI workflow
-    if (config.ciProvider === 'github-actions') {
+    if (config.ciProvider === 'github') {
       this.addFile(
         output,
         '.github/workflows/ci.yml',
@@ -331,7 +331,7 @@ git commit --no-verify -m "your message"
 
 ## CI/CD
 
-${config.ciProvider === 'github-actions' ? `
+${config.ciProvider === 'github' ? `
 GitHub Actions runs the following checks on every PR:
 
 1. **Lint** - Ensures code follows style guidelines
