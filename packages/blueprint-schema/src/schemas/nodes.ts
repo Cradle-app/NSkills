@@ -19,6 +19,7 @@ export const NodeCategory = z.enum([
   'telegram',     // Telegram-specific integrations
   'intelligence', // AIXBT Market Intelligence
   'superposition', // Superposition L3 integrations
+  'robinhood',    // Robinhood Chain integrations
   'analytics',    // Dune Analytics integrations
 ]);
 export type NodeCategory = z.infer<typeof NodeCategory>;
@@ -92,6 +93,11 @@ export const NodeType = z.enum([
   'superposition-utility-mining',
   'superposition-faucet',
   'superposition-meow-domains',
+
+  // Robinhood Chain
+  'robinhood-network',
+  'robinhood-deployment',
+  'robinhood-contracts',
 
   // Dune Analytics
   'dune-execute-sql',
@@ -828,6 +834,53 @@ export const SuperpositionMeowDomainsConfig = BaseNodeConfig.extend({
 export type SuperpositionMeowDomainsConfig = z.infer<typeof SuperpositionMeowDomainsConfig>;
 
 // ============================================================================
+// ROBINHOOD CHAIN CONFIGURATIONS
+// ============================================================================
+
+/**
+ * Robinhood Network configuration
+ * Foundation for Robinhood Chain apps - RPC and helper outputs
+ */
+export const RobinhoodNetworkConfig = BaseNodeConfig.extend({
+  network: z.enum(['testnet']).default('testnet'),
+  includeFaucetLink: z.boolean().default(true),
+  generateChainConfig: z.boolean().default(true),
+  generateConstants: z.boolean().default(true),
+  customRpcUrl: z.string().url().optional(),
+  enableWebSocket: z.boolean().default(true),
+  generateNetworkSwitcher: z.boolean().default(true),
+});
+export type RobinhoodNetworkConfig = z.infer<typeof RobinhoodNetworkConfig>;
+
+/**
+ * Robinhood Deployment configuration
+ * Controls how deployment guides and example contracts are generated
+ */
+export const RobinhoodDeploymentConfig = BaseNodeConfig.extend({
+  framework: z.enum(['hardhat', 'foundry', 'other']).default('hardhat'),
+  includeExampleContract: z.boolean().default(true),
+  includeVerificationSteps: z.boolean().default(true),
+  includeScripts: z.boolean().default(true),
+  outputPath: z.string().default('robinhood'),
+});
+export type RobinhoodDeploymentConfig = z.infer<typeof RobinhoodDeploymentConfig>;
+
+/**
+ * Robinhood Contracts configuration
+ * Select which contract groups to include in generated constants/types
+ */
+export const RobinhoodContractsConfig = BaseNodeConfig.extend({
+  includeTokenContracts: z.boolean().default(true),
+  includeCoreContracts: z.boolean().default(true),
+  includeBridgeContracts: z.boolean().default(true),
+  includePrecompiles: z.boolean().default(true),
+  includeMiscContracts: z.boolean().default(true),
+  generateTypes: z.boolean().default(true),
+  generateDocs: z.boolean().default(true),
+});
+export type RobinhoodContractsConfig = z.infer<typeof RobinhoodContractsConfig>;
+
+// ============================================================================
 // DUNE ANALYTICS CONFIGURATIONS
 // ============================================================================
 
@@ -978,6 +1031,10 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('superposition-utility-mining'), config: SuperpositionUtilityMiningConfig }),
   z.object({ type: z.literal('superposition-faucet'), config: SuperpositionFaucetConfig }),
   z.object({ type: z.literal('superposition-meow-domains'), config: SuperpositionMeowDomainsConfig }),
+  // Robinhood Chain
+  z.object({ type: z.literal('robinhood-network'), config: RobinhoodNetworkConfig }),
+  z.object({ type: z.literal('robinhood-deployment'), config: RobinhoodDeploymentConfig }),
+  z.object({ type: z.literal('robinhood-contracts'), config: RobinhoodContractsConfig }),
   // Dune Analytics
   z.object({ type: z.literal('dune-execute-sql'), config: DuneExecuteSQLConfig }),
   z.object({ type: z.literal('dune-token-price'), config: DuneTokenPriceConfig }),
@@ -1057,6 +1114,10 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'superposition-utility-mining': 'superposition',
     'superposition-faucet': 'superposition',
     'superposition-meow-domains': 'superposition',
+    // Robinhood Chain
+    'robinhood-network': 'robinhood',
+    'robinhood-deployment': 'robinhood',
+    'robinhood-contracts': 'robinhood',
     // Dune Analytics
     'dune-execute-sql': 'analytics',
     'dune-token-price': 'analytics',
@@ -1122,6 +1183,10 @@ export function getConfigSchemaForType(type: NodeType) {
     'superposition-utility-mining': SuperpositionUtilityMiningConfig,
     'superposition-faucet': SuperpositionFaucetConfig,
     'superposition-meow-domains': SuperpositionMeowDomainsConfig,
+    // Robinhood Chain
+    'robinhood-network': RobinhoodNetworkConfig,
+    'robinhood-deployment': RobinhoodDeploymentConfig,
+    'robinhood-contracts': RobinhoodContractsConfig,
     // Dune Analytics
     'dune-execute-sql': DuneExecuteSQLConfig,
     'dune-token-price': DuneTokenPriceConfig,

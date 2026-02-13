@@ -960,6 +960,63 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
   },
 
   // ============================================
+  // ROBINHOOD CHAIN CATEGORY
+  // ============================================
+  "robinhood-network": {
+    id: "robinhood-network",
+    name: "Network Config",
+    description: "Robinhood Chain testnet RPC and chain configuration",
+    icon: "Globe",
+    logoAsset: "robinhood.png",
+    color: "accent-green",
+    category: "robinhood",
+    tags: ["robinhood", "network", "config", "rpc", "orbit"],
+    compatibility: {
+      compatibleWith: [
+        "robinhood-deployment",
+        "robinhood-contracts",
+        "frontend-scaffold",
+        "wallet-auth",
+      ],
+      suggestedWith: ["rpc-provider"],
+      requires: [],
+    },
+    defaultConfig: {},
+  },
+  "robinhood-deployment": {
+    id: "robinhood-deployment",
+    name: "Deployment Guide",
+    description: "Generate deployment docs and scripts for Robinhood Chain",
+    icon: "Box",
+    logoAsset: "robinhood.png",
+    color: "accent-green",
+    category: "robinhood",
+    tags: ["robinhood", "deployment", "hardhat", "foundry", "contracts"],
+    compatibility: {
+      compatibleWith: ["robinhood-network", "frontend-scaffold"],
+      suggestedWith: ["wallet-auth"],
+      requires: ["robinhood-network"],
+    },
+    defaultConfig: {},
+  },
+  "robinhood-contracts": {
+    id: "robinhood-contracts",
+    name: "Contract Addresses",
+    description: "Typed constants for Robinhood Chain core and token contracts",
+    icon: "Database",
+    logoAsset: "robinhood.png",
+    color: "accent-green",
+    category: "robinhood",
+    tags: ["robinhood", "contracts", "addresses", "bridge", "tokens"],
+    compatibility: {
+      compatibleWith: ["robinhood-network", "frontend-scaffold", "rpc-provider"],
+      suggestedWith: ["robinhood-deployment"],
+      requires: ["robinhood-network"],
+    },
+    defaultConfig: {},
+  },
+
+  // ============================================
   // ANALYTICS CATEGORY (DUNE)
   // ============================================
   "dune-execute-sql": {

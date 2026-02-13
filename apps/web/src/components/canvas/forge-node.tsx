@@ -35,6 +35,7 @@ import PaymentLogo from '@/assets/blocks/payment.png';
 import ArbitrumLogo from '@/assets/blocks/arbitrum.svg';
 import NextjsLogo from '@/assets/blocks/Nextjs.png';
 import GithubLogo from '@/assets/blocks/github.png';
+import RobinhoodLogo from '@/assets/blocks/robinhood.png';
 
 /** Node types with custom logos (matches palette) */
 const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
@@ -91,6 +92,10 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'superposition-utility-mining': { src: SuperpositionLogo, alt: 'Superposition' },
   'superposition-faucet': { src: SuperpositionLogo, alt: 'Superposition' },
   'superposition-meow-domains': { src: SuperpositionLogo, alt: 'Superposition' },
+  // Robinhood Chain plugins
+  'robinhood-network': { src: RobinhoodLogo, alt: 'Robinhood Chain' },
+  'robinhood-deployment': { src: RobinhoodLogo, alt: 'Robinhood Chain' },
+  'robinhood-contracts': { src: RobinhoodLogo, alt: 'Robinhood Chain' },
   // Dune Analytics plugins
   'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
   'dune-token-price': { src: DuneLogo, alt: 'Dune' },

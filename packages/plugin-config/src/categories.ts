@@ -20,6 +20,12 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
         color: 'accent-cyan',
     },
     {
+        id: 'robinhood',
+        name: 'Robinhood Chain',
+        icon: 'Layers',
+        color: 'accent-green',
+    },
+    {
         id: 'analytics',
         name: 'Analytics',
         icon: 'Database',

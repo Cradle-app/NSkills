@@ -35,6 +35,7 @@ export type TemplateCategory =
   | 'telegram'
   | 'analytics'
   | 'superposition'
+  | 'robinhood'
   | 'payments'
   | 'infrastructure';
 
@@ -76,6 +77,7 @@ export const TEMPLATE_CATEGORIES: { id: TemplateCategory | 'all'; label: string 
   { id: 'telegram', label: 'Telegram' },
   { id: 'analytics', label: 'Analytics' },
   { id: 'superposition', label: 'Superposition' },
+  { id: 'robinhood', label: 'Robinhood' },
   { id: 'payments', label: 'Payments' },
   { id: 'infrastructure', label: 'Infra' },
 ];
@@ -511,6 +513,65 @@ export const TEMPLATES: Template[] = [
       { source: 6, target: 10 },  // frontend → agent
       { source: 6, target: 11 },  // frontend → paywall
       { source: 0, target: 12 },  // stylus → quality-gates
+    ],
+  },
+
+  // ── Robinhood Dapp ────────────────────────────────────────────────────────
+  // Flow: {erc20, erc721, erc1155} → {auditware, frontend, robinhood-*} → {wallet, dune-tx}
+  //       Ghost: onchain-activity, pyth, chainlink
+  {
+    id: 'robinhood-dapp',
+    name: 'Robinhood Dapp',
+    description:
+      'Pre-deployed ERC-20/721/1155 Stylus tokens on Robinhood Chain wired into Auditware Radar and a frontend, with Robinhood network, deployment, and contracts plugins plus Dune transaction analytics. On-chain activity, Pyth, and Chainlink appear as ghost suggestions.',
+    icon: 'Banknote',
+    colorClass: 'accent-secondary',
+    category: 'robinhood',
+    tags: ['Robinhood', 'Tokens', 'Analytics'],
+    explainer:
+      'Three pre-deployed Stylus token standards (ERC-20, ERC-721, and ERC-1155) represent the core assets on Robinhood Chain. Auditware (Radar) scans all token interactions for vulnerabilities, while the frontend orchestrates user flows. Robinhood Network wires RPC and chain config, Robinhood Contracts exposes typed addresses, and Robinhood Deployment generates deployment guides and scripts. Dune Transaction History powers analytics, while ghost nodes suggest adding on-chain activity tracking and Pyth/Chainlink price feeds.',
+    nodes: [
+      // Token layer
+      { type: 'erc20-stylus', position: { x: 0, y: 0 } },          // 0  T0
+      { type: 'erc721-stylus', position: { x: 0, y: 150 } },       // 1  T0
+      { type: 'erc1155-stylus', position: { x: 0, y: 300 } },      // 2  T0
+      // Core infra + frontend
+      { type: 'auditware-analyzing', position: { x: 300, y: 75 } },     // 3  T1
+      { type: 'frontend-scaffold', position: { x: 300, y: 275 } },      // 4  T1
+      // Robinhood plugins
+      { type: 'robinhood-network', position: { x: 300, y: 450 } },      // 5  T1
+      { type: 'robinhood-contracts', position: { x: 600, y: 450 } },    // 6  T2
+      { type: 'robinhood-deployment', position: { x: 900, y: 450 } },   // 7  T3
+      // Analytics + auth
+      { type: 'wallet-auth', position: { x: 600, y: 150 } },       // 8  T2
+      { type: 'dune-transaction-history', position: { x: 600, y: 275 } }, // 9  T2
+    ],
+    edges: [
+      // Tokens → Auditware and frontend
+      { source: 0, target: 3 },
+      { source: 1, target: 3 },
+      { source: 2, target: 3 },
+      { source: 0, target: 4 },
+      { source: 1, target: 4 },
+      { source: 2, target: 4 },
+      // Robinhood plugins → frontend / contracts / deployment
+      { source: 5, target: 4 }, // network → frontend
+      { source: 6, target: 4 }, // contracts → frontend
+      { source: 5, target: 6 }, // network → contracts
+      { source: 6, target: 7 }, // contracts → deployment guide
+      // Frontend → auth + analytics
+      { source: 4, target: 8 },
+      { source: 4, target: 9 },
+    ],
+    ghostNodes: [
+      { type: 'onchain-activity', position: { x: 900, y: 150 } },        // g0 (idx 10)
+      { type: 'pyth-oracle', position: { x: 900, y: 0 } },               // g1 (idx 11)
+      { type: 'chainlink-price-feed', position: { x: 900, y: 300 } },    // g2 (idx 12)
+    ],
+    ghostEdges: [
+      { source: 8, target: 10 },  // wallet-auth → onchain-activity
+      { source: 4, target: 11 },  // frontend → pyth-oracle
+      { source: 4, target: 12 },  // frontend → chainlink-price-feed
     ],
   },
 

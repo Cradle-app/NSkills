@@ -10,6 +10,7 @@ export type PluginCategory =
     | 'telegram'
     | 'intelligence'
     | 'superposition'
+    | 'robinhood'
     | 'analytics'
     | 'protocols';
 

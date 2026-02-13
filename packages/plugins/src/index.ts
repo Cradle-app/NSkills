@@ -46,6 +46,10 @@ export { SuperpositionThirdwebPlugin } from './superposition-thirdweb';
 export { SuperpositionUtilityMiningPlugin } from './superposition-utility-mining';
 export { SuperpositionFaucetPlugin } from './superposition-faucet';
 export { SuperpositionMeowDomainsPlugin } from './superposition-meow-domains';
+// Robinhood Chain plugins
+export { RobinhoodNetworkPlugin } from './robinhood-network';
+export { RobinhoodDeploymentPlugin } from './robinhood-deployment';
+export { RobinhoodContractsPlugin } from './robinhood-contracts';
 // ERC-20/ERC-721/ERC-1155 Stylus plugins
 export { ERC20StylusPlugin } from './erc20-stylus';
 export { ERC721StylusPlugin } from './erc721-stylus';
@@ -112,6 +116,9 @@ import { SuperpositionThirdwebPlugin } from './superposition-thirdweb';
 import { SuperpositionUtilityMiningPlugin } from './superposition-utility-mining';
 import { SuperpositionFaucetPlugin } from './superposition-faucet';
 import { SuperpositionMeowDomainsPlugin } from './superposition-meow-domains';
+import { RobinhoodNetworkPlugin } from './robinhood-network';
+import { RobinhoodDeploymentPlugin } from './robinhood-deployment';
+import { RobinhoodContractsPlugin } from './robinhood-contracts';
 
 // Dune Analytics plugins
 import {
@@ -185,6 +192,9 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new SuperpositionUtilityMiningPlugin());
   targetRegistry.register(new SuperpositionFaucetPlugin());
   targetRegistry.register(new SuperpositionMeowDomainsPlugin());
+  targetRegistry.register(new RobinhoodNetworkPlugin());
+  targetRegistry.register(new RobinhoodDeploymentPlugin());
+  targetRegistry.register(new RobinhoodContractsPlugin());
 
   // Dune Analytics plugins
   targetRegistry.register(new DuneExecuteSQLPlugin());
@@ -251,6 +261,9 @@ export function getOfficialPlugins() {
     new SuperpositionUtilityMiningPlugin(),
     new SuperpositionFaucetPlugin(),
     new SuperpositionMeowDomainsPlugin(),
+    new RobinhoodNetworkPlugin(),
+    new RobinhoodDeploymentPlugin(),
+    new RobinhoodContractsPlugin(),
     // Dune Analytics plugins
     new DuneExecuteSQLPlugin(),
     new DuneTokenPricePlugin(),

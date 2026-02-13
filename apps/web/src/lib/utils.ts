@@ -82,6 +82,10 @@ export function nodeTypeToLabel(type: string): string {
     'superposition-utility-mining': 'Utility Mining',
     'superposition-faucet': 'Testnet Faucet',
     'superposition-meow-domains': 'Meow Domains',
+    // Robinhood Chain
+    'robinhood-network': 'Robinhood Network',
+    'robinhood-deployment': 'Robinhood Deployment',
+    'robinhood-contracts': 'Robinhood Contracts',
     // Dune Analytics
     'dune-execute-sql': 'Dune Execute SQL',
     'dune-token-price': 'Dune Token Price',
@@ -154,6 +158,10 @@ export function nodeTypeToColor(type: string): string {
     'superposition-utility-mining': 'accent-cyan',
     'superposition-faucet': 'accent-cyan',
     'superposition-meow-domains': 'accent-cyan',
+    // Robinhood Chain
+    'robinhood-network': 'accent-green',
+    'robinhood-deployment': 'accent-green',
+    'robinhood-contracts': 'accent-green',
     // ERC-20/ERC-721/ERC-1155 Stylus nodes
     'erc20-stylus': 'node-contracts',
     'erc721-stylus': 'node-contracts',
