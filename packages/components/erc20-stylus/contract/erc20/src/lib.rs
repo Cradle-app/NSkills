@@ -13,10 +13,10 @@ use stylus_sdk::{
 use crate::erc20::{Erc20, Erc20Params, Erc20Error};
 
 /// Immutable definitions
-struct SuperPositionTokenParams;
-impl Erc20Params for SuperPositionTokenParams {
-    const NAME: &'static str = "SuperPositionToken";
-    const SYMBOL: &'static str = "SPT";
+struct RobinhoodTokenParams;
+impl Erc20Params for RobinhoodTokenParams {
+    const NAME: &'static str = "RobinhoodToken";
+    const SYMBOL: &'static str = "RH";
     const DECIMALS: u8 = 18;
 }
 
@@ -25,16 +25,16 @@ impl Erc20Params for SuperPositionTokenParams {
 // storage slots and types.
 sol_storage! {
     #[entrypoint]
-    struct SuperPositionToken {
-        // Allows erc20 to access SuperPositionToken's storage and make calls
+    struct RobinhoodToken {
+        // Allows erc20 to access RobinhoodToken's storage and make calls
         #[borrow]
-        Erc20<SuperPositionTokenParams> erc20;
+        Erc20<RobinhoodTokenParams> erc20;
     }
 }
 
 #[public]
-#[inherit(Erc20<SuperPositionTokenParams>)]
-impl SuperPositionToken {
+#[inherit(Erc20<RobinhoodTokenParams>)]
+impl RobinhoodToken {
     /// Mints tokens
     pub fn mint(&mut self, value: U256) -> Result<(), Erc20Error> {
         self.erc20.mint(msg::sender(), value)?;

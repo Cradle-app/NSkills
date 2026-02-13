@@ -591,16 +591,12 @@ impl MyContract {
 For more advanced caching controls, use the \`stylus-cache-sdk\`:
 
 \`\`\`rust
-use stylus_cache_sdk::{is_contract_cacheable, AutoCacheOptIn, emit_cache_opt_in};
+use stylus_cache_sdk::{is_contract_cacheable};
 
 #[public]
 impl MyContract {
     pub fn is_cacheable(&self) -> bool {
         is_contract_cacheable() // Dynamically controlled by SDK
-    }
-
-    pub fn opt_in_to_cache(&mut self) {
-        emit_cache_opt_in(); // One-time opt-in event
     }
 }
 \`\`\`

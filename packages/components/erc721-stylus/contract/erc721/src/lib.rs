@@ -23,12 +23,12 @@ sol_interface! {
     }
 }
 
-struct SuperPositionNFTParams;
+struct RobinhoodNFTParams;
 
 /// Immutable definitions
-impl Erc721Params for SuperPositionNFTParams {
-    const NAME: &'static str = "SuperPositionNFT";
-    const SYMBOL: &'static str = "SPTNFT";
+impl Erc721Params for RobinhoodNFTParams {
+    const NAME: &'static str = "RobinhoodNFT";
+    const SYMBOL: &'static str = "RHNFT";
 }
 
 // Define the entrypoint as a Solidity storage object. The sol_storage! macro
@@ -36,11 +36,11 @@ impl Erc721Params for SuperPositionNFTParams {
 // storage slots and types.
 sol_storage! {
     #[entrypoint]
-    struct SuperPositionNFT {
+    struct RobinhoodNFT {
         address art_contract_address;
 
         #[borrow] // Allows erc721 to access MyToken's storage and make calls
-        Erc721<SuperPositionNFTParams> erc721;
+        Erc721<RobinhoodNFTParams> erc721;
     }
 }
 
@@ -54,14 +54,14 @@ sol! {
 
 /// Represents the ways methods may fail.
 #[derive(SolidityError)]
-pub enum SuperPositionNFTError {
+pub enum RobinhoodNFTError {
     AlreadyInitialized(AlreadyInitialized),
     ExternalCallFailed(ExternalCallFailed),
 }
 
 #[public]
-#[inherit(Erc721<SuperPositionNFTParams>)]
-impl SuperPositionNFT {
+#[inherit(Erc721<RobinhoodNFTParams>)]
+impl RobinhoodNFT {
     /// Mints an NFT, but does not call onErc712Received
     pub fn mint(&mut self) -> Result<(), Vec<u8>> {
         let minter = msg::sender();
