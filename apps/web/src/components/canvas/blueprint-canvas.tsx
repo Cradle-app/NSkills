@@ -35,6 +35,7 @@ import { AuthStatusBadge } from '@/components/auth/auth-guard';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { BlueprintNode as BPNode, BlueprintEdge as BPEdge } from '@dapp-forge/blueprint-schema';
 import { BlueprintTemplatesModal } from '@/components/templates/blueprint-templates-modal';
+import { TEMPLATES } from '@/data/templates';
 
 // Dynamically build node types from plugin registry
 const nodeTypes: NodeTypes = getPluginIds().reduce(
@@ -540,7 +541,7 @@ function BlueprintCanvasInner() {
                   Start Building Your Project
                 </h3>
                 <p className="text-sm text-forge-muted mb-8 max-w-md mx-auto leading-relaxed">
-                  Choose from 18 ready-to-use templates or start from scratch by dragging components from the palette
+                  Choose from {TEMPLATES.length} ready-to-use templates or start from scratch by dragging components from the palette
                 </p>
               </motion.div>
 
