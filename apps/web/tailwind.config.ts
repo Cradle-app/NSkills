@@ -71,9 +71,9 @@ const config: Config = {
       },
 
       fontFamily: {
-        sans: ['var(--font-inter)', 'Inter', 'SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-outfit)', 'Outfit', 'SF Pro Display', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', 'monospace'],
-        display: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['var(--font-jakarta)', 'Plus Jakarta Sans', 'system-ui', 'sans-serif'],
       },
 
       fontSize: {
@@ -158,6 +158,7 @@ const config: Config = {
         'loading-float': 'loading-float 4s ease-in-out infinite',
         'loading-progress': 'loading-progress 2s ease-in-out infinite',
         'loading-text': 'loading-text 1.5s ease-in-out infinite',
+        'spin-slow': 'spin-slow 6s linear infinite',
       },
 
       keyframes: {
@@ -224,6 +225,10 @@ const config: Config = {
         'loading-text': {
           '0%, 100%': { opacity: '0.5' },
           '50%': { opacity: '1' },
+        },
+        'spin-slow': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
         },
       },
 

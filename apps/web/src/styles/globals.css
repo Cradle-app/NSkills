@@ -76,9 +76,9 @@
        TYPOGRAPHY TOKENS
        Clean, modern typographic system
        ---------------------------------------- */
-    --font-sans: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-sans: var(--font-outfit), 'Outfit', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', monospace;
-    --font-display: 'Inter', var(--font-sans);
+    --font-display: var(--font-jakarta), 'Plus Jakarta Sans', var(--font-sans);
     
     /* Type scale (refined) */
     --text-2xs: 0.625rem;     /* 10px */
@@ -901,13 +901,29 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  0%, 100% { 
+    transform: translateY(0) translateX(0); 
+    opacity: 0.6;
+  }
+  50% { 
+    transform: translateY(-20px) translateX(10px); 
+    opacity: 1;
+  }
 }
 
 @keyframes spin-slow {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@keyframes carousel-scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+
+@keyframes carousel-scroll-right {
+  0% { transform: translateX(-33.333%); }
+  100% { transform: translateX(0); }
 }
 
 /* ===========================================
