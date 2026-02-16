@@ -36,6 +36,7 @@ import ArbitrumLogo from '@/assets/blocks/arbitrum.svg';
 import NextjsLogo from '@/assets/blocks/Nextjs.png';
 import GithubLogo from '@/assets/blocks/github.png';
 import RobinhoodLogo from '@/assets/blocks/robinhood.png';
+import OpenClawLogo from '@/assets/blocks/openclaw.jpg';
 
 /** Node types with custom logos (matches palette) */
 const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
@@ -96,6 +97,8 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'robinhood-network': { src: RobinhoodLogo, alt: 'Robinhood Chain' },
   'robinhood-deployment': { src: RobinhoodLogo, alt: 'Robinhood Chain' },
   'robinhood-contracts': { src: RobinhoodLogo, alt: 'Robinhood Chain' },
+  // OpenClaw Agent
+  'openclaw-agent': { src: OpenClawLogo, alt: 'OpenClaw' },
   // Dune Analytics plugins
   'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
   'dune-token-price': { src: DuneLogo, alt: 'Dune' },

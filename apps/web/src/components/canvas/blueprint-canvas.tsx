@@ -33,7 +33,11 @@ import { getPluginIds } from '@cradle/plugin-config';
 import { useSessionMonitor, useAuthState } from '@/hooks/useSessionMonitor';
 import { AuthStatusBadge } from '@/components/auth/auth-guard';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { BlueprintNode as BPNode, BlueprintEdge as BPEdge } from '@dapp-forge/blueprint-schema';
+import type {
+  BlueprintNode as BPNode,
+  BlueprintEdge as BPEdge,
+  Blueprint,
+} from '@dapp-forge/blueprint-schema';
 import { BlueprintTemplatesModal } from '@/components/templates/blueprint-templates-modal';
 import { TEMPLATES } from '@/data/templates';
 
@@ -659,8 +663,8 @@ function BlueprintCanvasInner() {
             ...currentState,
             blueprint: {
               ...currentState.blueprint,
-              nodes: blueprintNodes,
-              edges: blueprintEdges,
+              nodes: blueprintNodes as Blueprint['nodes'],
+              edges: blueprintEdges as Blueprint['edges'],
               updatedAt: new Date().toISOString(),
             },
             // Also clear any ghosts

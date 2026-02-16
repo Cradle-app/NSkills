@@ -48,6 +48,7 @@ export const NodeType = z.enum([
   'ostium-trading',
   'maxxit',
   'onchain-activity',
+  'openclaw-agent',
 
   // Oracles / Analytics
   'pyth-oracle',
@@ -200,6 +201,13 @@ export const ERC8004AgentConfig = BaseNodeConfig.extend({
   }).default({}),
 });
 export type ERC8004AgentConfig = z.infer<typeof ERC8004AgentConfig>;
+
+/**
+ * OpenClaw Agent configuration
+ * Prompt-only agent block that reuses the shared BaseNodeConfig.
+ */
+export const OpenClawConfig = BaseNodeConfig.extend({});
+export type OpenClawConfig = z.infer<typeof OpenClawConfig>;
 
 /**
  * Stylus ZK Contract configuration
@@ -994,6 +1002,7 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('stylus-zk-contract'), config: StylusZKContractConfig }),
   z.object({ type: z.literal('x402-paywall-api'), config: X402PaywallConfig }),
   z.object({ type: z.literal('erc8004-agent-runtime'), config: ERC8004AgentConfig }),
+  z.object({ type: z.literal('openclaw-agent'), config: OpenClawConfig }),
   z.object({ type: z.literal('repo-quality-gates'), config: RepoQualityGatesConfig }),
   z.object({ type: z.literal('frontend-scaffold'), config: FrontendScaffoldConfig }),
   z.object({ type: z.literal('sdk-generator'), config: SDKGeneratorConfig }),
@@ -1083,6 +1092,7 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'ostium-trading': 'agents',
     'maxxit': 'agents',
     'onchain-activity': 'agents',
+    'openclaw-agent': 'agents',
     'pyth-oracle': 'analytics',
     'chainlink-price-feed': 'analytics',
     'aave-lending': 'agents',
@@ -1149,6 +1159,7 @@ export function getConfigSchemaForType(type: NodeType) {
     'erc1155-stylus': ERC1155StylusConfig,
     'x402-paywall-api': X402PaywallConfig,
     'erc8004-agent-runtime': ERC8004AgentConfig,
+    'openclaw-agent': OpenClawConfig,
     'repo-quality-gates': RepoQualityGatesConfig,
     'frontend-scaffold': FrontendScaffoldConfig,
     'sdk-generator': SDKGeneratorConfig,

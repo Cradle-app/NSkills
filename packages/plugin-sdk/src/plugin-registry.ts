@@ -138,6 +138,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'erc1155-stylus',
       'maxxit',
       'onchain-activity',
+      'openclaw-agent',
       'pyth-oracle',
       'chainlink-price-feed',
       'aave-lending',

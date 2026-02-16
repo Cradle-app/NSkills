@@ -42,6 +42,7 @@ export function nodeTypeToLabel(type: string): string {
     'erc8004-agent-runtime': 'ERC-8004 Agent',
     'ostium-trading': 'Ostium One-Click Trading',
     'onchain-activity': 'Onchain Activity',
+    'openclaw-agent': 'OpenClaw',
     // App
     'wallet-auth': 'Wallet Authentication',
     'rpc-provider': 'RPC Provider',
@@ -122,6 +123,7 @@ export function nodeTypeToColor(type: string): string {
     'erc8004-agent-runtime': 'node-agents',
     'ostium-trading': 'node-agents',
     'onchain-activity': 'node-agents',
+    'openclaw-agent': 'node-agents',
     // App
     'wallet-auth': 'node-app',
     'rpc-provider': 'node-app',

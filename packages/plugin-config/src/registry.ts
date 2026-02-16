@@ -304,6 +304,23 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         },
     },
 
+    'openclaw-agent': {
+        id: 'openclaw-agent',
+        name: 'OpenClaw',
+        description: 'Prompt-driven OpenClaw agent block',
+        icon: 'Bot',
+        logoAsset: 'openclaw.jpg',
+        color: 'node-agents',
+        category: 'agents',
+        tags: ['ai', 'agent', 'openclaw', 'prompt'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth'],
+            suggestedWith: ['onchain-activity', 'dune-transaction-history'],
+            requires: [],
+        },
+        defaultConfig: {},
+    },
+
     // ============================================
     // PAYMENTS CATEGORY
     // ============================================
