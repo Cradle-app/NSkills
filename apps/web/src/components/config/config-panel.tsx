@@ -50,6 +50,11 @@ import { SuperpositionUtilityMiningForm } from './forms/superposition-utility-mi
 import { SuperpositionFaucetForm } from './forms/superposition-faucet-form';
 import { SuperpositionMeowDomainsForm } from './forms/superposition-meow-domains-form';
 
+// Robinhood Chain forms
+import { RobinhoodNetworkForm } from './forms/robinhood-network-form';
+import { RobinhoodDeploymentForm } from './forms/robinhood-deployment-form';
+import { RobinhoodContractsForm } from './forms/robinhood-contracts-form';
+
 
 // ERC-20/ERC-721/ERC-1155 Stylus forms
 import { ERC20StylusForm } from './forms/erc20-stylus-form';
@@ -421,6 +426,17 @@ export function ConfigPanel() {
             )}
             {selectedNode.type === 'superposition-meow-domains' && (
               <SuperpositionMeowDomainsForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+
+            {/* Robinhood Chain nodes */}
+            {(selectedNode.type as string) === 'robinhood-network' && (
+              <RobinhoodNetworkForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {(selectedNode.type as string) === 'robinhood-deployment' && (
+              <RobinhoodDeploymentForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {(selectedNode.type as string) === 'robinhood-contracts' && (
+              <RobinhoodContractsForm nodeId={selectedNode.id} config={selectedNode.config} />
             )}
 
             {/* Dune Analytics nodes */}

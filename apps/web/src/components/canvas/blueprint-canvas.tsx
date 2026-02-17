@@ -33,8 +33,13 @@ import { getPluginIds } from '@cradle/plugin-config';
 import { useSessionMonitor, useAuthState } from '@/hooks/useSessionMonitor';
 import { AuthStatusBadge } from '@/components/auth/auth-guard';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { BlueprintNode as BPNode, BlueprintEdge as BPEdge } from '@dapp-forge/blueprint-schema';
+import type {
+  BlueprintNode as BPNode,
+  BlueprintEdge as BPEdge,
+  Blueprint,
+} from '@dapp-forge/blueprint-schema';
 import { BlueprintTemplatesModal } from '@/components/templates/blueprint-templates-modal';
+import { TEMPLATES } from '@/data/templates';
 
 // Dynamically build node types from plugin registry
 const nodeTypes: NodeTypes = getPluginIds().reduce(
@@ -540,7 +545,7 @@ function BlueprintCanvasInner() {
                   Start Building Your Project
                 </h3>
                 <p className="text-sm text-forge-muted mb-8 max-w-md mx-auto leading-relaxed">
-                  Choose from 18 ready-to-use templates or start from scratch by dragging components from the palette
+                  Choose from {TEMPLATES.length} ready-to-use templates or start from scratch by dragging components from the palette
                 </p>
               </motion.div>
 
@@ -658,8 +663,8 @@ function BlueprintCanvasInner() {
             ...currentState,
             blueprint: {
               ...currentState.blueprint,
-              nodes: blueprintNodes,
-              edges: blueprintEdges,
+              nodes: blueprintNodes as Blueprint['nodes'],
+              edges: blueprintEdges as Blueprint['edges'],
               updatedAt: new Date().toISOString(),
             },
             // Also clear any ghosts

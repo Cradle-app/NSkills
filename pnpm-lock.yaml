@@ -332,6 +332,9 @@ importers:
 
   packages/components/erc1155-stylus:
     dependencies:
+      '@radix-ui/react-select':
+        specifier: ^2.0.0
+        version: 2.2.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.0
         version: 2.1.1
@@ -349,7 +352,7 @@ importers:
         version: 2.6.0
       viem:
         specifier: ^2.21.0
-        version: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.5)
+        version: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       wagmi:
         specifier: ^2.0.0
         version: 2.19.5(@tanstack/query-core@5.90.19)(@tanstack/react-query@5.90.19(react@18.3.1))(@types/react@18.3.27)(bufferutil@4.1.0)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.5))(zod@4.3.5)
@@ -366,6 +369,9 @@ importers:
 
   packages/components/erc20-stylus:
     dependencies:
+      '@radix-ui/react-select':
+        specifier: ^2.0.0
+        version: 2.2.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.0
         version: 2.1.1
@@ -383,7 +389,7 @@ importers:
         version: 2.6.0
       viem:
         specifier: ^2.21.0
-        version: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.5)
+        version: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       wagmi:
         specifier: ^2.0.0
         version: 2.19.5(@tanstack/query-core@5.90.19)(@tanstack/react-query@5.90.19(react@18.3.1))(@types/react@18.3.27)(bufferutil@4.1.0)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.5))(zod@4.3.5)
@@ -400,6 +406,9 @@ importers:
 
   packages/components/erc721-stylus:
     dependencies:
+      '@radix-ui/react-select':
+        specifier: ^2.0.0
+        version: 2.2.6(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx:
         specifier: ^2.1.0
         version: 2.1.1
@@ -417,7 +426,7 @@ importers:
         version: 2.6.0
       viem:
         specifier: ^2.21.0
-        version: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.5)
+        version: 2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76)
       wagmi:
         specifier: ^2.0.0
         version: 2.19.5(@tanstack/query-core@5.90.19)(@tanstack/react-query@5.90.19(react@18.3.1))(@types/react@18.3.27)(bufferutil@4.1.0)(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.44.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.5))(zod@4.3.5)

@@ -10,7 +10,7 @@ import {
   RefreshCw,
   Check,
   Wallet,
-  Image,
+  Image as ImageIcon,
   AlertCircle,
   ExternalLink,
   Loader2,
@@ -24,6 +24,11 @@ import { cn } from '@/lib/utils';
 import { useAccount, useWalletClient, usePublicClient, useSwitchChain } from 'wagmi';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
 import type { Chain } from 'viem';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Image from 'next/image';
+import arbitrumLogo from '@/assets/blocks/arbitrum.svg';
+import superpositionLogo from '@/assets/blocks/superposition.png';
+import robinhoodLogo from '@/assets/blocks/robinhood.png';
 
 // Define custom Superposition chains
 const superposition: Chain = {
@@ -59,6 +64,23 @@ const superpositionTestnet: Chain = {
   testnet: true,
 };
 
+const robinhoodTestnet: Chain = {
+  id: 46630,
+  name: 'Robinhood Chain Testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Ether',
+    symbol: 'ETH',
+  },
+  rpcUrls: {
+    default: { http: ['https://rpc.testnet.chain.robinhood.com'] },
+  },
+  blockExplorers: {
+    default: { name: 'Explorer', url: 'https://explorer.testnet.chain.robinhood.com' },
+  },
+  testnet: true,
+};
+
 // ERC721 ABI for the deployed Stylus NFT contract (IStylusNFT)
 const ERC721_ABI = [
   // ERC721 Standard Interface
@@ -86,6 +108,8 @@ const DEFAULT_CONTRACT_ADDRESSES: Record<string, string | undefined> = {
   'arbitrum': undefined,
   'superposition': undefined,
   'superposition-testnet': '0xa0cc35ec0ce975c28dacc797edb7808e882043c3',
+  // 'robinhood': undefined,
+  'robinhood-testnet': '0xa0cc35ec0ce975c28dacc797edb7808e882043c3',
 };
 
 // Network configurations
@@ -118,11 +142,25 @@ const NETWORKS = {
     chainId: 98985,
     chain: superpositionTestnet,
   },
+  // 'robinhood': {
+  //   name: 'Robinhood Chain',
+  //   rpcUrl: 'https://rpc.chain.robinhood.com',
+  //   explorerUrl: 'https://explorer.chain.robinhood.com',
+  //   chainId: 46630,
+  //   chain: robinhoodTestnet,
+  // },
+  'robinhood-testnet': {
+    name: 'Robinhood Chain Testnet',
+    rpcUrl: 'https://rpc.testnet.chain.robinhood.com',
+    explorerUrl: 'https://explorer.testnet.chain.robinhood.com',
+    chainId: 46630,
+    chain: robinhoodTestnet,
+  },
 };
 
 interface ERC721InteractionPanelProps {
   contractAddress?: string;
-  network?: 'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet';
+  network?: 'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet' | 'robinhood-testnet';
 }
 
 interface TxStatus {
@@ -135,7 +173,7 @@ export function ERC721InteractionPanel({
   contractAddress: initialAddress,
   network: initialNetwork = 'arbitrum-sepolia',
 }: ERC721InteractionPanelProps) {
-  const [selectedNetwork, setSelectedNetwork] = useState<'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet'>(initialNetwork);
+  const [selectedNetwork, setSelectedNetwork] = useState<'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet' | 'robinhood-testnet'>(initialNetwork);
   const [contractAddress, setContractAddress] = useState(initialAddress || DEFAULT_CONTRACT_ADDRESSES[initialNetwork] || '');
   const [showCustomContract, setShowCustomContract] = useState(false);
   const [customAddress, setCustomAddress] = useState('');
@@ -539,22 +577,44 @@ export function ERC721InteractionPanel({
         <label className="text-xs text-[hsl(var(--color-text-muted))] flex items-center gap-1.5">
           <Globe className="w-3 h-3" /> Network
         </label>
-        <div className="grid grid-cols-2 gap-2">
-          {(['arbitrum-sepolia', 'arbitrum', 'superposition', 'superposition-testnet'] as const).map((net) => (
-            <button
-              key={net}
-              onClick={() => setSelectedNetwork(net)}
-              className={cn(
-                'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-                selectedNetwork === net
-                  ? 'bg-[hsl(var(--color-accent-primary))] border-[hsl(var(--color-accent-primary))] text-black'
-                  : 'bg-[hsl(var(--color-bg-base))] border-[hsl(var(--color-border-default)/0.5)] text-[hsl(var(--color-text-muted))] hover:text-[hsl(var(--color-text-primary))] hover:border-[hsl(var(--color-accent-primary)/0.5)]'
-              )}
-            >
-              {NETWORKS[net].name}
-            </button>
-          ))}
-        </div>
+        <Select value={selectedNetwork} onValueChange={(value) => setSelectedNetwork(value as typeof selectedNetwork)}>
+          <SelectTrigger className="w-full">
+            <SelectValue>
+              <div className="flex items-center gap-2">
+                <Image 
+                  src={selectedNetwork.includes('arbitrum') ? arbitrumLogo : selectedNetwork.includes('superposition') ? superpositionLogo : robinhoodLogo} 
+                  alt="" 
+                  width={16} 
+                  height={16} 
+                  className="rounded"
+                />
+                <span>{NETWORKS[selectedNetwork].name}</span>
+                {NETWORKS[selectedNetwork].chain.testnet && (
+                  <span className="text-[8px] px-1.5 py-0.5 bg-[hsl(var(--color-warning)/0.2)] text-[hsl(var(--color-warning))] rounded">Testnet</span>
+                )}
+              </div>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {(['arbitrum', 'arbitrum-sepolia', 'superposition', 'superposition-testnet', 'robinhood-testnet'] as const).map((net) => (
+              <SelectItem key={net} value={net}>
+                <div className="flex items-center gap-2">
+                  <Image 
+                    src={net.includes('arbitrum') ? arbitrumLogo : net.includes('superposition') ? superpositionLogo : robinhoodLogo} 
+                    alt="" 
+                    width={16} 
+                    height={16} 
+                    className="rounded"
+                  />
+                  <span>{NETWORKS[net].name}</span>
+                  {NETWORKS[net].chain.testnet && (
+                    <span className="text-[8px] px-1.5 py-0.5 bg-[hsl(var(--color-warning)/0.2)] text-[hsl(var(--color-warning))] rounded">Testnet</span>
+                  )}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Contract Info */}
@@ -671,7 +731,7 @@ export function ERC721InteractionPanel({
         <div className="space-y-2">
           <div className="flex items-center justify-between p-2.5 rounded-lg bg-[hsl(var(--color-bg-base)/0.5)] border border-[hsl(var(--color-border-default)/0.3)]">
             <div className="flex items-center gap-1.5">
-              <Image className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
+              <ImageIcon className="w-3 h-3 text-[hsl(var(--color-accent-primary))]" />
               <span className="text-[10px] text-[hsl(var(--color-text-muted))]">Your NFTs</span>
             </div>
             <span className="text-xs font-medium text-[hsl(var(--color-text-primary))]">{userBalance || '0'}</span>

@@ -19,6 +19,7 @@ import {
     ChevronUp
 } from 'lucide-react';
 import { cn } from './cn';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './Select';
 import { useAccount, useWalletClient, usePublicClient, useSwitchChain } from 'wagmi';
 import { arbitrum, arbitrumSepolia } from 'viem/chains';
 import type { Chain } from 'viem';
@@ -57,6 +58,23 @@ const superpositionTestnet: Chain = {
     testnet: true,
 };
 
+const robinhoodTestnet: Chain = {
+    id: 46630,
+    name: 'Robinhood Chain Testnet',
+    nativeCurrency: {
+        decimals: 18,
+        name: 'Ether',
+        symbol: 'ETH',
+    },
+    rpcUrls: {
+        default: { http: ['https://rpc.testnet.chain.robinhood.com'] },
+    },
+    blockExplorers: {
+        default: { name: 'Explorer', url: 'https://explorer.testnet.chain.robinhood.com' },
+    },
+    testnet: true,
+};
+
 // ERC20 ABI for the deployed Stylus contract (IStylusToken)
 const ERC20_ABI = [
     // ERC20 Standard Interface
@@ -81,6 +99,7 @@ const DEFAULT_CONTRACT_ADDRESSES: Record<string, string | undefined> = {
     'arbitrum': undefined, // No default contract deployed on mainnet
     'superposition': undefined, // No default contract deployed on mainnet
     'superposition-testnet': '0x88be27d855cb563bfcb18fa466f67d32d62fd0af',
+    'robinhood-testnet': '0x88be27d855cb563bfcb18fa466f67d32d62fd0af',
 };
 
 // Network configurations
@@ -113,11 +132,26 @@ const NETWORKS = {
         chainId: 98985,
         chain: superpositionTestnet,
     },
+    'robinhood-testnet': {
+        name: 'Robinhood Chain Testnet',
+        rpcUrl: 'https://rpc.testnet.chain.robinhood.com',
+        explorerUrl: 'https://explorer.testnet.chain.robinhood.com',
+        chainId: 46630,
+        chain: robinhoodTestnet,
+    },
 };
+
+interface ChainLogos {
+    arbitrum?: string;
+    superposition?: string;
+    robinhood?: string;
+}
 
 interface ERC20InteractionPanelProps {
     contractAddress?: string;
-    network?: 'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet';
+    network?: 'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet' | 'robinhood-testnet';
+    /** Optional: URLs for chain logos (arbitrum, superposition, robinhood) - pass to show logos in network selector */
+    logos?: ChainLogos;
 }
 
 interface TxStatus {
@@ -126,11 +160,22 @@ interface TxStatus {
     hash?: string;
 }
 
+const NETWORK_IDS = ['arbitrum', 'arbitrum-sepolia', 'superposition', 'superposition-testnet', 'robinhood-testnet'] as const;
+
+function getLogoForNetwork(net: (typeof NETWORK_IDS)[number], logos?: ChainLogos): string | undefined {
+    if (!logos) return undefined;
+    if (net.includes('arbitrum')) return logos.arbitrum;
+    if (net.includes('superposition')) return logos.superposition;
+    if (net.includes('robinhood')) return logos.robinhood;
+    return undefined;
+}
+
 export function ERC20InteractionPanel({
     contractAddress: initialAddress,
     network: initialNetwork = 'arbitrum-sepolia',
+    logos,
 }: ERC20InteractionPanelProps) {
-    const [selectedNetwork, setSelectedNetwork] = useState<'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet'>(initialNetwork);
+    const [selectedNetwork, setSelectedNetwork] = useState<'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet' | 'robinhood-testnet'>(initialNetwork);
     const [contractAddress, setContractAddress] = useState(initialAddress || DEFAULT_CONTRACT_ADDRESSES[initialNetwork] || '');
     const [showCustomContract, setShowCustomContract] = useState(false);
     const [customAddress, setCustomAddress] = useState('');
@@ -552,52 +597,36 @@ export function ERC20InteractionPanel({
                 <label className="text-xs text-forge-muted flex items-center gap-1.5">
                     <Globe className="w-3 h-3" /> Network
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                    <button
-                        onClick={() => setSelectedNetwork('arbitrum-sepolia')}
-                        className={cn(
-                            'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-                            selectedNetwork === 'arbitrum-sepolia'
-                                ? 'bg-emerald-600 border-emerald-500 text-white'
-                                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-emerald-500/50'
-                        )}
-                    >
-                        Arbitrum Sepolia
-                    </button>
-                    <button
-                        onClick={() => setSelectedNetwork('arbitrum')}
-                        className={cn(
-                            'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-                            selectedNetwork === 'arbitrum'
-                                ? 'bg-emerald-600 border-emerald-500 text-white'
-                                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-emerald-500/50'
-                        )}
-                    >
-                        Arbitrum One
-                    </button>
-                    <button
-                        onClick={() => setSelectedNetwork('superposition')}
-                        className={cn(
-                            'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-                            selectedNetwork === 'superposition'
-                                ? 'bg-emerald-600 border-emerald-500 text-white'
-                                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-emerald-500/50'
-                        )}
-                    >
-                        Superposition
-                    </button>
-                    <button
-                        onClick={() => setSelectedNetwork('superposition-testnet')}
-                        className={cn(
-                            'px-3 py-2 rounded-lg text-xs font-medium transition-colors border',
-                            selectedNetwork === 'superposition-testnet'
-                                ? 'bg-emerald-600 border-emerald-500 text-white'
-                                : 'bg-forge-bg border-forge-border/50 text-forge-muted hover:text-white hover:border-emerald-500/50'
-                        )}
-                    >
-                        Superposition Testnet
-                    </button>
-                </div>
+                <Select value={selectedNetwork} onValueChange={(value) => setSelectedNetwork(value as typeof selectedNetwork)}>
+                    <SelectTrigger className="w-full">
+                        <SelectValue>
+                            <div className="flex items-center gap-2">
+                                {getLogoForNetwork(selectedNetwork, logos) && (
+                                    <img src={getLogoForNetwork(selectedNetwork, logos)} alt="" width={16} height={16} className="rounded" />
+                                )}
+                                <span>{NETWORKS[selectedNetwork].name}</span>
+                                {NETWORKS[selectedNetwork].chain.testnet && (
+                                    <span className="text-[8px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">Testnet</span>
+                                )}
+                            </div>
+                        </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                        {NETWORK_IDS.map((net) => (
+                            <SelectItem key={net} value={net}>
+                                <div className="flex items-center gap-2">
+                                    {getLogoForNetwork(net, logos) && (
+                                        <img src={getLogoForNetwork(net, logos)} alt="" width={16} height={16} className="rounded" />
+                                    )}
+                                    <span>{NETWORKS[net].name}</span>
+                                    {NETWORKS[net].chain.testnet && (
+                                        <span className="text-[8px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">Testnet</span>
+                                    )}
+                                </div>
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Contract Info */}

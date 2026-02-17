@@ -27,7 +27,7 @@ export function ERC1155StylusForm({ nodeId, config }: Props) {
 
   // Get config values
   const contractAddress = config.contractAddress as string | undefined;
-  const network = (config.network as 'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet') || 'arbitrum-sepolia';
+  const network = (config.network as 'arbitrum' | 'arbitrum-sepolia' | 'superposition' | 'superposition-testnet' | 'robinhood-testnet') || 'arbitrum-sepolia';
   const selectedFunctions = (config.selectedFunctions as string[]) || ALL_FUNCTIONS;
 
   // Local state for function selection

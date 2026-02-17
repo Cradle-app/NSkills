@@ -42,6 +42,7 @@ export function nodeTypeToLabel(type: string): string {
     'erc8004-agent-runtime': 'ERC-8004 Agent',
     'ostium-trading': 'Ostium One-Click Trading',
     'onchain-activity': 'Onchain Activity',
+    'openclaw-agent': 'OpenClaw',
     // App
     'wallet-auth': 'Wallet Authentication',
     'rpc-provider': 'RPC Provider',
@@ -82,6 +83,10 @@ export function nodeTypeToLabel(type: string): string {
     'superposition-utility-mining': 'Utility Mining',
     'superposition-faucet': 'Testnet Faucet',
     'superposition-meow-domains': 'Meow Domains',
+    // Robinhood Chain
+    'robinhood-network': 'Robinhood Network',
+    'robinhood-deployment': 'Robinhood Deployment',
+    'robinhood-contracts': 'Robinhood Contracts',
     // Dune Analytics
     'dune-execute-sql': 'Dune Execute SQL',
     'dune-token-price': 'Dune Token Price',
@@ -118,6 +123,7 @@ export function nodeTypeToColor(type: string): string {
     'erc8004-agent-runtime': 'node-agents',
     'ostium-trading': 'node-agents',
     'onchain-activity': 'node-agents',
+    'openclaw-agent': 'node-agents',
     // App
     'wallet-auth': 'node-app',
     'rpc-provider': 'node-app',
@@ -154,6 +160,10 @@ export function nodeTypeToColor(type: string): string {
     'superposition-utility-mining': 'accent-cyan',
     'superposition-faucet': 'accent-cyan',
     'superposition-meow-domains': 'accent-cyan',
+    // Robinhood Chain
+    'robinhood-network': 'accent-green',
+    'robinhood-deployment': 'accent-green',
+    'robinhood-contracts': 'accent-green',
     // ERC-20/ERC-721/ERC-1155 Stylus nodes
     'erc20-stylus': 'node-contracts',
     'erc721-stylus': 'node-contracts',

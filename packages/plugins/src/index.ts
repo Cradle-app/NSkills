@@ -6,6 +6,7 @@ export { SmartCacheCachingPlugin } from './smartcache-caching';
 export { AuditwareAnalyzingPlugin } from './auditware-analyzing';
 export { X402PaywallPlugin } from './x402-paywall-api';
 export { ERC8004AgentPlugin } from './erc8004-agent-runtime';
+export { OpenClawAgentPlugin } from './openclaw-agent';
 export { RepoQualityGatesPlugin } from './repo-quality-gates';
 export { FrontendScaffoldPlugin } from './frontend-scaffold';
 
@@ -46,6 +47,10 @@ export { SuperpositionThirdwebPlugin } from './superposition-thirdweb';
 export { SuperpositionUtilityMiningPlugin } from './superposition-utility-mining';
 export { SuperpositionFaucetPlugin } from './superposition-faucet';
 export { SuperpositionMeowDomainsPlugin } from './superposition-meow-domains';
+// Robinhood Chain plugins
+export { RobinhoodNetworkPlugin } from './robinhood-network';
+export { RobinhoodDeploymentPlugin } from './robinhood-deployment';
+export { RobinhoodContractsPlugin } from './robinhood-contracts';
 // ERC-20/ERC-721/ERC-1155 Stylus plugins
 export { ERC20StylusPlugin } from './erc20-stylus';
 export { ERC721StylusPlugin } from './erc721-stylus';
@@ -71,6 +76,7 @@ import { SmartCacheCachingPlugin } from './smartcache-caching';
 import { AuditwareAnalyzingPlugin } from './auditware-analyzing';
 import { X402PaywallPlugin } from './x402-paywall-api';
 import { ERC8004AgentPlugin } from './erc8004-agent-runtime';
+import { OpenClawAgentPlugin } from './openclaw-agent';
 import { RepoQualityGatesPlugin } from './repo-quality-gates';
 import { FrontendScaffoldPlugin } from './frontend-scaffold';
 import { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
@@ -112,6 +118,9 @@ import { SuperpositionThirdwebPlugin } from './superposition-thirdweb';
 import { SuperpositionUtilityMiningPlugin } from './superposition-utility-mining';
 import { SuperpositionFaucetPlugin } from './superposition-faucet';
 import { SuperpositionMeowDomainsPlugin } from './superposition-meow-domains';
+import { RobinhoodNetworkPlugin } from './robinhood-network';
+import { RobinhoodDeploymentPlugin } from './robinhood-deployment';
+import { RobinhoodContractsPlugin } from './robinhood-contracts';
 
 // Dune Analytics plugins
 import {
@@ -142,6 +151,7 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new AuditwareAnalyzingPlugin());
   targetRegistry.register(new X402PaywallPlugin());
   targetRegistry.register(new ERC8004AgentPlugin());
+  targetRegistry.register(new OpenClawAgentPlugin());
   targetRegistry.register(new RepoQualityGatesPlugin());
   targetRegistry.register(new FrontendScaffoldPlugin());
 
@@ -185,6 +195,9 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new SuperpositionUtilityMiningPlugin());
   targetRegistry.register(new SuperpositionFaucetPlugin());
   targetRegistry.register(new SuperpositionMeowDomainsPlugin());
+  targetRegistry.register(new RobinhoodNetworkPlugin());
+  targetRegistry.register(new RobinhoodDeploymentPlugin());
+  targetRegistry.register(new RobinhoodContractsPlugin());
 
   // Dune Analytics plugins
   targetRegistry.register(new DuneExecuteSQLPlugin());
@@ -211,6 +224,7 @@ export function getOfficialPlugins() {
     new AuditwareAnalyzingPlugin(),
     new X402PaywallPlugin(),
     new ERC8004AgentPlugin(),
+    new OpenClawAgentPlugin(),
     new RepoQualityGatesPlugin(),
     new FrontendScaffoldPlugin(),
     // New Arbitrum-focused plugins
@@ -251,6 +265,9 @@ export function getOfficialPlugins() {
     new SuperpositionUtilityMiningPlugin(),
     new SuperpositionFaucetPlugin(),
     new SuperpositionMeowDomainsPlugin(),
+    new RobinhoodNetworkPlugin(),
+    new RobinhoodDeploymentPlugin(),
+    new RobinhoodContractsPlugin(),
     // Dune Analytics plugins
     new DuneExecuteSQLPlugin(),
     new DuneTokenPricePlugin(),

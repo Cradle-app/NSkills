@@ -13,6 +13,7 @@ import type {
   StylusContractConfig,
   X402PaywallConfig,
   ERC8004AgentConfig,
+  OpenClawConfig,
   RepoQualityGatesConfig,
   MaxxitLazyTradingConfig,
 } from './schemas/nodes';
@@ -34,6 +35,7 @@ export type {
   StylusContractConfig,
   X402PaywallConfig,
   ERC8004AgentConfig,
+  OpenClawConfig,
   RepoQualityGatesConfig,
   MaxxitLazyTradingConfig,
   BlueprintEdge,

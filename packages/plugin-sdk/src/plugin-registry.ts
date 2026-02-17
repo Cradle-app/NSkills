@@ -138,6 +138,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'erc1155-stylus',
       'maxxit',
       'onchain-activity',
+      'openclaw-agent',
       'pyth-oracle',
       'chainlink-price-feed',
       'aave-lending',
@@ -155,6 +156,10 @@ export function getDefaultRegistry(): PluginRegistry {
       'superposition-utility-mining',
       'superposition-faucet',
       'superposition-meow-domains',
+      // Robinhood Chain
+      'robinhood-network',
+      'robinhood-deployment',
+      'robinhood-contracts',
       // Dune Analytics
       'dune-execute-sql',
       'dune-token-price',
