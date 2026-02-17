@@ -67,6 +67,7 @@ import { DuneAnalyticsForm } from './forms/dune-analytics-form';
 import { StylusRustContractForm } from './forms/stylus-rust-contract-form';
 import { SmartCacheCachingForm } from './forms/smartcache-caching-form';
 import { AuditwareAnalyzingForm } from './forms/auditware-analyzing-form';
+import { OpenClawAgentForm } from './forms/openclaw-agent-form';
 
 /**
  * Collapsible AI Prompt section -- shared across ALL node types.
@@ -349,6 +350,9 @@ export function ConfigPanel() {
             )}
             {selectedNode.type === 'ostium-trading' && (
               <OstiumTradingForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {selectedNode.type === 'openclaw-agent' && (
+              <OpenClawAgentForm nodeId={selectedNode.id} config={selectedNode.config} />
             )}
 
             {/* ERC-20/ERC-721/ERC-1155 Stylus nodes */}
