@@ -11,6 +11,24 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     // ============================================
     // CONTRACTS CATEGORY
     // ============================================
+    'bnb-voting-contract': {
+      id: 'bnb-voting-contract',
+      name: 'Voting Contract',
+      description: 'Interact with a deployed Voting.sol contract on BNB Smart Chain Testnet',
+      icon: 'ShieldCheck',
+      logoAsset: 'BNB Chain.png',
+      color: 'node-contracts',
+      category: 'contracts',
+      tags: ['voting', 'governance', 'bnb', 'testnet', 'contract'],
+      compatibility: {
+          compatibleWith: ['frontend-scaffold', 'wallet-auth'],
+          suggestedWith: ['rpc-provider'],
+          requires: [],
+      },
+      defaultConfig: {
+          contractAddress: '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD',
+      },
+  },
     'erc20-stylus': {
         id: 'erc20-stylus',
         name: 'ERC-20 Token',

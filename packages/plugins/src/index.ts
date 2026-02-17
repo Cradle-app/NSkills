@@ -9,6 +9,7 @@ export { ERC8004AgentPlugin } from './erc8004-agent-runtime';
 export { OpenClawAgentPlugin } from './openclaw-agent';
 export { RepoQualityGatesPlugin } from './repo-quality-gates';
 export { FrontendScaffoldPlugin } from './frontend-scaffold';
+export { BnbVotingContractPlugin } from './bnb-voting-contract';
 
 // New Arbitrum-focused plugins
 export { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
@@ -79,6 +80,7 @@ import { ERC8004AgentPlugin } from './erc8004-agent-runtime';
 import { OpenClawAgentPlugin } from './openclaw-agent';
 import { RepoQualityGatesPlugin } from './repo-quality-gates';
 import { FrontendScaffoldPlugin } from './frontend-scaffold';
+import { BnbVotingContractPlugin } from './bnb-voting-contract';
 import { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
 import { WalletAuthPlugin } from './wallet-auth';
 import { RPCProviderPlugin } from './rpc-provider';
@@ -154,6 +156,7 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new OpenClawAgentPlugin());
   targetRegistry.register(new RepoQualityGatesPlugin());
   targetRegistry.register(new FrontendScaffoldPlugin());
+  targetRegistry.register(new BnbVotingContractPlugin());
 
   // New Arbitrum-focused plugins
   targetRegistry.register(new EIP7702SmartEOAPlugin());
@@ -227,6 +230,7 @@ export function getOfficialPlugins() {
     new OpenClawAgentPlugin(),
     new RepoQualityGatesPlugin(),
     new FrontendScaffoldPlugin(),
+    new BnbVotingContractPlugin(),
     // New Arbitrum-focused plugins
     new EIP7702SmartEOAPlugin(),
     new WalletAuthPlugin(),

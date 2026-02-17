@@ -66,6 +66,7 @@ import NextjsLogo from '@/assets/blocks/Nextjs.png';
 import GithubLogo from '@/assets/blocks/github.png';
 import RobinhoodLogo from '@/assets/blocks/robinhood.png';
 import OpenClawLogo from '@/assets/blocks/openclaw.jpg';
+import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
 
 /**
  * Centralized logo asset mapping
@@ -95,6 +96,7 @@ const LOGO_ASSETS: Record<string, any> = {
   'github.png': GithubLogo,
   'robinhood.png': RobinhoodLogo,
   'openclaw.jpg': OpenClawLogo,
+  'BNB Chain.png': BnbChainLogo,
 };
 
 function getLogoAsset(logoAsset?: string): any | null {

@@ -39,6 +39,7 @@ export const NodeType = z.enum([
   'erc20-stylus',
   'erc721-stylus',
   'erc1155-stylus',
+  'bnb-voting-contract',
 
   // Payments
   'x402-paywall-api',
@@ -208,6 +209,15 @@ export type ERC8004AgentConfig = z.infer<typeof ERC8004AgentConfig>;
  */
 export const OpenClawConfig = BaseNodeConfig.extend({});
 export type OpenClawConfig = z.infer<typeof OpenClawConfig>;
+
+/**
+ * BNB Voting Contract configuration
+ * Simple config that pins a deployed Voting.sol contract on BNB Testnet.
+ */
+export const BnbVotingContractConfig = BaseNodeConfig.extend({
+  contractAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/).default('0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD'),
+});
+export type BnbVotingContractConfig = z.infer<typeof BnbVotingContractConfig>;
 
 /**
  * Stylus ZK Contract configuration
@@ -1003,6 +1013,7 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('x402-paywall-api'), config: X402PaywallConfig }),
   z.object({ type: z.literal('erc8004-agent-runtime'), config: ERC8004AgentConfig }),
   z.object({ type: z.literal('openclaw-agent'), config: OpenClawConfig }),
+  z.object({ type: z.literal('bnb-voting-contract'), config: BnbVotingContractConfig }),
   z.object({ type: z.literal('repo-quality-gates'), config: RepoQualityGatesConfig }),
   z.object({ type: z.literal('frontend-scaffold'), config: FrontendScaffoldConfig }),
   z.object({ type: z.literal('sdk-generator'), config: SDKGeneratorConfig }),
@@ -1087,6 +1098,7 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'erc20-stylus': 'contracts',
     'erc721-stylus': 'contracts',
     'erc1155-stylus': 'contracts',
+    'bnb-voting-contract': 'contracts',
     'x402-paywall-api': 'payments',
     'erc8004-agent-runtime': 'agents',
     'ostium-trading': 'agents',
@@ -1157,6 +1169,7 @@ export function getConfigSchemaForType(type: NodeType) {
     'erc20-stylus': ERC20StylusConfig,
     'erc721-stylus': ERC721StylusConfig,
     'erc1155-stylus': ERC1155StylusConfig,
+    'bnb-voting-contract': BnbVotingContractConfig,
     'x402-paywall-api': X402PaywallConfig,
     'erc8004-agent-runtime': ERC8004AgentConfig,
     'openclaw-agent': OpenClawConfig,
