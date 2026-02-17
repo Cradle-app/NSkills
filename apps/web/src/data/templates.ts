@@ -133,8 +133,10 @@ export const TEMPLATES: Template[] = [
       { type: 'dune-transaction-history', position: { x: 600, y: 300 } },         // 6  T2
       { type: 'chainlink-price-feed', position: { x: 0, y: 0 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },   // 7  T0
       { type: 'erc1155-stylus', position: { x: 0, y: 300 } },                     // 8  T0
+      { type: 'openclaw-agent', position: { x: 900, y: 300 } },                   // 9  T3
     ],
     edges: [
+      { source: 3, target: 9 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 1 },
       { source: 0, target: 2 },
       { source: 0, target: 3 },
@@ -146,18 +148,18 @@ export const TEMPLATES: Template[] = [
       { source: 8, target: 1 }, // erc1155 -> smartcache
     ],
     ghostNodes: [
-      { type: 'onchain-activity', position: { x: 900, y: 0 } },                  // g0 (idx 9)
-      { type: 'ipfs-storage', position: { x: 900, y: 150 } },                    // g1 (idx 10)
-      { type: 'pyth-oracle', position: { x: 900, y: 300 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } }, // g2 (idx 11)
-      { type: 'erc20-stylus', position: { x: 0, y: 450 } },                       // g3 (idx 12)
-      { type: 'erc721-stylus', position: { x: 0, y: 600 } },                      // g4 (idx 13)
+      { type: 'onchain-activity', position: { x: 900, y: 0 } },                  // g0 (idx 10)
+      { type: 'ipfs-storage', position: { x: 900, y: 150 } },                    // g1 (idx 11)
+      { type: 'pyth-oracle', position: { x: 900, y: 300 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } }, // g2 (idx 12)
+      { type: 'erc20-stylus', position: { x: 0, y: 450 } },                       // g3 (idx 13)
+      { type: 'erc721-stylus', position: { x: 0, y: 600 } },                      // g4 (idx 14)
     ],
     ghostEdges: [
-      { source: 4, target: 9 },  // wallet-auth → onchain-activity
-      { source: 0, target: 10 }, // contract → ipfs-storage
-      { source: 0, target: 11 }, // contract → pyth-oracle
-      { source: 12, target: 1 }, // erc20 → smartcache
-      { source: 13, target: 1 }, // erc721 → smartcache
+      { source: 4, target: 10 },  // wallet-auth → onchain-activity
+      { source: 0, target: 11 }, // contract → ipfs-storage
+      { source: 0, target: 12 }, // contract → pyth-oracle
+      { source: 13, target: 1 }, // erc20 → smartcache
+      { source: 14, target: 1 }, // erc721 → smartcache
     ],
   },
 
@@ -183,8 +185,10 @@ export const TEMPLATES: Template[] = [
       { type: 'frontend-scaffold', position: { x: 900, y: 150 } },     // 5  T3
       { type: 'pyth-oracle', position: { x: 900, y: 0 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },  // 6  T3
       { type: 'chainlink-price-feed', position: { x: 900, y: 300 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },  // 7  T3
+      { type: 'openclaw-agent', position: { x: 1200, y: 150 } },                  // 8  T4
     ],
     edges: [
+      { source: 5, target: 8 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 2 },   // wallet-auth → maxxit
       { source: 0, target: 1 },   // wallet-auth → onchain-activity
       { source: 2, target: 3 },   // maxxit → ostium-trading
@@ -194,16 +198,16 @@ export const TEMPLATES: Template[] = [
       { source: 7, target: 5 },   // chainlink-price-feed → frontend-scaffold
     ],
     ghostNodes: [
-      { type: 'ipfs-storage', position: { x: 300, y: 300 } },          // g0 (idx 8)
-      { type: 'telegram-notifications', position: { x: 900, y: 450 } }, // g1 (idx 9)
-      { type: 'dune-dex-volume', position: { x: 1200, y: 0 } },        // g2 (idx 10)
-      { type: 'dune-protocol-tvl', position: { x: 1200, y: 150 } },     // g3 (idx 11)
+      { type: 'ipfs-storage', position: { x: 300, y: 300 } },          // g0 (idx 9)
+      { type: 'telegram-notifications', position: { x: 900, y: 450 } }, // g1 (idx 10)
+      { type: 'dune-dex-volume', position: { x: 1200, y: 0 } },        // g2 (idx 11)
+      { type: 'dune-protocol-tvl', position: { x: 1200, y: 150 } },     // g3 (idx 12)
     ],
     ghostEdges: [
-      { source: 2, target: 8 },   // maxxit → ipfs-storage
-      { source: 5, target: 9 },   // frontend-scaffold → telegram-notifications
-      { source: 3, target: 10 },  // ostium-trading → dune-dex-volume
-      { source: 3, target: 11 },  // ostium-trading → dune-protocol-tvl
+      { source: 2, target: 9 },   // maxxit → ipfs-storage
+      { source: 5, target: 10 },  // frontend-scaffold → telegram-notifications
+      { source: 3, target: 11 },  // ostium-trading → dune-dex-volume
+      { source: 3, target: 12 },  // ostium-trading → dune-protocol-tvl
     ],
   },
 
@@ -232,8 +236,10 @@ export const TEMPLATES: Template[] = [
       { type: 'dune-transaction-history', position: { x: 360, y: 450 } }, // 6  T1
       { type: 'wallet-auth', position: { x: 680, y: 40 } },            // 7  T2
       { type: 'chain-data', position: { x: 700, y: 220 } },             // 8 T2
+      { type: 'openclaw-agent', position: { x: 960, y: 140 } },         // 9  T2
     ],
     edges: [
+      { source: 4, target: 9 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 1 },
       { source: 1, target: 2 },
       { source: 0, target: 3 },
@@ -244,14 +250,14 @@ export const TEMPLATES: Template[] = [
       { source: 4, target: 8 },
     ],
     ghostNodes: [
-      { type: 'x402-paywall-api', position: { x: 900, y: 0 } },          // g0 (idx 9)
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 150 } },    // g1 (idx 10)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },       // g2 (idx 11)
+      { type: 'x402-paywall-api', position: { x: 900, y: 0 } },          // g0 (idx 10)
+      { type: 'erc8004-agent-runtime', position: { x: 900, y: 150 } },    // g1 (idx 11)
+      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },       // g2 (idx 12)
     ],
     ghostEdges: [
-      { source: 4, target: 9 },  // frontend → paywall
-      { source: 4, target: 10 },  // frontend → agent
-      { source: 0, target: 11 },  // stylus → quality-gates
+      { source: 4, target: 10 },  // frontend → paywall
+      { source: 4, target: 11 },  // frontend → agent
+      { source: 0, target: 12 },  // stylus → quality-gates
     ],
   },
 
@@ -278,8 +284,10 @@ export const TEMPLATES: Template[] = [
       { type: 'frontend-scaffold', position: { x: 900, y: 225 } },               // 6  T3
       { type: 'dune-transaction-history', position: { x: 1200, y: 75 } },        // 7  T4
       { type: 'wallet-auth', position: { x: 1200, y: 375 } },                    // 8  T4
+      { type: 'openclaw-agent', position: { x: 1500, y: 225 } },                 // 9  T5
     ],
     edges: [
+      { source: 6, target: 9 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 4 },
       { source: 0, target: 5 },
       { source: 0, target: 6 },
@@ -293,16 +301,16 @@ export const TEMPLATES: Template[] = [
       { source: 6, target: 8 },
     ],
     ghostNodes: [
-      { type: 'superposition-faucet', position: { x: 1500, y: 150 } },           // g0 (idx 9)
-      { type: 'superposition-meow-domains', position: { x: 1500, y: 300 } },     // g1 (idx 10)
-      { type: 'ipfs-storage', position: { x: 1200, y: 225 } },                   // g2 (idx 11)
-      { type: 'onchain-activity', position: { x: 1200, y: 525 } },               // g3 (idx 12)
+      { type: 'superposition-faucet', position: { x: 1500, y: 150 } },           // g0 (idx 10)
+      { type: 'superposition-meow-domains', position: { x: 1500, y: 300 } },     // g1 (idx 11)
+      { type: 'ipfs-storage', position: { x: 1200, y: 225 } },                   // g2 (idx 12)
+      { type: 'onchain-activity', position: { x: 1200, y: 525 } },               // g3 (idx 13)
     ],
     ghostEdges: [
-      { source: 0, target: 9 },   // network → faucet
-      { source: 0, target: 10 },  // network → meow-domains
-      { source: 6, target: 11 },  // frontend → ipfs
-      { source: 6, target: 12 },  // frontend → onchain-activity
+      { source: 0, target: 10 },   // network → faucet
+      { source: 0, target: 11 },  // network → meow-domains
+      { source: 6, target: 12 },  // frontend → ipfs
+      { source: 6, target: 13 },  // frontend → onchain-activity
     ],
   },
 
@@ -332,8 +340,10 @@ export const TEMPLATES: Template[] = [
       { type: 'chain-data', position: { x: 900, y: 300 } },               // 9  T3
       { type: 'frontend-scaffold', position: { x: 900, y: 450 } },        // 10 T3
       { type: 'wallet-auth', position: { x: 1200, y: 225 } },             // 11 T4
+      { type: 'openclaw-agent', position: { x: 1500, y: 450 } },          // 12 T5
     ],
     edges: [
+      { source: 10, target: 12 },  // frontend-scaffold → openclaw-agent
       { source: 0, target: 1 },
       { source: 0, target: 6 },
       { source: 1, target: 3 },
@@ -349,14 +359,14 @@ export const TEMPLATES: Template[] = [
       { source: 10, target: 11 },
     ],
     ghostNodes: [
-      { type: 'superposition-faucet', position: { x: 1500, y: 0 } },       // g0 (idx 12)
-      { type: 'superposition-super-assets', position: { x: 1500, y: 150 } },// g1 (idx 13)
-      { type: 'superposition-utility-mining', position: { x: 1500, y: 300 } },// g2 (idx 14)
+      { type: 'superposition-faucet', position: { x: 1500, y: 0 } },       // g0 (idx 13)
+      { type: 'superposition-super-assets', position: { x: 1500, y: 150 } },// g1 (idx 14)
+      { type: 'superposition-utility-mining', position: { x: 1500, y: 300 } },// g2 (idx 15)
     ],
     ghostEdges: [
-      { source: 0, target: 12 },  // network → faucet
-      { source: 5, target: 13 },  // longtail → super-assets
-      { source: 10, target: 14 }, // frontend → utility-mining
+      { source: 0, target: 13 },  // network → faucet
+      { source: 5, target: 14 },  // longtail → super-assets
+      { source: 10, target: 15 }, // frontend → utility-mining
     ],
   },
 
@@ -385,8 +395,10 @@ export const TEMPLATES: Template[] = [
       { type: 'telegram-notifications', position: { x: 380, y: -280 } },   // 7  T2
       { type: 'wallet-auth', position: { x: 380, y: 160 } },            // 8  T2
       { type: 'frontend-scaffold', position: { x: 680, y: -80 } },      // 9  T2
+      { type: 'openclaw-agent', position: { x: 980, y: -80 } },         // 10 T3
     ],
     edges: [
+      { source: 9, target: 10 },  // frontend-scaffold → openclaw-agent
       { source: 0, target: 2 },
       { source: 0, target: 3 },
       { source: 0, target: 7 },
@@ -399,14 +411,14 @@ export const TEMPLATES: Template[] = [
       { source: 2, target: 9 },
     ],
     ghostNodes: [
-      { type: 'chain-data', position: { x: 680, y: 150 } },              // g0 (idx 10)
-      { type: 'dune-wallet-balances', position: { x: 900, y: 0 } },   // g1 (idx 11)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },     // g2 (idx 12)
+      { type: 'chain-data', position: { x: 680, y: 150 } },              // g0 (idx 11)
+      { type: 'dune-wallet-balances', position: { x: 900, y: 0 } },   // g1 (idx 12)
+      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },     // g2 (idx 13)
     ],
     ghostEdges: [
-      { source: 9, target: 10 },  // frontend → chain-data
-      { source: 9, target: 11 },  // frontend → dune-wallet-balances
-      { source: 1, target: 12 },  // stylus → quality-gates
+      { source: 9, target: 11 },  // frontend → chain-data
+      { source: 9, target: 12 },  // frontend → dune-wallet-balances
+      { source: 1, target: 13 },  // stylus → quality-gates
     ],
   },
 
@@ -437,8 +449,10 @@ export const TEMPLATES: Template[] = [
       { type: 'wallet-auth', position: { x: 1200, y: 0 } },               // 9  T4
       { type: 'rpc-provider', position: { x: 1200, y: 150 } },            // 10 T4
       { type: 'telegram-ai-agent', position: { x: 1200, y: 300 } },       // 11 T4
+      { type: 'openclaw-agent', position: { x: 1500, y: 150 } },          // 12 T5
     ],
     edges: [
+      { source: 8, target: 12 },  // frontend-scaffold → openclaw-agent
       { source: 0, target: 4 },
       { source: 0, target: 5 },
       { source: 3, target: 0 },
@@ -491,8 +505,10 @@ export const TEMPLATES: Template[] = [
       { type: 'ipfs-storage', position: { x: 300, y: 450 } },           // 7  T1
       { type: 'wallet-auth', position: { x: 600, y: 150 } },            // 8  T2
       { type: 'chain-data', position: { x: 600, y: 300 } },             // 9  T2
+      { type: 'openclaw-agent', position: { x: 900, y: 300 } },          // 10 T3
     ],
     edges: [
+      { source: 6, target: 10 },  // frontend-scaffold → openclaw-agent
       { source: 0, target: 4 },
       { source: 0, target: 5 },
       { source: 0, target: 6 },
@@ -505,14 +521,14 @@ export const TEMPLATES: Template[] = [
       { source: 6, target: 9 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 10)
-      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 11)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },    // g2 (idx 12)
+      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 11)
+      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 12)
+      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },    // g2 (idx 13)
     ],
     ghostEdges: [
-      { source: 6, target: 10 },  // frontend → agent
-      { source: 6, target: 11 },  // frontend → paywall
-      { source: 0, target: 12 },  // stylus → quality-gates
+      { source: 6, target: 11 },  // frontend → agent
+      { source: 6, target: 12 },  // frontend → paywall
+      { source: 0, target: 13 },  // stylus → quality-gates
     ],
   },
 
@@ -545,8 +561,10 @@ export const TEMPLATES: Template[] = [
       // Analytics + auth
       { type: 'wallet-auth', position: { x: 600, y: 150 } },       // 8  T2
       { type: 'dune-transaction-history', position: { x: 600, y: 275 } }, // 9  T2
+      { type: 'openclaw-agent', position: { x: 900, y: 275 } },    // 10 T3
     ],
     edges: [
+      { source: 4, target: 10 },  // frontend-scaffold → openclaw-agent
       // Tokens → Auditware and frontend
       { source: 0, target: 3 },
       { source: 1, target: 3 },
@@ -564,14 +582,14 @@ export const TEMPLATES: Template[] = [
       { source: 4, target: 9 },
     ],
     ghostNodes: [
-      { type: 'onchain-activity', position: { x: 900, y: 150 } },        // g0 (idx 10)
-      { type: 'pyth-oracle', position: { x: 900, y: 0 } },               // g1 (idx 11)
-      { type: 'chainlink-price-feed', position: { x: 900, y: 300 } },    // g2 (idx 12)
+      { type: 'onchain-activity', position: { x: 900, y: 150 } },        // g0 (idx 11)
+      { type: 'pyth-oracle', position: { x: 900, y: 0 } },               // g1 (idx 12)
+      { type: 'chainlink-price-feed', position: { x: 900, y: 300 } },    // g2 (idx 13)
     ],
     ghostEdges: [
-      { source: 8, target: 10 },  // wallet-auth → onchain-activity
-      { source: 4, target: 11 },  // frontend → pyth-oracle
-      { source: 4, target: 12 },  // frontend → chainlink-price-feed
+      { source: 8, target: 11 },  // wallet-auth → onchain-activity
+      { source: 4, target: 12 },  // frontend → pyth-oracle
+      { source: 4, target: 13 },  // frontend → chainlink-price-feed
     ],
   },
 
@@ -596,8 +614,10 @@ export const TEMPLATES: Template[] = [
       { type: 'frontend-scaffold', position: { x: 300, y: 450 } },    // 4  T1
       { type: 'wallet-auth', position: { x: 600, y: 150 } },          // 5  T2
       { type: 'chain-data', position: { x: 600, y: 300 } },           // 6  T2
+      { type: 'openclaw-agent', position: { x: 900, y: 450 } },       // 7  T3
     ],
     edges: [
+      { source: 4, target: 7 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 1 },
       { source: 0, target: 2 },
       { source: 0, target: 3 },
@@ -606,14 +626,14 @@ export const TEMPLATES: Template[] = [
       { source: 4, target: 6 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 7)
-      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 8)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },    // g2 (idx 9)
+      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 8)
+      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 9)
+      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },    // g2 (idx 10)
     ],
     ghostEdges: [
-      { source: 4, target: 7 },  // frontend → agent
-      { source: 4, target: 8 },  // frontend → paywall
-      { source: 0, target: 9 },  // zk-contract → quality-gates
+      { source: 4, target: 8 },  // frontend → agent
+      { source: 4, target: 9 },  // frontend → paywall
+      { source: 0, target: 10 },  // zk-contract → quality-gates
     ],
   },
 
@@ -640,8 +660,10 @@ export const TEMPLATES: Template[] = [
       { type: 'wallet-auth', position: { x: 600, y: 0 } },            // 6  T2
       { type: 'rpc-provider', position: { x: 600, y: 150 } },         // 7  T2
       { type: 'chain-data', position: { x: 600, y: 300 } },           // 8  T2
+      { type: 'openclaw-agent', position: { x: 900, y: 300 } },       // 9  T3
     ],
     edges: [
+      { source: 5, target: 9 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 3 },
       { source: 1, target: 3 },
       { source: 2, target: 4 },
@@ -653,14 +675,14 @@ export const TEMPLATES: Template[] = [
       { source: 5, target: 8 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 9)
-      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 10)
-      { type: 'dune-dex-volume', position: { x: 900, y: 300 } },       // g2 (idx 11)
+      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 10)
+      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 11)
+      { type: 'dune-dex-volume', position: { x: 900, y: 300 } },       // g2 (idx 12)
     ],
     ghostEdges: [
-      { source: 5, target: 9 },   // frontend → agent
-      { source: 5, target: 10 },  // frontend → paywall
-      { source: 5, target: 11 },  // frontend → dune-dex-volume
+      { source: 5, target: 10 },   // frontend → agent
+      { source: 5, target: 11 },  // frontend → paywall
+      { source: 5, target: 12 },  // frontend → dune-dex-volume
     ],
   },
 
@@ -684,8 +706,10 @@ export const TEMPLATES: Template[] = [
       { type: 'wallet-auth', position: { x: 300, y: 150 } },           // 3  T1
       { type: 'rpc-provider', position: { x: 300, y: 300 } },          // 4  T1
       { type: 'chain-data', position: { x: 600, y: 150 } },            // 5  T2
+      { type: 'openclaw-agent', position: { x: 900, y: 0 } },          // 6  T3
     ],
     edges: [
+      { source: 2, target: 6 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 2 },
       { source: 0, target: 3 },
       { source: 0, target: 4 },
@@ -694,14 +718,14 @@ export const TEMPLATES: Template[] = [
       { source: 2, target: 5 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 6)
-      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 7)
-      { type: 'eip7702-smart-eoa', position: { x: 900, y: 300 } },     // g2 (idx 8)
+      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },   // g0 (idx 7)
+      { type: 'x402-paywall-api', position: { x: 900, y: 150 } },      // g1 (idx 8)
+      { type: 'eip7702-smart-eoa', position: { x: 900, y: 300 } },     // g2 (idx 9)
     ],
     ghostEdges: [
-      { source: 2, target: 6 },  // frontend → agent
-      { source: 2, target: 7 },  // frontend → paywall
-      { source: 1, target: 8 },  // chain-abstraction → eip7702
+      { source: 2, target: 7 },  // frontend → agent
+      { source: 2, target: 8 },  // frontend → paywall
+      { source: 1, target: 9 },  // chain-abstraction → eip7702
     ],
   },
 
@@ -731,8 +755,10 @@ export const TEMPLATES: Template[] = [
       { type: 'telegram-notifications', position: { x: 600, y: 0 } },    // 9  T2
       { type: 'frontend-scaffold', position: { x: 600, y: 300 } },       // 10 T2
       { type: 'wallet-auth', position: { x: 900, y: 300 } },             // 11 T3
+      { type: 'openclaw-agent', position: { x: 1200, y: 300 } },         // 12 T4
     ],
     edges: [
+      { source: 10, target: 12 },  // frontend-scaffold → openclaw-agent
       { source: 0, target: 4 },
       { source: 0, target: 5 },
       { source: 0, target: 10 },
@@ -747,14 +773,14 @@ export const TEMPLATES: Template[] = [
       { source: 10, target: 11 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 1200, y: 0 } },    // g0 (idx 12)
-      { type: 'x402-paywall-api', position: { x: 1200, y: 150 } },       // g1 (idx 13)
-      { type: 'repo-quality-gates', position: { x: 1200, y: 300 } },     // g2 (idx 14)
+      { type: 'erc8004-agent-runtime', position: { x: 1200, y: 0 } },    // g0 (idx 13)
+      { type: 'x402-paywall-api', position: { x: 1200, y: 150 } },       // g1 (idx 14)
+      { type: 'repo-quality-gates', position: { x: 1200, y: 300 } },     // g2 (idx 15)
     ],
     ghostEdges: [
-      { source: 10, target: 12 },  // frontend → agent
-      { source: 10, target: 13 },  // frontend → paywall
-      { source: 0, target: 14 },   // stylus → quality-gates
+      { source: 10, target: 13 },  // frontend → agent
+      { source: 10, target: 14 },  // frontend → paywall
+      { source: 0, target: 15 },   // stylus → quality-gates
     ],
   },
 
@@ -781,8 +807,10 @@ export const TEMPLATES: Template[] = [
       { type: 'telegram-notifications', position: { x: 500, y: 300 } },  // 5  T2
       { type: 'chain-data', position: { x: 750, y: 150 } },              // 6  T3
       { type: 'frontend-scaffold', position: { x: 1000, y: 75 } },       // 7  T4
+      { type: 'openclaw-agent', position: { x: 1300, y: 75 } },          // 8  T5
     ],
     edges: [
+      { source: 7, target: 8 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 1 },
       { source: 1, target: 2 },
       { source: 1, target: 3 },
@@ -794,14 +822,14 @@ export const TEMPLATES: Template[] = [
       { source: 6, target: 7 },
     ],
     ghostNodes: [
-      { type: 'x402-paywall-api', position: { x: 1300, y: 0 } },        // g0 (idx 8)
-      { type: 'dune-wallet-balances', position: { x: 1300, y: 150 } },   // g1 (idx 9)
-      { type: 'wallet-auth', position: { x: 1300, y: 300 } },            // g2 (idx 10)
+      { type: 'x402-paywall-api', position: { x: 1300, y: 0 } },        // g0 (idx 9)
+      { type: 'dune-wallet-balances', position: { x: 1300, y: 150 } },   // g1 (idx 10)
+      { type: 'wallet-auth', position: { x: 1300, y: 300 } },            // g2 (idx 11)
     ],
     ghostEdges: [
-      { source: 7, target: 8 },   // frontend → paywall
-      { source: 7, target: 9 },   // frontend → dune-wallet-balances
-      { source: 7, target: 10 },  // frontend → wallet-auth
+      { source: 7, target: 9 },   // frontend → paywall
+      { source: 7, target: 10 },   // frontend → dune-wallet-balances
+      { source: 7, target: 11 },  // frontend → wallet-auth
     ],
   },
 
@@ -834,8 +862,10 @@ export const TEMPLATES: Template[] = [
       { type: 'wallet-auth', position: { x: 900, y: 150 } },             // 11 T3
       { type: 'rpc-provider', position: { x: 900, y: 300 } },            // 12 T3
       { type: 'chain-data', position: { x: 900, y: 450 } },              // 13 T3
+      { type: 'openclaw-agent', position: { x: 1200, y: 300 } },         // 14 T4
     ],
     edges: [
+      { source: 10, target: 14 },  // frontend-scaffold → openclaw-agent
       { source: 0, target: 4 },
       { source: 0, target: 5 },
       { source: 0, target: 6 },
@@ -854,12 +884,12 @@ export const TEMPLATES: Template[] = [
       { source: 6, target: 11 },
     ],
     ghostNodes: [
-      { type: 'x402-paywall-api', position: { x: 1200, y: 0 } },         // g0 (idx 14)
-      { type: 'repo-quality-gates', position: { x: 1200, y: 300 } },     // g1 (idx 15)
+      { type: 'x402-paywall-api', position: { x: 1200, y: 0 } },         // g0 (idx 15)
+      { type: 'repo-quality-gates', position: { x: 1200, y: 300 } },     // g1 (idx 16)
     ],
     ghostEdges: [
-      { source: 10, target: 14 },  // frontend → paywall
-      { source: 3, target: 15 },   // stylus → quality-gates
+      { source: 10, target: 15 },  // frontend → paywall
+      { source: 3, target: 16 },   // stylus → quality-gates
     ],
   },
 
@@ -889,8 +919,10 @@ export const TEMPLATES: Template[] = [
       { type: 'dune-transaction-history', position: { x: 600, y: 225 } }, // 8  T1
       { type: 'frontend-scaffold', position: { x: 900, y: 225 } },        // 9  T2
       { type: 'wallet-auth', position: { x: 1200, y: 225 } },             // 10 T3
+      { type: 'openclaw-agent', position: { x: 1500, y: 225 } },          // 11 T4
     ],
     edges: [
+      { source: 9, target: 11 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 9 },
       { source: 1, target: 9 },
       { source: 2, target: 9 },
@@ -903,12 +935,12 @@ export const TEMPLATES: Template[] = [
       { source: 9, target: 10 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 1500, y: 75 } },    // g0 (idx 11)
-      { type: 'x402-paywall-api', position: { x: 1500, y: 225 } },        // g1 (idx 12)
+      { type: 'erc8004-agent-runtime', position: { x: 1500, y: 75 } },    // g0 (idx 12)
+      { type: 'x402-paywall-api', position: { x: 1500, y: 225 } },        // g1 (idx 13)
     ],
     ghostEdges: [
-      { source: 9, target: 11 },  // frontend → agent
-      { source: 9, target: 12 },  // frontend → paywall
+      { source: 9, target: 12 },  // frontend → agent
+      { source: 9, target: 13 },  // frontend → paywall
     ],
   },
 
@@ -938,8 +970,10 @@ export const TEMPLATES: Template[] = [
       { type: 'dune-token-price', position: { x: 300, y: 450 } },        // 7  T1
       { type: 'wallet-auth', position: { x: 600, y: 0 } },               // 8  T2
       { type: 'rpc-provider', position: { x: 600, y: 150 } },            // 9  T2
+      { type: 'openclaw-agent', position: { x: 900, y: 300 } },           // 10 T3
     ],
     edges: [
+      { source: 6, target: 10 },  // frontend-scaffold → openclaw-agent
       { source: 0, target: 6 },
       { source: 1, target: 6 },
       { source: 1, target: 7 },
@@ -951,16 +985,16 @@ export const TEMPLATES: Template[] = [
       { source: 6, target: 9 },
     ],
     ghostNodes: [
-      { type: 'telegram-ai-agent', position: { x: 900, y: 0 } },         // g0 (idx 10)
-      { type: 'telegram-notifications', position: { x: 900, y: 150 } },  // g1 (idx 11)
-      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },      // g2 (idx 12)
-      { type: 'dune-execute-sql', position: { x: 900, y: 450 } },        // g3 (idx 13)
+      { type: 'telegram-ai-agent', position: { x: 900, y: 0 } },         // g0 (idx 11)
+      { type: 'telegram-notifications', position: { x: 900, y: 150 } },  // g1 (idx 12)
+      { type: 'repo-quality-gates', position: { x: 900, y: 300 } },      // g2 (idx 13)
+      { type: 'dune-execute-sql', position: { x: 900, y: 450 } },        // g3 (idx 14)
     ],
     ghostEdges: [
-      { source: 2, target: 10 },   // agent → telegram-ai
-      { source: 10, target: 11 },  // telegram-ai → telegram-notifications
-      { source: 3, target: 12 },   // stylus → quality-gates
-      { source: 6, target: 13 },   // frontend → dune-execute-sql
+      { source: 2, target: 11 },   // agent → telegram-ai
+      { source: 11, target: 12 },  // telegram-ai → telegram-notifications
+      { source: 3, target: 13 },   // stylus → quality-gates
+      { source: 6, target: 14 },   // frontend → dune-execute-sql
     ],
   },
 
@@ -984,8 +1018,10 @@ export const TEMPLATES: Template[] = [
       { type: 'chain-data', position: { x: 300, y: 300 } },            // 3  T1
       { type: 'eip7702-smart-eoa', position: { x: 600, y: 50 } },      // 4  T2
       { type: 'chain-abstraction', position: { x: 600, y: 150 } },     // 5  T2
+      { type: 'openclaw-agent', position: { x: 900, y: 150 } },         // 6  T3
     ],
     edges: [
+      { source: 0, target: 6 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 1 },
       { source: 0, target: 2 },
       { source: 0, target: 3 },
@@ -993,18 +1029,18 @@ export const TEMPLATES: Template[] = [
       { source: 1, target: 5 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 0, y: 450 } },   // g0 (idx 6)
-      { type: 'x402-paywall-api', position: { x: 300, y: 450 } },      // g1 (idx 7)
-      { type: 'dune-gas-price', position: { x: 600, y: 450 } },        // g2 (idx 8)
-      { type: 'onchain-activity', position: { x: 900, y: 100 } },      // g3 (idx 9)
-      { type: 'dune-wallet-balances', position: { x: 900, y: 250 } },  // g4 (idx 10)
+      { type: 'erc8004-agent-runtime', position: { x: 0, y: 450 } },   // g0 (idx 7)
+      { type: 'x402-paywall-api', position: { x: 300, y: 450 } },      // g1 (idx 8)
+      { type: 'dune-gas-price', position: { x: 600, y: 450 } },        // g2 (idx 9)
+      { type: 'onchain-activity', position: { x: 900, y: 100 } },      // g3 (idx 10)
+      { type: 'dune-wallet-balances', position: { x: 900, y: 250 } },  // g4 (idx 11)
     ],
     ghostEdges: [
-      { source: 0, target: 6 },  // frontend → agent
-      { source: 0, target: 7 },  // frontend → paywall
-      { source: 0, target: 8 },  // frontend → dune-gas-price
-      { source: 3, target: 9 },  // chain-data → onchain-activity
-      { source: 3, target: 10 }, // chain-data → dune-wallet-balances
+      { source: 0, target: 7 },  // frontend → agent
+      { source: 0, target: 8 },  // frontend → paywall
+      { source: 0, target: 9 },  // frontend → dune-gas-price
+      { source: 3, target: 10 },  // chain-data → onchain-activity
+      { source: 3, target: 11 }, // chain-data → dune-wallet-balances
     ],
   },
 
@@ -1031,8 +1067,10 @@ export const TEMPLATES: Template[] = [
       { type: 'wallet-auth', position: { x: 600, y: 0 } },             // 5  T2
       { type: 'rpc-provider', position: { x: 600, y: 150 } },          // 6  T2
       { type: 'dune-wallet-balances', position: { x: 600, y: 300 } },  // 7  T2
+      { type: 'openclaw-agent', position: { x: 900, y: 300 } },         // 8  T3
     ],
     edges: [
+      { source: 4, target: 8 },   // frontend-scaffold → openclaw-agent
       { source: 0, target: 1 },
       { source: 0, target: 2 },
       { source: 0, target: 4 },
@@ -1042,20 +1080,20 @@ export const TEMPLATES: Template[] = [
       { source: 4, target: 7 },
     ],
     ghostNodes: [
-      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },           // g0 (idx 8)
-      { type: 'repo-quality-gates', position: { x: 900, y: 150 } },            // g1 (idx 9)
-      { type: 'chain-data', position: { x: 900, y: 300 } },                    // g2 (idx 10)
-      { type: 'dune-transaction-history', position: { x: 1200, y: 0 } },       // g3 (idx 11)
-      { type: 'arbitrum-bridge', position: { x: 1200, y: 150 } },              // g4 (idx 12)
-      { type: 'eip7702-smart-eoa', position: { x: 1200, y: 300 } },            // g5 (idx 13)
+      { type: 'erc8004-agent-runtime', position: { x: 900, y: 0 } },           // g0 (idx 9)
+      { type: 'repo-quality-gates', position: { x: 900, y: 150 } },            // g1 (idx 10)
+      { type: 'chain-data', position: { x: 900, y: 300 } },                    // g2 (idx 11)
+      { type: 'dune-transaction-history', position: { x: 1200, y: 0 } },       // g3 (idx 12)
+      { type: 'arbitrum-bridge', position: { x: 1200, y: 150 } },              // g4 (idx 13)
+      { type: 'eip7702-smart-eoa', position: { x: 1200, y: 300 } },            // g5 (idx 14)
     ],
     ghostEdges: [
-      { source: 4, target: 8 },   // frontend → agent
-      { source: 0, target: 9 },   // contract → quality-gates
-      { source: 4, target: 10 },  // frontend → chain-data
-      { source: 4, target: 11 },  // frontend → dune-transaction-history
-      { source: 4, target: 12 },  // frontend → arbitrum-bridge
-      { source: 5, target: 13 },  // wallet-auth → eip7702-smart-eoa
+      { source: 4, target: 9 },   // frontend → agent
+      { source: 0, target: 10 },   // contract → quality-gates
+      { source: 4, target: 11 },  // frontend → chain-data
+      { source: 4, target: 12 },  // frontend → dune-transaction-history
+      { source: 4, target: 13 },  // frontend → arbitrum-bridge
+      { source: 5, target: 14 },  // wallet-auth → eip7702-smart-eoa
     ],
   },
 ];

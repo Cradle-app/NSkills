@@ -164,7 +164,7 @@ export const cardStyles = {
   cardList: 'text-[11px] text-[hsl(var(--color-text-muted))] space-y-1.5 mt-2',
 
   /** Card list item */
-  cardListItem: 'flex items-start gap-2',
+  cardListItem: 'flex items-start gap-2.5',
 
   /** Code highlight in card */
   cardCode: 'font-mono text-[hsl(var(--color-text-secondary))]',
