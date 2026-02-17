@@ -89,6 +89,7 @@ export function nodeTypeToLabel(type: string): string {
     'robinhood-contracts': 'Robinhood Contracts',
     // BNB Voting
     'bnb-voting-contract': 'BNB Voting Contract',
+    'bnb-auction-contract': 'BNB Auction Contract',
     // Dune Analytics
     'dune-execute-sql': 'Dune Execute SQL',
     'dune-token-price': 'Dune Token Price',
@@ -168,6 +169,7 @@ export function nodeTypeToColor(type: string): string {
     'robinhood-contracts': 'accent-green',
     // BNB Voting
     'bnb-voting-contract': 'node-contracts',
+    'bnb-auction-contract': 'node-contracts',
     // ERC-20/ERC-721/ERC-1155 Stylus nodes
     'erc20-stylus': 'node-contracts',
     'erc721-stylus': 'node-contracts',

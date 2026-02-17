@@ -22,6 +22,7 @@ import {
     Zap,
     Coins,
     Search,
+    Gavel,
     Plus,
     X,
     type LucideIcon,
@@ -54,6 +55,7 @@ const ICON_MAP: Record<PluginIcon, LucideIcon> = {
     Zap,
     Coins,
     Search,
+    Gavel,
 };
 
 function getIconComponent(iconName: PluginIcon): LucideIcon {

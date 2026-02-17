@@ -8,7 +8,7 @@ import {
   Box, CreditCard, Bot, Layout, ShieldCheck, Trash2,
   Lock, Key, Wallet, Globe, ArrowLeftRight, Database,
   HardDrive, Layers, TrendingUp, Zap, Sparkles, Search,
-  DollarSign, Fuel, Send, Link, Coins, Plus, X as XIcon
+  DollarSign, Fuel, Send, Link, Coins, Plus, X as XIcon, Gavel
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBlueprintStore } from '@/store/blueprint';
@@ -102,6 +102,8 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'openclaw-agent': { src: OpenClawLogo, alt: 'OpenClaw' },
   // BNB Voting Contract
   'bnb-voting-contract': { src: BnbChainLogo, alt: 'BNB Voting' },
+  // BNB Auction Contract
+  'bnb-auction-contract': { src: BnbChainLogo, alt: 'BNB Auction' },
   // Dune Analytics plugins
   'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
   'dune-token-price': { src: DuneLogo, alt: 'Dune' },
@@ -158,6 +160,8 @@ const iconMap: Record<string, typeof Box> = {
   'dune-transaction-history': Database,
   'dune-gas-price': Fuel,
   'dune-protocol-tvl': Lock,
+  // BNB Auction Contract
+  'bnb-auction-contract': Gavel,
 };
 
 /**

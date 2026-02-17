@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Wallet,
   Globe,
+  ChevronDown,
 } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import { cn } from '@/lib/utils';
@@ -219,6 +220,7 @@ export function VotingInteractionPanel({
   const defaultAddress = initialAddress ?? '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD';
   const [contractAddress] = useState(defaultAddress);
   const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
+  const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
   const networkConfig = BNB_NETWORKS[selectedNetwork];
 
   const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
@@ -503,6 +505,7 @@ export function VotingInteractionPanel({
         </div>
       </div>
 
+
       {/* Network Selector */}
       <div className="space-y-1.5">
         <label className="text-xs text-[hsl(var(--color-text-muted))] flex items-center gap-1.5">
@@ -511,20 +514,19 @@ export function VotingInteractionPanel({
         <div className="relative">
           <button
             type="button"
-            disabled
+            onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
             className={cn(
               'w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm',
               'bg-[hsl(var(--color-bg-base))] border-[hsl(var(--color-border-default))]',
-              'text-[hsl(var(--color-text-primary))]',
-              networkConfig.disabled && 'opacity-60 cursor-not-allowed'
+              'text-[hsl(var(--color-text-primary))] hover:border-[hsl(var(--color-accent-primary)/0.5)] transition-colors'
             )}
           >
             <div className="flex items-center gap-2">
-              <Image 
-                src={BnbChainLogo} 
-                alt="BNB Chain" 
-                width={16} 
-                height={16} 
+              <Image
+                src={BnbChainLogo}
+                alt="BNB Chain"
+                width={16}
+                height={16}
                 className="rounded"
               />
               <span>{networkConfig.name}</span>
@@ -532,10 +534,62 @@ export function VotingInteractionPanel({
                 <span className="text-[8px] px-1.5 py-0.5 bg-[hsl(var(--color-warning)/0.2)] text-[hsl(var(--color-warning))] rounded">Testnet</span>
               )}
             </div>
+            <ChevronDown className={cn(
+              'w-4 h-4 text-[hsl(var(--color-text-muted))] transition-transform',
+              showNetworkDropdown && 'rotate-180'
+            )} />
           </button>
-          <p className="text-[10px] text-[hsl(var(--color-text-muted))] mt-1">
-            Contract deployed on BNB Testnet only. Mainnet support coming soon.
-          </p>
+
+          {/* Dropdown Menu */}
+          {showNetworkDropdown && (
+            <div className="absolute top-full mt-1 w-full bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))] rounded-lg shadow-xl z-50 overflow-hidden">
+              {Object.entries(BNB_NETWORKS).map(([key, network]) => (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={network.disabled}
+                  onClick={() => {
+                    if (!network.disabled) {
+                      setSelectedNetwork(key as BnbNetworkKey);
+                      setShowNetworkDropdown(false);
+                    }
+                  }}
+                  className={cn(
+                    'w-full px-3 py-2.5 text-left text-sm transition-colors',
+                    'flex items-center justify-between',
+                    network.disabled
+                      ? 'opacity-50 cursor-not-allowed bg-[hsl(var(--color-bg-base))]'
+                      : 'hover:bg-[hsl(var(--color-accent-primary)/0.1)] cursor-pointer',
+                    selectedNetwork === key && 'bg-[hsl(var(--color-accent-primary)/0.2)]'
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src={BnbChainLogo}
+                      alt="BNB Chain"
+                      width={16}
+                      height={16}
+                      className="rounded"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[hsl(var(--color-text-primary))]">{network.name}</span>
+                        {network.id === 'testnet' && (
+                          <span className="text-[8px] px-1.5 py-0.5 bg-[hsl(var(--color-warning)/0.2)] text-[hsl(var(--color-warning))] rounded">Testnet</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-[hsl(var(--color-text-muted))] mt-0.5">
+                        {network.description}
+                      </p>
+                    </div>
+                  </div>
+                  {network.disabled && (
+                    <span className="text-[9px] px-1.5 py-0.5 bg-gray-500/20 text-gray-400 rounded">Coming Soon</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -554,11 +608,11 @@ export function VotingInteractionPanel({
           className={cn(
             'rounded-lg p-2.5 border flex items-start gap-2',
             txStatus.status === 'pending' &&
-              'bg-[hsl(var(--color-info)/0.08)] border-[hsl(var(--color-info)/0.4)]',
+            'bg-[hsl(var(--color-info)/0.08)] border-[hsl(var(--color-info)/0.4)]',
             txStatus.status === 'success' &&
-              'bg-[hsl(var(--color-success)/0.08)] border-[hsl(var(--color-success)/0.4)]',
+            'bg-[hsl(var(--color-success)/0.08)] border-[hsl(var(--color-success)/0.4)]',
             txStatus.status === 'error' &&
-              'bg-[hsl(var(--color-error)/0.08)] border-[hsl(var(--color-error)/0.4)]'
+            'bg-[hsl(var(--color-error)/0.08)] border-[hsl(var(--color-error)/0.4)]'
           )}
         >
           {txStatus.status === 'pending' && (

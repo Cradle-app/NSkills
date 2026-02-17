@@ -36,7 +36,8 @@ export type PluginIcon =
     | 'TrendingUp'
     | 'Zap'
     | 'Coins'
-    | 'Search';
+    | 'Search'
+    | 'Gavel';
 
 /**
  * Plugin compatibility relationships
