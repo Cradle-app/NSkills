@@ -74,14 +74,11 @@ export function LandingFooter() {
                 className="w-28"
               />
             </Link>
-            <span className="text-forge-text-secondary text-xs">
-              · © {new Date().getFullYear()} All rights reserved.
-            </span>
           </div>
 
           {/* Minimal text */}
           <p className="text-forge-text-secondary text-xs">
-            Structure enables creativity. Built for Arbitrum.
+            © {new Date().getFullYear()} All rights reserved.
           </p>
         </div>
       </div>

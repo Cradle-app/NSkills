@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, createContext, useContext, useLayoutEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 import { X, ChevronLeft, ChevronRight, Sparkles, MousePointer, Command, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -92,8 +93,13 @@ export function OnboardingTourProvider({ children, steps = DEFAULT_STEPS }: Onbo
     const [isActive, setIsActive] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
 
+    const pathname = usePathname();
+
     // Check if onboarding was completed
     useEffect(() => {
+        // Only show tour on /app routes
+        if (!pathname?.startsWith('/app')) return;
+
         const completed = localStorage.getItem(STORAGE_KEY);
         if (!completed) {
             // Show tour for new users after a short delay
@@ -102,7 +108,7 @@ export function OnboardingTourProvider({ children, steps = DEFAULT_STEPS }: Onbo
             }, 1500);
             return () => clearTimeout(timer);
         }
-    }, []);
+    }, [pathname]);
 
     const startTour = useCallback(() => {
         setCurrentStep(0);

@@ -45,7 +45,7 @@ export function HeroCanvas() {
               <div className="w-2.5 h-2.5 rounded-full bg-[#27c93f]/80" />
             </div>
             <div className="w-[1px] h-3 bg-white/10 mx-2" />
-            <span className="text-[10px] text-white/40 tracking-wider font-mono">NSKILLS_PREVIEW</span>
+            <span className="text-[10px] text-white/40 tracking-wider font-mono">NSKILLS.XYZ</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-[#d97a4a] animate-pulse" />

@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Store in encrypted cookie (simplified - use proper encryption in production)
-    const response = NextResponse.redirect(new URL('/?github=connected', request.url));
+    const response = NextResponse.redirect(new URL('/app?github=connected', request.url));
     
     response.cookies.set('cradle_session', Buffer.from(JSON.stringify(sessionData)).toString('base64'), {
       httpOnly: true,
