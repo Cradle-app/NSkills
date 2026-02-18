@@ -5,7 +5,11 @@
   "description": "Web3 Dapp Blueprint workflow engine and repo generator",
   "scripts": {
     "dev": "turbo run dev --concurrency=30",
+    "dev:web": "turbo run dev --filter=@dapp-forge/web",
+    "dev:orchestrator": "turbo run dev --filter=apps/orchestrator",
     "build": "turbo run build",
+    "build:web": "turbo run build --filter=@dapp-forge/web...",
+    "build:orchestrator": "turbo run build --filter=apps/orchestrator",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",

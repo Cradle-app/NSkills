@@ -37,7 +37,8 @@ export type TemplateCategory =
   | 'superposition'
   | 'robinhood'
   | 'payments'
-  | 'infrastructure';
+  | 'infrastructure'
+  | 'binance';
 
 export interface Template {
   id: string;
@@ -71,6 +72,7 @@ export interface Template {
 export const TEMPLATE_CATEGORIES: { id: TemplateCategory | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
   { id: 'contracts', label: 'Contracts' },
+  { id: 'binance', label: 'Binance' },
   { id: 'defi', label: 'DeFi' },
   { id: 'nft', label: 'NFT' },
   { id: 'ai', label: 'AI / Agents' },
@@ -1094,6 +1096,148 @@ export const TEMPLATES: Template[] = [
       { source: 4, target: 12 },  // frontend → dune-transaction-history
       { source: 4, target: 13 },  // frontend → arbitrum-bridge
       { source: 5, target: 14 },  // wallet-auth → eip7702-smart-eoa
+    ],
+  },
+
+  // ── 19. Binance Smart Dapp ────────────────────────────────────────────────
+  // Flow: voting-contract → {frontend, onchain-activity, dune-tx, pyth, chainlink, uniswap, wallet} → openclaw
+  //       Ghost: ipfs-storage, dune-token-price, rpc-provider
+  {
+    id: 'binance-smart-dapp',
+    name: 'Binance Smart Dapp',
+    description:
+      'BNB Voting Contract + Frontend + OpenClaw + Oracles + Uniswap + Analytics + Wallet Auth — IPFS, token price, and RPC as suggestions',
+    icon: 'Vote',
+    colorClass: 'success',
+    category: 'binance',
+    tags: ['BNB', 'Voting', 'Oracles', 'DeFi', 'Analytics'],
+    explainer:
+      'A comprehensive Binance Smart Chain dApp centered around a voting contract. The frontend scaffold provides the user interface, while OpenClaw agent enables AI-powered interactions. On-chain activity and Dune transaction history track voting events and governance actions. Pyth and Chainlink oracles provide price feeds for token-based voting mechanisms. Uniswap swap enables token exchanges within the dApp. Wallet authentication connects user identities to voting actions. Ghost blocks suggest IPFS storage for proposal metadata, Dune token price for market data, and RPC provider for enhanced connectivity.',
+    nodes: [
+      { type: 'bnb-voting-contract', position: { x: 0, y: 300 } },              // 0  T0
+      { type: 'frontend-scaffold', position: { x: 300, y: 300 } },              // 1  T1
+      { type: 'openclaw-agent', position: { x: 600, y: 300 } },                 // 2  T2
+      { type: 'onchain-activity', position: { x: 300, y: 0 } },                // 3  T1
+      { type: 'dune-transaction-history', position: { x: 300, y: 150 } },     // 4  T1
+      { type: 'pyth-oracle', position: { x: 300, y: 450 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } },  // 5  T1
+      { type: 'chainlink-price-feed', position: { x: 300, y: 600 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } },  // 6  T1
+      { type: 'uniswap-swap', position: { x: 300, y: 750 } },                 // 7  T1
+      { type: 'wallet-auth', position: { x: 600, y: 150 } },                  // 8  T2
+    ],
+    edges: [
+      { source: 1, target: 2 },   // frontend-scaffold → openclaw-agent
+      { source: 0, target: 1 },   // bnb-voting-contract → frontend-scaffold
+      { source: 0, target: 3 },   // bnb-voting-contract → onchain-activity
+      { source: 0, target: 4 },   // bnb-voting-contract → dune-transaction-history
+      { source: 0, target: 5 },   // bnb-voting-contract → pyth-oracle
+      { source: 0, target: 6 },   // bnb-voting-contract → chainlink-price-feed
+      { source: 0, target: 7 },   // bnb-voting-contract → uniswap-swap
+      { source: 0, target: 8 },   // bnb-voting-contract → wallet-auth
+      { source: 1, target: 8 },   // frontend-scaffold → wallet-auth
+    ],
+    ghostNodes: [
+      { type: 'ipfs-storage', position: { x: 600, y: 0 } },                   // g0 (idx 9)
+      { type: 'dune-token-price', position: { x: 600, y: 450 } },             // g1 (idx 10)
+      { type: 'rpc-provider', position: { x: 600, y: 600 } },                 // g2 (idx 11)
+    ],
+    ghostEdges: [
+      { source: 0, target: 9 },   // bnb-voting-contract → ipfs-storage
+      { source: 0, target: 10 },  // bnb-voting-contract → dune-token-price
+      { source: 0, target: 11 },  // bnb-voting-contract → rpc-provider
+    ],
+  },
+
+  // ── 20. BNB MetaStack ────────────────────────────────────────────────────
+  // Core: {voting, auction, group-savings, wallet-auth} → {frontend, pyth, chainlink, uniswap} → {ipfs, onchain-activity, dune-tx-history} → openclaw
+  // Ghost: aave/compound (auction-only), x402 (group-savings-only), dune analytics (frontend)
+  {
+    id: 'bnb-metastack',
+    name: 'BNB MetaStack',
+    description:
+      'All 3 BNB contracts wired to a single frontend, shared oracles + swap, shared storage + activity + transaction history, with AI agent — DeFi + paywall + Dune analytics as suggestions',
+    icon: 'Layers',
+    colorClass: 'success',
+    category: 'binance',
+    tags: ['BNB', 'Voting', 'Auction', 'GroupSavings', 'Oracles', 'Uniswap', 'Dune', 'IPFS'],
+    explainer:
+      'A full-stack BNB suite: Voting, Auction, and GroupSavings contracts all feed a single frontend scaffold. Wallet Auth sits to the left to gate and personalize user actions. Pyth + Chainlink provide price inputs and Uniswap enables token swaps; all three are connected to each contract. IPFS stores shared proposal/auction metadata, while Onchain Activity and Dune Transaction History track what happens across all three contracts. OpenClaw sits on the right side of the frontend as an AI layer. Ghost blocks suggest adding Aave/Compound integrations (auction-only), an x402 paywall (GroupSavings-only), and extra Dune analytics modules connected to the frontend.',
+    nodes: [
+      // Contracts (left)
+      { type: 'bnb-voting-contract', position: { x: 0, y: 180 } },        // 0  T0
+      { type: 'bnb-auction-contract', position: { x: 0, y: 330 } },       // 1  T0
+      { type: 'bnb-groupsavings-contract', position: { x: 0, y: 480 } },  // 2  T0
+
+      // Auth (left of frontend)
+      { type: 'wallet-auth', position: { x: 0, y: 0 } },                 // 3  T0
+
+      // Frontend (centre)
+      { type: 'frontend-scaffold', position: { x: 300, y: 330 } },       // 4  T1
+
+      // Oracles + swap (connected to all 3 contracts)
+      { type: 'pyth-oracle', position: { x: 300, y: 0 }, config: { priceFeedId: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace' } }, // 5  T1
+      { type: 'chainlink-price-feed', position: { x: 300, y: 150 }, config: { feedAddress: '0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612' } }, // 6  T1
+      { type: 'uniswap-swap', position: { x: 300, y: 560 } },            // 7  T1
+
+      // Shared infra + analytics (right)
+      { type: 'ipfs-storage', position: { x: 600, y: 150 } },            // 8  T2
+      { type: 'onchain-activity', position: { x: 600, y: 330 } },        // 9  T2
+      { type: 'dune-transaction-history', position: { x: 600, y: 480 } }, // 10 T2
+
+      // Agent (right of frontend)
+      { type: 'openclaw-agent', position: { x: 900, y: 330 } },          // 11 T3
+    ],
+    edges: [
+      // Frontend + agent
+      { source: 4, target: 11 }, // frontend-scaffold → openclaw-agent
+      { source: 3, target: 4 },  // wallet-auth → frontend-scaffold
+
+      // All 3 contracts → frontend
+      { source: 0, target: 4 },
+      { source: 1, target: 4 },
+      { source: 2, target: 4 },
+
+      // All 3 contracts → shared IPFS / onchain / tx history
+      { source: 0, target: 8 },
+      { source: 1, target: 8 },
+      { source: 2, target: 8 },
+      { source: 0, target: 9 },
+      { source: 1, target: 9 },
+      { source: 2, target: 9 },
+      { source: 0, target: 10 },
+      { source: 1, target: 10 },
+      { source: 2, target: 10 },
+
+      // Oracles + swap connected to all 3 contracts
+      { source: 0, target: 5 },
+      { source: 1, target: 5 },
+      { source: 2, target: 5 },
+      { source: 0, target: 6 },
+      { source: 1, target: 6 },
+      { source: 2, target: 6 },
+      { source: 0, target: 7 },
+      { source: 1, target: 7 },
+      { source: 2, target: 7 },
+    ],
+    ghostNodes: [
+      { type: 'aave-lending', position: { x: 900, y: 0 } },              // g0 (idx 12)
+      { type: 'compound-lending', position: { x: 900, y: 150 } },        // g1 (idx 13)
+      { type: 'x402-paywall-api', position: { x: 900, y: 300 } },        // g2 (idx 14)
+      { type: 'dune-token-price', position: { x: 900, y: 450 } },        // g3 (idx 15)
+      { type: 'dune-dex-volume', position: { x: 900, y: 600 } },         // g4 (idx 16)
+      { type: 'dune-protocol-tvl', position: { x: 900, y: 750 } },       // g5 (idx 17)
+    ],
+    ghostEdges: [
+      // Auction-only ghost suggestions
+      { source: 1, target: 12 }, // bnb-auction-contract → aave-lending
+      { source: 1, target: 13 }, // bnb-auction-contract → compound-lending
+
+      // GroupSavings-only ghost suggestion
+      { source: 2, target: 14 }, // bnb-groupsavings-contract → x402-paywall-api
+
+      // Frontend-connected ghost analytics
+      { source: 4, target: 15 }, // frontend → dune-token-price
+      { source: 4, target: 16 }, // frontend → dune-dex-volume
+      { source: 4, target: 17 }, // frontend → dune-protocol-tvl
     ],
   },
 ];
