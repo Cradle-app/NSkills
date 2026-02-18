@@ -7,7 +7,7 @@ import { ToastProvider } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/ui/theme-toggle';
 import { OnboardingTourProvider } from '@/components/ui/onboarding-tour';
 import { WagmiProvider, http, useAccount } from 'wagmi';
-import { arbitrum, arbitrumSepolia } from 'viem/chains';
+import { arbitrum, arbitrumSepolia, bsc, bscTestnet } from 'viem/chains';
 import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { useAuthStore } from '@/store/auth';
@@ -16,10 +16,12 @@ import { AuthFlowModal } from '@/components/auth/auth-flow-modal';
 const wagmiConfig = getDefaultConfig({
   appName: '[N]skills',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'dummy_id',
-  chains: [arbitrum, arbitrumSepolia],
+  chains: [arbitrum, arbitrumSepolia, bsc, bscTestnet],
   transports: {
     [arbitrum.id]: http(),
     [arbitrumSepolia.id]: http(),
+    [bsc.id]: http(),
+    [bscTestnet.id]: http(),
   },
   ssr: true,
 });

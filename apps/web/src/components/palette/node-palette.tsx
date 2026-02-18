@@ -25,6 +25,8 @@ import {
   Zap,
   Coins,
   Star,
+  Gavel,
+  PiggyBank,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -66,6 +68,7 @@ import NextjsLogo from '@/assets/blocks/Nextjs.png';
 import GithubLogo from '@/assets/blocks/github.png';
 import RobinhoodLogo from '@/assets/blocks/robinhood.png';
 import OpenClawLogo from '@/assets/blocks/openclaw.jpg';
+import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
 
 /**
  * Centralized logo asset mapping
@@ -95,6 +98,7 @@ const LOGO_ASSETS: Record<string, any> = {
   'github.png': GithubLogo,
   'robinhood.png': RobinhoodLogo,
   'openclaw.jpg': OpenClawLogo,
+  'BNB Chain.png': BnbChainLogo,
 };
 
 function getLogoAsset(logoAsset?: string): any | null {
@@ -105,7 +109,7 @@ function getLogoAsset(logoAsset?: string): any | null {
 const ICON_MAP: Record<PluginIcon, LucideIcon> = {
   Box, CreditCard, Bot, Layout, ShieldCheck, Wallet, Globe, Database,
   HardDrive, Layers, Lock, Link, ArrowLeftRight, Key, Sparkles, TrendingUp,
-  Zap, Coins, Search,
+  Zap, Coins, Search, Gavel, PiggyBank,
 };
 
 function getIconComponent(iconName: PluginIcon): LucideIcon {

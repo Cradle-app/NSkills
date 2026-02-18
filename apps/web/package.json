@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@cradle/aave-lending": "workspace:*",
+    "@cradle/bnb-groupsavings": "workspace:*",
     "@cradle/chainlink-price-feed": "workspace:*",
     "@cradle/compound-lending": "workspace:*",
     "@cradle/erc8004-agent": "workspace:*",

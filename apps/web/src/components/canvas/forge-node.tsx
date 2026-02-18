@@ -8,7 +8,7 @@ import {
   Box, CreditCard, Bot, Layout, ShieldCheck, Trash2,
   Lock, Key, Wallet, Globe, ArrowLeftRight, Database,
   HardDrive, Layers, TrendingUp, Zap, Sparkles, Search,
-  DollarSign, Fuel, Send, Link, Coins, Plus, X as XIcon
+  DollarSign, Fuel, Send, Link, Coins, Plus, X as XIcon, Gavel, PiggyBank
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBlueprintStore } from '@/store/blueprint';
@@ -37,6 +37,7 @@ import NextjsLogo from '@/assets/blocks/Nextjs.png';
 import GithubLogo from '@/assets/blocks/github.png';
 import RobinhoodLogo from '@/assets/blocks/robinhood.png';
 import OpenClawLogo from '@/assets/blocks/openclaw.jpg';
+import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
 
 /** Node types with custom logos (matches palette) */
 const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
@@ -99,6 +100,11 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'robinhood-contracts': { src: RobinhoodLogo, alt: 'Robinhood Chain' },
   // OpenClaw Agent
   'openclaw-agent': { src: OpenClawLogo, alt: 'OpenClaw' },
+  // BNB Voting Contract
+  'bnb-voting-contract': { src: BnbChainLogo, alt: 'BNB Voting' },
+  // BNB Auction Contract
+  'bnb-auction-contract': { src: BnbChainLogo, alt: 'BNB Auction' },
+  'bnb-groupsavings-contract': { src: BnbChainLogo, alt: 'BNB Group Savings' },
   // Dune Analytics plugins
   'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
   'dune-token-price': { src: DuneLogo, alt: 'Dune' },
@@ -155,6 +161,9 @@ const iconMap: Record<string, typeof Box> = {
   'dune-transaction-history': Database,
   'dune-gas-price': Fuel,
   'dune-protocol-tvl': Lock,
+  // BNB Auction Contract
+  'bnb-auction-contract': Gavel,
+  'bnb-groupsavings-contract': PiggyBank,
 };
 
 /**

@@ -7,7 +7,6 @@ const nextConfig = {
     },
   },
   webpack: (config, { isServer }) => {
-    // Ignore optional dependencies that cause warnings
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
