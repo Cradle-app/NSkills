@@ -26,6 +26,7 @@ import {
   Coins,
   Star,
   Gavel,
+  PiggyBank,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -108,7 +109,7 @@ function getLogoAsset(logoAsset?: string): any | null {
 const ICON_MAP: Record<PluginIcon, LucideIcon> = {
   Box, CreditCard, Bot, Layout, ShieldCheck, Wallet, Globe, Database,
   HardDrive, Layers, Lock, Link, ArrowLeftRight, Key, Sparkles, TrendingUp,
-  Zap, Coins, Search, Gavel,
+  Zap, Coins, Search, Gavel, PiggyBank,
 };
 
 function getIconComponent(iconName: PluginIcon): LucideIcon {

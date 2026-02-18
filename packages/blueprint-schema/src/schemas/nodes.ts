@@ -41,6 +41,7 @@ export const NodeType = z.enum([
   'erc1155-stylus',
   'bnb-voting-contract',
   'bnb-auction-contract',
+  'bnb-groupsavings-contract',
 
   // Payments
   'x402-paywall-api',
@@ -228,6 +229,11 @@ export const BnbAuctionContractConfig = BaseNodeConfig.extend({
   contractAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/).default('0x00320016Ad572264a64C98142e51200E60f73bCE'),
 });
 export type BnbAuctionContractConfig = z.infer<typeof BnbAuctionContractConfig>;
+
+export const BnbGroupSavingsContractConfig = BaseNodeConfig.extend({
+  contractAddress: nullableString(),
+});
+export type BnbGroupSavingsContractConfig = z.infer<typeof BnbGroupSavingsContractConfig>;
 
 /**
  * Stylus ZK Contract configuration
@@ -1025,6 +1031,7 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('openclaw-agent'), config: OpenClawConfig }),
   z.object({ type: z.literal('bnb-voting-contract'), config: BnbVotingContractConfig }),
   z.object({ type: z.literal('bnb-auction-contract'), config: BnbAuctionContractConfig }),
+  z.object({ type: z.literal('bnb-groupsavings-contract'), config: BnbGroupSavingsContractConfig }),
   z.object({ type: z.literal('repo-quality-gates'), config: RepoQualityGatesConfig }),
   z.object({ type: z.literal('frontend-scaffold'), config: FrontendScaffoldConfig }),
   z.object({ type: z.literal('sdk-generator'), config: SDKGeneratorConfig }),
@@ -1111,6 +1118,7 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'erc1155-stylus': 'contracts',
     'bnb-voting-contract': 'contracts',
     'bnb-auction-contract': 'contracts',
+    'bnb-groupsavings-contract': 'contracts',
     'x402-paywall-api': 'payments',
     'erc8004-agent-runtime': 'agents',
     'ostium-trading': 'agents',
@@ -1183,6 +1191,7 @@ export function getConfigSchemaForType(type: NodeType) {
     'erc1155-stylus': ERC1155StylusConfig,
     'bnb-voting-contract': BnbVotingContractConfig,
     'bnb-auction-contract': BnbAuctionContractConfig,
+    'bnb-groupsavings-contract': BnbGroupSavingsContractConfig,
     'x402-paywall-api': X402PaywallConfig,
     'erc8004-agent-runtime': ERC8004AgentConfig,
     'openclaw-agent': OpenClawConfig,

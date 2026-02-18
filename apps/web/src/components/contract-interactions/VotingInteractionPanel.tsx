@@ -26,9 +26,10 @@ const BNB_NETWORKS = {
     chainId: 97,
     rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
     explorerUrl: 'https://testnet.bscscan.com',
-    label: 'Testnet (deployed)',
+    label: 'BNB Testnet',
     description: 'Deployed Voting.sol contract on BNB Testnet',
     disabled: false,
+    symbol: 'tBNB',
   },
   mainnet: {
     id: 'mainnet' as const,
@@ -36,9 +37,32 @@ const BNB_NETWORKS = {
     chainId: 56,
     rpcUrl: 'https://bsc-dataseed.bnbchain.org',
     explorerUrl: 'https://bscscan.com',
-    label: 'Mainnet (coming soon)',
+    label: 'BNB Mainnet',
     description: 'No voting contract deployed yet',
     disabled: true,
+    symbol: 'BNB',
+  },
+  opbnbTestnet: {
+    id: 'opbnbTestnet' as const,
+    name: 'opBNB Testnet',
+    chainId: 5611,
+    rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
+    explorerUrl: 'https://testnet.opbnbscan.com',
+    label: 'opBNB Testnet',
+    description: 'opBNB L2 Testnet (coming soon)',
+    disabled: true,
+    symbol: 'tBNB',
+  },
+  opbnbMainnet: {
+    id: 'opbnbMainnet' as const,
+    name: 'opBNB Mainnet',
+    chainId: 204,
+    rpcUrl: 'https://opbnb-mainnet-rpc.bnbchain.org',
+    explorerUrl: 'https://opbnbscan.com',
+    label: 'opBNB Mainnet',
+    description: 'opBNB L2 Mainnet (coming soon)',
+    disabled: true,
+    symbol: 'BNB',
   },
 } as const;
 
@@ -283,8 +307,8 @@ export function VotingInteractionPanel({
                   chainId: targetChainIdHex,
                   chainName: networkConfig.name,
                   nativeCurrency: {
-                    name: 'BNB',
-                    symbol: 'BNB',
+                    name: networkConfig.symbol,
+                    symbol: networkConfig.symbol,
                     decimals: 18,
                   },
                   rpcUrls: [networkConfig.rpcUrl],
@@ -530,7 +554,7 @@ export function VotingInteractionPanel({
                 className="rounded"
               />
               <span>{networkConfig.name}</span>
-              {networkConfig.id === 'testnet' && (
+              {(networkConfig.id === 'testnet' || networkConfig.id === 'opbnbTestnet') && (
                 <span className="text-[8px] px-1.5 py-0.5 bg-[hsl(var(--color-warning)/0.2)] text-[hsl(var(--color-warning))] rounded">Testnet</span>
               )}
             </div>
@@ -558,7 +582,7 @@ export function VotingInteractionPanel({
                     'w-full px-3 py-2.5 text-left text-sm transition-colors',
                     'flex items-center justify-between',
                     network.disabled
-                      ? 'opacity-50 cursor-not-allowed bg-[hsl(var(--color-bg-base))]'
+                      ? 'opacity-50 cursor-not-allowed bg-[hsl(var(--color-bg-base))]/80 backdrop-blur-sm'
                       : 'hover:bg-[hsl(var(--color-accent-primary)/0.1)] cursor-pointer',
                     selectedNetwork === key && 'bg-[hsl(var(--color-accent-primary)/0.2)]'
                   )}
@@ -574,7 +598,7 @@ export function VotingInteractionPanel({
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-[hsl(var(--color-text-primary))]">{network.name}</span>
-                        {network.id === 'testnet' && (
+                        {(network.id === 'testnet' || network.id === 'opbnbTestnet') && (
                           <span className="text-[8px] px-1.5 py-0.5 bg-[hsl(var(--color-warning)/0.2)] text-[hsl(var(--color-warning))] rounded">Testnet</span>
                         )}
                       </div>

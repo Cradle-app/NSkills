@@ -138,6 +138,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'erc1155-stylus',
       'bnb-voting-contract',
       'bnb-auction-contract',
+      'bnb-groupsavings-contract',
       'maxxit',
       'onchain-activity',
       'openclaw-agent',

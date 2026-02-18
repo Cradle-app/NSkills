@@ -11,6 +11,7 @@ export { RepoQualityGatesPlugin } from './repo-quality-gates';
 export { FrontendScaffoldPlugin } from './frontend-scaffold';
 export { BnbVotingContractPlugin } from './bnb-voting-contract';
 export { BnbAuctionContractPlugin } from './bnb-auction-contract';
+export { BnbGroupSavingsContractPlugin } from './bnb-groupsavings-contract';
 
 // New Arbitrum-focused plugins
 export { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
@@ -83,6 +84,7 @@ import { RepoQualityGatesPlugin } from './repo-quality-gates';
 import { FrontendScaffoldPlugin } from './frontend-scaffold';
 import { BnbVotingContractPlugin } from './bnb-voting-contract';
 import { BnbAuctionContractPlugin } from './bnb-auction-contract';
+import { BnbGroupSavingsContractPlugin } from './bnb-groupsavings-contract';
 import { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
 import { WalletAuthPlugin } from './wallet-auth';
 import { RPCProviderPlugin } from './rpc-provider';
@@ -160,6 +162,7 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new FrontendScaffoldPlugin());
   targetRegistry.register(new BnbVotingContractPlugin());
   targetRegistry.register(new BnbAuctionContractPlugin());
+  targetRegistry.register(new BnbGroupSavingsContractPlugin());
 
   // New Arbitrum-focused plugins
   targetRegistry.register(new EIP7702SmartEOAPlugin());
@@ -235,6 +238,7 @@ export function getOfficialPlugins() {
     new FrontendScaffoldPlugin(),
     new BnbVotingContractPlugin(),
     new BnbAuctionContractPlugin(),
+    new BnbGroupSavingsContractPlugin(),
     // New Arbitrum-focused plugins
     new EIP7702SmartEOAPlugin(),
     new WalletAuthPlugin(),

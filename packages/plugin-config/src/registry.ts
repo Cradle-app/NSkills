@@ -47,6 +47,24 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
       contractAddress: '0x00320016Ad572264a64C98142e51200E60f73bCE',
     },
   },
+  'bnb-groupsavings-contract': {
+    id: 'bnb-groupsavings-contract',
+    name: 'Group Savings Contract',
+    description: 'Interact with a GroupSavings.sol contract on BNB Smart Chain Testnet',
+    icon: 'PiggyBank',
+    logoAsset: 'BNB Chain.png',
+    color: 'node-contracts',
+    category: 'contracts',
+    tags: ['savings', 'crowdfunding', 'bnb', 'testnet', 'contract'],
+    compatibility: {
+      compatibleWith: ['frontend-scaffold', 'wallet-auth'],
+      suggestedWith: ['rpc-provider'],
+      requires: [],
+    },
+    defaultConfig: {
+      contractAddress: '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28',
+    },
+  },
   'erc20-stylus': {
     id: 'erc20-stylus',
     name: 'ERC-20 Token',

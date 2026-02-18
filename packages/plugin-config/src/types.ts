@@ -37,7 +37,8 @@ export type PluginIcon =
     | 'Zap'
     | 'Coins'
     | 'Search'
-    | 'Gavel';
+    | 'Gavel'
+    | 'PiggyBank';
 
 /**
  * Plugin compatibility relationships

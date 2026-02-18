@@ -62,6 +62,7 @@ import { ERC721StylusForm } from './forms/erc721-stylus-form';
 import { ERC1155StylusForm } from './forms/erc1155-stylus-form';
 import { BnbVotingContractForm } from './forms/bnb-voting-contract-form';
 import { BnbAuctionContractForm } from './forms/bnb-auction-contract-form';
+import { BnbGroupSavingsContractForm } from './forms/bnb-groupsavings-contract-form';
 
 // Dune Analytics form
 import { DuneAnalyticsForm } from './forms/dune-analytics-form';
@@ -372,6 +373,9 @@ export function ConfigPanel() {
             )}
             {(selectedNode.type as string) === 'bnb-auction-contract' && (
               <BnbAuctionContractForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {(selectedNode.type as string) === 'bnb-groupsavings-contract' && (
+              <BnbGroupSavingsContractForm nodeId={selectedNode.id} config={selectedNode.config} />
             )}
             {selectedNode.type === 'onchain-activity' && (
               <OnchainActivityForm nodeId={selectedNode.id} config={selectedNode.config} />

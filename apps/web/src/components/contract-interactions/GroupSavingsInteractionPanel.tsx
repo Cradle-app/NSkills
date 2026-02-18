@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import { ethers } from 'ethers';
 import {
-    Gavel,
+    PiggyBank,
     Users,
     RefreshCw,
     Loader2,
@@ -14,8 +13,11 @@ import {
     Timer,
     TrendingUp,
     ArrowDownToLine,
+    Target,
     ChevronDown,
+    Globe,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useAccount } from 'wagmi';
 import { cn } from '@/lib/utils';
 import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
@@ -28,7 +30,7 @@ const BNB_NETWORKS = {
         rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
         explorerUrl: 'https://testnet.bscscan.com',
         label: 'BNB Testnet',
-        description: 'Deployed SimpleAuction.sol contract on BNB Testnet',
+        description: 'Deployed GroupSavings.sol contract on BNB Testnet',
         disabled: false,
         symbol: 'tBNB',
     },
@@ -39,7 +41,7 @@ const BNB_NETWORKS = {
         rpcUrl: 'https://bsc-dataseed.bnbchain.org',
         explorerUrl: 'https://bscscan.com',
         label: 'BNB Mainnet',
-        description: 'No auction contract deployed yet',
+        description: 'No GroupSavings contract deployed yet',
         disabled: true,
         symbol: 'BNB',
     },
@@ -69,25 +71,56 @@ const BNB_NETWORKS = {
 
 type BnbNetworkKey = keyof typeof BNB_NETWORKS;
 
-const AUCTION_ABI = [
+const GROUP_SAVINGS_ABI = [
     {
         inputs: [],
-        name: 'endEarly',
+        name: 'contribute',
+        outputs: [],
+        stateMutability: 'payable',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'refund',
         outputs: [],
         stateMutability: 'nonpayable',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'endTime',
+        name: 'withdrawFunds',
+        outputs: [],
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        inputs: [{ internalType: 'address', name: '', type: 'address' }],
+        name: 'contributions',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'ended',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        name: 'deadline',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'description',
+        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        inputs: [],
+        name: 'getContributors',
+        outputs: [
+            { internalType: 'address[]', name: 'addrs', type: 'address[]' },
+            { internalType: 'uint256[]', name: 'amounts', type: 'uint256[]' },
+        ],
         stateMutability: 'view',
         type: 'function',
     },
@@ -95,33 +128,28 @@ const AUCTION_ABI = [
         inputs: [],
         name: 'getStatus',
         outputs: [
-            { internalType: 'string', name: 'item', type: 'string' },
-            { internalType: 'address', name: 'leader', type: 'address' },
-            { internalType: 'uint256', name: 'leadingBid', type: 'uint256' },
+            { internalType: 'string', name: 'desc', type: 'string' },
+            { internalType: 'uint256', name: 'goal', type: 'uint256' },
+            { internalType: 'uint256', name: 'raised', type: 'uint256' },
+            { internalType: 'uint256', name: 'remaining', type: 'uint256' },
             { internalType: 'uint256', name: 'secondsLeft', type: 'uint256' },
-            { internalType: 'bool', name: 'isEnded', type: 'bool' },
+            { internalType: 'bool', name: 'goalMet', type: 'bool' },
+            { internalType: 'bool', name: 'isWithdrawn', type: 'bool' },
         ],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'highestBid',
+        name: 'goalAmount',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'highestBidder',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'itemName',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        name: 'myContribution',
+        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
@@ -133,43 +161,29 @@ const AUCTION_ABI = [
         type: 'function',
     },
     {
-        inputs: [{ internalType: 'address', name: '', type: 'address' }],
-        name: 'pendingReturns',
+        inputs: [],
+        name: 'progressPercent',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'placeBid',
-        outputs: [],
-        stateMutability: 'payable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'timeLeft',
+        name: 'totalRaised',
         outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
         stateMutability: 'view',
         type: 'function',
     },
     {
         inputs: [],
-        name: 'withdraw',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'withdrawProceeds',
-        outputs: [],
-        stateMutability: 'nonpayable',
+        name: 'withdrawn',
+        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+        stateMutability: 'view',
         type: 'function',
     },
 ] as const;
 
-export interface AuctionInteractionPanelProps {
+export interface GroupSavingsInteractionPanelProps {
     contractAddress?: string;
 }
 
@@ -179,10 +193,10 @@ interface TxStatus {
     hash?: string;
 }
 
-export function AuctionInteractionPanel({
+export function GroupSavingsInteractionPanel({
     contractAddress: initialAddress,
-}: AuctionInteractionPanelProps) {
-    const defaultAddress = initialAddress ?? '0x00320016Ad572264a64C98142e51200E60f73bCE';
+}: GroupSavingsInteractionPanelProps) {
+    const defaultAddress = initialAddress ?? '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28';
     const [contractAddress] = useState(defaultAddress);
     const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
     const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
@@ -190,23 +204,22 @@ export function AuctionInteractionPanel({
 
     const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
-    // Auction state
-    const [itemName, setItemName] = useState<string | null>(null);
-    const [highestBid, setHighestBid] = useState<bigint | null>(null);
-    const [highestBidder, setHighestBidder] = useState<string | null>(null);
-    const [owner, setOwner] = useState<string | null>(null);
-    const [ended, setEnded] = useState<boolean | null>(null);
+    const [desc, setDesc] = useState<string | null>(null);
+    const [goalAmount, setGoalAmount] = useState<bigint | null>(null);
+    const [totalRaised, setTotalRaised] = useState<bigint | null>(null);
+    const [remaining, setRemaining] = useState<bigint | null>(null);
     const [secondsLeft, setSecondsLeft] = useState<bigint | null>(null);
+    const [goalMet, setGoalMet] = useState<boolean | null>(null);
+    const [isWithdrawn, setIsWithdrawn] = useState<boolean | null>(null);
+    const [owner, setOwner] = useState<string | null>(null);
+    const [progressPct, setProgressPct] = useState<bigint | null>(null);
 
-    // Bid input
-    const [bidAmount, setBidAmount] = useState('');
+    const [contributeAmount, setContributeAmount] = useState('');
 
-    // Pending returns check
-    const [pendingAddress, setPendingAddress] = useState('');
-    const [pendingResult, setPendingResult] = useState<bigint | null>(null);
-    const [pendingError, setPendingError] = useState<string | null>(null);
+    const [checkAddress, setCheckAddress] = useState('');
+    const [checkResult, setCheckResult] = useState<bigint | null>(null);
+    const [checkError, setCheckError] = useState<string | null>(null);
 
-    // Tx status
     const [txStatus, setTxStatus] = useState<TxStatus>({ status: 'idle', message: '' });
     const [contractError, setContractError] = useState<string | null>(null);
 
@@ -215,7 +228,7 @@ export function AuctionInteractionPanel({
     const getReadContract = useCallback(() => {
         if (!contractAddress) return null;
         const provider = new ethers.JsonRpcProvider(networkConfig.rpcUrl);
-        return new ethers.Contract(contractAddress, AUCTION_ABI, provider);
+        return new ethers.Contract(contractAddress, GROUP_SAVINGS_ABI, provider);
     }, [contractAddress, networkConfig.rpcUrl]);
 
     const getWriteContract = useCallback(async () => {
@@ -271,7 +284,7 @@ export function AuctionInteractionPanel({
 
         const provider = new ethers.BrowserProvider(ethereum);
         const signer = await provider.getSigner();
-        return new ethers.Contract(contractAddress, AUCTION_ABI, signer);
+        return new ethers.Contract(contractAddress, GROUP_SAVINGS_ABI, signer);
     }, [chain?.id, contractAddress, walletConnected, networkConfig]);
 
     const fetchState = useCallback(async () => {
@@ -280,19 +293,23 @@ export function AuctionInteractionPanel({
 
         setContractError(null);
         try {
-            const [status, contractOwner] = await Promise.all([
+            const [status, contractOwner, pct] = await Promise.all([
                 contract.getStatus(),
                 contract.owner(),
+                contract.progressPercent(),
             ]);
 
-            setItemName(status.item as string);
-            setHighestBidder(status.leader as string);
-            setHighestBid(status.leadingBid as bigint);
+            setDesc(status.desc as string);
+            setGoalAmount(status.goal as bigint);
+            setTotalRaised(status.raised as bigint);
+            setRemaining(status.remaining as bigint);
             setSecondsLeft(status.secondsLeft as bigint);
-            setEnded(Boolean(status.isEnded));
+            setGoalMet(Boolean(status.goalMet));
+            setIsWithdrawn(Boolean(status.isWithdrawn));
             setOwner(contractOwner as string);
+            setProgressPct(pct as bigint);
         } catch (error: any) {
-            console.error('Error fetching auction state:', error);
+            console.error('Error fetching savings state:', error);
             setContractError(error?.reason || error?.message || 'Unable to read contract state on BNB Testnet');
         }
     }, [getReadContract]);
@@ -303,9 +320,8 @@ export function AuctionInteractionPanel({
         }
     }, [contractAddress, fetchState]);
 
-    // Auto-refresh countdown
     useEffect(() => {
-        if (ended || secondsLeft === null || secondsLeft === 0n) return;
+        if (goalMet || isWithdrawn || secondsLeft === null || secondsLeft === 0n) return;
         const interval = setInterval(() => {
             setSecondsLeft((prev) => {
                 if (prev === null || prev <= 1n) return 0n;
@@ -313,7 +329,7 @@ export function AuctionInteractionPanel({
             });
         }, 1000);
         return () => clearInterval(interval);
-    }, [ended, secondsLeft]);
+    }, [goalMet, isWithdrawn, secondsLeft]);
 
     const handleTx = async (op: () => Promise<ethers.TransactionResponse>, successMessage: string) => {
         if (!walletConnected) {
@@ -330,7 +346,7 @@ export function AuctionInteractionPanel({
             setTxStatus({ status: 'success', message: successMessage, hash: tx.hash });
             await fetchState();
         } catch (error: any) {
-            console.error('Auction transaction error:', error);
+            console.error('GroupSavings transaction error:', error);
             const msg = error?.reason || error?.message || 'Transaction failed';
             setTxStatus({ status: 'error', message: msg });
         } finally {
@@ -338,115 +354,98 @@ export function AuctionInteractionPanel({
         }
     };
 
-    const handlePlaceBid = async () => {
-        if (!bidAmount) {
-            setTxStatus({ status: 'error', message: 'Please enter a bid amount' });
-            setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 3000);
-            return;
-        }
-        
-        const value = parseFloat(bidAmount);
-        if (Number.isNaN(value) || value <= 0) {
-            setTxStatus({ status: 'error', message: 'Bid amount must be a positive number' });
+    const handleContribute = async () => {
+        if (!contributeAmount) {
+            setTxStatus({ status: 'error', message: 'Please enter a contribution amount' });
             setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 3000);
             return;
         }
 
-        // Check if auction is still active
-        if (ended || (secondsLeft !== null && secondsLeft <= 0n)) {
-            setTxStatus({ status: 'error', message: 'Auction has ended. Cannot place bid.' });
+        const value = parseFloat(contributeAmount);
+        if (Number.isNaN(value) || value <= 0) {
+            setTxStatus({ status: 'error', message: 'Amount must be a positive number' });
+            setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 3000);
+            return;
+        }
+
+        if (secondsLeft !== null && secondsLeft <= 0n) {
+            setTxStatus({ status: 'error', message: 'Deadline has passed. Cannot contribute.' });
             setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 4000);
             return;
         }
 
-        // Check if bid exceeds current highest
-        if (highestBid !== null) {
-            const weiValue = ethers.parseEther(bidAmount);
-            if (weiValue <= highestBid) {
-                setTxStatus({ 
-                    status: 'error', 
-                    message: `Bid must exceed ${ethers.formatEther(highestBid)} BNB (current highest bid)` 
-                });
-                setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 4000);
-                return;
-            }
+        if (isWithdrawn) {
+            setTxStatus({ status: 'error', message: 'Funds already withdrawn.' });
+            setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 4000);
+            return;
         }
 
         try {
             const contract = await getWriteContract();
-            const weiValue = ethers.parseEther(bidAmount);
+            const weiValue = ethers.parseEther(contributeAmount);
             await handleTx(
-                () => contract.placeBid({ value: weiValue }),
-                `Bid placed: ${bidAmount} BNB`
+                () => contract.contribute({ value: weiValue }),
+                `Contributed: ${contributeAmount} BNB`
             );
-            setBidAmount('');
+            setContributeAmount('');
         } catch (error: any) {
-            console.error('Auction transaction error:', error);
-            let errorMsg = 'Failed to place bid';
-            
-            if (error?.message?.includes('Auction has ended')) {
-                errorMsg = 'Auction has ended. Refresh to see current status.';
-            } else if (error?.message?.includes('Auction already closed')) {
-                errorMsg = 'Auction has been closed by owner.';
-            } else if (error?.message?.includes('Bid too low')) {
-                errorMsg = 'Bid too low. Must exceed current highest bid.';
+            console.error('Contribute error:', error);
+            let errorMsg = 'Failed to contribute';
+
+            if (error?.message?.includes('Deadline has passed')) {
+                errorMsg = 'Deadline has passed. Cannot contribute.';
+            } else if (error?.message?.includes('Funds already withdrawn')) {
+                errorMsg = 'Funds have already been withdrawn.';
+            } else if (error?.message?.includes('Must send ETH')) {
+                errorMsg = 'Must send BNB (amount > 0).';
             } else if (error?.reason) {
                 errorMsg = error.reason;
             } else if (error?.message) {
                 errorMsg = error.message;
             }
-            
+
             setTxStatus({ status: 'error', message: errorMsg });
             setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 6000);
         }
     };
 
-    const handleWithdraw = async () => {
+    const handleRefund = async () => {
         try {
             const contract = await getWriteContract();
-            await handleTx(() => contract.withdraw(), 'Withdrawn pending returns');
+            await handleTx(() => contract.refund(), 'Refund claimed successfully');
         } catch (error: any) {
-            setTxStatus({ status: 'error', message: error?.message || 'Failed to withdraw' });
+            setTxStatus({ status: 'error', message: error?.message || 'Failed to claim refund' });
         }
     };
 
-    const handleEndEarly = async () => {
+    const handleWithdrawFunds = async () => {
         try {
             const contract = await getWriteContract();
-            await handleTx(() => contract.endEarly(), 'Auction ended early');
+            await handleTx(() => contract.withdrawFunds(), 'Funds withdrawn by owner');
         } catch (error: any) {
-            setTxStatus({ status: 'error', message: error?.message || 'Failed to end auction early' });
+            setTxStatus({ status: 'error', message: error?.message || 'Failed to withdraw funds' });
         }
     };
 
-    const handleWithdrawProceeds = async () => {
-        try {
-            const contract = await getWriteContract();
-            await handleTx(() => contract.withdrawProceeds(), 'Proceeds withdrawn');
-        } catch (error: any) {
-            setTxStatus({ status: 'error', message: error?.message || 'Failed to withdraw proceeds' });
-        }
-    };
-
-    const handleCheckPending = async () => {
+    const handleCheckContribution = async () => {
         const contract = getReadContract();
         if (!contract) return;
 
-        const target = (pendingAddress || userAddress)?.toString();
+        const target = (checkAddress || userAddress)?.toString();
         if (!target) {
-            setPendingError('Enter an address or connect your wallet');
-            setPendingResult(null);
+            setCheckError('Enter an address or connect your wallet');
+            setCheckResult(null);
             return;
         }
 
         try {
-            setPendingError(null);
-            const result = await contract.pendingReturns(target);
-            setPendingResult(result as bigint);
+            setCheckError(null);
+            const result = await contract.contributions(target);
+            setCheckResult(result as bigint);
         } catch (error: any) {
-            console.error('Error checking pending returns:', error);
-            setPendingError(error?.reason || error?.message || 'Unable to check pending returns');
-            setPendingResult(null);
+            console.error('Error checking contribution:', error);
+            setCheckError(error?.reason || error?.message || 'Unable to check contribution');
+            setCheckResult(null);
         }
     };
 
@@ -461,23 +460,21 @@ export function AuctionInteractionPanel({
         return `${s}s`;
     }
 
-    const isOwnerHint = (
-        <p className="text-[10px] text-forge-muted">
-            Owner-only functions. If your transaction reverts, make sure you are using the deployer wallet.
-        </p>
-    );
+    const deadlinePassed = secondsLeft !== null && secondsLeft <= 0n;
+    const canRefund = deadlinePassed && !goalMet && !isWithdrawn;
+    const canWithdraw = goalMet === true && !isWithdrawn;
 
     return (
         <div className="space-y-4">
             {/* Header */}
-            <div className="p-3 rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent">
+            <div className="p-3 rounded-lg border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-transparent">
                 <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2">
-                        <Gavel className="w-4 h-4 text-amber-400" />
+                        <PiggyBank className="w-4 h-4 text-emerald-400" />
                         <div>
-                            <h3 className="text-sm font-medium text-white">BNB Auction Contract</h3>
+                            <h3 className="text-sm font-medium text-white">BNB Group Savings</h3>
                             <p className="text-[10px] text-forge-muted">
-                                English auction on BNB Smart Chain Testnet.
+                                Shared savings pot on {networkConfig.name}.
                             </p>
                         </div>
                     </div>
@@ -486,34 +483,17 @@ export function AuctionInteractionPanel({
                     href={explorerUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[10px] font-mono text-amber-400 hover:underline"
+                    className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400 hover:underline"
                 >
                     {contractAddress.slice(0, 6)}...{contractAddress.slice(-4)}
                     <ExternalLink className="w-2.5 h-2.5" />
                 </a>
             </div>
 
-            {/* Wallet Status */}
-            <div className={cn(
-                'p-2.5 rounded-lg border',
-                walletConnected ? 'border-green-500/30 bg-green-500/5' : 'border-amber-500/30 bg-amber-500/5'
-            )}>
-                <div className="flex items-center gap-2">
-                    <Users className={cn('w-3.5 h-3.5', walletConnected ? 'text-green-400' : 'text-amber-400')} />
-                    {walletConnected ? (
-                        <span className="text-[10px] text-green-300">
-                            Connected: <code className="text-green-400">{userAddress?.slice(0, 6)}...{userAddress?.slice(-4)}</code>
-                        </span>
-                    ) : (
-                        <span className="text-[10px] text-amber-300">Connect wallet via Wallet Auth node for write ops</span>
-                    )}
-                </div>
-            </div>
-
             {/* Network Selector */}
             <div className="space-y-1.5">
                 <label className="text-xs text-forge-muted flex items-center gap-1.5">
-                    <span className="text-sm">🌐</span> Network
+                    <Globe className="w-3.5 h-3.5" /> Network
                 </label>
                 <div className="relative">
                     <button
@@ -522,7 +502,7 @@ export function AuctionInteractionPanel({
                         className={cn(
                             'w-full flex items-center justify-between px-3 py-2 rounded-lg border text-sm',
                             'bg-forge-bg border-forge-border',
-                            'text-white hover:border-amber-500/50 transition-colors'
+                            'text-white hover:border-emerald-500/50 transition-colors'
                         )}
                     >
                         <div className="flex items-center gap-2">
@@ -535,7 +515,7 @@ export function AuctionInteractionPanel({
                             />
                             <span>{networkConfig.name}</span>
                             {(networkConfig.id === 'testnet' || networkConfig.id === 'opbnbTestnet') && (
-                                <span className="text-[8px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">Testnet</span>
+                                <span className="text-[8px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">Testnet</span>
                             )}
                         </div>
                         <ChevronDown className={cn(
@@ -544,7 +524,6 @@ export function AuctionInteractionPanel({
                         )} />
                     </button>
 
-                    {/* Dropdown Menu */}
                     {showNetworkDropdown && (
                         <div className="absolute top-full mt-1 w-full bg-forge-bg border border-forge-border rounded-lg shadow-xl z-50 overflow-hidden">
                             {Object.entries(BNB_NETWORKS).map(([key, network]) => (
@@ -563,8 +542,8 @@ export function AuctionInteractionPanel({
                                         'flex items-center justify-between',
                                         network.disabled
                                             ? 'opacity-50 cursor-not-allowed bg-forge-bg/80 backdrop-blur-sm'
-                                            : 'hover:bg-amber-500/10 cursor-pointer',
-                                        selectedNetwork === key && 'bg-amber-500/20'
+                                            : 'hover:bg-emerald-500/10 cursor-pointer',
+                                        selectedNetwork === key && 'bg-emerald-500/20'
                                     )}
                                 >
                                     <div className="flex items-center gap-2">
@@ -579,7 +558,7 @@ export function AuctionInteractionPanel({
                                             <div className="flex items-center gap-2">
                                                 <span className="text-white">{network.name}</span>
                                                 {(network.id === 'testnet' || network.id === 'opbnbTestnet') && (
-                                                    <span className="text-[8px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">Testnet</span>
+                                                    <span className="text-[8px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">Testnet</span>
                                                 )}
                                             </div>
                                             <p className="text-[10px] text-forge-muted mt-0.5">
@@ -588,7 +567,7 @@ export function AuctionInteractionPanel({
                                         </div>
                                     </div>
                                     {network.disabled && (
-                                        <span className="text-[9px] px-1.5 py-0.5 bg-gray-500/20 text-gray-400 rounded">Coming Soon</span>
+                                        <span className="text-[9px] px-1.5 py-0.5 bg-gray-500/30 text-gray-400 rounded shrink-0">Coming soon</span>
                                     )}
                                 </button>
                             ))}
@@ -597,10 +576,27 @@ export function AuctionInteractionPanel({
                 </div>
             </div>
 
+            {/* Wallet Status */}
+            <div className={cn(
+                'p-2.5 rounded-lg border',
+                walletConnected ? 'border-green-500/30 bg-green-500/5' : 'border-emerald-500/30 bg-emerald-500/5'
+            )}>
+                <div className="flex items-center gap-2">
+                    <Users className={cn('w-3.5 h-3.5', walletConnected ? 'text-green-400' : 'text-emerald-400')} />
+                    {walletConnected ? (
+                        <span className="text-[10px] text-green-300">
+                            Connected: <code className="text-green-400">{userAddress?.slice(0, 6)}...{userAddress?.slice(-4)}</code>
+                        </span>
+                    ) : (
+                        <span className="text-[10px] text-emerald-300">Connect wallet via Wallet Auth node for write ops</span>
+                    )}
+                </div>
+            </div>
+
             {/* Refresh button */}
             <button
                 onClick={fetchState}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-medium transition-colors"
             >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Refresh state
@@ -612,7 +608,7 @@ export function AuctionInteractionPanel({
                     className={cn(
                         'rounded-lg p-2.5 border flex items-start gap-2',
                         txStatus.status === 'pending' && 'bg-blue-500/10 border-blue-500/30',
-                        txStatus.status === 'success' && 'bg-amber-500/10 border-amber-500/30',
+                        txStatus.status === 'success' && 'bg-emerald-500/10 border-emerald-500/30',
                         txStatus.status === 'error' && 'bg-red-500/10 border-red-500/30'
                     )}
                 >
@@ -620,7 +616,7 @@ export function AuctionInteractionPanel({
                         <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin shrink-0" />
                     )}
                     {txStatus.status === 'success' && (
-                        <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                     )}
                     {txStatus.status === 'error' && (
                         <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
@@ -630,7 +626,7 @@ export function AuctionInteractionPanel({
                             className={cn(
                                 'text-[10px] font-medium truncate',
                                 txStatus.status === 'pending' && 'text-blue-300',
-                                txStatus.status === 'success' && 'text-amber-300',
+                                txStatus.status === 'success' && 'text-emerald-300',
                                 txStatus.status === 'error' && 'text-red-300'
                             )}
                         >
@@ -651,11 +647,11 @@ export function AuctionInteractionPanel({
                 </div>
             )}
 
-            {/* Auction State */}
+            {/* Savings Status */}
             <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                    <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-xs font-medium text-white">Auction Status</span>
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-xs font-medium text-white">Savings Status</span>
                 </div>
                 {contractError && (
                     <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-2">
@@ -663,24 +659,59 @@ export function AuctionInteractionPanel({
                         <p className="text-[10px] text-red-200">{contractError}</p>
                     </div>
                 )}
+
+                {/* Description */}
+                <div className="p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
+                    <p className="text-[10px] text-forge-muted">Description</p>
+                    <p className="text-sm font-semibold text-white">
+                        {desc ?? '—'}
+                    </p>
+                </div>
+
+                {/* Progress Bar */}
+                {goalAmount !== null && totalRaised !== null && (
+                    <div className="p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <p className="text-[10px] text-forge-muted">Progress</p>
+                            <p className="text-[10px] font-medium text-emerald-400">
+                                {progressPct !== null ? `${Number(progressPct)}%` : '—'}
+                            </p>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-forge-border/30 overflow-hidden">
+                            <div
+                                className={cn(
+                                    'h-full rounded-full transition-all duration-500',
+                                    goalMet ? 'bg-emerald-400' : 'bg-emerald-600'
+                                )}
+                                style={{ width: `${Math.min(Number(progressPct ?? 0n), 100)}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div className="p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
-                        <p className="text-[10px] text-forge-muted">Item</p>
+                        <div className="flex items-center gap-1">
+                            <Target className="w-3 h-3 text-emerald-400" />
+                            <p className="text-[10px] text-forge-muted">Goal</p>
+                        </div>
                         <p className="text-sm font-semibold text-white">
-                            {itemName ?? '—'}
+                            {goalAmount !== null
+                                ? `${ethers.formatEther(goalAmount)} BNB`
+                                : '—'}
                         </p>
                     </div>
                     <div className="p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
-                        <p className="text-[10px] text-forge-muted">Highest Bid</p>
+                        <p className="text-[10px] text-forge-muted">Raised</p>
                         <p className="text-sm font-semibold text-white">
-                            {highestBid !== null
-                                ? `${ethers.formatEther(highestBid)} BNB`
+                            {totalRaised !== null
+                                ? `${ethers.formatEther(totalRaised)} BNB`
                                 : '—'}
                         </p>
                     </div>
                     <div className="p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
                         <div className="flex items-center gap-1">
-                            <Timer className="w-3 h-3 text-amber-400" />
+                            <Timer className="w-3 h-3 text-emerald-400" />
                             <p className="text-[10px] text-forge-muted">Time Left</p>
                         </div>
                         <p className="text-sm font-semibold text-white">
@@ -690,10 +721,10 @@ export function AuctionInteractionPanel({
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="p-2.5 rounded-lg bg-forge-bg/50 border border-forge-border/30">
-                        <p className="text-[10px] text-forge-muted">Leading Bidder</p>
-                        <p className="text-[11px] font-mono text-white truncate">
-                            {highestBidder && highestBidder !== '0x0000000000000000000000000000000000000000'
-                                ? highestBidder
+                        <p className="text-[10px] text-forge-muted">Remaining</p>
+                        <p className="text-sm font-semibold text-white">
+                            {remaining !== null
+                                ? `${ethers.formatEther(remaining)} BNB`
                                 : '—'}
                         </p>
                     </div>
@@ -705,25 +736,35 @@ export function AuctionInteractionPanel({
                         <p className="text-[10px] text-forge-muted mt-1">
                             Status:{' '}
                             <span className="font-semibold text-white">
-                                {ended === null ? '—' : ended ? 'Ended' : 'Active'}
+                                {isWithdrawn === null
+                                    ? '—'
+                                    : isWithdrawn
+                                        ? 'Withdrawn'
+                                        : goalMet
+                                            ? 'Goal Met ✓'
+                                            : deadlinePassed
+                                                ? 'Expired'
+                                                : 'Active'}
                             </span>
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* Place Bid */}
+            {/* Contribute */}
             <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                    <Gavel className="w-3.5 h-3.5 text-amber-400" />
-                    <span className="text-xs font-medium text-white">Place a Bid</span>
+                    <PiggyBank className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-xs font-medium text-white">Contribute</span>
                 </div>
                 <div className="p-3 rounded-lg bg-forge-bg/50 border border-forge-border/40 space-y-2">
-                    {ended || (secondsLeft !== null && secondsLeft <= 0n) ? (
+                    {deadlinePassed || isWithdrawn ? (
                         <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center gap-2">
                             <AlertCircle className="w-3.5 h-3.5 text-red-400" />
                             <p className="text-[10px] text-red-200">
-                                Auction has ended. No more bids can be placed.
+                                {isWithdrawn
+                                    ? 'Funds have been withdrawn. No more contributions.'
+                                    : 'Deadline has passed. No more contributions.'}
                             </p>
                         </div>
                     ) : (
@@ -733,106 +774,99 @@ export function AuctionInteractionPanel({
                                     type="number"
                                     step="0.001"
                                     min={0}
-                                    value={bidAmount}
-                                    onChange={(e) => setBidAmount(e.target.value)}
-                                    placeholder="Bid amount in BNB (e.g. 0.01)"
+                                    value={contributeAmount}
+                                    onChange={(e) => setContributeAmount(e.target.value)}
+                                    placeholder="Amount in BNB (e.g. 0.01)"
                                     className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-xs text-white placeholder-white/40 focus:outline-none"
                                 />
-                                {highestBid !== null && (
-                                    <p className="text-[9px] text-amber-400">
-                                        Minimum bid: {ethers.formatEther(highestBid + 1n)} BNB (must exceed current highest)
+                                {remaining !== null && remaining > 0n && (
+                                    <p className="text-[9px] text-emerald-400">
+                                        Still needed: {ethers.formatEther(remaining)} BNB
                                     </p>
                                 )}
                             </div>
                             <button
-                                onClick={handlePlaceBid}
+                                onClick={handleContribute}
                                 disabled={!walletConnected || txStatus.status === 'pending'}
-                                className="w-full py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded text-[10px] font-medium disabled:opacity-50"
+                                className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium disabled:opacity-50"
                             >
-                                Place Bid
+                                Contribute
                             </button>
                             <p className="text-[10px] text-forge-muted">
-                                Your bid must exceed the current highest bid. Outbid BNB is refundable via Withdraw.
+                                Send BNB to help reach the group savings goal.
                             </p>
                         </>
                     )}
                 </div>
             </div>
 
-            {/* Withdraw */}
+            {/* Refund */}
             <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                    <ArrowDownToLine className="w-3.5 h-3.5 text-green-400" />
-                    <span className="text-xs font-medium text-white">Withdraw</span>
+                    <ArrowDownToLine className="w-3.5 h-3.5 text-orange-400" />
+                    <span className="text-xs font-medium text-white">Claim Refund</span>
                 </div>
                 <button
-                    onClick={handleWithdraw}
-                    disabled={!walletConnected || txStatus.status === 'pending'}
-                    className="w-full py-1.5 bg-green-600 hover:bg-green-500 text-white rounded text-[10px] font-medium disabled:opacity-50"
+                    onClick={handleRefund}
+                    disabled={!walletConnected || txStatus.status === 'pending' || !canRefund}
+                    className="w-full py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded text-[10px] font-medium disabled:opacity-50"
                 >
-                    Withdraw Pending Returns
+                    Claim Refund
                 </button>
                 <p className="text-[10px] text-forge-muted">
-                    If you have been outbid, use this to reclaim your BNB.
+                    Refunds are available if the deadline passes without reaching the goal.
                 </p>
             </div>
 
-            {/* Admin Controls */}
+            {/* Owner: Withdraw Funds */}
             <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                    <Gavel className="w-3.5 h-3.5 text-amber-400" />
+                    <PiggyBank className="w-3.5 h-3.5 text-emerald-400" />
                     <span className="text-xs font-medium text-white">Owner Controls</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <button
-                        onClick={handleEndEarly}
-                        disabled={!walletConnected || txStatus.status === 'pending'}
-                        className="px-3 py-2 text-[11px] rounded-lg bg-red-600 text-white font-medium hover:bg-red-500 disabled:opacity-50"
-                    >
-                        End Auction Early
-                    </button>
-                    <button
-                        onClick={handleWithdrawProceeds}
-                        disabled={!walletConnected || txStatus.status === 'pending'}
-                        className="px-3 py-2 text-[11px] rounded-lg bg-amber-600 text-white font-medium hover:bg-amber-500 disabled:opacity-50"
-                    >
-                        Withdraw Proceeds
-                    </button>
-                </div>
-                {isOwnerHint}
+                <button
+                    onClick={handleWithdrawFunds}
+                    disabled={!walletConnected || txStatus.status === 'pending' || !canWithdraw}
+                    className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium disabled:opacity-50"
+                >
+                    Withdraw Funds
+                </button>
+                <p className="text-[10px] text-forge-muted">
+                    Owner-only. Withdraw all funds once the goal is reached. If you are not the owner, the transaction will revert.
+                </p>
             </div>
 
-            {/* Check Pending Returns */}
+            {/* Check Contribution */}
             <div className="space-y-2">
                 <p className="text-[10px] font-medium text-white">
-                    Check pending returns for an address
+                    Check contribution for an address
                 </p>
                 <div className="flex flex-col gap-1.5">
                     <input
                         type="text"
                         placeholder={userAddress ? 'Leave empty to use connected wallet' : '0x... address'}
-                        value={pendingAddress}
-                        onChange={(e) => setPendingAddress(e.target.value)}
+                        value={checkAddress}
+                        onChange={(e) => setCheckAddress(e.target.value)}
                         className="w-full px-2.5 py-1.5 bg-forge-bg border border-forge-border/50 rounded text-[11px] text-white placeholder-white/40 focus:outline-none"
                     />
                     <div className="flex items-center gap-2">
                         <button
-                            onClick={handleCheckPending}
-                            className="px-2.5 py-1.5 text-[10px] rounded-lg bg-amber-600 text-white font-medium hover:bg-amber-500"
+                            onClick={handleCheckContribution}
+                            className="px-2.5 py-1.5 text-[10px] rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-500"
                         >
-                            Check pending
+                            Check
                         </button>
-                        {pendingResult !== null && !pendingError && (
+                        {checkResult !== null && !checkError && (
                             <span className="text-[10px] text-forge-muted">
-                                Pending:{' '}
+                                Contribution:{' '}
                                 <span className="font-semibold text-white">
-                                    {ethers.formatEther(pendingResult)} BNB
+                                    {ethers.formatEther(checkResult)} BNB
                                 </span>
                             </span>
                         )}
-                        {pendingError && (
+                        {checkError && (
                             <span className="text-[10px] text-red-300 truncate">
-                                {pendingError}
+                                {checkError}
                             </span>
                         )}
                     </div>
