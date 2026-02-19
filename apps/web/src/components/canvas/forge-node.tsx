@@ -102,9 +102,9 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'openclaw-agent': { src: OpenClawLogo, alt: 'OpenClaw' },
   // BNB Voting Contract
   'bnb-voting-contract': { src: BnbChainLogo, alt: 'BNB Voting' },
-  // BNB Auction Contract
   'bnb-auction-contract': { src: BnbChainLogo, alt: 'BNB Auction' },
   'bnb-groupsavings-contract': { src: BnbChainLogo, alt: 'BNB Group Savings' },
+  'bnb-marketplace-contract': { src: BnbChainLogo, alt: 'BNB Marketplace' },
   // Dune Analytics plugins
   'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
   'dune-token-price': { src: DuneLogo, alt: 'Dune' },
@@ -161,9 +161,9 @@ const iconMap: Record<string, typeof Box> = {
   'dune-transaction-history': Database,
   'dune-gas-price': Fuel,
   'dune-protocol-tvl': Lock,
-  // BNB Auction Contract
   'bnb-auction-contract': Gavel,
   'bnb-groupsavings-contract': PiggyBank,
+  'bnb-marketplace-contract': Box,
 };
 
 /**

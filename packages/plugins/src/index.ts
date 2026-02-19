@@ -85,6 +85,7 @@ import { FrontendScaffoldPlugin } from './frontend-scaffold';
 import { BnbVotingContractPlugin } from './bnb-voting-contract';
 import { BnbAuctionContractPlugin } from './bnb-auction-contract';
 import { BnbGroupSavingsContractPlugin } from './bnb-groupsavings-contract';
+import { BnbMarketplaceContractPlugin } from './bnb-marketplace-contract';
 import { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
 import { WalletAuthPlugin } from './wallet-auth';
 import { RPCProviderPlugin } from './rpc-provider';
@@ -163,6 +164,7 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new BnbVotingContractPlugin());
   targetRegistry.register(new BnbAuctionContractPlugin());
   targetRegistry.register(new BnbGroupSavingsContractPlugin());
+  targetRegistry.register(new BnbMarketplaceContractPlugin());
 
   // New Arbitrum-focused plugins
   targetRegistry.register(new EIP7702SmartEOAPlugin());

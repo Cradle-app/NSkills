@@ -65,6 +65,24 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
       contractAddress: '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28',
     },
   },
+  'bnb-marketplace-contract': {
+    id: 'bnb-marketplace-contract',
+    name: 'Marketplace Contract',
+    description: 'Interact with a SimpleMarketplace.sol contract on BNB Smart Chain Testnet',
+    icon: 'Box',
+    logoAsset: 'BNB Chain.png',
+    color: 'node-contracts',
+    category: 'contracts',
+    tags: ['marketplace', 'escrow', 'bnb', 'testnet', 'contract'],
+    compatibility: {
+      compatibleWith: ['frontend-scaffold', 'wallet-auth'],
+      suggestedWith: ['rpc-provider'],
+      requires: [],
+    },
+    defaultConfig: {
+      contractAddress: '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61',
+    },
+  },
   'erc20-stylus': {
     id: 'erc20-stylus',
     name: 'ERC-20 Token',

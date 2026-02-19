@@ -139,6 +139,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'bnb-voting-contract',
       'bnb-auction-contract',
       'bnb-groupsavings-contract',
+      'bnb-marketplace-contract',
       'maxxit',
       'onchain-activity',
       'openclaw-agent',

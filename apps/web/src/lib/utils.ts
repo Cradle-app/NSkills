@@ -91,6 +91,7 @@ export function nodeTypeToLabel(type: string): string {
     'bnb-voting-contract': 'BNB Voting Contract',
     'bnb-auction-contract': 'BNB Auction Contract',
     'bnb-groupsavings-contract': 'BNB Group Savings Contract',
+    'bnb-marketplace-contract': 'BNB Marketplace Contract',
     // Dune Analytics
     'dune-execute-sql': 'Dune Execute SQL',
     'dune-token-price': 'Dune Token Price',
@@ -172,6 +173,7 @@ export function nodeTypeToColor(type: string): string {
     'bnb-voting-contract': 'node-contracts',
     'bnb-auction-contract': 'node-contracts',
     'bnb-groupsavings-contract': 'node-contracts',
+    'bnb-marketplace-contract': 'node-contracts',
     // ERC-20/ERC-721/ERC-1155 Stylus nodes
     'erc20-stylus': 'node-contracts',
     'erc721-stylus': 'node-contracts',
