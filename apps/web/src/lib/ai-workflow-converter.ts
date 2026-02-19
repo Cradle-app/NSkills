@@ -26,6 +26,9 @@ const toolTypeMap: Record<string, string> = {
   'pyth_oracle': 'pyth-oracle',
   'chainlink_price_feed': 'chainlink-price-feed',
   'chainlink_price': 'chainlink-price-feed',
+  'uniswap_swap': 'uniswap-swap',
+  'uniswap': 'uniswap-swap',
+  'swap': 'uniswap-swap',
   'aave_lending': 'aave-lending',
   'aave': 'aave-lending',
   'lending': 'aave-lending',
@@ -54,6 +57,73 @@ const toolTypeMap: Record<string, string> = {
   'aixbt_signals': 'aixbt-signals',
   'aixbt_indigo': 'aixbt-indigo',
   'aixbt_observer': 'aixbt-observer',
+  // Superposition
+  'superposition_network': 'superposition-network',
+  'superposition_bridge': 'superposition-bridge',
+  'superposition_longtail': 'superposition-longtail',
+  'superposition_super_assets': 'superposition-super-assets',
+  'superposition_thirdweb': 'superposition-thirdweb',
+  'superposition_utility_mining': 'superposition-utility-mining',
+  'superposition_faucet': 'superposition-faucet',
+  'superposition_meow_domains': 'superposition-meow-domains',
+  // Robinhood
+  'robinhood_network': 'robinhood-network',
+  'robinhood_deployment': 'robinhood-deployment',
+  'robinhood_contracts': 'robinhood-contracts',
+  // OpenClaw
+  'openclaw_agent': 'openclaw-agent',
+  'openclaw': 'openclaw-agent',
+  // BNB
+  'bnb_voting_contract': 'bnb-voting-contract',
+  'bnb_voting': 'bnb-voting-contract',
+  'bnb_auction_contract': 'bnb-auction-contract',
+  'bnb_auction': 'bnb-auction-contract',
+  'bnb_groupsavings_contract': 'bnb-groupsavings-contract',
+  'bnb_groupsavings': 'bnb-groupsavings-contract',
+  'bnb_lottery_contract': 'bnb-lottery-contract',
+  'bnb_lottery': 'bnb-lottery-contract',
+  'crowdfunding_contract': 'crowdfunding-contract',
+  'crowdfunding': 'crowdfunding-contract',
+  'bounty_board_contract': 'bounty-board-contract',
+  'bounty_board': 'bounty-board-contract',
+  'bnb_marketplace_contract': 'bnb-marketplace-contract',
+  'bnb_marketplace': 'bnb-marketplace-contract',
+  'bnb_voting_contracts': 'bnb-voting-contract',
+  'voting_contract': 'bnb-voting-contract',
+  'voting': 'bnb-voting-contract',
+  'bnb_auction_contracts': 'bnb-auction-contract',
+  'auction_contract': 'bnb-auction-contract',
+  'auction': 'bnb-auction-contract',
+  'bnb_groupsavings_contracts': 'bnb-groupsavings-contract',
+  'groupsavings_contract': 'bnb-groupsavings-contract',
+  'groupsavings': 'bnb-groupsavings-contract',
+  'bnb_lottery_contracts': 'bnb-lottery-contract',
+  'lottery_contract': 'bnb-lottery-contract',
+  'lottery': 'bnb-lottery-contract',
+  'crowdfunding_contracts': 'crowdfunding-contract',
+  'bounty_board_contracts': 'bounty-board-contract',
+  'bnb_marketplace_contracts': 'bnb-marketplace-contract',
+  'marketplace_contract': 'bnb-marketplace-contract',
+  'marketplace': 'bnb-marketplace-contract',
+  // Dune
+  'dune_execute_sql': 'dune-execute-sql',
+  'dune_sql': 'dune-execute-sql',
+  'dune_token_price': 'dune-token-price',
+  'dune_price': 'dune-token-price',
+  'dune_wallet_balances': 'dune-wallet-balances',
+  'dune_balances': 'dune-wallet-balances',
+  'dune_dex_volume': 'dune-dex-volume',
+  'dune_volume': 'dune-dex-volume',
+  'dune_nft_floor': 'dune-nft-floor',
+  'dune_floor': 'dune-nft-floor',
+  'dune_address_labels': 'dune-address-labels',
+  'dune_labels': 'dune-address-labels',
+  'dune_transaction_history': 'dune-transaction-history',
+  'dune_history': 'dune-transaction-history',
+  'dune_gas_price': 'dune-gas-price',
+  'dune_gas': 'dune-gas-price',
+  'dune_protocol_tvl': 'dune-protocol-tvl',
+  'dune_tvl': 'dune-protocol-tvl',
 };
 
 // Valid node types in our system
@@ -92,6 +162,35 @@ const validNodeTypes = [
   'aixbt-signals',
   'aixbt-indigo',
   'aixbt-observer',
+  'uniswap-swap',
+  'superposition-network',
+  'superposition-bridge',
+  'superposition-longtail',
+  'superposition-super-assets',
+  'superposition-thirdweb',
+  'superposition-utility-mining',
+  'superposition-faucet',
+  'superposition-meow-domains',
+  'robinhood-network',
+  'robinhood-deployment',
+  'robinhood-contracts',
+  'openclaw-agent',
+  'bnb-voting-contract',
+  'bnb-auction-contract',
+  'bnb-groupsavings-contract',
+  'bnb-lottery-contract',
+  'crowdfunding-contract',
+  'bounty-board-contract',
+  'bnb-marketplace-contract',
+  'dune-execute-sql',
+  'dune-token-price',
+  'dune-wallet-balances',
+  'dune-dex-volume',
+  'dune-nft-floor',
+  'dune-address-labels',
+  'dune-transaction-history',
+  'dune-gas-price',
+  'dune-protocol-tvl',
 ];
 
 // Default node configs matching the blueprint store
@@ -282,6 +381,44 @@ const DEFAULT_NODE_CONFIGS: Record<string, Record<string, unknown>> = {
     severityFilter: ['low', 'medium', 'high'],
     projectPath: '.',
   },
+  'uniswap-swap': {
+    tokenIn: 'ETH',
+    tokenOut: 'USDC',
+  },
+  'superposition-network': {},
+  'superposition-bridge': {},
+  'superposition-longtail': {},
+  'superposition-super-assets': {},
+  'superposition-thirdweb': {},
+  'superposition-utility-mining': {},
+  'superposition-faucet': {},
+  'superposition-meow-domains': {},
+  'robinhood-network': {},
+  'robinhood-deployment': {},
+  'robinhood-contracts': {},
+  'openclaw-agent': {},
+  'bnb-voting-contract': {},
+  'bnb-auction-contract': {},
+  'bnb-groupsavings-contract': {},
+  'bnb-lottery-contract': {},
+  'crowdfunding-contract': {},
+  'bounty-board-contract': {},
+  'bnb-marketplace-contract': {},
+  'dune-execute-sql': {
+    queryId: '',
+  },
+  'dune-token-price': {
+    tokenAddress: '',
+  },
+  'dune-wallet-balances': {
+    walletAddress: '',
+  },
+  'dune-dex-volume': {},
+  'dune-nft-floor': {},
+  'dune-address-labels': {},
+  'dune-transaction-history': {},
+  'dune-gas-price': {},
+  'dune-protocol-tvl': {},
 };
 
 // Generate proper UUIDs
@@ -443,7 +580,7 @@ export function isValidAIWorkflowResponse(data: unknown): data is AIResponse {
  */
 export function getAvailableNodeTypesContext(): string {
   return `
-Available components for building Web3 applications on Arbitrum:
+Available components for building Web3 applications (Arbitrum, BNB Chain, etc.):
 
 CONTRACTS:
 - stylus_contract: Stylus contract - provide instructions, get markdown guide + counter template for LLM-assisted code gen
@@ -482,5 +619,46 @@ TELEGRAM:
 
 QUALITY:
 - quality_gates: CI/CD, testing, linting setup
+
+DEFI:
+- uniswap_swap: Swap tokens on Uniswap
+
+SUPERPOSITION:
+- superposition_network: Superposition network integration
+- superposition_bridge: Bridge assets to Superposition
+- superposition_longtail: Longtail asset protocols
+- superposition_super_assets: Manage Super Assets
+- superposition_thirdweb: Thirdweb integration for Superposition
+- superposition_utility_mining: Utility mining rewards
+- superposition_faucet: Testnet faucet access
+- superposition_meow_domains: ENS-like domains for Superposition
+
+ROBINHOOD:
+- robinhood_network: Robinhood network integration
+- robinhood_deployment: Deploy contracts to Robinhood chain
+- robinhood_contracts: Interact with Robinhood smart contracts
+
+BNB CHAIN:
+- bnb_voting_contract: Full-stack Voting dApp on BNB Chain
+- bnb_auction_contract: Full-stack Auction dApp on BNB Chain
+- bnb_groupsavings_contract: Full-stack Group Savings dApp
+- bnb_lottery_contract: Full-stack Lottery dApp on BNB Chain
+- crowdfunding_contract: Full-stack Crowdfunding dApp
+- bounty_board_contract: Full-stack Bounty Board dApp
+- bnb_marketplace_contract: Full-stack NFT/Asset Marketplace dApp
+
+DUNE ANALYTICS:
+- dune_execute_sql: Execute custom SQL queries
+- dune_token_price: Fetch token prices
+- dune_wallet_balances: Analyze wallet holdings
+- dune_dex_volume: DEX trading volume metrics
+- dune_nft_floor: NFT collection floor prices
+- dune_address_labels: Address labeling and attribution
+- dune_transaction_history: Historical query data
+- dune_gas_price: Gas price tracking
+- dune_protocol_tvl: Total Value Locked analytics
+
+OTHER AGENTS:
+- openclaw_agent: OpenClaw execution agent
 `.trim();
 }
