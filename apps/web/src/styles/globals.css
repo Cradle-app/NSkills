@@ -45,11 +45,11 @@
     --color-accent-primary-l: 58%;
     --color-accent-primary: var(--color-accent-primary-h) var(--color-accent-primary-s) var(--color-accent-primary-l); /* #d97a4a */
     
-    /* Secondary accent - Soft purple */
-    --color-accent-secondary-h: 255;
-    --color-accent-secondary-s: 45%;
-    --color-accent-secondary-l: 60%;
-    --color-accent-secondary: var(--color-accent-secondary-h) var(--color-accent-secondary-s) var(--color-accent-secondary-l); /* #9b8cbd */
+    /* Secondary accent - Muted terracotta (derived from primary) */
+    --color-accent-secondary-h: 18;
+    --color-accent-secondary-s: 50%;
+    --color-accent-secondary-l: 65%;
+    --color-accent-secondary: var(--color-accent-secondary-h) var(--color-accent-secondary-s) var(--color-accent-secondary-l); /* #e19d7a */
     
     /* Tertiary accent - Muted teal */
     --color-accent-tertiary-h: 175;
@@ -66,10 +66,10 @@
     /* Node category colors - Softer palette */
     --color-node-contracts: 200 55% 55%;    /* Soft blue */
     --color-node-payments: 38 60% 55%;      /* Warm amber */
-    --color-node-agents: 285 45% 55%;       /* Muted purple */
+    --color-node-agents: 18 45% 55%;       /* Muted terracotta */
     --color-node-app: 152 45% 50%;          /* Soft green */
     --color-node-quality: 0 50% 55%;        /* Muted red */
-    --color-node-intelligence: 255 45% 58%; /* Soft violet */
+    --color-node-intelligence: 18 45% 58%; /* Muted terracotta */
     --color-node-telegram: 200 70% 48%;     /* Telegram blue */
     
     /* ----------------------------------------

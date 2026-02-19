@@ -17,130 +17,8 @@ import {
 import { useAccount } from 'wagmi';
 import { cn } from './cn';
 
-const BNB_NETWORKS = {
-    testnet: {
-        id: 'testnet' as const,
-        name: 'BNB Smart Chain Testnet',
-        chainId: 97,
-        rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
-        explorerUrl: 'https://testnet.bscscan.com',
-        label: 'Testnet (deployed)',
-        description: 'Deployed SimpleAuction.sol contract on BNB Testnet',
-        disabled: false,
-    },
-    mainnet: {
-        id: 'mainnet' as const,
-        name: 'BSC Mainnet',
-        chainId: 56,
-        rpcUrl: 'https://bsc-dataseed.bnbchain.org',
-        explorerUrl: 'https://bscscan.com',
-        label: 'Mainnet (coming soon)',
-        description: 'No auction contract deployed yet',
-        disabled: true,
-    },
-} as const;
-
-type BnbNetworkKey = keyof typeof BNB_NETWORKS;
-
-const AUCTION_ABI = [
-    {
-        inputs: [],
-        name: 'endEarly',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'endTime',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'ended',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getStatus',
-        outputs: [
-            { internalType: 'string', name: 'item', type: 'string' },
-            { internalType: 'address', name: 'leader', type: 'address' },
-            { internalType: 'uint256', name: 'leadingBid', type: 'uint256' },
-            { internalType: 'uint256', name: 'secondsLeft', type: 'uint256' },
-            { internalType: 'bool', name: 'isEnded', type: 'bool' },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'highestBid',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'highestBidder',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'itemName',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'owner',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [{ internalType: 'address', name: '', type: 'address' }],
-        name: 'pendingReturns',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'placeBid',
-        outputs: [],
-        stateMutability: 'payable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'timeLeft',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'withdraw',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'withdrawProceeds',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-] as const;
+import { BNB_NETWORKS, type BnbNetworkKey } from '../../../../lib/bnb-network-config';
+import AUCTION_ABI from '../contract/auction/auction-abi.json';
 
 export interface AuctionInteractionPanelProps {
     contractAddress?: string;
@@ -316,7 +194,7 @@ export function AuctionInteractionPanel({
             setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 3000);
             return;
         }
-        
+
         const value = parseFloat(bidAmount);
         if (Number.isNaN(value) || value <= 0) {
             setTxStatus({ status: 'error', message: 'Bid amount must be a positive number' });
@@ -335,9 +213,9 @@ export function AuctionInteractionPanel({
         if (highestBid !== null) {
             const weiValue = ethers.parseEther(bidAmount);
             if (weiValue <= highestBid) {
-                setTxStatus({ 
-                    status: 'error', 
-                    message: `Bid must exceed ${ethers.formatEther(highestBid)} BNB (current highest bid)` 
+                setTxStatus({
+                    status: 'error',
+                    message: `Bid must exceed ${ethers.formatEther(highestBid)} BNB (current highest bid)`
                 });
                 setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 4000);
                 return;
@@ -355,7 +233,7 @@ export function AuctionInteractionPanel({
         } catch (error: any) {
             console.error('Auction transaction error:', error);
             let errorMsg = 'Failed to place bid';
-            
+
             if (error?.message?.includes('Auction has ended')) {
                 errorMsg = 'Auction has ended. Refresh to see current status.';
             } else if (error?.message?.includes('Auction already closed')) {
@@ -367,7 +245,7 @@ export function AuctionInteractionPanel({
             } else if (error?.message) {
                 errorMsg = error.message;
             }
-            
+
             setTxStatus({ status: 'error', message: errorMsg });
             setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 6000);
         }

@@ -63,6 +63,9 @@ import { ERC1155StylusForm } from './forms/erc1155-stylus-form';
 import { BnbVotingContractForm } from './forms/bnb-voting-contract-form';
 import { BnbAuctionContractForm } from './forms/bnb-auction-contract-form';
 import { BnbGroupSavingsContractForm } from './forms/bnb-groupsavings-contract-form';
+import { BnbLotteryContractForm } from './forms/bnb-lottery-contract-form';
+import { CrowdfundingContractForm } from './forms/crowdfunding-contract-form';
+import { BountyBoardContractForm } from './forms/bounty-board-contract-form';
 
 // Dune Analytics form
 import { DuneAnalyticsForm } from './forms/dune-analytics-form';
@@ -376,6 +379,15 @@ export function ConfigPanel() {
             )}
             {(selectedNode.type as string) === 'bnb-groupsavings-contract' && (
               <BnbGroupSavingsContractForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {(selectedNode.type as string) === 'bnb-lottery-contract' && (
+              <BnbLotteryContractForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {(selectedNode.type as string) === 'crowdfunding-contract' && (
+              <CrowdfundingContractForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {(selectedNode.type as string) === 'bounty-board-contract' && (
+              <BountyBoardContractForm nodeId={selectedNode.id} config={selectedNode.config} />
             )}
             {selectedNode.type === 'onchain-activity' && (
               <OnchainActivityForm nodeId={selectedNode.id} config={selectedNode.config} />

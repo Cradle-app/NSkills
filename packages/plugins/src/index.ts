@@ -12,6 +12,9 @@ export { FrontendScaffoldPlugin } from './frontend-scaffold';
 export { BnbVotingContractPlugin } from './bnb-voting-contract';
 export { BnbAuctionContractPlugin } from './bnb-auction-contract';
 export { BnbGroupSavingsContractPlugin } from './bnb-groupsavings-contract';
+export { BnbLotteryContractPlugin } from './bnb-lottery-contract';
+export { CrowdfundingContractPlugin } from './crowdfunding-contract';
+export { BountyBoardContractPlugin } from './bounty-board-contract';
 
 // New Arbitrum-focused plugins
 export { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
@@ -85,6 +88,9 @@ import { FrontendScaffoldPlugin } from './frontend-scaffold';
 import { BnbVotingContractPlugin } from './bnb-voting-contract';
 import { BnbAuctionContractPlugin } from './bnb-auction-contract';
 import { BnbGroupSavingsContractPlugin } from './bnb-groupsavings-contract';
+import { BnbLotteryContractPlugin } from './bnb-lottery-contract';
+import { CrowdfundingContractPlugin } from './crowdfunding-contract';
+import { BountyBoardContractPlugin } from './bounty-board-contract';
 import { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
 import { WalletAuthPlugin } from './wallet-auth';
 import { RPCProviderPlugin } from './rpc-provider';
@@ -163,6 +169,9 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new BnbVotingContractPlugin());
   targetRegistry.register(new BnbAuctionContractPlugin());
   targetRegistry.register(new BnbGroupSavingsContractPlugin());
+  targetRegistry.register(new BnbLotteryContractPlugin());
+  targetRegistry.register(new CrowdfundingContractPlugin());
+  targetRegistry.register(new BountyBoardContractPlugin());
 
   // New Arbitrum-focused plugins
   targetRegistry.register(new EIP7702SmartEOAPlugin());
@@ -239,6 +248,9 @@ export function getOfficialPlugins() {
     new BnbVotingContractPlugin(),
     new BnbAuctionContractPlugin(),
     new BnbGroupSavingsContractPlugin(),
+    new BnbLotteryContractPlugin(),
+    new CrowdfundingContractPlugin(),
+    new BountyBoardContractPlugin(),
     // New Arbitrum-focused plugins
     new EIP7702SmartEOAPlugin(),
     new WalletAuthPlugin(),

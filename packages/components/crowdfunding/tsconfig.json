@@ -1,0 +1,21 @@
+{
+    "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+        "outDir": "./dist",
+        "declaration": true,
+        "jsx": "react-jsx",
+        "baseUrl": ".",
+        "paths": {
+            "@root/*": ["../../../*"]
+        },
+        "resolveJsonModule": true
+    },
+    "include": [
+        "src/**/*",
+        "contract/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

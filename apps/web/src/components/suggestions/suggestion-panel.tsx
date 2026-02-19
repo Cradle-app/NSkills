@@ -27,6 +27,9 @@ import {
     Plus,
     X,
     type LucideIcon,
+    Ticket,
+    Heart,
+    ClipboardList,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSuggestedPlugins, type SuggestedPlugin } from '@/hooks/use-suggested-plugins';
@@ -58,6 +61,9 @@ const ICON_MAP: Record<PluginIcon, LucideIcon> = {
     Search,
     Gavel,
     PiggyBank,
+    Ticket,
+    Heart,
+    ClipboardList
 };
 
 function getIconComponent(iconName: PluginIcon): LucideIcon {

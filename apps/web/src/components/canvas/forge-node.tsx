@@ -100,11 +100,13 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'robinhood-contracts': { src: RobinhoodLogo, alt: 'Robinhood Chain' },
   // OpenClaw Agent
   'openclaw-agent': { src: OpenClawLogo, alt: 'OpenClaw' },
-  // BNB Voting Contract
+  // BNB Contract
   'bnb-voting-contract': { src: BnbChainLogo, alt: 'BNB Voting' },
-  // BNB Auction Contract
   'bnb-auction-contract': { src: BnbChainLogo, alt: 'BNB Auction' },
   'bnb-groupsavings-contract': { src: BnbChainLogo, alt: 'BNB Group Savings' },
+  'bnb-lottery-contract': { src: BnbChainLogo, alt: 'BNB Lottery' },
+  'crowdfunding-contract': {src: BnbChainLogo, alt: 'BNB Crowdfunding'},
+  'bounty-board-contract': {src: BnbChainLogo, alt: 'BNB Bounty Board'},
   // Dune Analytics plugins
   'dune-execute-sql': { src: DuneLogo, alt: 'Dune' },
   'dune-token-price': { src: DuneLogo, alt: 'Dune' },

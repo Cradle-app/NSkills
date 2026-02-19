@@ -42,6 +42,9 @@ export const NodeType = z.enum([
   'bnb-voting-contract',
   'bnb-auction-contract',
   'bnb-groupsavings-contract',
+  'bnb-lottery-contract',
+  'bounty-board-contract',
+  'crowdfunding-contract',
 
   // Payments
   'x402-paywall-api',
@@ -234,6 +237,30 @@ export const BnbGroupSavingsContractConfig = BaseNodeConfig.extend({
   contractAddress: nullableString(),
 });
 export type BnbGroupSavingsContractConfig = z.infer<typeof BnbGroupSavingsContractConfig>;
+
+/**
+ * BNB Lottery Contract configuration
+ */
+export const BnbLotteryContractConfig = BaseNodeConfig.extend({
+  contractAddress: nullableString(),
+});
+export type BnbLotteryContractConfig = z.infer<typeof BnbLotteryContractConfig>;
+
+/**
+ * Bounty Board Contract configuration
+ */
+export const BountyBoardContractConfig = BaseNodeConfig.extend({
+  contractAddress: nullableString(),
+});
+export type BountyBoardContractConfig = z.infer<typeof BountyBoardContractConfig>;
+
+/**
+ * Crowdfunding Contract configuration
+ */
+export const CrowdfundingContractConfig = BaseNodeConfig.extend({
+  contractAddress: nullableString(),
+});
+export type CrowdfundingContractConfig = z.infer<typeof CrowdfundingContractConfig>;
 
 /**
  * Stylus ZK Contract configuration
@@ -1033,6 +1060,9 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('bnb-auction-contract'), config: BnbAuctionContractConfig }),
   z.object({ type: z.literal('bnb-groupsavings-contract'), config: BnbGroupSavingsContractConfig }),
   z.object({ type: z.literal('repo-quality-gates'), config: RepoQualityGatesConfig }),
+  z.object({ type: z.literal('bnb-lottery-contract'), config: BnbLotteryContractConfig }),
+  z.object({ type: z.literal('bounty-board-contract'), config: BountyBoardContractConfig }),
+  z.object({ type: z.literal('crowdfunding-contract'), config: CrowdfundingContractConfig }),
   z.object({ type: z.literal('frontend-scaffold'), config: FrontendScaffoldConfig }),
   z.object({ type: z.literal('sdk-generator'), config: SDKGeneratorConfig }),
   // New Arbitrum/Telegram nodes
@@ -1119,6 +1149,9 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'bnb-voting-contract': 'contracts',
     'bnb-auction-contract': 'contracts',
     'bnb-groupsavings-contract': 'contracts',
+    'bnb-lottery-contract': 'contracts',
+    'bounty-board-contract': 'contracts',
+    'crowdfunding-contract': 'contracts',
     'x402-paywall-api': 'payments',
     'erc8004-agent-runtime': 'agents',
     'ostium-trading': 'agents',
@@ -1192,6 +1225,9 @@ export function getConfigSchemaForType(type: NodeType) {
     'bnb-voting-contract': BnbVotingContractConfig,
     'bnb-auction-contract': BnbAuctionContractConfig,
     'bnb-groupsavings-contract': BnbGroupSavingsContractConfig,
+    'bnb-lottery-contract': BnbLotteryContractConfig,
+    'bounty-board-contract': BountyBoardContractConfig,
+    'crowdfunding-contract': CrowdfundingContractConfig,
     'x402-paywall-api': X402PaywallConfig,
     'erc8004-agent-runtime': ERC8004AgentConfig,
     'openclaw-agent': OpenClawConfig,

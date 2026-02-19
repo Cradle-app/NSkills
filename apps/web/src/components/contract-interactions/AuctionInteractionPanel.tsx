@@ -20,154 +20,8 @@ import { useAccount } from 'wagmi';
 import { cn } from '@/lib/utils';
 import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
 
-const BNB_NETWORKS = {
-    testnet: {
-        id: 'testnet' as const,
-        name: 'BNB Smart Chain Testnet',
-        chainId: 97,
-        rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
-        explorerUrl: 'https://testnet.bscscan.com',
-        label: 'BNB Testnet',
-        description: 'Deployed SimpleAuction.sol contract on BNB Testnet',
-        disabled: false,
-        symbol: 'tBNB',
-    },
-    mainnet: {
-        id: 'mainnet' as const,
-        name: 'BSC Mainnet',
-        chainId: 56,
-        rpcUrl: 'https://bsc-dataseed.bnbchain.org',
-        explorerUrl: 'https://bscscan.com',
-        label: 'BNB Mainnet',
-        description: 'No auction contract deployed yet',
-        disabled: true,
-        symbol: 'BNB',
-    },
-    opbnbTestnet: {
-        id: 'opbnbTestnet' as const,
-        name: 'opBNB Testnet',
-        chainId: 5611,
-        rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
-        explorerUrl: 'https://testnet.opbnbscan.com',
-        label: 'opBNB Testnet',
-        description: 'opBNB L2 Testnet (coming soon)',
-        disabled: true,
-        symbol: 'tBNB',
-    },
-    opbnbMainnet: {
-        id: 'opbnbMainnet' as const,
-        name: 'opBNB Mainnet',
-        chainId: 204,
-        rpcUrl: 'https://opbnb-mainnet-rpc.bnbchain.org',
-        explorerUrl: 'https://opbnbscan.com',
-        label: 'opBNB Mainnet',
-        description: 'opBNB L2 Mainnet (coming soon)',
-        disabled: true,
-        symbol: 'BNB',
-    },
-} as const;
-
-type BnbNetworkKey = keyof typeof BNB_NETWORKS;
-
-const AUCTION_ABI = [
-    {
-        inputs: [],
-        name: 'endEarly',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'endTime',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'ended',
-        outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'getStatus',
-        outputs: [
-            { internalType: 'string', name: 'item', type: 'string' },
-            { internalType: 'address', name: 'leader', type: 'address' },
-            { internalType: 'uint256', name: 'leadingBid', type: 'uint256' },
-            { internalType: 'uint256', name: 'secondsLeft', type: 'uint256' },
-            { internalType: 'bool', name: 'isEnded', type: 'bool' },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'highestBid',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'highestBidder',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'itemName',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'owner',
-        outputs: [{ internalType: 'address', name: '', type: 'address' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [{ internalType: 'address', name: '', type: 'address' }],
-        name: 'pendingReturns',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'placeBid',
-        outputs: [],
-        stateMutability: 'payable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'timeLeft',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'withdraw',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        inputs: [],
-        name: 'withdrawProceeds',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-] as const;
+import { BNB_NETWORKS, type BnbNetworkKey } from '../../../../../lib/bnb-network-config';
+import AUCTION_ABI from '../../../../../packages/components/bnb-auction/contract/auction/auction-abi.json';
 
 export interface AuctionInteractionPanelProps {
     contractAddress?: string;
@@ -248,11 +102,7 @@ export function AuctionInteractionPanel({
                                 {
                                     chainId: targetChainIdHex,
                                     chainName: networkConfig.name,
-                                    nativeCurrency: {
-                                        name: networkConfig.symbol,
-                                        symbol: networkConfig.symbol,
-                                        decimals: 18,
-                                    },
+                                    nativeCurrency: networkConfig.nativeCurrency,
                                     rpcUrls: [networkConfig.rpcUrl],
                                     blockExplorerUrls: [networkConfig.explorerUrl],
                                 },
@@ -344,7 +194,7 @@ export function AuctionInteractionPanel({
             setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 3000);
             return;
         }
-        
+
         const value = parseFloat(bidAmount);
         if (Number.isNaN(value) || value <= 0) {
             setTxStatus({ status: 'error', message: 'Bid amount must be a positive number' });
@@ -363,9 +213,9 @@ export function AuctionInteractionPanel({
         if (highestBid !== null) {
             const weiValue = ethers.parseEther(bidAmount);
             if (weiValue <= highestBid) {
-                setTxStatus({ 
-                    status: 'error', 
-                    message: `Bid must exceed ${ethers.formatEther(highestBid)} BNB (current highest bid)` 
+                setTxStatus({
+                    status: 'error',
+                    message: `Bid must exceed ${ethers.formatEther(highestBid)} BNB (current highest bid)`
                 });
                 setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 4000);
                 return;
@@ -383,7 +233,7 @@ export function AuctionInteractionPanel({
         } catch (error: any) {
             console.error('Auction transaction error:', error);
             let errorMsg = 'Failed to place bid';
-            
+
             if (error?.message?.includes('Auction has ended')) {
                 errorMsg = 'Auction has ended. Refresh to see current status.';
             } else if (error?.message?.includes('Auction already closed')) {
@@ -395,7 +245,7 @@ export function AuctionInteractionPanel({
             } else if (error?.message) {
                 errorMsg = error.message;
             }
-            
+
             setTxStatus({ status: 'error', message: errorMsg });
             setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 6000);
         }
@@ -547,51 +397,54 @@ export function AuctionInteractionPanel({
                     {/* Dropdown Menu */}
                     {showNetworkDropdown && (
                         <div className="absolute top-full mt-1 w-full bg-forge-bg border border-forge-border rounded-lg shadow-xl z-50 overflow-hidden">
-                            {Object.entries(BNB_NETWORKS).map(([key, network]) => (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    disabled={network.disabled}
-                                    onClick={() => {
-                                        if (!network.disabled) {
-                                            setSelectedNetwork(key as BnbNetworkKey);
-                                            setShowNetworkDropdown(false);
-                                        }
-                                    }}
-                                    className={cn(
-                                        'w-full px-3 py-2.5 text-left text-sm transition-colors',
-                                        'flex items-center justify-between',
-                                        network.disabled
-                                            ? 'opacity-50 cursor-not-allowed bg-forge-bg/80 backdrop-blur-sm'
-                                            : 'hover:bg-amber-500/10 cursor-pointer',
-                                        selectedNetwork === key && 'bg-amber-500/20'
-                                    )}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <Image
-                                            src={BnbChainLogo}
-                                            alt="BNB Chain"
-                                            width={16}
-                                            height={16}
-                                            className="rounded"
-                                        />
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-white">{network.name}</span>
-                                                {(network.id === 'testnet' || network.id === 'opbnbTestnet') && (
-                                                    <span className="text-[8px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">Testnet</span>
-                                                )}
+                            {(Object.keys(BNB_NETWORKS) as BnbNetworkKey[]).map((key) => {
+                                const network = BNB_NETWORKS[key];
+                                return (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        disabled={network.disabled}
+                                        onClick={() => {
+                                            if (!network.disabled) {
+                                                setSelectedNetwork(key);
+                                                setShowNetworkDropdown(false);
+                                            }
+                                        }}
+                                        className={cn(
+                                            'w-full px-3 py-2.5 text-left text-sm transition-colors',
+                                            'flex items-center justify-between',
+                                            network.disabled
+                                                ? 'opacity-50 cursor-not-allowed bg-forge-bg/80 backdrop-blur-sm'
+                                                : 'hover:bg-amber-500/10 cursor-pointer',
+                                            selectedNetwork === key && 'bg-amber-500/20'
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Image
+                                                src={BnbChainLogo}
+                                                alt="BNB Chain"
+                                                width={16}
+                                                height={16}
+                                                className="rounded"
+                                            />
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-white">{network.name}</span>
+                                                    {(network.id === 'testnet' || network.id === 'opbnbTestnet') && (
+                                                        <span className="text-[8px] px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded">Testnet</span>
+                                                    )}
+                                                </div>
+                                                <p className="text-[10px] text-forge-muted mt-0.5">
+                                                    {network.description}
+                                                </p>
                                             </div>
-                                            <p className="text-[10px] text-forge-muted mt-0.5">
-                                                {network.description}
-                                            </p>
                                         </div>
-                                    </div>
-                                    {network.disabled && (
-                                        <span className="text-[9px] px-1.5 py-0.5 bg-gray-500/20 text-gray-400 rounded">Coming Soon</span>
-                                    )}
-                                </button>
-                            ))}
+                                        {network.disabled && (
+                                            <span className="text-[9px] px-1.5 py-0.5 bg-gray-500/20 text-gray-400 rounded">Coming Soon</span>
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

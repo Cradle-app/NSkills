@@ -60,7 +60,7 @@ export class ExecutionEngine {
   async execute(
     blueprint: Blueprint,
     runId: string,
-    options: ExecutionOptions = {}
+    options: ExecutionOptions = {},
   ): Promise<ExecutionResult> {
     const logger = createExecutionLogger(runId);
     // Mark run as started
@@ -81,7 +81,7 @@ export class ExecutionEngine {
       const sortedNodes = topologicalSort(blueprint.nodes, blueprint.edges);
       if (!sortedNodes) {
         throw new Error(
-          "Blueprint contains cycles - cannot determine execution order"
+          "Blueprint contains cycles - cannot determine execution order",
         );
       }
 
@@ -163,7 +163,7 @@ export class ExecutionEngine {
             plugin.componentPackage || "component",
             pathContext,
             plugin.componentPathMappings,
-            node.type
+            node.type,
           );
         }
 
@@ -176,7 +176,7 @@ export class ExecutionEngine {
             fs,
             "/output",
             plugin.apiRoutesPath,
-            pathContext
+            pathContext,
           );
         }
 
@@ -189,7 +189,7 @@ export class ExecutionEngine {
             fs,
             "/output",
             plugin.apiRoutesPath,
-            pathContext
+            pathContext,
           );
         }
 
@@ -199,7 +199,7 @@ export class ExecutionEngine {
 
         logger.info(
           `Node ${node.type} generated ${output.files.length} files`,
-          { nodeId: node.id }
+          { nodeId: node.id },
         );
       }
 
@@ -211,7 +211,7 @@ export class ExecutionEngine {
         allEnvVars,
         allScripts,
         pathContext,
-        sortedNodes
+        sortedNodes,
       );
 
       // Run format and lint
@@ -250,7 +250,7 @@ export class ExecutionEngine {
         const repoResult = await this.githubIntegration.createRepository(
           blueprint.config.github,
           fs,
-          "/output"
+          "/output",
         );
 
         repoUrl = repoResult.url;
@@ -302,7 +302,7 @@ export class ExecutionEngine {
     packageName: string,
     pathContext: PathContext,
     pathMappings?: Record<string, PathCategory>,
-    nodeType?: string
+    nodeType?: string,
   ): void {
     const currentFileDir = dirname(fileURLToPath(import.meta.url));
 
@@ -329,7 +329,7 @@ export class ExecutionEngine {
       // but the recursive search above is much more reliable
       projectRoot = path.resolve(
         currentFileDir,
-        currentFileDir.includes("dist") ? "../../../" : "../../../../"
+        currentFileDir.includes("dist") ? "../../../" : "../../../../",
       );
     }
 
@@ -342,11 +342,13 @@ export class ExecutionEngine {
 
     // Determine scope: non-scaffold plugins get scoped by their node type
     const isScaffold =
-      FRONTEND_SCAFFOLD_TYPES.includes(nodeType || '') ||
-      BACKEND_SCAFFOLD_TYPES.includes(nodeType || '');
+      FRONTEND_SCAFFOLD_TYPES.includes(nodeType || "") ||
+      BACKEND_SCAFFOLD_TYPES.includes(nodeType || "");
     const scope = isScaffold ? undefined : nodeType;
 
-    console.log(`Copying component from: ${sourcePath}${scope ? ` (scoped: ${scope})` : ''}`);
+    console.log(
+      `Copying component from: ${sourcePath}${scope ? ` (scoped: ${scope})` : ""}`,
+    );
 
     // If path mappings are provided and we have a frontend scaffold, use intelligent routing
     if (pathMappings && pathContext.hasFrontend) {
@@ -358,7 +360,7 @@ export class ExecutionEngine {
         outputPath,
         pathMappings,
         pathContext,
-        scope
+        scope,
       );
       return;
     }
@@ -366,7 +368,7 @@ export class ExecutionEngine {
     // Legacy: Special case for wallet-auth without path mappings
     if (packageName === "@cradle/wallet-auth" && pathContext.hasFrontend) {
       console.log(
-        "Merging wallet-auth into apps/web/src/ (frontend-scaffold detected)"
+        "Merging wallet-auth into apps/web/src/ (frontend-scaffold detected)",
       );
       this.copyWalletAuthMerged(realFs, memFs, sourcePath, outputPath);
       return;
@@ -392,7 +394,7 @@ export class ExecutionEngine {
     outputPath: string,
     pathMappings: Record<string, PathCategory>,
     pathContext: PathContext,
-    scope?: string
+    scope?: string,
   ): void {
     this.copyDirectoryWithMappings(
       sourceFs,
@@ -402,7 +404,7 @@ export class ExecutionEngine {
       "",
       pathMappings,
       pathContext,
-      scope
+      scope,
     );
   }
 
@@ -421,7 +423,7 @@ export class ExecutionEngine {
     relativePath: string,
     pathMappings: Record<string, PathCategory>,
     pathContext: PathContext,
-    scope?: string
+    scope?: string,
   ): void {
     const currentPath = relativePath
       ? path.join(sourcePath, relativePath)
@@ -451,7 +453,7 @@ export class ExecutionEngine {
           relativeItem,
           pathMappings,
           pathContext,
-          scope
+          scope,
         );
       } else {
         const category = this.findPathCategory(relativeItem, pathMappings);
@@ -464,11 +466,16 @@ export class ExecutionEngine {
             // e.g., contract/erc20/src/lib.rs -> contracts/erc20/src/lib.rs
             const contractRelativePath = relativeItem.replace(
               /^contracts?\//,
-              ""
+              "",
             );
             targetPath = `${outputPath}/contracts/${contractRelativePath}`;
           } else {
-            const resolvedPath = resolveOutputPath(item, category, pathContext, { scope });
+            const resolvedPath = resolveOutputPath(
+              item,
+              category,
+              pathContext,
+              { scope },
+            );
             targetPath = `${outputPath}/${resolvedPath}`;
           }
 
@@ -484,7 +491,7 @@ export class ExecutionEngine {
           try {
             const existingContent = targetFs.readFileSync(
               targetPath,
-              "utf-8"
+              "utf-8",
             ) as string;
 
             // File exists - check if we should merge
@@ -492,7 +499,7 @@ export class ExecutionEngine {
               const mergeResult = mergeFileContents(
                 existingContent,
                 incomingContent,
-                item
+                item,
               );
 
               if (mergeResult.success) {
@@ -501,12 +508,12 @@ export class ExecutionEngine {
 
                 if (mergeResult.warnings.length > 0) {
                   console.log(
-                    `    ⚠️ Merge warnings: ${mergeResult.warnings.join(", ")}`
+                    `    ⚠️ Merge warnings: ${mergeResult.warnings.join(", ")}`,
                   );
                 }
               } else {
                 console.warn(
-                  `    ⚠️ Could not merge ${item}, keeping existing`
+                  `    ⚠️ Could not merge ${item}, keeping existing`,
                 );
                 finalContent = existingContent;
                 action = "kept-existing";
@@ -514,7 +521,7 @@ export class ExecutionEngine {
             } else {
               // Not a mergeable file type - keep existing and warn
               console.warn(
-                `    ⚠️ File conflict: ${item} - keeping existing (consider using unique names)`
+                `    ⚠️ File conflict: ${item} - keeping existing (consider using unique names)`,
               );
               finalContent = existingContent;
               action = "kept-existing";
@@ -528,8 +535,8 @@ export class ExecutionEngine {
           console.log(
             `  ${relativeItem} -> ${targetPath.replace(
               outputPath + "/",
-              ""
-            )} (${category}) [${action}]`
+              "",
+            )} (${category}) [${action}]`,
           );
         } else {
           if (item === "README.md" || item.endsWith(".md")) {
@@ -549,7 +556,7 @@ export class ExecutionEngine {
    */
   private findPathCategory(
     filePath: string,
-    pathMappings: Record<string, PathCategory>
+    pathMappings: Record<string, PathCategory>,
   ): PathCategory | undefined {
     // Normalize path separators
     const normalizedPath = filePath.replace(/\\/g, "/");
@@ -586,7 +593,7 @@ export class ExecutionEngine {
     sourceFs: typeof realFs,
     targetFs: ReturnType<typeof createFsFromVolume>,
     sourcePath: string,
-    outputPath: string
+    outputPath: string,
   ): void {
     const srcPath = path.join(sourcePath, "src");
     if (!sourceFs.existsSync(srcPath)) {
@@ -642,7 +649,7 @@ export class ExecutionEngine {
     memFs: ReturnType<typeof createFsFromVolume>,
     outputPath: string,
     apiRoutesPath: string,
-    pathContext: PathContext
+    pathContext: PathContext,
   ): void {
     // Resolve project root using the same strategy as copyComponentToOutput
     const currentFileDir = dirname(fileURLToPath(import.meta.url));
@@ -663,7 +670,7 @@ export class ExecutionEngine {
     if (!projectRoot) {
       projectRoot = path.resolve(
         currentFileDir,
-        currentFileDir.includes("dist") ? "../../../" : "../../../../"
+        currentFileDir.includes("dist") ? "../../../" : "../../../../",
       );
     }
 
@@ -680,13 +687,17 @@ export class ExecutionEngine {
     // Determine the target path inside the generated project
     let targetPath: string;
     if (pathContext.hasFrontend) {
-      const srcPath = pathContext.frontendSrcPath ? `/${pathContext.frontendSrcPath}` : '';
+      const srcPath = pathContext.frontendSrcPath
+        ? `/${pathContext.frontendSrcPath}`
+        : "";
       targetPath = `${outputPath}/${pathContext.frontendPath}${srcPath}/app/api/${namespace}`;
     } else {
       targetPath = `${outputPath}/src/app/api/${namespace}`;
     }
 
-    console.log(`Copying API routes: ${apiRoutesPath} → ${targetPath.replace(outputPath + "/", "")}`);
+    console.log(
+      `Copying API routes: ${apiRoutesPath} → ${targetPath.replace(outputPath + "/", "")}`,
+    );
     this.copyDirectoryToMemfs(realFs, memFs, sourcePath, targetPath);
   }
 
@@ -697,7 +708,7 @@ export class ExecutionEngine {
     sourceFs: typeof realFs,
     targetFs: ReturnType<typeof createFsFromVolume>,
     sourcePath: string,
-    targetPath: string
+    targetPath: string,
   ): void {
     targetFs.mkdirSync(targetPath, { recursive: true });
 
@@ -737,7 +748,7 @@ function generateRootFiles(
   envVars: CodegenOutput["envVars"],
   scripts: CodegenOutput["scripts"],
   pathContext?: PathContext,
-  nodes?: BlueprintNode[]
+  nodes?: BlueprintNode[],
 ): void {
   // Determine if we need monorepo structure
   // Only need monorepo if:
@@ -798,7 +809,7 @@ function generateRootFiles(
 
   fs.writeFileSync(
     `${basePath}/package.json`,
-    JSON.stringify(packageJson, null, 2)
+    JSON.stringify(packageJson, null, 2),
   );
 
   // Generate .env.example
@@ -811,7 +822,7 @@ function generateRootFiles(
       (v) =>
         `# ${v.description}${v.required ? " (required)" : ""}${
           v.secret ? " [secret]" : ""
-        }\n${v.key}=${v.defaultValue || ""}`
+        }\n${v.key}=${v.defaultValue || ""}`,
     )
     .join("\n\n");
   const envExample =
@@ -907,7 +918,7 @@ target/
  * - keep the first non-empty defaultValue
  */
 function dedupeEnvVars(
-  envVars: CodegenOutput["envVars"]
+  envVars: CodegenOutput["envVars"],
 ): CodegenOutput["envVars"] {
   const byKey = new Map<string, CodegenOutput["envVars"][number]>();
 
@@ -941,7 +952,7 @@ function generateReadme(
   project: Blueprint["config"]["project"],
   scripts: CodegenOutput["scripts"],
   envVars: CodegenOutput["envVars"],
-  nodes?: BlueprintNode[]
+  nodes?: BlueprintNode[],
 ): string {
   const appSlug = project.name.toLowerCase().replace(/\s+/g, "-");
   const nodeTypes = new Set((nodes || []).map((n) => n.type));

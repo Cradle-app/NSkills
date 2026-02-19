@@ -38,7 +38,10 @@ export type PluginIcon =
     | 'Coins'
     | 'Search'
     | 'Gavel'
-    | 'PiggyBank';
+    | 'PiggyBank'
+    | 'Ticket'
+    | 'Heart'
+    | 'ClipboardList';
 
 /**
  * Plugin compatibility relationships

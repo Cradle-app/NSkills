@@ -271,15 +271,18 @@ export function resolveOutputPath(
 
     // 3. Normalize and Append Filename
     // Remove leading slashes and fix separators
-    const normalizedPath = originalPath.replace(/\\/g, '/').replace(/^\/+/, '');
+    let normalizedPath = originalPath.replace(/\\/g, '/').replace(/^\/+/, '');
     
     // Check if original path is already deep (contains slash)
     // If it is, and we're scoping, we might be double-nesting if we're not careful.
     // But usually originalPath from plugins is just "api.ts" or "hooks/useMe.ts".
     
     // For contract sources, we preserve the hierarchy relative to contracts/
+    // But strip any leading contract/ or contracts/ prefix to avoid duplication
     if (category === 'contract-source') {
-       // Special handling handled by caller usually, but let's be safe
+       // Remove ALL leading contract/ or contracts/ prefixes to avoid duplication
+       // e.g., contracts/lottery/Lottery.sol -> lottery/Lottery.sol
+       normalizedPath = normalizedPath.replace(/^(contracts?\/)+/, '');
        return basePath ? `${basePath}/${normalizedPath}` : normalizedPath;
     }
 
