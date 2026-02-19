@@ -1,84 +1,76 @@
-# 🌱 Cradle
+<p align="center">
+  <img src="apps/web/src/assets/blocks/BNB Chain.png" alt="BNB Chain" width="80" />
+</p>
 
-**Build your Web3 foundation. Then vibe.**
+<h1 align="center">🌱 [N]skills</h1>
+<p align="center"><strong>Build your Web3 foundation. Then vibe.</strong></p>
+<p align="center">
+  A visual foundation builder for BNB Chain Web3 projects — drag, connect, configure, generate.
+</p>
 
-Cradle is a visual foundation builder for Web3 projects. Instead of starting from a blank slate or vibecoding your entire architecture, define your project structure visually, generate structured, organized code, then fine-tune with AI tools like Cursor or Copilot.
+---
 
-## 🎯 The Vision
+## What is [N]skills?
 
-**Problem**: Starting a Web3 project often means either:
-- Vibecoding from scratch with AI (chaotic, inconsistent architecture)
-- Copy-pasting boilerplate and hoping for the best
-- Spending days on scaffolding before writing actual logic
-
-**Solution**: Cradle gives you the **structured foundation** your project needs:
-
-1. **Design visually** - Drag components, connect dependencies, configure settings
-2. **Generate foundation** - Get clean, structured and organized code
-3. **Vibe from there** - Use Cursor/Copilot to add features on a solid base
+[N]skills is a visual blueprint builder for Web3 projects. Instead of starting from a blank slate or vibecoding your entire architecture, define your project structure visually, generate structured and organized code, then fine-tune with AI tools like Cursor or Copilot.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  🎨 Visual Design  →  📦 Generate Code  →  ✨ AI Enhance    │
 │                                                             │
-│  "I want Stylus      "Here's your        "Now let's add    │
-│   contracts with      organized           that custom       │
-│   ZK proofs and       codebase with       feature with      │
-│   wallet auth"        proper structure"   Cursor..."        │
+│  "I want BNB          "Here's your        "Now let's add    │
+│   contracts with       organized           that custom       │
+│   wallet auth and      codebase with       feature with      │
+│   Dune analytics"      proper structure"   Cursor..."        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🧩 Components
+---
 
-Build your foundation with Web3 building blocks:
+## Documentation
 
-### Smart Contracts (Arbitrum Stylus)
-- **[@cradle/erc20-stylus](./packages/components/erc20-stylus)** - ERC-20 token with mintable, burnable, and pausable features.
-- **[@cradle/erc721-stylus](./packages/components/erc721-stylus)** - ERC-721 NFT collection with enumerable, metadata, and batch minting support.
-- **[@cradle/erc1155-stylus](./packages/components/erc1155-stylus)** - ERC-1155 multi-token standard with batch operations and supply tracking.
+| Document | Description |
+|----------|-------------|
+| [docs/PROJECT.md](./docs/PROJECT.md) | Problem, solution, impact & roadmap |
+| [docs/TECHNICAL.md](./docs/TECHNICAL.md) | Architecture, setup & demo guide |
+| [docs/EXTRAS.md](./docs/EXTRAS.md) | Demo video & presentation links |
+| [bsc.address](./bsc.address) | All deployed contract addresses |
 
-### AI & Trading
-- **[@cradle/erc8004-agent](./packages/components/erc8004-agent)** - On-chain AI agent registry with ERC-8004 standard. Includes OpenRouter LLM integration and staking mechanism.
-- **[@cradle/maxxit-lazy-trader](./packages/components/maxxit-lazy-trader)** - Wallet-based Telegram bot setup for automated trading. 4-step flow with Ostium agent generation.
+---
 
-### Infrastructure & Auth
-- **Frontend Scaffold** - Complete Next.js Web3 app generator with wagmi + viem, RainbowKit wallet UI, Tailwind CSS,etc.
-- **[@cradle/wallet-auth](./packages/components/wallet-auth)** - RainbowKit + wagmi wallet authentication with multi-chain support and WalletConnect v2 ready.
-- **[@cradle/ostium-onect](./packages/components/ostium-onect)** - Trading setup for Ostium DEX. Handles delegation and USDC approvals seamlessly.
+## 🟡 BNB Chain — Deployed Contracts
 
-### Data & Analytics
-- **[@cradle/onchain-activity](./packages/components/onchain-activity)** - Fetch wallet transaction history with category filtering (ERC-20/721/1155, contract interactions). Powered by Alchemy.
+<p>
+  <img src="apps/web/src/assets/blocks/BNB Chain.png" alt="BNB Chain" width="24" style="vertical-align:middle;" />
+  &nbsp;<strong>BSC Smart Chain Testnet</strong> (Chain ID: 97)
+</p>
 
-#### Dune Analytics - Blockchain Data Queries
-Access blockchain data with 9 specialized plugins powered by Dune's data warehouse:
-- **Dune Execute SQL** - Run custom SQL queries on blockchain data with performance optimization and React hooks.
-- **Dune Token Price** - Real-time token prices across multiple chains.
-- **Dune Wallet Balances** - Portfolio balances with USD valuations and NFT support.
-- **Dune DEX Volume** - Trading volume and statistics with time-range filtering.
-- **Dune NFT Floor** - NFT collection floor prices and marketplace statistics.
-- **Dune Address Labels** - Human-readable labels for addresses (ENS, known wallets, protocols).
-- **Dune Transaction History** - Comprehensive wallet transaction history with configurable limits.
-- **Dune Gas Price** - Gas price analytics and statistics across networks.
-- **Dune Protocol TVL** - Total Value Locked calculations for DeFi protocols.
+| Contract | Address | Verified |
+|----------|---------|---------|
+| Voting | [`0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD`](https://testnet.bscscan.com/address/0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD#readContract) | ✅ |
+| Auction | [`0x00320016Ad572264a64C98142e51200E60f73bCE`](https://testnet.bscscan.com/address/0x00320016Ad572264a64C98142e51200E60f73bCE) | ✅ |
+| Group Savings | [`0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28`](https://testnet.bscscan.com/address/0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28) | ✅ |
+| Marketplace | [`0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61`](https://testnet.bscscan.com/address/0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61#code) | ✅ |
+| Lottery | [`0x9bb658a999a46d149262fe74d37894ac203ca493`](https://testnet.bscscan.com/address/0x9bb658a999a46d149262fe74d37894ac203ca493) | ✅ |
+| Crowd Funding | [`0x96bbbef124fe87477244d8583f771fdf6c2f0ed6`](https://testnet.bscscan.com/address/0x96bbbef124fe87477244d8583f771fdf6c2f0ed6) | ✅ |
+| Bounty Board | [`0x54e583f445b5b4736628d04fcff66698977b4b00`](https://testnet.bscscan.com/address/0x54e583f445b5b4736628d04fcff66698977b4b00) | ✅ |
 
-### Market Intelligence
-#### AIXBT Intelligence - AI-Powered Market Research
-Integrate AI-driven market intelligence with 4 specialized plugins:
-- **AIXBT Momentum** - Track social momentum and cluster convergence for crypto projects.
-- **AIXBT Signals** - Real-time event signals and alerts for project activity.
-- **AIXBT Indigo** - Conversational AI for market research and analysis.
-- **AIXBT Observer** - Correlate on-chain activity with social signals for comprehensive insights.
+<p>
+  <img src="apps/web/src/assets/blocks/BNB Chain.png" alt="BNB Chain" width="24" style="vertical-align:middle;" />
+  &nbsp;<strong>opBNB Testnet</strong> (Chain ID: 5611)
+</p>
 
-### Superposition L3 Chain Blocks
-Build on Superposition with specialized L3 integrations:
+| Contract | Address | Verified |
+|----------|---------|---------|
+| Voting | [`0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD`](https://opbnb-testnet.bscscan.com/address/0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD#code) | ✅ |
+| Auction | [`0xea2c7377fd34366878516bd68ccb469016b529d9`](https://opbnb-testnet.bscscan.com/address/0xea2c7377fd34366878516bd68ccb469016b529d9#code) | ✅ |
+| Group Savings | [`0xB9896Cb9aC638EE36324B57c6eF8E88668Ef6c3c`](https://opbnb-testnet.bscscan.com/address/0xB9896Cb9aC638EE36324B57c6eF8E88668Ef6c3c#code) | ✅ |
+| Marketplace | [`0x00320016Ad572264a64C98142e51200E60f73bCE`](https://opbnb-testnet.bscscan.com/address/0x00320016Ad572264a64C98142e51200E60f73bCE#code) | ✅ |
+| Lottery | [`0x59c9ca4D0fd69674705043525FF0e063F9A6F13E`](https://opbnb-testnet.bscscan.com/address/0x59c9ca4D0fd69674705043525FF0e063F9A6F13E#code) | ✅ |
+| Crowd Funding | [`0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28`](https://opbnb-testnet.bscscan.com/address/0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28#code) | ✅ |
+| Bounty Board | [`0xB7743a347Ec63456F6b2fCa4DdDC1b39c86875E9`](https://opbnb-testnet.bscscan.com/address/0xB7743a347Ec63456F6b2fCa4DdDC1b39c86875E9#code) | ✅ |
 
-- **[@cradle/superposition-bridge](./packages/components/superposition-bridge)** - Bridge assets to Superposition L3 via Li.Fi cross-chain routing. Support for ETH, USDC, USDT from Arbitrum/Ethereum/Optimism/Base.
-- **[@cradle/superposition-longtail](./packages/components/superposition-longtail)** - Longtail AMM DEX integration. 4x cheaper than Uniswap V3, built with Stylus. Includes utility mining rewards.
-- **[@cradle/superposition-super-assets](./packages/components/superposition-super-assets)** - Yield-bearing wrapped tokens (sUSDC, sETH). Earn passive yield from holding + active rewards from using.
-- **Superposition Thirdweb** - Deploy and interact with contracts using Thirdweb SDK. NFT drops, prebuilt contracts, gasless transactions.
-- **Superposition Utility Mining** - Track and claim transaction-based rewards. Earn tokens by using the network.
-- **Superposition Faucet** - Testnet token faucet for SPN, wSPN, CAT, and fUSDC with cooldown management.
-- **Superposition Meow Domains** - .meow domain name resolution and metadata. Twitter, URL, avatar integration.
+---
 
 ## 🚀 Quick Start
 
@@ -88,126 +80,133 @@ git clone https://github.com/Cradle-app/Cradle.git
 cd Cradle
 
 # Install
-pnpm install
+npx --yes pnpm@9.0.0 install
 
 # Build
-pnpm build
+npx --yes pnpm@9.0.0 build
 
 # Run
-pnpm dev
+npx --yes pnpm@9.0.0 dev
 ```
 
-Open http://localhost:3001 and start building!
+Open **http://localhost:3001** and start building.
 
-## 🔐 Authentication Flow
+> See [docs/TECHNICAL.md](./docs/TECHNICAL.md) for full setup, environment variables, and GitHub OAuth configuration.
 
-Cradle uses a dual authentication system to secure your workspace and enable code deployment:
-
-1. **Wallet Authentication** - Connect your Web3 wallet (MetaMask, WalletConnect, etc.) to access the Cradle platform
-2. **GitHub Authentication** - Connect your GitHub account to push generated code directly to your repositories
-
-This ensures that:
-- Your blueprints are securely tied to your wallet identity
-- Generated code can be automatically pushed to your GitHub repos
-- You maintain full ownership and control over your projects
+---
 
 ## 🏗️ Architecture
 
 ```
 cradle/
 ├── apps/
-│   ├── web/                  # Next.js visual editor
-│   └── orchestrator/         # Fastify code generation engine
+│   ├── web/                  # Next.js 14 visual editor (port 3001)
+│   └── orchestrator/         # Fastify code generation API (port 3000)
 ├── packages/
-│   ├── blueprint-schema/     # Zod schemas for blueprints
-│   ├── plugin-sdk/           # Plugin development kit
-│   └── plugins/              # All component plugins
-└── examples/                 # Example blueprints
+│   ├── blueprint-schema/     # Zod validation schemas
+│   ├── plugin-config/        # Plugin metadata & registry
+│   ├── plugin-sdk/           # Base plugin class
+│   └── plugins/              # All component plugin implementations
+├── docs/                     # Project documentation
+└── bsc.address               # Deployed contract addresses
 ```
-
-## 💡 How It Works
-
-### Visual Builder
-1. **Design** - Drag components from the palette onto the canvas
-2. **Configure** - Click nodes to set properties (contract names, auth methods, etc.)
-3. **Connect** - Link components to define dependencies
-4. **Generate** - Click "Generate" to create your codebase
-5. **Develop** - Open in Cursor/VS Code and build your features
-
-### AI-Powered Workflow
-- **💬 Chat with AI** - Describe your app in natural language and let AI suggest the right component architecture
-- **🤖 Smart Generation** - AI analyzes your requirements and creates a complete blueprint with properly connected components
-- **🎯 Iterative Refinement** - Continue the conversation to refine and adjust your architecture
-
-### Import & Export
-- **📥 Import JSON** - Load existing blueprints from JSON files to continue working or share with team
-- **📤 Export JSON** - Save your blueprints as JSON for version control, backup, or collaboration
-
-### Generated Code Structure
-Cradle uses an intelligent path resolver to organize generated code into a clean repository structure:
-
-```
-your-project/
-├── apps/
-│   ├── web/                    # Frontend application (Next.js)
-│   │   ├── src/
-│   │   │   ├── app/           # Next.js app router pages
-│   │   │   ├── components/    # React components
-│   │   │   ├── hooks/         # React hooks (useTokenPrice, useWalletAuth, etc.)
-│   │   │   ├── lib/           # Utilities & config (wagmi, chains, API clients)
-│   │   │   └── types/         # TypeScript type definitions
-│   │   ├── public/            # Static assets
-│   │   └── package.json
-│   └── api/                    # Backend application (optional)
-│       └── src/
-│           ├── routes/        # API route handlers
-│           ├── services/      # Business logic
-│           └── middleware/    # Express/Fastify middleware
-├── contracts/                  # Smart contracts
-│   ├── erc20-token/           # Individual contract folders
-│       ├── src/              # Stylus Rust source
-│       └── tests/            # Contract tests
-├── docs/                       # Auto-generated documentation
-└── shared/                     # Shared types across frontend/backend
-```
-
-**Intelligent Routing:**
-- Frontend files automatically go to `apps/web/src/` with proper subdirectories
-- Backend routes fallback to `apps/web/src/app/api/` if no backend scaffold
-- Each plugin categorizes its outputs (hooks, components, lib, etc.)
-- Contracts stay organized in individual folders under `contracts/`
-
-## 🔧 What You Get
-
-Each Cradle component is ready to use and includes:
-
-- 🦀 **Rust/Stylus Contracts** - Smart contracts built with the Stylus Rust SDK and modern security patterns
-- ⚛️ **React Hooks** - `useERC20Interactions`, `useAgentRegistry`, `useWalletAuth` and more
-- � **TypeScript SDK** - Type-safe functions for all contract interactions
-- 📝 **Comprehensive Docs** - Installation, deployment, API reference, and examples
-- 🧪 **Testing Ready** - Integration examples for frontend
-- � **Multi-Chain** - Arbitrum mainnet and Sepolia testnet support out of the box
-- 📦 **NPM Ready** - Organized as publishable packages with proper dependencies
-
-## 🎨 Design Philosophy
-
-**Structure enables creativity.** 
-
-The best AI-assisted development happens when you have:
-- Clear file organization
-- Consistent patterns
-- Type safety
-- Proper abstractions
-
-Cradle gives you this foundation so your vibing sessions are productive, not chaotic.
-
-## 🔒 Security
-
-- Secrets are isolated and never committed
-- Template injection is prevented
-- Rate limiting on all endpoints
-- Audit logging for compliance
 
 ---
 
-**Cradle** - *Build your Web3 foundation. Then vibe.* ✨
+## 🧩 BNB Chain Nodes
+
+Build your BNB Chain foundation visually with these contract nodes:
+
+| Node | Contract | Networks |
+|------|----------|---------|
+| 🗳️ **BNB Voting** | On-chain governance voting | BSC Testnet + opBNB Testnet |
+| 🔨 **BNB Auction** | Escrow-based English auction | BSC Testnet + opBNB Testnet |
+| 🐷 **BNB Group Savings** | Collective savings with goal tracking | BSC Testnet + opBNB Testnet |
+| 🛒 **BNB Marketplace** | Escrow marketplace for goods/services | BSC Testnet + opBNB Testnet |
+
+Each node ships with a **live interaction panel** — connect your wallet, switch chains, and interact with deployed contracts directly from the [N]skills UI.
+
+---
+
+## 🎨 BNB Chain Templates
+
+Two ready-to-use templates combine multiple BNB ecosystem tools:
+
+### Binance Smart Dapp
+Voting contract + Frontend Scaffold + OpenClaw + Onchain Activity + Dune Analytics + Pyth + Chainlink + Uniswap + Wallet Auth
+
+### BNB MetaStack
+All 3 BNB contracts + Frontend + IPFS + Wallet Auth + Pyth + Chainlink + Uniswap + Onchain Activity + OpenClaw + Aave + x402 Paywall + Dune (Token Price, DEX Volume, Protocol TVL, Transaction History)
+
+---
+
+## 🧩 All Components
+
+### BNB Chain (Solidity)
+- **BNB Voting Contract** — On-chain governance
+- **BNB Auction Contract** — Escrow English auction
+- **BNB Group Savings Contract** — Collective savings goals
+- **BNB Marketplace Contract** — Escrow marketplace
+
+### Smart Contracts (Arbitrum Stylus)
+- **[@cradle/erc20-stylus](./packages/components/erc20-stylus)** — ERC-20 with mintable, burnable, pausable
+- **[@cradle/erc721-stylus](./packages/components/erc721-stylus)** — ERC-721 NFT with enumerable + batch mint
+- **[@cradle/erc1155-stylus](./packages/components/erc1155-stylus)** — ERC-1155 multi-token with batch ops
+
+### Infrastructure & Auth
+- **Frontend Scaffold** — Next.js + wagmi + RainbowKit + Tailwind
+- **[@cradle/wallet-auth](./packages/components/wallet-auth)** — RainbowKit + wagmi multi-chain auth
+- **IPFS Storage** — Decentralized file storage integration
+
+### Oracles & DeFi
+- **Pyth Oracle** — Real-time price feeds
+- **Chainlink Price Feed** — Decentralized oracle data
+- **Uniswap Swap** — DEX swap integration
+- **Aave** — Lending/borrowing protocol
+- **x402 Paywall** — HTTP 402 payment-gated endpoints
+
+### Data & Analytics
+- **[@cradle/onchain-activity](./packages/components/onchain-activity)** — Wallet tx history via Alchemy
+- **Dune Analytics** — 9 specialized plugins (Token Price, DEX Volume, Protocol TVL, Transaction History, Gas, NFT Floor, Wallet Balances, Address Labels, SQL)
+
+### AI & Agents
+- **[@cradle/erc8004-agent](./packages/components/erc8004-agent)** — On-chain AI agent registry
+- **OpenClaw Agent** — AI agent integration
+- **AIXBT Intelligence** — 4 AI market intelligence plugins
+
+---
+
+## 💡 How It Works
+
+1. **Design** — Drag BNB contract nodes and other components from the palette onto the canvas
+2. **Configure** — Click any node to open its config panel and interact with live deployed contracts
+3. **Connect** — Link components to define dependencies and data flow
+4. **Generate** — Click "Generate" to create a structured codebase, optionally pushed to GitHub
+5. **Develop** — Open in Cursor or VS Code; build your features on a solid base
+
+### AI-Powered Workflow
+- **Chat with AI** — Describe your app in natural language; AI suggests the right architecture
+- **Smart Generation** — AI creates a complete blueprint with properly connected components
+- **Iterative Refinement** — Continue the conversation to adjust and improve your design
+
+---
+
+## 🔐 Authentication
+
+[N]skills uses a dual authentication system:
+
+1. **Wallet Auth** — Connect MetaMask, WalletConnect, or any Web3 wallet
+2. **GitHub Auth** — OAuth integration to push generated code directly to your repositories
+
+---
+
+## 🔒 Security
+
+- Secrets isolated and never committed
+- Template injection prevented
+- Rate limiting on all API endpoints
+- Generated contracts follow Solidity security best practices
+
+---
+
+**[N]skills** — *Build your Web3 foundation. Then vibe.* ✨

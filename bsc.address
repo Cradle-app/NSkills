@@ -1,0 +1,27 @@
+# [N]skills — Deployed Contract Addresses
+
+## BSC Smart Chain Testnet (Chain ID: 97)
+
+| Contract        | Address                                      | Explorer                                                                                          |
+|-----------------|----------------------------------------------|---------------------------------------------------------------------------------------------------|
+| Voting          | `0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD` | https://testnet.bscscan.com/address/0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD#readContract      |
+| Auction         | `0x00320016Ad572264a64C98142e51200E60f73bCE` | https://testnet.bscscan.com/address/0x00320016Ad572264a64C98142e51200E60f73bCE                    |
+| Group Savings   | `0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28` | https://testnet.bscscan.com/address/0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28                    |
+| Marketplace     | `0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61` | https://testnet.bscscan.com/address/0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61#code               |
+| Lottery         | `0x9bb658a999a46d149262fe74d37894ac203ca493` | https://testnet.bscscan.com/address/0x9bb658a999a46d149262fe74d37894ac203ca493                    |
+| Crowd Funding   | `0x96bbbef124fe87477244d8583f771fdf6c2f0ed6` | https://testnet.bscscan.com/address/0x96bbbef124fe87477244d8583f771fdf6c2f0ed6                    |
+| Bounty Board    | `0x54e583f445b5b4736628d04fcff66698977b4b00` | https://testnet.bscscan.com/address/0x54e583f445b5b4736628d04fcff66698977b4b00                    |
+
+## opBNB Testnet (Chain ID: 5611)
+
+| Contract        | Address                                      | Explorer                                                                                                    |
+|-----------------|----------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| Voting          | `0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD` | https://opbnb-testnet.bscscan.com/address/0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD#code                  |
+| Auction         | `0xea2c7377fd34366878516bd68ccb469016b529d9` | https://opbnb-testnet.bscscan.com/address/0xea2c7377fd34366878516bd68ccb469016b529d9#code                  |
+| Group Savings   | `0xB9896Cb9aC638EE36324B57c6eF8E88668Ef6c3c` | https://opbnb-testnet.bscscan.com/address/0xB9896Cb9aC638EE36324B57c6eF8E88668Ef6c3c#code                  |
+| Marketplace     | `0x00320016Ad572264a64C98142e51200E60f73bCE` | https://opbnb-testnet.bscscan.com/address/0x00320016Ad572264a64C98142e51200E60f73bCE#code                  |
+| Lottery         | `0x59c9ca4D0fd69674705043525FF0e063F9A6F13E` | https://opbnb-testnet.bscscan.com/address/0x59c9ca4D0fd69674705043525FF0e063F9A6F13E#code                  |
+| Crowd Funding   | `0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28` | https://opbnb-testnet.bscscan.com/address/0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28#code                  |
+| Bounty Board    | `0xB7743a347Ec63456F6b2fCa4DdDC1b39c86875E9` | https://opbnb-testnet.bscscan.com/address/0xB7743a347Ec63456F6b2fCa4DdDC1b39c86875E9#code                  |
+
+All contracts are verified and publicly readable on the respective block explorers.
