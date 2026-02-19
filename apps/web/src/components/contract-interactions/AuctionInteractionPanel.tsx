@@ -31,6 +31,7 @@ const BNB_NETWORKS = {
         description: 'Deployed SimpleAuction.sol contract on BNB Testnet',
         disabled: false,
         symbol: 'tBNB',
+        contractAddress: '0x00320016Ad572264a64C98142e51200E60f73bCE',
     },
     mainnet: {
         id: 'mainnet' as const,
@@ -39,20 +40,22 @@ const BNB_NETWORKS = {
         rpcUrl: 'https://bsc-dataseed.bnbchain.org',
         explorerUrl: 'https://bscscan.com',
         label: 'BNB Mainnet',
-        description: 'No auction contract deployed yet',
+        description: 'No auction contract deployed yet (coming soon)',
         disabled: true,
         symbol: 'BNB',
+        contractAddress: undefined,
     },
     opbnbTestnet: {
         id: 'opbnbTestnet' as const,
         name: 'opBNB Testnet',
         chainId: 5611,
         rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
-        explorerUrl: 'https://testnet.opbnbscan.com',
+        explorerUrl: 'https://opbnb-testnet.bscscan.com',
         label: 'opBNB Testnet',
-        description: 'opBNB L2 Testnet (coming soon)',
-        disabled: true,
+        description: 'Deployed SimpleAuction.sol contract on opBNB L2 Testnet',
+        disabled: false,
         symbol: 'tBNB',
+        contractAddress: '0xea2c7377fd34366878516bd68ccb469016b529d9',
     },
     opbnbMainnet: {
         id: 'opbnbMainnet' as const,
@@ -64,6 +67,7 @@ const BNB_NETWORKS = {
         description: 'opBNB L2 Mainnet (coming soon)',
         disabled: true,
         symbol: 'BNB',
+        contractAddress: undefined,
     },
 } as const;
 
@@ -171,6 +175,7 @@ const AUCTION_ABI = [
 
 export interface AuctionInteractionPanelProps {
     contractAddress?: string;
+    onNetworkChange?: (contractAddress: string, networkLabel: string) => void;
 }
 
 interface TxStatus {
@@ -181,12 +186,12 @@ interface TxStatus {
 
 export function AuctionInteractionPanel({
     contractAddress: initialAddress,
+    onNetworkChange,
 }: AuctionInteractionPanelProps) {
-    const defaultAddress = initialAddress ?? '0x00320016Ad572264a64C98142e51200E60f73bCE';
-    const [contractAddress] = useState(defaultAddress);
     const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
     const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
     const networkConfig = BNB_NETWORKS[selectedNetwork];
+    const contractAddress = networkConfig.contractAddress ?? initialAddress ?? '0x00320016Ad572264a64C98142e51200E60f73bCE';
 
     const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -274,6 +279,18 @@ export function AuctionInteractionPanel({
         return new ethers.Contract(contractAddress, AUCTION_ABI, signer);
     }, [chain?.id, contractAddress, walletConnected, networkConfig]);
 
+    const resetState = useCallback(() => {
+        setItemName(null);
+        setHighestBid(null);
+        setHighestBidder(null);
+        setOwner(null);
+        setEnded(null);
+        setSecondsLeft(null);
+        setPendingResult(null);
+        setPendingError(null);
+        setContractError(null);
+    }, []);
+
     const fetchState = useCallback(async () => {
         const contract = getReadContract();
         if (!contract) return;
@@ -299,9 +316,10 @@ export function AuctionInteractionPanel({
 
     useEffect(() => {
         if (contractAddress) {
+            resetState();
             fetchState();
         }
-    }, [contractAddress, fetchState]);
+    }, [contractAddress, selectedNetwork, fetchState, resetState]);
 
     // Auto-refresh countdown
     useEffect(() => {
@@ -556,6 +574,10 @@ export function AuctionInteractionPanel({
                                         if (!network.disabled) {
                                             setSelectedNetwork(key as BnbNetworkKey);
                                             setShowNetworkDropdown(false);
+                                            onNetworkChange?.(
+                                                network.contractAddress ?? '',
+                                                network.label,
+                                            );
                                         }
                                     }}
                                     className={cn(

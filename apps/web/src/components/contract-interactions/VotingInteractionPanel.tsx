@@ -30,6 +30,7 @@ const BNB_NETWORKS = {
     description: 'Deployed Voting.sol contract on BNB Testnet',
     disabled: false,
     symbol: 'tBNB',
+    contractAddress: '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD',
   },
   mainnet: {
     id: 'mainnet' as const,
@@ -38,20 +39,22 @@ const BNB_NETWORKS = {
     rpcUrl: 'https://bsc-dataseed.bnbchain.org',
     explorerUrl: 'https://bscscan.com',
     label: 'BNB Mainnet',
-    description: 'No voting contract deployed yet',
+    description: 'No voting contract deployed yet (coming soon)',
     disabled: true,
     symbol: 'BNB',
+    contractAddress: undefined,
   },
   opbnbTestnet: {
     id: 'opbnbTestnet' as const,
     name: 'opBNB Testnet',
     chainId: 5611,
     rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
-    explorerUrl: 'https://testnet.opbnbscan.com',
+    explorerUrl: 'https://opbnb-testnet.bscscan.com',
     label: 'opBNB Testnet',
-    description: 'opBNB L2 Testnet (coming soon)',
-    disabled: true,
+    description: 'Deployed Voting.sol contract on opBNB L2 Testnet',
+    disabled: false,
     symbol: 'tBNB',
+    contractAddress: '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD',
   },
   opbnbMainnet: {
     id: 'opbnbMainnet' as const,
@@ -63,6 +66,7 @@ const BNB_NETWORKS = {
     description: 'opBNB L2 Mainnet (coming soon)',
     disabled: true,
     symbol: 'BNB',
+    contractAddress: undefined,
   },
 } as const;
 
@@ -230,6 +234,7 @@ type Candidate = {
 
 interface VotingInteractionPanelProps {
   contractAddress?: string;
+  onNetworkChange?: (contractAddress: string, networkLabel: string) => void;
 }
 
 interface TxStatus {
@@ -240,12 +245,12 @@ interface TxStatus {
 
 export function VotingInteractionPanel({
   contractAddress: initialAddress,
+  onNetworkChange,
 }: VotingInteractionPanelProps) {
-  const defaultAddress = initialAddress ?? '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD';
-  const [contractAddress] = useState(defaultAddress);
   const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
   const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
   const networkConfig = BNB_NETWORKS[selectedNetwork];
+  const contractAddress = networkConfig.contractAddress ?? initialAddress ?? '0xFa2A4bf9Df5e25A5e3c2f0d09d9D2E8a3c2C3e3D';
 
   const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -332,6 +337,20 @@ export function VotingInteractionPanel({
     return new ethers.Contract(contractAddress, VOTING_ABI, signer);
   }, [chain?.id, contractAddress, walletConnected]);
 
+  const resetState = useCallback(() => {
+    setCandidates([]);
+    setTotalVotes(null);
+    setWinnerName(null);
+    setWinnerVotes(null);
+    setOwner(null);
+    setVotingOpen(null);
+    setHasVotedResult(null);
+    setHasVotedError(null);
+    setCandidateQueryResult(null);
+    setCandidateQueryError(null);
+    setContractError(null);
+  }, []);
+
   const fetchState = useCallback(async () => {
     const contract = getReadContract();
     if (!contract) return;
@@ -365,9 +384,10 @@ export function VotingInteractionPanel({
 
   useEffect(() => {
     if (contractAddress) {
+      resetState();
       fetchState();
     }
-  }, [contractAddress, fetchState]);
+  }, [contractAddress, selectedNetwork, fetchState, resetState]);
 
   const handleTx = async (op: () => Promise<ethers.TransactionResponse>, successMessage: string) => {
     if (!walletConnected) {
@@ -576,6 +596,10 @@ export function VotingInteractionPanel({
                     if (!network.disabled) {
                       setSelectedNetwork(key as BnbNetworkKey);
                       setShowNetworkDropdown(false);
+                      onNetworkChange?.(
+                        network.contractAddress ?? '',
+                        network.label,
+                      );
                     }
                   }}
                   className={cn(

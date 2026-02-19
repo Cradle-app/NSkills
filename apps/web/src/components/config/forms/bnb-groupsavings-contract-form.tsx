@@ -9,12 +9,12 @@ import { GroupSavingsInteractionPanel } from '@/components/contract-interactions
 const formStyles = { container: 'space-y-6' };
 const cardStyles = { base: 'p-4 rounded-xl border border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-muted))]' };
 const labelStyles = {
-    base: 'block text-xs font-medium text-[hsl(var(--color-text-dim))] uppercase tracking-wider mb-2',
-    icon: 'w-3 h-3 inline-block mr-1.5 opacity-70',
+    base: 'flex items-center gap-1.5 text-xs font-medium text-[hsl(var(--color-text-secondary))]',
+    helper: 'text-[10px] text-[hsl(var(--color-text-muted))] mt-1.5 leading-relaxed',
 };
-const inputStyles = {
-    base: 'w-full bg-[hsl(var(--color-bg-default))] border border-[hsl(var(--color-border-default))] rounded-lg px-3 py-2 text-sm text-[hsl(var(--color-text-default))] placeholder-[hsl(var(--color-text-dim))] focus:outline-none focus:ring-1 focus:ring-[hsl(var(--color-accent))] transition-all',
-};
+
+const DEFAULT_GROUPSAVINGS_ADDRESS = '0x1234567890123456789012345678901234567890';
+const DEFAULT_NETWORK_LABEL = 'BNB Testnet';
 
 interface BnbGroupSavingsContractFormProps {
     nodeId: string;
@@ -25,15 +25,23 @@ interface BnbGroupSavingsContractFormProps {
 
 export function BnbGroupSavingsContractForm({ nodeId, config }: BnbGroupSavingsContractFormProps) {
     const updateNodeConfig = useBlueprintStore((state) => state.updateNodeConfig);
-    const [address, setAddress] = useState(config.contractAddress || '');
+
+    const configuredAddress = config.contractAddress || DEFAULT_GROUPSAVINGS_ADDRESS;
+    const [localAddress, setLocalAddress] = useState(configuredAddress);
+    const [networkLabel, setNetworkLabel] = useState(DEFAULT_NETWORK_LABEL);
 
     useEffect(() => {
-        setAddress(config.contractAddress || '');
-    }, [config.contractAddress]);
+        setLocalAddress(configuredAddress);
+    }, [configuredAddress]);
 
-    const handleAddressChange = (newAddress: string) => {
-        setAddress(newAddress);
-        updateNodeConfig(nodeId, { contractAddress: newAddress });
+    const handleBlur = () => {
+        if (!localAddress) return;
+        updateNodeConfig(nodeId, { contractAddress: localAddress });
+    };
+
+    const handleNetworkChange = (contractAddress: string, label: string) => {
+        if (contractAddress) setLocalAddress(contractAddress);
+        setNetworkLabel(label);
     };
 
     return (
@@ -46,42 +54,38 @@ export function BnbGroupSavingsContractForm({ nodeId, config }: BnbGroupSavingsC
                 <div>
                     <h3 className="text-sm font-medium text-emerald-100">BNB Group Savings</h3>
                     <p className="text-xs text-emerald-200/60">
-                        Interact with GroupSavings.sol on BNB Testnet
+                        Interact with GroupSavings.sol on BNB Smart Chain
                     </p>
                 </div>
             </div>
 
             {/* Contract Configuration */}
             <div className={cardStyles.base}>
-                <label className={labelStyles.base}>
-                    <PiggyBank className={labelStyles.icon} />
-                    Contract Address
-                </label>
                 <div className="space-y-2">
+                    <label className={cn(labelStyles.base, 'mb-0')}>
+                        <span>Contract address ({networkLabel})</span>
+                    </label>
                     <input
                         type="text"
-                        value={address}
-                        onChange={(e) => handleAddressChange(e.target.value)}
-                        placeholder="0x..."
-                        className={cn(inputStyles.base, 'font-mono text-xs')}
+                        value={localAddress}
+                        onChange={(e) => setLocalAddress(e.target.value)}
+                        onBlur={handleBlur}
+                        placeholder={DEFAULT_GROUPSAVINGS_ADDRESS}
+                        className="w-full px-3 py-2 text-xs rounded-lg bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))] text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none focus:border-[hsl(var(--color-accent-primary))] focus:ring-2 focus:ring-[hsl(var(--color-accent-primary)/0.15)] font-mono"
                     />
-                    <p className="text-[10px] text-[hsl(var(--color-text-dim))]">
-                        Address of the deployed GroupSavings contract
+                    <p className={labelStyles.helper}>
+                        Deployed GroupSavings.sol contract on {networkLabel}. You can paste a different address if
+                        you have your own deployment.
                     </p>
                 </div>
             </div>
 
             {/* Live Interaction */}
-            <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                    <div className="h-px flex-1 bg-[hsl(var(--color-border-default))]" />
-                    <span className="text-[10px] uppercase tracking-widest text-[hsl(var(--color-text-dim))] font-medium">
-                        Live Preview
-                    </span>
-                    <div className="h-px flex-1 bg-[hsl(var(--color-border-default))]" />
-                </div>
-
-                <GroupSavingsInteractionPanel contractAddress={address} />
+            <div className={cardStyles.base}>
+                <GroupSavingsInteractionPanel
+                    contractAddress={localAddress}
+                    onNetworkChange={handleNetworkChange}
+                />
             </div>
         </div>
     );

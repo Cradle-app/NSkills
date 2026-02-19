@@ -33,6 +33,7 @@ const BNB_NETWORKS = {
         description: 'Deployed SimpleMarketplace.sol contract on BNB Testnet',
         disabled: false,
         symbol: 'tBNB',
+        contractAddress: '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61',
     },
     mainnet: {
         id: 'mainnet' as const,
@@ -44,17 +45,19 @@ const BNB_NETWORKS = {
         description: 'No marketplace contract deployed yet (coming soon)',
         disabled: true,
         symbol: 'BNB',
+        contractAddress: undefined,
     },
     opbnbTestnet: {
         id: 'opbnbTestnet' as const,
         name: 'opBNB Testnet',
         chainId: 5611,
         rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
-        explorerUrl: 'https://testnet.opbnbscan.com',
+        explorerUrl: 'https://opbnb-testnet.bscscan.com',
         label: 'opBNB Testnet',
-        description: 'opBNB L2 Testnet (coming soon)',
-        disabled: true,
+        description: 'Deployed SimpleMarketplace.sol contract on opBNB L2 Testnet',
+        disabled: false,
         symbol: 'tBNB',
+        contractAddress: '0x00320016Ad572264a64C98142e51200E60f73bCE',
     },
     opbnbMainnet: {
         id: 'opbnbMainnet' as const,
@@ -66,6 +69,7 @@ const BNB_NETWORKS = {
         description: 'opBNB L2 Mainnet (coming soon)',
         disabled: true,
         symbol: 'BNB',
+        contractAddress: undefined,
     },
 } as const;
 
@@ -168,6 +172,7 @@ const MARKETPLACE_ABI = [
 
 export interface MarketplaceInteractionPanelProps {
     contractAddress?: string;
+    onNetworkChange?: (contractAddress: string, networkLabel: string) => void;
 }
 
 interface TxStatus {
@@ -191,12 +196,12 @@ interface MarketplaceItem {
 
 export function MarketplaceInteractionPanel({
     contractAddress: initialAddress,
+    onNetworkChange,
 }: MarketplaceInteractionPanelProps) {
-    const defaultAddress = initialAddress ?? '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61';
-    const [contractAddress] = useState(defaultAddress);
     const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
     const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
     const networkConfig = BNB_NETWORKS[selectedNetwork];
+    const contractAddress = networkConfig.contractAddress ?? initialAddress ?? '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61';
 
     const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -330,10 +335,17 @@ export function MarketplaceInteractionPanel({
         }
     }, [getReadContract]);
 
+    const resetState = useCallback(() => {
+        setItems([]);
+        setStats(null);
+        setContractError(null);
+    }, []);
+
     useEffect(() => {
+        resetState();
         fetchItems();
         fetchStats();
-    }, [fetchItems, fetchStats]);
+    }, [selectedNetwork, fetchItems, fetchStats, resetState]);
 
     const resetTxStatus = () => setTxStatus({ status: 'idle', message: '' });
 
@@ -580,6 +592,10 @@ export function MarketplaceInteractionPanel({
                                         if (!network.disabled) {
                                             setSelectedNetwork(key as BnbNetworkKey);
                                             setShowNetworkDropdown(false);
+                                            onNetworkChange?.(
+                                                network.contractAddress ?? '',
+                                                network.label,
+                                            );
                                         }
                                     }}
                                     className={cn(
