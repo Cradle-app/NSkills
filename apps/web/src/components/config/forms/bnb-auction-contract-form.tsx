@@ -14,6 +14,7 @@ const labelStyles = {
 };
 
 const DEFAULT_AUCTION_ADDRESS = '0x00320016Ad572264a64C98142e51200E60f73bCE';
+const DEFAULT_NETWORK_LABEL = 'BNB Testnet';
 
 function FormHeader({
     icon: Icon,
@@ -48,6 +49,7 @@ export function BnbAuctionContractForm({ nodeId, config }: Props) {
 
     const configuredAddress = (config.contractAddress as string | undefined) || DEFAULT_AUCTION_ADDRESS;
     const [localAddress, setLocalAddress] = useState(configuredAddress);
+    const [networkLabel, setNetworkLabel] = useState(DEFAULT_NETWORK_LABEL);
 
     useEffect(() => {
         setLocalAddress(configuredAddress);
@@ -61,19 +63,24 @@ export function BnbAuctionContractForm({ nodeId, config }: Props) {
         });
     };
 
+    const handleNetworkChange = (contractAddress: string, label: string) => {
+        if (contractAddress) setLocalAddress(contractAddress);
+        setNetworkLabel(label);
+    };
+
     return (
         <div className={formStyles.container}>
             <FormHeader
                 icon={Gavel}
                 title="BNB Auction Contract"
-                description="Interact with a deployed SimpleAuction.sol contract on BNB Smart Chain Testnet."
+                description="Interact with a deployed SimpleAuction.sol contract on BNB Smart Chain."
             />
 
             {/* Contract configuration */}
             <div className={cardStyles.base}>
                 <div className="space-y-2">
                     <label className={cn(labelStyles.base, 'mb-0')}>
-                        <span>Contract address (BNB Testnet)</span>
+                        <span>Contract address ({networkLabel})</span>
                     </label>
                     <input
                         type="text"
@@ -84,15 +91,18 @@ export function BnbAuctionContractForm({ nodeId, config }: Props) {
                         className="w-full px-3 py-2 text-xs rounded-lg bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))] text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none focus:border-[hsl(var(--color-accent-primary))] focus:ring-2 focus:ring-[hsl(var(--color-accent-primary)/0.15)] font-mono"
                     />
                     <p className={labelStyles.helper}>
-                        Defaults to the deployed SimpleAuction.sol contract on BNB Smart Chain Testnet. You can paste
-                        a different address if you have your own deployment.
+                        Deployed SimpleAuction.sol contract on {networkLabel}. You can paste a different address if
+                        you have your own deployment.
                     </p>
                 </div>
             </div>
 
             {/* Live interaction panel */}
             <div className={cardStyles.base}>
-                <AuctionInteractionPanel contractAddress={localAddress} />
+                <AuctionInteractionPanel
+                    contractAddress={localAddress}
+                    onNetworkChange={handleNetworkChange}
+                />
             </div>
         </div>
     );

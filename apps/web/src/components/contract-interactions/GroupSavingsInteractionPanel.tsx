@@ -33,6 +33,7 @@ const BNB_NETWORKS = {
         description: 'Deployed GroupSavings.sol contract on BNB Testnet',
         disabled: false,
         symbol: 'tBNB',
+        contractAddress: '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28',
     },
     mainnet: {
         id: 'mainnet' as const,
@@ -41,20 +42,22 @@ const BNB_NETWORKS = {
         rpcUrl: 'https://bsc-dataseed.bnbchain.org',
         explorerUrl: 'https://bscscan.com',
         label: 'BNB Mainnet',
-        description: 'No GroupSavings contract deployed yet',
+        description: 'No GroupSavings contract deployed yet (coming soon)',
         disabled: true,
         symbol: 'BNB',
+        contractAddress: undefined,
     },
     opbnbTestnet: {
         id: 'opbnbTestnet' as const,
         name: 'opBNB Testnet',
         chainId: 5611,
         rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
-        explorerUrl: 'https://testnet.opbnbscan.com',
+        explorerUrl: 'https://opbnb-testnet.bscscan.com',
         label: 'opBNB Testnet',
-        description: 'opBNB L2 Testnet (coming soon)',
-        disabled: true,
+        description: 'Deployed GroupSavings.sol contract on opBNB L2 Testnet',
+        disabled: false,
         symbol: 'tBNB',
+        contractAddress: '0xB9896Cb9aC638EE36324B57c6eF8E88668Ef6c3c',
     },
     opbnbMainnet: {
         id: 'opbnbMainnet' as const,
@@ -66,6 +69,7 @@ const BNB_NETWORKS = {
         description: 'opBNB L2 Mainnet (coming soon)',
         disabled: true,
         symbol: 'BNB',
+        contractAddress: undefined,
     },
 } as const;
 
@@ -185,6 +189,7 @@ const GROUP_SAVINGS_ABI = [
 
 export interface GroupSavingsInteractionPanelProps {
     contractAddress?: string;
+    onNetworkChange?: (contractAddress: string, networkLabel: string) => void;
 }
 
 interface TxStatus {
@@ -195,12 +200,12 @@ interface TxStatus {
 
 export function GroupSavingsInteractionPanel({
     contractAddress: initialAddress,
+    onNetworkChange,
 }: GroupSavingsInteractionPanelProps) {
-    const defaultAddress = initialAddress ?? '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28';
-    const [contractAddress] = useState(defaultAddress);
     const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
     const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
     const networkConfig = BNB_NETWORKS[selectedNetwork];
+    const contractAddress = networkConfig.contractAddress ?? initialAddress ?? '0x1234567890123456789012345678901234567890';
 
     const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -287,6 +292,21 @@ export function GroupSavingsInteractionPanel({
         return new ethers.Contract(contractAddress, GROUP_SAVINGS_ABI, signer);
     }, [chain?.id, contractAddress, walletConnected, networkConfig]);
 
+    const resetState = useCallback(() => {
+        setDesc(null);
+        setGoalAmount(null);
+        setTotalRaised(null);
+        setRemaining(null);
+        setSecondsLeft(null);
+        setGoalMet(null);
+        setIsWithdrawn(null);
+        setOwner(null);
+        setProgressPct(null);
+        setCheckResult(null);
+        setCheckError(null);
+        setContractError(null);
+    }, []);
+
     const fetchState = useCallback(async () => {
         const contract = getReadContract();
         if (!contract) return;
@@ -316,9 +336,10 @@ export function GroupSavingsInteractionPanel({
 
     useEffect(() => {
         if (contractAddress) {
+            resetState();
             fetchState();
         }
-    }, [contractAddress, fetchState]);
+    }, [contractAddress, selectedNetwork, fetchState, resetState]);
 
     useEffect(() => {
         if (goalMet || isWithdrawn || secondsLeft === null || secondsLeft === 0n) return;
@@ -535,6 +556,10 @@ export function GroupSavingsInteractionPanel({
                                         if (!network.disabled) {
                                             setSelectedNetwork(key as BnbNetworkKey);
                                             setShowNetworkDropdown(false);
+                                            onNetworkChange?.(
+                                                network.contractAddress ?? '',
+                                                network.label,
+                                            );
                                         }
                                     }}
                                     className={cn(
