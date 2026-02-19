@@ -4,7 +4,7 @@ import { getAvailableNodeTypesContext } from '@/lib/ai-workflow-converter';
 export const runtime = 'nodejs';
 
 // System prompt for the AI
-const SYSTEM_PROMPT = `You are a friendly Web3 application architect assistant for [N]skills, a visual skills composer for Arbitrum dApps.
+const SYSTEM_PROMPT = `You are a friendly Web3 application architect assistant for [N]skills, a visual skills composer for Web3 dApps (Arbitrum, BNB Chain, Robinhood, etc.).
 
 Your job is to help users design application architectures OR have helpful conversations.
 
@@ -309,6 +309,31 @@ function generateMockWorkflowResponse(query: string): AIWorkflowResponse {
   const hasMarketplace = lowerQuery.includes('marketplace') || lowerQuery.includes('buy') || lowerQuery.includes('sell');
   const hasPaywall = lowerQuery.includes('paywall') || lowerQuery.includes('payment') || lowerQuery.includes('monetize') || lowerQuery.includes('premium');
   const hasAnalytics = lowerQuery.includes('analytics') || lowerQuery.includes('activity') || lowerQuery.includes('transaction') || lowerQuery.includes('history');
+  
+  // New Plugin Detections
+  // BNB Chain
+  const hasBNB = lowerQuery.includes('bnb') || lowerQuery.includes('binance') || lowerQuery.includes('bsc');
+  const hasVoting = lowerQuery.includes('voting') || lowerQuery.includes('vote') || lowerQuery.includes('dao');
+  const hasAuction = lowerQuery.includes('auction') || lowerQuery.includes('bid');
+  const hasLottery = lowerQuery.includes('lottery') || lowerQuery.includes('raffle');
+  const hasCrowdfunding = lowerQuery.includes('crowd') || lowerQuery.includes('fund') || lowerQuery.includes('raise');
+  const hasBounty = lowerQuery.includes('bounty') || lowerQuery.includes('gig') || lowerQuery.includes('task');
+  const hasGroupSavings = lowerQuery.includes('group') || lowerQuery.includes('save') || lowerQuery.includes('savings');
+  
+  // Superposition
+  const hasSuperposition = lowerQuery.includes('superposition') || lowerQuery.includes('longtail') || lowerQuery.includes('utility mining');
+  
+  // Robinhood
+  const hasRobinhood = lowerQuery.includes('robinhood');
+  
+  // Dune
+  const hasDune = lowerQuery.includes('dune') || lowerQuery.includes('sql') || lowerQuery.includes('query');
+  
+  // OpenClaw
+  const hasOpenClaw = lowerQuery.includes('openclaw') || lowerQuery.includes('claw');
+  
+  // Uniswap
+  const hasUniswap = lowerQuery.includes('uniswap') || lowerQuery.includes('swap');
 
   let toolId = 1;
   const getToolId = () => `tool_${toolId++}`;
@@ -494,8 +519,144 @@ function generateMockWorkflowResponse(query: string): AIWorkflowResponse {
   if (tools.length > 3) {
     tools.push({
       id: getToolId(),
-      type: 'quality_gates',
+      type: 'repo-quality-gates',
       name: 'Quality Gates',
+      next_tools: [],
+    });
+  }
+
+  // --- New Plugin Logic ---
+
+  // BNB Chain specific contracts
+  if (hasVoting) {
+    tools.push({
+      id: getToolId(),
+      type: 'bnb-voting-contract',
+      name: 'BNB Voting Contract',
+      next_tools: [],
+    });
+  }
+  
+  if (hasAuction) {
+    tools.push({
+      id: getToolId(),
+      type: 'bnb-auction-contract',
+      name: 'BNB Auction Contract',
+      next_tools: [],
+    });
+  }
+  
+  if (hasLottery) {
+    tools.push({
+      id: getToolId(),
+      type: 'bnb-lottery-contract',
+      name: 'BNB Lottery Contract',
+      next_tools: [],
+    });
+  }
+  
+  if (hasCrowdfunding) {
+    tools.push({
+      id: getToolId(),
+      type: 'crowdfunding-contract',
+      name: 'BNB Crowdfunding',
+      next_tools: [],
+    });
+  }
+  
+  if (hasBounty) {
+    tools.push({
+      id: getToolId(),
+      type: 'bounty-board-contract',
+      name: 'BNB Bounty Board',
+      next_tools: [],
+    });
+  }
+
+  if (hasGroupSavings) {
+    tools.push({
+      id: getToolId(),
+      type: 'bnb-groupsavings-contract',
+      name: 'BNB Group Savings',
+      next_tools: [],
+    });
+  }
+
+  // Marketplace logic check (BNB specific vs Generic)
+  if (hasMarketplace && hasBNB) {
+     const marketTool = tools.find(t => t.type === 'ipfs_storage'); // Clean up generic if needed, but for now just add BNB one
+     tools.push({
+      id: getToolId(),
+      type: 'bnb-marketplace-contract',
+      name: 'BNB Marketplace',
+      next_tools: [],
+    });
+  }
+
+  // Superposition
+  if (hasSuperposition) {
+    tools.push({
+      id: getToolId(),
+      type: 'superposition-network',
+      name: 'Superposition Network',
+      next_tools: [],
+    });
+    tools.push({
+      id: getToolId(),
+      type: 'superposition-bridge',
+      name: 'Superposition Bridge',
+      next_tools: [],
+    });
+  }
+
+  // Robinhood
+  if (hasRobinhood) {
+    tools.push({
+      id: getToolId(),
+      type: 'robinhood-network',
+      name: 'Robinhood Network',
+      next_tools: [],
+    });
+    tools.push({
+      id: getToolId(),
+      type: 'robinhood-deployment',
+      name: 'Contract Deployment',
+      next_tools: [],
+    });
+  }
+
+  // Dune
+  if (hasDune) {
+    tools.push({
+      id: getToolId(),
+      type: 'dune-execute-sql',
+      name: 'Dune SQL Query',
+      next_tools: [],
+    });
+    tools.push({
+      id: getToolId(),
+      type: 'dune-transaction-history',
+      name: 'Transaction History',
+      next_tools: [],
+    });
+  }
+  
+  // OpenClaw
+  if (hasOpenClaw) {
+    tools.push({
+      id: getToolId(),
+      type: 'openclaw-agent',
+      name: 'OpenClaw Agent',
+      next_tools: [],
+    });
+  }
+  
+  // Uniswap
+  if (hasUniswap) {
+    tools.push({
+      id: getToolId(),
+      type: 'uniswap-swap',
+      name: 'Uniswap Swap',
       next_tools: [],
     });
   }
@@ -534,8 +695,12 @@ function generateMockWorkflowResponse(query: string): AIWorkflowResponse {
       description = `Telegram integration architecture with ${componentNames}. This enables crypto alerts and wallet linking via Telegram.`;
     } else if (hasAnalytics) {
       description = `Wallet analytics architecture with ${componentNames}. This enables tracking and displaying onchain activity.`;
+    } else if (hasVoting || hasAuction || hasLottery || hasBNB) {
+      description = `BNB Chain dApp architecture with ${componentNames}. This full-stack application includes specialized smart contracts and frontend integration.`;
+    } else if (hasSuperposition) {
+      description = `Superposition Layer-3 architecture with ${componentNames}.`;
     } else {
-      description = `Web3 application architecture with ${componentNames}. Built for Arbitrum with modern development practices.`;
+      description = `Web3 application architecture with ${componentNames}. Built for modern blockchains with best practices.`;
     }
   }
 

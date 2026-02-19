@@ -442,7 +442,7 @@ export function AIChatbot({ onApplyWorkflow }: AIChatbotProps) {
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="Describe your app..."
-                      className="w-full min-h-[36px] max-h-[80px] px-3 py-2 text-xs bg-forge-elevated border border-forge-border/50 rounded-lg text-white placeholder:text-forge-muted focus:outline-none focus:border-accent-cyan/40 transition-colors resize-none"
+                      className="w-full min-h-[36px] max-h-[80px] px-3 py-2 text-xs bg-forge-elevated border border-forge-border/50 rounded-lg text-white placeholder:text-white focus:outline-none focus:border-accent-cyan/40 transition-colors resize-none"
                       disabled={isLoading}
                       rows={1}
                     />
