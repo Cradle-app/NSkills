@@ -16,6 +16,7 @@ import type {
   OpenClawConfig,
   RepoQualityGatesConfig,
   MaxxitLazyTradingConfig,
+  AsterDexConfig,
 } from './schemas/nodes';
 import type { BlueprintEdge, EdgeType } from './schemas/edges';
 import type { BlueprintConfig, NetworkConfig, GitHubConfig } from './schemas/config';
@@ -38,6 +39,7 @@ export type {
   OpenClawConfig,
   RepoQualityGatesConfig,
   MaxxitLazyTradingConfig,
+  AsterDexConfig,
   BlueprintEdge,
   EdgeType,
   BlueprintConfig,

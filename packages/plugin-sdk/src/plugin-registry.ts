@@ -141,6 +141,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'bnb-groupsavings-contract',
       'bnb-marketplace-contract',
       'maxxit',
+      'aster-dex',
       'onchain-activity',
       'openclaw-agent',
       'pyth-oracle',

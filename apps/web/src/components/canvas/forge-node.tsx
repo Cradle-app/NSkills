@@ -24,6 +24,7 @@ import AuditwareLogo from '@/assets/blocks/auditware.png';
 import StylusLogo from '@/assets/blocks/stylus.svg';
 import OstiumLogo from '@/assets/blocks/Ostium.svg';
 import MaxxitLogo from '@/assets/blocks/MaxxitLogo.png';
+import AsterLogo from '@/assets/blocks/Aster.png';
 import AIbotLogo from '@/assets/blocks/AIbot.png';
 import WalletLogoPng from '@/assets/blocks/Wallet.png';
 import SuperpositionLogo from '@/assets/blocks/superposition.png';
@@ -61,6 +62,7 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   // Agent plugins
   'ostium-trading': { src: OstiumLogo, alt: 'Ostium' },
   'maxxit': { src: MaxxitLogo, alt: 'Maxxit' },
+  'aster-dex': { src: AsterLogo, alt: 'Aster DEX' },
   'erc8004-agent-runtime': { src: AIbotLogo, alt: 'AIbot' },
   'onchain-activity': { src: WalletLogoPng, alt: 'Wallet' },
   // Intelligence plugins
@@ -139,6 +141,7 @@ const iconMap: Record<string, typeof Box> = {
   'zk-primitives': Lock,
   'ostium-trading': TrendingUp,
   'maxxit': Bot,
+  'aster-dex': TrendingUp,
   'uniswap-swap': Coins,
   'aave-lending': DollarSign,
   'compound-lending': DollarSign,
@@ -439,7 +442,8 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
     (nodeType === 'x402-paywall-api' && data.currency) ||
     (nodeType === 'erc8004-agent-runtime' && data.modelProvider) ||
     nodeType === 'ostium-trading' ||
-    nodeType === 'maxxit'
+    nodeType === 'maxxit' ||
+    nodeType === 'aster-dex'
   );
 
   return (
@@ -607,6 +611,16 @@ function ForgeNodeComponent({ id, data, selected }: NodeProps) {
                 {data.setupComplete || data.linkedStatus === 'LINKED'
                   ? 'LINKED'
                   : data.linkedStatus || 'NOT LINKED'}
+              </span>
+            )}
+
+            {nodeType === 'aster-dex' && (
+              <span className={cn(
+                'text-[9px] px-2 py-0.5 rounded-md font-mono uppercase tracking-wider',
+                'bg-[hsl(var(--color-bg-base)/0.6)] border border-[hsl(var(--color-border-subtle))]',
+                colors.text
+              )}>
+                BNB Chain
               </span>
             )}
           </div>

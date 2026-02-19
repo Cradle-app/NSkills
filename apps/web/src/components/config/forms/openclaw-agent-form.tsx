@@ -25,7 +25,7 @@ export function OpenClawAgentForm({ nodeId, config }: Props) {
       <FormHeader
         icon={Bot}
         title="OpenClaw Agent"
-        description="Personal AI assistant you run on your own devices, now wired into your DappForge blueprint as an agent node."
+        description="Personal AI assistant you run on your own devices, now wired into your Nskills app as an agent node."
         variant="primary"
       />
 
@@ -61,7 +61,7 @@ export function OpenClawAgentForm({ nodeId, config }: Props) {
             product is the assistant that actually does work for you.
           </p>
           <p className={cardStyles.cardBody}>
-            In your DappForge blueprint, the <span className="font-mono">openclaw-agent</span> node is a prompt-driven block that describes how
+            In your Nskills app, the <span className="font-mono">openclaw-agent</span> node is a prompt-driven block that describes how
             OpenClaw should behave and what role it plays in the architecture. The shared AI Prompt section above is included in the generated
             repo as a markdown doc, so you can hand that context directly to OpenClaw or other agents.
           </p>
@@ -178,7 +178,7 @@ openclaw onboard --install-daemon`}
           </div>
 
           <p className={labelStyles.helper}>
-            When you click <span className="font-semibold">Build</span> in DappForge, your blueprint will include OpenClaw documentation files
+            When you click <span className="font-semibold">Build</span> in Nskills, your blueprint will include OpenClaw documentation files
             that mirror this setup, so you (or your team) can follow the same steps directly in the generated repo.
           </p>
 

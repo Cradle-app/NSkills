@@ -28,6 +28,7 @@ export { TelegramWalletLinkPlugin } from './telegram-wallet-link';
 export { TelegramAIAgentPlugin } from './telegram-ai-agent';
 export { OstiumTradingPlugin } from './ostium-trading';
 export { MaxxitLazyTradingPlugin } from './maxxit';
+export { AsterDexPlugin } from './aster-dex';
 export { OnchainActivityPlugin } from './onchain-activity';
 export { PythOraclePlugin } from './pyth-oracle';
 export { ChainlinkPriceFeedPlugin } from './chainlink-price-feed';
@@ -103,6 +104,7 @@ import { ERC20StylusPlugin } from './erc20-stylus';
 import { ERC721StylusPlugin } from './erc721-stylus';
 import { ERC1155StylusPlugin } from './erc1155-stylus';
 import { MaxxitLazyTradingPlugin } from './maxxit';
+import { AsterDexPlugin } from './aster-dex';
 import { OnchainActivityPlugin } from './onchain-activity';
 import { PythOraclePlugin } from './pyth-oracle';
 import { ChainlinkPriceFeedPlugin } from './chainlink-price-feed';
@@ -186,6 +188,7 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new ERC721StylusPlugin());
   targetRegistry.register(new ERC1155StylusPlugin());
   targetRegistry.register(new MaxxitLazyTradingPlugin());
+  targetRegistry.register(new AsterDexPlugin());
   targetRegistry.register(new OnchainActivityPlugin());
   targetRegistry.register(new PythOraclePlugin());
   targetRegistry.register(new ChainlinkPriceFeedPlugin());
@@ -260,6 +263,7 @@ export function getOfficialPlugins() {
     new ERC721StylusPlugin(),
     new ERC1155StylusPlugin(),
     new MaxxitLazyTradingPlugin(),
+    new AsterDexPlugin(),
     new OnchainActivityPlugin(),
     new PythOraclePlugin(),
     new ChainlinkPriceFeedPlugin(),

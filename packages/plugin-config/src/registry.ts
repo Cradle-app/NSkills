@@ -355,6 +355,22 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
     },
     defaultConfig: {},
   },
+  'aster-dex': {
+    id: 'aster-dex',
+    name: 'Aster DEX',
+    description: 'Guidance block for integrating Aster DEX with OpenClaw skills',
+    icon: 'TrendingUp',
+    logoAsset: 'Aster.png',
+    color: 'node-agents',
+    category: 'agents',
+    tags: ['aster', 'dex', 'trading', 'perpetuals', 'guidance'],
+    compatibility: {
+      compatibleWith: ['frontend-scaffold', 'wallet-auth'],
+      suggestedWith: ['openclaw-agent', 'maxxit'],
+      requires: [],
+    },
+    defaultConfig: {},
+  },
   'onchain-activity': {
     id: 'onchain-activity',
     name: 'Onchain Activity',

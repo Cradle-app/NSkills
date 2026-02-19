@@ -39,6 +39,7 @@ import { CompoundLendingForm } from './forms/compound-lending-form';
 import { UniswapSwapForm } from './forms/uniswap-swap-form';
 import { AIXBTForm } from './forms/aixbt-form';
 import { MaxxitLazyTradingForm } from './forms/maxxit-lazy-trading-form';
+import { AsterDexForm } from './forms/aster-dex-form';
 
 // Superposition L3 forms
 import { SuperpositionNetworkForm } from './forms/superposition-network-form';
@@ -401,6 +402,9 @@ export function ConfigPanel() {
             )}
             {selectedNode.type === 'maxxit' && (
               <MaxxitLazyTradingForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {selectedNode.type === 'aster-dex' && (
+              <AsterDexForm nodeId={selectedNode.id} config={selectedNode.config} />
             )}
 
             {/* Stylus workflow nodes */}

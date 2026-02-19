@@ -70,6 +70,7 @@ export function nodeTypeToLabel(type: string): string {
     'erc721-stylus': 'ERC-721 Stylus NFT',
     'erc1155-stylus': 'ERC-1155 Stylus Multi-Token',
     'maxxit': 'Maxxit Lazy Trader',
+    'aster-dex': 'Aster DEX',
     'pyth-oracle': 'Pyth Price Oracle',
     'chainlink-price-feed': 'Chainlink Price Feed',
     'aave-lending': 'Aave Lending',
@@ -152,6 +153,7 @@ export function nodeTypeToColor(type: string): string {
     'aixbt-observer': 'node-intelligence',
     // Legacy
     'maxxit': 'node-agents',
+    'aster-dex': 'node-agents',
     'pyth-oracle': 'accent-purple',
     'chainlink-price-feed': 'accent-purple',
     'aave-lending': 'node-agents',

@@ -20,6 +20,8 @@ const toolTypeMap: Record<string, string> = {
   'maxxit_lazy_trader': 'maxxit',
   'maxxit_trader': 'maxxit',
   'maxxit': 'maxxit',
+  'aster_dex': 'aster-dex',
+  'aster': 'aster-dex',
   'onchain_activity': 'onchain-activity',
   'pyth_oracle': 'pyth-oracle',
   'chainlink_price_feed': 'chainlink-price-feed',
@@ -67,6 +69,7 @@ const validNodeTypes = [
   'erc8004-agent-runtime',
   'ostium-trading',
   'maxxit',
+  'aster-dex',
   'onchain-activity',
   'pyth-oracle',
   'chainlink-price-feed',
@@ -205,6 +208,7 @@ const DEFAULT_NODE_CONFIGS: Record<string, Record<string, unknown>> = {
     enableOneClick: true,
   },
   'maxxit': {},
+  'aster-dex': {},
   'onchain-activity': {
     network: 'arbitrum',
     transactionLimit: '10',
@@ -457,6 +461,7 @@ AGENTS:
 - erc8004_agent: AI agent with on-chain registry (ERC-8004)
 - ostium_trading: One-click trading setup for Ostium
 - maxxit_lazy_trader: Maxxit Lazy Trader API integration
+- aster_dex: Aster DEX guidance block with API service scaffold
 - onchain_activity: Fetch wallet transactions by category
 
 APP:
