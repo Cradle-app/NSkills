@@ -21,12 +21,64 @@ import Image from 'next/image';
 import { useAccount } from 'wagmi';
 import { cn } from '@/lib/utils';
 import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
-
-import { BNB_NETWORKS, type BnbNetworkKey } from '../../../../../lib/bnb-network-config';
 import GROUP_SAVINGS_ABI from '../../../../../packages/components/bnb-groupsavings/contract/groupsavings/group-savings.json';
+
+const BNB_NETWORKS = {
+    testnet: {
+        id: 'testnet' as const,
+        name: 'BNB Smart Chain Testnet',
+        chainId: 97,
+        rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
+        explorerUrl: 'https://testnet.bscscan.com',
+        label: 'BNB Testnet',
+        description: 'Deployed GroupSavings.sol contract on BNB Testnet',
+        disabled: false,
+        symbol: 'tBNB',
+        contractAddress: '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28',
+    },
+    mainnet: {
+        id: 'mainnet' as const,
+        name: 'BSC Mainnet',
+        chainId: 56,
+        rpcUrl: 'https://bsc-dataseed.bnbchain.org',
+        explorerUrl: 'https://bscscan.com',
+        label: 'BNB Mainnet',
+        description: 'No GroupSavings contract deployed yet (coming soon)',
+        disabled: true,
+        symbol: 'BNB',
+        contractAddress: undefined,
+    },
+    opbnbTestnet: {
+        id: 'opbnbTestnet' as const,
+        name: 'opBNB Testnet',
+        chainId: 5611,
+        rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
+        explorerUrl: 'https://opbnb-testnet.bscscan.com',
+        label: 'opBNB Testnet',
+        description: 'Deployed GroupSavings.sol contract on opBNB L2 Testnet',
+        disabled: false,
+        symbol: 'tBNB',
+        contractAddress: '0xB9896Cb9aC638EE36324B57c6eF8E88668Ef6c3c',
+    },
+    opbnbMainnet: {
+        id: 'opbnbMainnet' as const,
+        name: 'opBNB Mainnet',
+        chainId: 204,
+        rpcUrl: 'https://opbnb-mainnet-rpc.bnbchain.org',
+        explorerUrl: 'https://opbnbscan.com',
+        label: 'opBNB Mainnet',
+        description: 'opBNB L2 Mainnet (coming soon)',
+        disabled: true,
+        symbol: 'BNB',
+        contractAddress: undefined,
+    },
+} as const;
+
+type BnbNetworkKey = keyof typeof BNB_NETWORKS;
 
 export interface GroupSavingsInteractionPanelProps {
     contractAddress?: string;
+    onNetworkChange?: (contractAddress: string, networkLabel: string) => void;
 }
 
 interface TxStatus {
@@ -37,12 +89,12 @@ interface TxStatus {
 
 export function GroupSavingsInteractionPanel({
     contractAddress: initialAddress,
+    onNetworkChange,
 }: GroupSavingsInteractionPanelProps) {
-    const defaultAddress = initialAddress ?? '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28';
-    const [contractAddress] = useState(defaultAddress);
     const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
     const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
     const networkConfig = BNB_NETWORKS[selectedNetwork];
+    const contractAddress = networkConfig.contractAddress ?? initialAddress ?? '0x1234567890123456789012345678901234567890';
 
     const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -103,7 +155,11 @@ export function GroupSavingsInteractionPanel({
                                 {
                                     chainId: targetChainIdHex,
                                     chainName: networkConfig.name,
-                                    nativeCurrency: networkConfig.nativeCurrency,
+                                    nativeCurrency: {
+                                        name: networkConfig.symbol,
+                                        symbol: networkConfig.symbol,
+                                        decimals: 18,
+                                    },
                                     rpcUrls: [networkConfig.rpcUrl],
                                     blockExplorerUrls: [networkConfig.explorerUrl],
                                 },
@@ -124,6 +180,21 @@ export function GroupSavingsInteractionPanel({
         const signer = await provider.getSigner();
         return new ethers.Contract(contractAddress, GROUP_SAVINGS_ABI, signer);
     }, [chain?.id, contractAddress, walletConnected, networkConfig]);
+
+    const resetState = useCallback(() => {
+        setDesc(null);
+        setGoalAmount(null);
+        setTotalRaised(null);
+        setRemaining(null);
+        setSecondsLeft(null);
+        setGoalMet(null);
+        setIsWithdrawn(null);
+        setOwner(null);
+        setProgressPct(null);
+        setCheckResult(null);
+        setCheckError(null);
+        setContractError(null);
+    }, []);
 
     const fetchState = useCallback(async () => {
         const contract = getReadContract();
@@ -154,9 +225,10 @@ export function GroupSavingsInteractionPanel({
 
     useEffect(() => {
         if (contractAddress) {
+            resetState();
             fetchState();
         }
-    }, [contractAddress, fetchState]);
+    }, [contractAddress, selectedNetwork, fetchState, resetState]);
 
     useEffect(() => {
         if (goalMet || isWithdrawn || secondsLeft === null || secondsLeft === 0n) return;
@@ -364,54 +436,55 @@ export function GroupSavingsInteractionPanel({
 
                     {showNetworkDropdown && (
                         <div className="absolute top-full mt-1 w-full bg-forge-bg border border-forge-border rounded-lg shadow-xl z-50 overflow-hidden">
-                            {(Object.keys(BNB_NETWORKS) as BnbNetworkKey[]).map((key) => {
-                                const network = BNB_NETWORKS[key];
-                                return (
-                                    <button
-                                        key={key}
-                                        type="button"
-                                        disabled={network.disabled}
-                                        onClick={() => {
-                                            if (!network.disabled) {
-                                                setSelectedNetwork(key);
-                                                setShowNetworkDropdown(false);
-                                            }
-                                        }}
-                                        className={cn(
-                                            'w-full px-3 py-2.5 text-left text-sm transition-colors',
-                                            'flex items-center justify-between',
-                                            network.disabled
-                                                ? 'opacity-50 cursor-not-allowed bg-forge-bg/80 backdrop-blur-sm'
-                                                : 'hover:bg-emerald-500/10 cursor-pointer',
-                                            selectedNetwork === key && 'bg-emerald-500/20'
-                                        )}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <Image
-                                                src={BnbChainLogo}
-                                                alt="BNB Chain"
-                                                width={16}
-                                                height={16}
-                                                className="rounded"
-                                            />
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-white">{network.name}</span>
-                                                    {(network.id === 'testnet' || network.id === 'opbnbTestnet') && (
-                                                        <span className="text-[8px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">Testnet</span>
-                                                    )}
-                                                </div>
-                                                <p className="text-[10px] text-forge-muted mt-0.5">
-                                                    {network.description}
-                                                </p>
+                            {Object.entries(BNB_NETWORKS).map(([key, network]) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    disabled={network.disabled}
+                                    onClick={() => {
+                                        if (!network.disabled) {
+                                            setSelectedNetwork(key as BnbNetworkKey);
+                                            setShowNetworkDropdown(false);
+                                            onNetworkChange?.(
+                                                network.contractAddress ?? '',
+                                                network.label,
+                                            );
+                                        }
+                                    }}
+                                    className={cn(
+                                        'w-full px-3 py-2.5 text-left text-sm transition-colors',
+                                        'flex items-center justify-between',
+                                        network.disabled
+                                            ? 'opacity-50 cursor-not-allowed bg-forge-bg/80 backdrop-blur-sm'
+                                            : 'hover:bg-emerald-500/10 cursor-pointer',
+                                        selectedNetwork === key && 'bg-emerald-500/20'
+                                    )}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Image
+                                            src={BnbChainLogo}
+                                            alt="BNB Chain"
+                                            width={16}
+                                            height={16}
+                                            className="rounded"
+                                        />
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-white">{network.name}</span>
+                                                {(network.id === 'testnet' || network.id === 'opbnbTestnet') && (
+                                                    <span className="text-[8px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">Testnet</span>
+                                                )}
                                             </div>
+                                            <p className="text-[10px] text-forge-muted mt-0.5">
+                                                {network.description}
+                                            </p>
                                         </div>
-                                        {network.disabled && (
-                                            <span className="text-[9px] px-1.5 py-0.5 bg-gray-500/30 text-gray-400 rounded shrink-0">Coming soon</span>
-                                        )}
-                                    </button>
-                                );
-                            })}
+                                    </div>
+                                    {network.disabled && (
+                                        <span className="text-[9px] px-1.5 py-0.5 bg-gray-500/30 text-gray-400 rounded shrink-0">Coming soon</span>
+                                    )}
+                                </button>
+                            ))}
                         </div>
                     )}
                 </div>

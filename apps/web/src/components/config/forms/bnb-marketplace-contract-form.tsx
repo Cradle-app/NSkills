@@ -1,19 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Gavel } from 'lucide-react';
+import { Box } from 'lucide-react';
 import { useBlueprintStore } from '@/store/blueprint';
 import { cn } from '@/lib/utils';
-import { AuctionInteractionPanel } from '@/components/contract-interactions/AuctionInteractionPanel';
+import { MarketplaceInteractionPanel } from '@/components/contract-interactions/MarketplaceInteractionPanel';
 
 const formStyles = { container: 'space-y-6' };
-const cardStyles = { base: 'p-4 rounded-xl border border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-muted))]' };
+const cardStyles = {
+    base: 'p-4 rounded-xl border border-[hsl(var(--color-border-default))] bg-[hsl(var(--color-bg-muted))]',
+};
 const labelStyles = {
     base: 'flex items-center gap-1.5 text-xs font-medium text-[hsl(var(--color-text-secondary))]',
     helper: 'text-[10px] text-[hsl(var(--color-text-muted))] mt-1.5 leading-relaxed',
 };
 
-const DEFAULT_AUCTION_ADDRESS = '0x00320016Ad572264a64C98142e51200E60f73bCE';
+const DEFAULT_MARKETPLACE_ADDRESS = '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61';
 const DEFAULT_NETWORK_LABEL = 'BNB Testnet';
 
 function FormHeader({
@@ -21,15 +23,14 @@ function FormHeader({
     title,
     description,
 }: {
-    icon: typeof Gavel;
+    icon: typeof Box;
     title: string;
     description: string;
-    variant?: string;
 }) {
     return (
         <div className="flex items-start gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <Icon className="w-5 h-5 text-amber-400" />
+            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <Icon className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
                 <h3 className="text-sm font-semibold text-[hsl(var(--color-text-primary))]">{title}</h3>
@@ -44,10 +45,11 @@ interface Props {
     config: Record<string, unknown>;
 }
 
-export function BnbAuctionContractForm({ nodeId, config }: Props) {
+export function BnbMarketplaceContractForm({ nodeId, config }: Props) {
     const { updateNodeConfig } = useBlueprintStore();
 
-    const configuredAddress = (config.contractAddress as string | undefined) || DEFAULT_AUCTION_ADDRESS;
+    const configuredAddress =
+        (config.contractAddress as string | undefined) || DEFAULT_MARKETPLACE_ADDRESS;
     const [localAddress, setLocalAddress] = useState(configuredAddress);
     const [networkLabel, setNetworkLabel] = useState(DEFAULT_NETWORK_LABEL);
 
@@ -71,9 +73,9 @@ export function BnbAuctionContractForm({ nodeId, config }: Props) {
     return (
         <div className={formStyles.container}>
             <FormHeader
-                icon={Gavel}
-                title="BNB Auction Contract"
-                description="Interact with a deployed SimpleAuction.sol contract on BNB Smart Chain."
+                icon={Box}
+                title="BNB Marketplace Contract"
+                description="Interact with a SimpleMarketplace.sol escrow marketplace on BNB Smart Chain."
             />
 
             {/* Contract configuration */}
@@ -87,19 +89,19 @@ export function BnbAuctionContractForm({ nodeId, config }: Props) {
                         value={localAddress}
                         onChange={(e) => setLocalAddress(e.target.value)}
                         onBlur={handleBlur}
-                        placeholder={DEFAULT_AUCTION_ADDRESS}
+                        placeholder={DEFAULT_MARKETPLACE_ADDRESS}
                         className="w-full px-3 py-2 text-xs rounded-lg bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))] text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none focus:border-[hsl(var(--color-accent-primary))] focus:ring-2 focus:ring-[hsl(var(--color-accent-primary)/0.15)] font-mono"
                     />
                     <p className={labelStyles.helper}>
-                        Deployed SimpleAuction.sol contract on {networkLabel}. You can paste a different address if
-                        you have your own deployment.
+                        Deployed SimpleMarketplace.sol contract on {networkLabel}. You can paste a different address
+                        if you have your own deployment.
                     </p>
                 </div>
             </div>
 
             {/* Live interaction panel */}
             <div className={cardStyles.base}>
-                <AuctionInteractionPanel
+                <MarketplaceInteractionPanel
                     contractAddress={localAddress}
                     onNetworkChange={handleNetworkChange}
                 />

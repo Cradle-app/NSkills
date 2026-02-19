@@ -70,6 +70,7 @@ export function nodeTypeToLabel(type: string): string {
     'erc721-stylus': 'ERC-721 Stylus NFT',
     'erc1155-stylus': 'ERC-1155 Stylus Multi-Token',
     'maxxit': 'Maxxit Lazy Trader',
+    'aster-dex': 'Aster DEX',
     'pyth-oracle': 'Pyth Price Oracle',
     'chainlink-price-feed': 'Chainlink Price Feed',
     'aave-lending': 'Aave Lending',
@@ -92,6 +93,9 @@ export function nodeTypeToLabel(type: string): string {
     'bnb-auction-contract': 'BNB Auction Contract',
     'bnb-groupsavings-contract': 'BNB Group Savings Contract',
     'bnb-lottery-contract': 'BNB Lottery Contract',
+    'crowdfunding-contract': 'BNB Crowdfunding Contract',
+    'bounty-board-contract': 'BNB Bounty Board Contract',
+    'bnb-marketplace-contract': 'BNB Marketplace Contract',
     // Dune Analytics
     'dune-execute-sql': 'Dune Execute SQL',
     'dune-token-price': 'Dune Token Price',
@@ -152,6 +156,7 @@ export function nodeTypeToColor(type: string): string {
     'aixbt-observer': 'node-intelligence',
     // Legacy
     'maxxit': 'node-agents',
+    'aster-dex': 'node-agents',
     'pyth-oracle': 'accent-purple',
     'chainlink-price-feed': 'accent-purple',
     'aave-lending': 'node-agents',
@@ -174,6 +179,9 @@ export function nodeTypeToColor(type: string): string {
     'bnb-auction-contract': 'node-contracts',
     'bnb-groupsavings-contract': 'node-contracts',
     'bnb-lottery-contract': 'node-contracts',
+    'crowdfunding-contract': 'node-contracts',
+    'bounty-board-contract': 'node-contracts',
+    'bnb-marketplace-contract': 'node-contracts',
     // ERC-20/ERC-721/ERC-1155 Stylus nodes
     'erc20-stylus': 'node-contracts',
     'erc721-stylus': 'node-contracts',

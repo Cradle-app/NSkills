@@ -53,6 +53,7 @@ export const NodeType = z.enum([
   'erc8004-agent-runtime',
   'ostium-trading',
   'maxxit',
+  'aster-dex',
   'onchain-activity',
   'openclaw-agent',
 
@@ -531,6 +532,12 @@ export const MaxxitLazyTradingConfig = BaseNodeConfig.extend({
   telegramName: nullableString().optional(),
 });
 export type MaxxitLazyTradingConfig = z.infer<typeof MaxxitLazyTradingConfig>;
+
+/**
+ * Aster DEX guidance block configuration
+ */
+export const AsterDexConfig = BaseNodeConfig.extend({});
+export type AsterDexConfig = z.infer<typeof AsterDexConfig>;
 
 
 /**
@@ -1080,6 +1087,7 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('telegram-ai-agent'), config: TelegramAIAgentConfig }),
   z.object({ type: z.literal('ostium-trading'), config: OstiumTradingConfig }),
   z.object({ type: z.literal('maxxit'), config: MaxxitLazyTradingConfig }),
+  z.object({ type: z.literal('aster-dex'), config: AsterDexConfig }),
   z.object({ type: z.literal('onchain-activity'), config: OnchainActivityConfig }),
   z.object({ type: z.literal('pyth-oracle'), config: PythOracleConfig }),
   z.object({ type: z.literal('chainlink-price-feed'), config: ChainlinkPriceFeedConfig }),
@@ -1156,6 +1164,7 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'erc8004-agent-runtime': 'agents',
     'ostium-trading': 'agents',
     'maxxit': 'agents',
+    'aster-dex': 'agents',
     'onchain-activity': 'agents',
     'openclaw-agent': 'agents',
     'pyth-oracle': 'analytics',
@@ -1246,6 +1255,7 @@ export function getConfigSchemaForType(type: NodeType) {
     'telegram-ai-agent': TelegramAIAgentConfig,
     'ostium-trading': OstiumTradingConfig,
     'maxxit': MaxxitLazyTradingConfig,
+    'aster-dex': AsterDexConfig,
     'onchain-activity': OnchainActivityConfig,
     'pyth-oracle': PythOracleConfig,
     'chainlink-price-feed': ChainlinkPriceFeedConfig,

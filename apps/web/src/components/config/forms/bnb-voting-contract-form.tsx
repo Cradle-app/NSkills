@@ -13,12 +13,14 @@ interface Props {
 }
 
 const DEFAULT_VOTING_ADDRESS = '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD';
+const DEFAULT_NETWORK_LABEL = 'BNB Testnet';
 
 export function BnbVotingContractForm({ nodeId, config }: Props) {
   const { updateNodeConfig } = useBlueprintStore();
 
   const configuredAddress = (config.contractAddress as string | undefined) || DEFAULT_VOTING_ADDRESS;
   const [localAddress, setLocalAddress] = useState(configuredAddress);
+  const [networkLabel, setNetworkLabel] = useState(DEFAULT_NETWORK_LABEL);
 
   useEffect(() => {
     setLocalAddress(configuredAddress);
@@ -32,12 +34,17 @@ export function BnbVotingContractForm({ nodeId, config }: Props) {
     });
   };
 
+  const handleNetworkChange = (contractAddress: string, label: string) => {
+    if (contractAddress) setLocalAddress(contractAddress);
+    setNetworkLabel(label);
+  };
+
   return (
     <div className={formStyles.container}>
       <FormHeader
         icon={ShieldCheck}
         title="BNB Voting Contract"
-        description="Interact with a deployed Voting.sol governance contract on BNB Smart Chain Testnet."
+        description="Interact with a deployed Voting.sol governance contract on BNB Smart Chain."
         variant="primary"
       />
 
@@ -45,7 +52,7 @@ export function BnbVotingContractForm({ nodeId, config }: Props) {
       <div className={cardStyles.base}>
         <div className="space-y-2">
           <label className={cn(labelStyles.base, 'mb-0')}>
-            <span>Contract address (BNB Testnet)</span>
+            <span>Contract address ({networkLabel})</span>
           </label>
           <input
             type="text"
@@ -56,17 +63,19 @@ export function BnbVotingContractForm({ nodeId, config }: Props) {
             className="w-full px-3 py-2 text-xs rounded-lg bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))] text-[hsl(var(--color-text-primary))] placeholder-[hsl(var(--color-text-muted))] focus:outline-none focus:border-[hsl(var(--color-accent-primary))] focus:ring-2 focus:ring-[hsl(var(--color-accent-primary)/0.15)] font-mono"
           />
           <p className={labelStyles.helper}>
-            Defaults to the deployed Voting.sol contract on BNB Smart Chain Testnet. You can paste
-            a different address if you have your own deployment.
+            Deployed Voting.sol contract on {networkLabel}. You can paste a different address if
+            you have your own deployment.
           </p>
         </div>
       </div>
 
       {/* Live interaction panel */}
       <div className={cardStyles.base}>
-        <VotingInteractionPanel contractAddress={localAddress} />
+        <VotingInteractionPanel
+          contractAddress={localAddress}
+          onNetworkChange={handleNetworkChange}
+        />
       </div>
     </div>
   );
 }
-

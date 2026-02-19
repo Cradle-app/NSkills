@@ -72,6 +72,7 @@ import GithubLogo from '@/assets/blocks/github.png';
 import RobinhoodLogo from '@/assets/blocks/robinhood.png';
 import OpenClawLogo from '@/assets/blocks/openclaw.jpg';
 import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
+import AsterLogo from '@/assets/blocks/Aster.png';
 
 /**
  * Centralized logo asset mapping
@@ -102,6 +103,7 @@ const LOGO_ASSETS: Record<string, any> = {
   'robinhood.png': RobinhoodLogo,
   'openclaw.jpg': OpenClawLogo,
   'BNB Chain.png': BnbChainLogo,
+  'Aster.png': AsterLogo,
 };
 
 function getLogoAsset(logoAsset?: string): any | null {

@@ -39,6 +39,7 @@ import { CompoundLendingForm } from './forms/compound-lending-form';
 import { UniswapSwapForm } from './forms/uniswap-swap-form';
 import { AIXBTForm } from './forms/aixbt-form';
 import { MaxxitLazyTradingForm } from './forms/maxxit-lazy-trading-form';
+import { AsterDexForm } from './forms/aster-dex-form';
 
 // Superposition L3 forms
 import { SuperpositionNetworkForm } from './forms/superposition-network-form';
@@ -66,6 +67,7 @@ import { BnbGroupSavingsContractForm } from './forms/bnb-groupsavings-contract-f
 import { BnbLotteryContractForm } from './forms/bnb-lottery-contract-form';
 import { CrowdfundingContractForm } from './forms/crowdfunding-contract-form';
 import { BountyBoardContractForm } from './forms/bounty-board-contract-form';
+import { BnbMarketplaceContractForm } from './forms/bnb-marketplace-contract-form';
 
 // Dune Analytics form
 import { DuneAnalyticsForm } from './forms/dune-analytics-form';
@@ -388,6 +390,9 @@ export function ConfigPanel() {
             )}
             {(selectedNode.type as string) === 'bounty-board-contract' && (
               <BountyBoardContractForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}  
+            {(selectedNode.type as string) === 'bnb-marketplace-contract' && (
+              <BnbMarketplaceContractForm nodeId={selectedNode.id} config={selectedNode.config} />
             )}
             {selectedNode.type === 'onchain-activity' && (
               <OnchainActivityForm nodeId={selectedNode.id} config={selectedNode.config} />
@@ -409,6 +414,9 @@ export function ConfigPanel() {
             )}
             {selectedNode.type === 'maxxit' && (
               <MaxxitLazyTradingForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {selectedNode.type === 'aster-dex' && (
+              <AsterDexForm nodeId={selectedNode.id} config={selectedNode.config} />
             )}
 
             {/* Stylus workflow nodes */}

@@ -26,6 +26,7 @@ import {
     CreditCard,
     KeyRound,
     Filter,
+    Vote,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -71,6 +72,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
     Zap,
     CreditCard,
     KeyRound,
+    Vote,
 };
 
 function resolveIcon(name: string): LucideIcon {
