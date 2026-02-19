@@ -13,9 +13,60 @@ import {
 } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import { cn } from './cn';
-
-import { BNB_NETWORKS, type BnbNetworkKey } from '../../../../lib/bnb-network-config';
 import VOTING_ABI from '../contract/voting/voting-abi.json';
+
+const BNB_NETWORKS = {
+  testnet: {
+    id: 'testnet' as const,
+    name: 'BNB Smart Chain Testnet',
+    chainId: 97,
+    rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
+    explorerUrl: 'https://testnet.bscscan.com',
+    label: 'BNB Testnet',
+    description: 'Deployed Voting.sol contract on BNB Testnet',
+    disabled: false,
+    symbol: 'tBNB',
+    contractAddress: '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD',
+  },
+  mainnet: {
+    id: 'mainnet' as const,
+    name: 'BSC Mainnet',
+    chainId: 56,
+    rpcUrl: 'https://bsc-dataseed.bnbchain.org',
+    explorerUrl: 'https://bscscan.com',
+    label: 'BNB Mainnet',
+    description: 'No voting contract deployed yet (coming soon)',
+    disabled: true,
+    symbol: 'BNB',
+    contractAddress: undefined,
+  },
+  opbnbTestnet: {
+    id: 'opbnbTestnet' as const,
+    name: 'opBNB Testnet',
+    chainId: 5611,
+    rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
+    explorerUrl: 'https://opbnb-testnet.bscscan.com',
+    label: 'opBNB Testnet',
+    description: 'Deployed Voting.sol contract on opBNB L2 Testnet',
+    disabled: false,
+    symbol: 'tBNB',
+    contractAddress: '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD',
+  },
+  opbnbMainnet: {
+    id: 'opbnbMainnet' as const,
+    name: 'opBNB Mainnet',
+    chainId: 204,
+    rpcUrl: 'https://opbnb-mainnet-rpc.bnbchain.org',
+    explorerUrl: 'https://opbnbscan.com',
+    label: 'opBNB Mainnet',
+    description: 'opBNB L2 Mainnet (coming soon)',
+    disabled: true,
+    symbol: 'BNB',
+    contractAddress: undefined,
+  },
+} as const;
+
+type BnbNetworkKey = keyof typeof BNB_NETWORKS;
 
 
 type Candidate = {
