@@ -21,7 +21,7 @@ File: apps/web/src/components/dialogs/generate-dialog.tsx
 
 File: apps/web/src/app/api/blueprints/generate/sync/route.ts
 
-- Extracts GitHub token from cradle_session cookie
+- Extracts GitHub token from [N]skills_session cookie
 - Forwards request to Orchestrator at ORCHESTRATOR_URL/blueprints/generate/sync
 - Passes GitHub token in X-GitHub-Token header
 
@@ -96,12 +96,12 @@ File: apps/orchestrator/src/engine/github.ts
 - Plugin SDK: packages/plugin-sdk/
 - All Plugins: packages/plugins/src/
 
-## How Fastify is Used in Cradle
+## How Fastify is Used in [N]skills
 
 File: apps/orchestrator/src/index.ts
 
 ```tsx
-// Fastify initialization in Cradle
+// Fastify initialization in [N]skills
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
