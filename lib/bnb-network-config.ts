@@ -1,4 +1,5 @@
-export const BNB_NETWORKS = {
+
+export const BNB_BASE_NETWORKS = {
   testnet: {
     id: 'testnet' as const,
     name: 'BNB Smart Chain Testnet',
@@ -39,7 +40,7 @@ export const BNB_NETWORKS = {
     explorerUrl: 'https://testnet.opbnbscan.com',
     label: 'opBNB Testnet',
     description: 'opBNB L2 Testnet',
-    disabled: true,
+    disabled: false,
     symbol: 'tBNB',
     nativeCurrency: {
       name: 'BNB',
@@ -65,4 +66,159 @@ export const BNB_NETWORKS = {
   },
 } as const;
 
-export type BnbNetworkKey = keyof typeof BNB_NETWORKS;
+export type BnbNetworkKey = keyof typeof BNB_BASE_NETWORKS;
+
+// --- Feature Contract Addresses ---
+
+export const VOTING_CONTRACTS = {
+  testnet: '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD',
+  mainnet: undefined,
+  opbnbTestnet: '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD',
+  opbnbMainnet: undefined,
+};
+
+export const AUCTION_CONTRACTS = {
+  testnet: '0x00320016Ad572264a64C98142e51200E60f73bCE',
+  mainnet: undefined,
+  opbnbTestnet: '0xea2c7377fd34366878516bd68ccb469016b529d9',
+  opbnbMainnet: undefined,
+};
+
+export const GROUP_SAVINGS_CONTRACTS = {
+  testnet: '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28',
+  mainnet: undefined,
+  opbnbTestnet: '0xB9896Cb9aC638EE36324B57c6eF8E88668Ef6c3c',
+  opbnbMainnet: undefined,
+};
+
+export const MARKETPLACE_CONTRACTS = {
+  testnet: '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61',
+  mainnet: undefined,
+  opbnbTestnet: '0x00320016Ad572264a64C98142e51200E60f73bCE',
+  opbnbMainnet: undefined,
+};
+
+export const LOTTERY_CONTRACTS = {
+  testnet: '0x9bb658a999a46d149262fe74d37894ac203ca493',
+  mainnet: undefined,
+  opbnbTestnet: '0x59c9ca4D0fd69674705043525FF0e063F9A6F13E',
+  opbnbMainnet: undefined,
+};
+
+export const CROWDFUNDING_CONTRACTS = {
+  testnet: '0x96bbbef124fe87477244d8583f771fdf6c2f0ed6',
+  mainnet: undefined,
+  opbnbTestnet: '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28',
+  opbnbMainnet: undefined,
+};
+
+export const BOUNTY_BOARD_CONTRACTS = {
+  testnet: '0x54e583f445b5b4736628d04fcff66698977b4b00',
+  mainnet: undefined,
+  opbnbTestnet: '0xB7743a347Ec63456F6b2fCa4DdDC1b39c86875E9',
+  opbnbMainnet: undefined,
+};
+
+// --- Feature-Specific Exports ---
+
+export const BNB_VOTING_NETWORKS = {
+  testnet: { ...BNB_BASE_NETWORKS.testnet, contracts: { voting: VOTING_CONTRACTS.testnet } },
+  mainnet: { ...BNB_BASE_NETWORKS.mainnet, contracts: { voting: VOTING_CONTRACTS.mainnet } },
+  opbnbTestnet: { ...BNB_BASE_NETWORKS.opbnbTestnet, contracts: { voting: VOTING_CONTRACTS.opbnbTestnet } },
+  opbnbMainnet: { ...BNB_BASE_NETWORKS.opbnbMainnet, contracts: { voting: VOTING_CONTRACTS.opbnbMainnet } },
+} as const;
+
+export const BNB_AUCTION_NETWORKS = {
+  testnet: { ...BNB_BASE_NETWORKS.testnet, contracts: { auction: AUCTION_CONTRACTS.testnet } },
+  mainnet: { ...BNB_BASE_NETWORKS.mainnet, contracts: { auction: AUCTION_CONTRACTS.mainnet } },
+  opbnbTestnet: { ...BNB_BASE_NETWORKS.opbnbTestnet, contracts: { auction: AUCTION_CONTRACTS.opbnbTestnet } },
+  opbnbMainnet: { ...BNB_BASE_NETWORKS.opbnbMainnet, contracts: { auction: AUCTION_CONTRACTS.opbnbMainnet } },
+} as const;
+
+export const BNB_GROUPSAVINGS_NETWORKS = {
+  testnet: { ...BNB_BASE_NETWORKS.testnet, contracts: { groupSavings: GROUP_SAVINGS_CONTRACTS.testnet } },
+  mainnet: { ...BNB_BASE_NETWORKS.mainnet, contracts: { groupSavings: GROUP_SAVINGS_CONTRACTS.mainnet } },
+  opbnbTestnet: { ...BNB_BASE_NETWORKS.opbnbTestnet, contracts: { groupSavings: GROUP_SAVINGS_CONTRACTS.opbnbTestnet } },
+  opbnbMainnet: { ...BNB_BASE_NETWORKS.opbnbMainnet, contracts: { groupSavings: GROUP_SAVINGS_CONTRACTS.opbnbMainnet } },
+} as const;
+
+export const BNB_MARKETPLACE_NETWORKS = {
+  testnet: { ...BNB_BASE_NETWORKS.testnet, contracts: { marketplace: MARKETPLACE_CONTRACTS.testnet } },
+  mainnet: { ...BNB_BASE_NETWORKS.mainnet, contracts: { marketplace: MARKETPLACE_CONTRACTS.mainnet } },
+  opbnbTestnet: { ...BNB_BASE_NETWORKS.opbnbTestnet, contracts: { marketplace: MARKETPLACE_CONTRACTS.opbnbTestnet } },
+  opbnbMainnet: { ...BNB_BASE_NETWORKS.opbnbMainnet, contracts: { marketplace: MARKETPLACE_CONTRACTS.opbnbMainnet } },
+} as const;
+
+export const BNB_LOTTERY_NETWORKS = {
+  testnet: { ...BNB_BASE_NETWORKS.testnet, contracts: { lottery: LOTTERY_CONTRACTS.testnet } },
+  mainnet: { ...BNB_BASE_NETWORKS.mainnet, contracts: { lottery: LOTTERY_CONTRACTS.mainnet } },
+  opbnbTestnet: { ...BNB_BASE_NETWORKS.opbnbTestnet, contracts: { lottery: LOTTERY_CONTRACTS.opbnbTestnet } },
+  opbnbMainnet: { ...BNB_BASE_NETWORKS.opbnbMainnet, contracts: { lottery: LOTTERY_CONTRACTS.opbnbMainnet } },
+} as const;
+
+export const BNB_CROWDFUNDING_NETWORKS = {
+  testnet: { ...BNB_BASE_NETWORKS.testnet, contracts: { crowdFunding: CROWDFUNDING_CONTRACTS.testnet } },
+  mainnet: { ...BNB_BASE_NETWORKS.mainnet, contracts: { crowdFunding: CROWDFUNDING_CONTRACTS.mainnet } },
+  opbnbTestnet: { ...BNB_BASE_NETWORKS.opbnbTestnet, contracts: { crowdFunding: CROWDFUNDING_CONTRACTS.opbnbTestnet } },
+  opbnbMainnet: { ...BNB_BASE_NETWORKS.opbnbMainnet, contracts: { crowdFunding: CROWDFUNDING_CONTRACTS.opbnbMainnet } },
+} as const;
+
+export const BNB_BOUNTYBOARD_NETWORKS = {
+  testnet: { ...BNB_BASE_NETWORKS.testnet, contracts: { bountyBoard: BOUNTY_BOARD_CONTRACTS.testnet } },
+  mainnet: { ...BNB_BASE_NETWORKS.mainnet, contracts: { bountyBoard: BOUNTY_BOARD_CONTRACTS.mainnet } },
+  opbnbTestnet: { ...BNB_BASE_NETWORKS.opbnbTestnet, contracts: { bountyBoard: BOUNTY_BOARD_CONTRACTS.opbnbTestnet } },
+  opbnbMainnet: { ...BNB_BASE_NETWORKS.opbnbMainnet, contracts: { bountyBoard: BOUNTY_BOARD_CONTRACTS.opbnbMainnet } },
+} as const;
+
+// --- Combined Export (Single Source of Truth) ---
+
+export const BNB_NETWORKS = {
+  testnet: {
+    ...BNB_BASE_NETWORKS.testnet,
+    contracts: {
+      voting: VOTING_CONTRACTS.testnet,
+      auction: AUCTION_CONTRACTS.testnet,
+      groupSavings: GROUP_SAVINGS_CONTRACTS.testnet,
+      marketplace: MARKETPLACE_CONTRACTS.testnet,
+      lottery: LOTTERY_CONTRACTS.testnet,
+      crowdFunding: CROWDFUNDING_CONTRACTS.testnet,
+      bountyBoard: BOUNTY_BOARD_CONTRACTS.testnet,
+    },
+  },
+  mainnet: {
+    ...BNB_BASE_NETWORKS.mainnet,
+    contracts: {
+      voting: VOTING_CONTRACTS.mainnet,
+      auction: AUCTION_CONTRACTS.mainnet,
+      groupSavings: GROUP_SAVINGS_CONTRACTS.mainnet,
+      marketplace: MARKETPLACE_CONTRACTS.mainnet,
+      lottery: LOTTERY_CONTRACTS.mainnet,
+      crowdFunding: CROWDFUNDING_CONTRACTS.mainnet,
+      bountyBoard: BOUNTY_BOARD_CONTRACTS.mainnet,
+    },
+  },
+  opbnbTestnet: {
+    ...BNB_BASE_NETWORKS.opbnbTestnet,
+    contracts: {
+      voting: VOTING_CONTRACTS.opbnbTestnet,
+      auction: AUCTION_CONTRACTS.opbnbTestnet,
+      groupSavings: GROUP_SAVINGS_CONTRACTS.opbnbTestnet,
+      marketplace: MARKETPLACE_CONTRACTS.opbnbTestnet,
+      lottery: LOTTERY_CONTRACTS.opbnbTestnet,
+      crowdFunding: CROWDFUNDING_CONTRACTS.opbnbTestnet,
+      bountyBoard: BOUNTY_BOARD_CONTRACTS.opbnbTestnet,
+    },
+  },
+  opbnbMainnet: {
+    ...BNB_BASE_NETWORKS.opbnbMainnet,
+    contracts: {
+      voting: VOTING_CONTRACTS.opbnbMainnet,
+      auction: AUCTION_CONTRACTS.opbnbMainnet,
+      groupSavings: GROUP_SAVINGS_CONTRACTS.opbnbMainnet,
+      marketplace: MARKETPLACE_CONTRACTS.opbnbMainnet,
+      lottery: LOTTERY_CONTRACTS.opbnbMainnet,
+      crowdFunding: CROWDFUNDING_CONTRACTS.opbnbMainnet,
+      bountyBoard: BOUNTY_BOARD_CONTRACTS.opbnbMainnet,
+    },
+  },
+} as const;

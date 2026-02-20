@@ -24,7 +24,7 @@ import { useAccount } from 'wagmi';
 import { cn } from '@/lib/utils';
 import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
 
-import { BNB_NETWORKS, type BnbNetworkKey } from '../../../../../lib/bnb-network-config';
+import { BNB_BOUNTYBOARD_NETWORKS, type BnbNetworkKey } from '@root/lib/bnb-network-config';
 
 const BOUNTYBOARD_ABI = [
   { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
@@ -93,11 +93,10 @@ interface TxStatus {
 export function BountyBoardInteractionPanel({
   contractAddress: initialAddress,
 }: BountyBoardInteractionPanelProps) {
-  const defaultAddress = initialAddress ?? '0x54e583f445b5b4736628d04fcff66698977b4b00';
-  const [contractAddress] = useState(defaultAddress);
   const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
   const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
-  const networkConfig = BNB_NETWORKS[selectedNetwork];
+  const networkConfig = BNB_BOUNTYBOARD_NETWORKS[selectedNetwork];
+  const contractAddress = networkConfig.contracts.bountyBoard ?? initialAddress ?? '0x54e583f445b5b4736628d04fcff66698977b4b00';
 
   const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -351,7 +350,7 @@ export function BountyBoardInteractionPanel({
         </button>
         {showNetworkDropdown && (
           <div className="absolute z-50 w-full mt-1 py-1 rounded-lg bg-[hsl(var(--color-bg-elevated))] border border-[hsl(var(--color-border-default))] shadow-xl">
-            {Object.entries(BNB_NETWORKS).map(([key, net]) => (
+            {Object.entries(BNB_BOUNTYBOARD_NETWORKS).map(([key, net]) => (
               <button
                 key={key}
                 onClick={() => { setSelectedNetwork(key as BnbNetworkKey); setShowNetworkDropdown(false); }}

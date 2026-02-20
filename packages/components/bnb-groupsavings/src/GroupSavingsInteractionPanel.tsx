@@ -18,7 +18,7 @@ import {
 import { useAccount } from 'wagmi';
 import { cn } from './cn';
 
-import { BNB_NETWORKS, type BnbNetworkKey } from '../../../../lib/bnb-network-config';
+import { BNB_GROUPSAVINGS_NETWORKS, type BnbNetworkKey } from '@root/lib/bnb-network-config';
 import GROUP_SAVINGS_ABI from '../contract/groupsavings/group-savings.json';
 
 export interface GroupSavingsInteractionPanelProps {
@@ -34,10 +34,10 @@ interface TxStatus {
 export function GroupSavingsInteractionPanel({
     contractAddress: initialAddress,
 }: GroupSavingsInteractionPanelProps) {
-    const defaultAddress = initialAddress ?? '0x9C8ca8Cb9eC9886f2cbD9917F083D561e773cF28';
-    const [contractAddress] = useState(defaultAddress);
+    const defaultAddress = initialAddress ?? BNB_GROUPSAVINGS_NETWORKS.testnet.contracts.groupSavings;
+    const [contractAddress] = useState(defaultAddress || '');
     const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
-    const networkConfig = BNB_NETWORKS[selectedNetwork];
+    const networkConfig = BNB_GROUPSAVINGS_NETWORKS[selectedNetwork];
 
     const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 

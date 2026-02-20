@@ -20,58 +20,8 @@ import { cn } from '@/lib/utils';
 import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
 import VOTING_ABI from "../../../../../packages/components/bnb-voting/contract/voting/voting-abi.json"
 
-const BNB_NETWORKS = {
-  testnet: {
-    id: 'testnet' as const,
-    name: 'BNB Smart Chain Testnet',
-    chainId: 97,
-    rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
-    explorerUrl: 'https://testnet.bscscan.com',
-    label: 'BNB Testnet',
-    description: 'Deployed Voting.sol contract on BNB Testnet',
-    disabled: false,
-    symbol: 'tBNB',
-    contractAddress: '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD',
-  },
-  mainnet: {
-    id: 'mainnet' as const,
-    name: 'BSC Mainnet',
-    chainId: 56,
-    rpcUrl: 'https://bsc-dataseed.bnbchain.org',
-    explorerUrl: 'https://bscscan.com',
-    label: 'BNB Mainnet',
-    description: 'No voting contract deployed yet (coming soon)',
-    disabled: true,
-    symbol: 'BNB',
-    contractAddress: undefined,
-  },
-  opbnbTestnet: {
-    id: 'opbnbTestnet' as const,
-    name: 'opBNB Testnet',
-    chainId: 5611,
-    rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
-    explorerUrl: 'https://opbnb-testnet.bscscan.com',
-    label: 'opBNB Testnet',
-    description: 'Deployed Voting.sol contract on opBNB L2 Testnet',
-    disabled: false,
-    symbol: 'tBNB',
-    contractAddress: '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD',
-  },
-  opbnbMainnet: {
-    id: 'opbnbMainnet' as const,
-    name: 'opBNB Mainnet',
-    chainId: 204,
-    rpcUrl: 'https://opbnb-mainnet-rpc.bnbchain.org',
-    explorerUrl: 'https://opbnbscan.com',
-    label: 'opBNB Mainnet',
-    description: 'opBNB L2 Mainnet (coming soon)',
-    disabled: true,
-    symbol: 'BNB',
-    contractAddress: undefined,
-  },
-} as const;
-
-type BnbNetworkKey = keyof typeof BNB_NETWORKS;
+// Force module resolution update
+import { BNB_VOTING_NETWORKS, type BnbNetworkKey } from '@root/lib/bnb-network-config';
 
 
 type Candidate = {
@@ -96,8 +46,8 @@ export function VotingInteractionPanel({
 }: VotingInteractionPanelProps) {
   const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
   const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
-  const networkConfig = BNB_NETWORKS[selectedNetwork];
-  const contractAddress = networkConfig.contractAddress ?? initialAddress ?? '0xFa2A4bf9Df5e25A5e3c2f0d09d9D2E8a3c2C3e3D';
+  const networkConfig = BNB_VOTING_NETWORKS[selectedNetwork];
+  const contractAddress = networkConfig.contracts.voting ?? initialAddress ?? '0x8a64dFb64A71AfD00F926064E1f2a0B9a7cBe7dD';
 
   const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -434,7 +384,7 @@ export function VotingInteractionPanel({
           {/* Dropdown Menu */}
           {showNetworkDropdown && (
             <div className="absolute top-full mt-1 w-full bg-[hsl(var(--color-bg-base))] border border-[hsl(var(--color-border-default))] rounded-lg shadow-xl z-50 overflow-hidden">
-              {Object.entries(BNB_NETWORKS).map(([key, network]) => (
+              {Object.entries(BNB_VOTING_NETWORKS).map(([key, network]) => (
                 <button
                   key={key}
                   type="button"
@@ -444,7 +394,7 @@ export function VotingInteractionPanel({
                       setSelectedNetwork(key as BnbNetworkKey);
                       setShowNetworkDropdown(false);
                       onNetworkChange?.(
-                        network.contractAddress ?? '',
+                        network.contracts.voting ?? '',
                         network.label,
                       );
                     }

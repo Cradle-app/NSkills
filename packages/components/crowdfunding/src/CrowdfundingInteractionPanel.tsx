@@ -20,7 +20,7 @@ import {
 import { useAccount } from 'wagmi';
 import { cn } from './cn';
 
-import { BNB_NETWORKS, type BnbNetworkKey } from '../../../../lib/bnb-network-config';
+import { BNB_CROWDFUNDING_NETWORKS, type BnbNetworkKey } from '@root/lib/bnb-network-config';
 import CROWDFUNDING_ABI from '../contract/crowdfunding/crowdfunding-abi.json';
 
 export interface CrowdfundingInteractionPanelProps {
@@ -51,11 +51,11 @@ interface TxStatus {
 export function CrowdfundingInteractionPanel({
   contractAddress: initialAddress,
 }: CrowdfundingInteractionPanelProps) {
-  const defaultAddress = initialAddress ?? '0x96bBBef124fe87477244D8583F771fdF6C2f0ED6';
-  const [contractAddress] = useState(defaultAddress);
+  const defaultAddress = initialAddress ?? BNB_CROWDFUNDING_NETWORKS.testnet.contracts.crowdFunding;
+  const [contractAddress] = useState(defaultAddress || '');
   const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
   const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
-  const networkConfig = BNB_NETWORKS[selectedNetwork];
+  const networkConfig = BNB_CROWDFUNDING_NETWORKS[selectedNetwork];
 
   const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -287,7 +287,7 @@ export function CrowdfundingInteractionPanel({
         </button>
         {showNetworkDropdown && (
           <div className="absolute z-50 w-full mt-1 py-1 rounded-lg bg-[hsl(var(--color-bg-elevated))] border border-[hsl(var(--color-border-default))] shadow-xl">
-            {Object.entries(BNB_NETWORKS).map(([key, net]) => (
+            {Object.entries(BNB_CROWDFUNDING_NETWORKS).map(([key, net]) => (
               <button
                 key={key}
                 onClick={() => { setSelectedNetwork(key as BnbNetworkKey); setShowNetworkDropdown(false); }}

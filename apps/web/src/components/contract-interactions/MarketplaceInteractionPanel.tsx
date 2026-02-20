@@ -22,58 +22,7 @@ import { useAccount } from 'wagmi';
 import { cn } from '@/lib/utils';
 import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
 
-const BNB_NETWORKS = {
-    testnet: {
-        id: 'testnet' as const,
-        name: 'BNB Smart Chain Testnet',
-        chainId: 97,
-        rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
-        explorerUrl: 'https://testnet.bscscan.com',
-        label: 'BNB Testnet',
-        description: 'Deployed SimpleMarketplace.sol contract on BNB Testnet',
-        disabled: false,
-        symbol: 'tBNB',
-        contractAddress: '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61',
-    },
-    mainnet: {
-        id: 'mainnet' as const,
-        name: 'BSC Mainnet',
-        chainId: 56,
-        rpcUrl: 'https://bsc-dataseed.bnbchain.org',
-        explorerUrl: 'https://bscscan.com',
-        label: 'BNB Mainnet',
-        description: 'No marketplace contract deployed yet (coming soon)',
-        disabled: true,
-        symbol: 'BNB',
-        contractAddress: undefined,
-    },
-    opbnbTestnet: {
-        id: 'opbnbTestnet' as const,
-        name: 'opBNB Testnet',
-        chainId: 5611,
-        rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
-        explorerUrl: 'https://opbnb-testnet.bscscan.com',
-        label: 'opBNB Testnet',
-        description: 'Deployed SimpleMarketplace.sol contract on opBNB L2 Testnet',
-        disabled: false,
-        symbol: 'tBNB',
-        contractAddress: '0x00320016Ad572264a64C98142e51200E60f73bCE',
-    },
-    opbnbMainnet: {
-        id: 'opbnbMainnet' as const,
-        name: 'opBNB Mainnet',
-        chainId: 204,
-        rpcUrl: 'https://opbnb-mainnet-rpc.bnbchain.org',
-        explorerUrl: 'https://opbnbscan.com',
-        label: 'opBNB Mainnet',
-        description: 'opBNB L2 Mainnet (coming soon)',
-        disabled: true,
-        symbol: 'BNB',
-        contractAddress: undefined,
-    },
-} as const;
-
-type BnbNetworkKey = keyof typeof BNB_NETWORKS;
+import { BNB_MARKETPLACE_NETWORKS, type BnbNetworkKey } from '@root/lib/bnb-network-config';
 
 const MARKETPLACE_ABI = [
     {
@@ -200,8 +149,8 @@ export function MarketplaceInteractionPanel({
 }: MarketplaceInteractionPanelProps) {
     const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
     const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
-    const networkConfig = BNB_NETWORKS[selectedNetwork];
-    const contractAddress = networkConfig.contractAddress ?? initialAddress ?? '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61';
+    const networkConfig = BNB_MARKETPLACE_NETWORKS[selectedNetwork];
+    const contractAddress = networkConfig.contracts.marketplace ?? initialAddress ?? '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61';
 
     const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -583,7 +532,7 @@ export function MarketplaceInteractionPanel({
 
                     {showNetworkDropdown && (
                         <div className="absolute top-full mt-1 w-full bg-forge-bg border border-forge-border rounded-lg shadow-xl z-50 overflow-hidden">
-                            {Object.entries(BNB_NETWORKS).map(([key, network]) => (
+                            {Object.entries(BNB_MARKETPLACE_NETWORKS).map(([key, network]) => (
                                 <button
                                     key={key}
                                     type="button"
@@ -593,7 +542,7 @@ export function MarketplaceInteractionPanel({
                                             setSelectedNetwork(key as BnbNetworkKey);
                                             setShowNetworkDropdown(false);
                                             onNetworkChange?.(
-                                                network.contractAddress ?? '',
+                                                network.contracts.marketplace ?? '',
                                                 network.label,
                                             );
                                         }
@@ -693,356 +642,356 @@ export function MarketplaceInteractionPanel({
 
             {/* List new item */}
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/40 p-4">
-                        <div className="flex items-center justify-between gap-2 mb-3">
-                            <div className="flex items-center gap-2">
-                                <div className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400">
-                                    <ListPlus className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <h4 className="text-xs font-semibold text-emerald-50">List new item</h4>
-                                    <p className="text-[10px] text-emerald-100/70">
-                                        Create a new escrow listing with price in BNB
-                                    </p>
-                                </div>
-                            </div>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-medium text-emerald-300 border border-emerald-500/30">
-                                <ArrowRightLeft className="w-3 h-3" />
-                                Escrow
-                            </span>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                        <div className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400">
+                            <ListPlus className="w-4 h-4" />
                         </div>
+                        <div>
+                            <h4 className="text-xs font-semibold text-emerald-50">List new item</h4>
+                            <p className="text-[10px] text-emerald-100/70">
+                                Create a new escrow listing with price in BNB
+                            </p>
+                        </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-medium text-emerald-300 border border-emerald-500/30">
+                        <ArrowRightLeft className="w-3 h-3" />
+                        Escrow
+                    </span>
+                </div>
 
-                        <div className="grid gap-2.5">
-                            <div className="grid gap-2 md:grid-cols-2">
-                                <div>
-                                    <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
-                                        Item name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={newItemName}
-                                        onChange={(e) => setNewItemName(e.target.value)}
-                                        placeholder="e.g. Design audit, NFT, access pass"
-                                        className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
-                                        Price (BNB)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={newItemPrice}
-                                        onChange={(e) => setNewItemPrice(e.target.value)}
-                                        placeholder="0.1"
-                                        className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
-                                    Description (optional)
-                                </label>
-                                <textarea
-                                    value={newItemDescription}
-                                    onChange={(e) => setNewItemDescription(e.target.value)}
-                                    placeholder="What is included in this listing? Terms, delivery, format..."
-                                    rows={2}
-                                    className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70 resize-none"
-                                />
-                            </div>
-                            <button
-                                type="button"
-                                onClick={handleListItem}
-                                disabled={!canInteract || txStatus.status === 'pending'}
-                                className={cn(
-                                    'inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium',
-                                    'bg-emerald-500 text-emerald-950 hover:bg-emerald-400',
-                                    'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-500',
-                                    'transition-colors',
-                                )}
-                            >
-                                {txStatus.status === 'pending' ? (
-                                    <>
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <ShoppingBag className="w-3.5 h-3.5" />
-                                        List item
-                                    </>
-                                )}
-                            </button>
-                            {!canInteract && (
-                                <p className="text-[10px] text-emerald-100/70">
-                                    Connect your wallet to list items.
-                                </p>
-                            )}
+                <div className="grid gap-2.5">
+                    <div className="grid gap-2 md:grid-cols-2">
+                        <div>
+                            <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
+                                Item name
+                            </label>
+                            <input
+                                type="text"
+                                value={newItemName}
+                                onChange={(e) => setNewItemName(e.target.value)}
+                                placeholder="e.g. Design audit, NFT, access pass"
+                                className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
+                            />
                         </div>
+                        <div>
+                            <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
+                                Price (BNB)
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.0001"
+                                value={newItemPrice}
+                                onChange={(e) => setNewItemPrice(e.target.value)}
+                                placeholder="0.1"
+                                className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
+                            Description (optional)
+                        </label>
+                        <textarea
+                            value={newItemDescription}
+                            onChange={(e) => setNewItemDescription(e.target.value)}
+                            placeholder="What is included in this listing? Terms, delivery, format..."
+                            rows={2}
+                            className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70 resize-none"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleListItem}
+                        disabled={!canInteract || txStatus.status === 'pending'}
+                        className={cn(
+                            'inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium',
+                            'bg-emerald-500 text-emerald-950 hover:bg-emerald-400',
+                            'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-500',
+                            'transition-colors',
+                        )}
+                    >
+                        {txStatus.status === 'pending' ? (
+                            <>
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                                Processing...
+                            </>
+                        ) : (
+                            <>
+                                <ShoppingBag className="w-3.5 h-3.5" />
+                                List item
+                            </>
+                        )}
+                    </button>
+                    {!canInteract && (
+                        <p className="text-[10px] text-emerald-100/70">
+                            Connect your wallet to list items.
+                        </p>
+                    )}
+                </div>
             </div>
 
             {/* Manage purchases */}
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/40 p-4 space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                                <div className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400">
-                                    <ArrowDownToLine className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <h4 className="text-xs font-semibold text-emerald-50">Manage purchases</h4>
-                                    <p className="text-[10px] text-emerald-100/70">
-                                        Purchase, confirm delivery, or raise disputes
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    fetchItems();
-                                    fetchStats();
-                                }}
-                                className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-[10px] font-medium text-emerald-200 hover:bg-emerald-500/20 transition-colors"
-                            >
-                                <RefreshCw className="w-3 h-3" />
-                                Refresh
-                            </button>
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400">
+                            <ArrowDownToLine className="w-4 h-4" />
                         </div>
-
-                        <div className="grid gap-2 md:grid-cols-3">
-                            <div className="space-y-1.5">
-                                <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
-                                    Purchase item ID
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={purchaseItemId}
-                                    onChange={(e) => setPurchaseItemId(e.target.value)}
-                                    placeholder="0"
-                                    className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handlePurchaseItem}
-                                    disabled={!canInteract || txStatus.status === 'pending'}
-                                    className={cn(
-                                        'inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
-                                        'bg-emerald-500 text-emerald-950 hover:bg-emerald-400',
-                                        'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-500',
-                                        'transition-colors w-full',
-                                    )}
-                                >
-                                    Buy
-                                </button>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
-                                    Confirm delivery ID
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={confirmItemId}
-                                    onChange={(e) => setConfirmItemId(e.target.value)}
-                                    placeholder="0"
-                                    className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleConfirmDelivery}
-                                    disabled={!canInteract || txStatus.status === 'pending'}
-                                    className={cn(
-                                        'inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
-                                        'bg-emerald-500 text-emerald-950 hover:bg-emerald-400',
-                                        'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-500',
-                                        'transition-colors w-full',
-                                    )}
-                                >
-                                    Confirm
-                                </button>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
-                                    Dispute item ID
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={disputeItemId}
-                                    onChange={(e) => setDisputeItemId(e.target.value)}
-                                    placeholder="0"
-                                    className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleRaiseDispute}
-                                    disabled={!canInteract || txStatus.status === 'pending'}
-                                    className={cn(
-                                        'inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
-                                        'bg-red-500 text-red-950 hover:bg-red-400',
-                                        'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500',
-                                        'transition-colors w-full',
-                                    )}
-                                >
-                                    Dispute
-                                </button>
-                            </div>
+                        <div>
+                            <h4 className="text-xs font-semibold text-emerald-50">Manage purchases</h4>
+                            <p className="text-[10px] text-emerald-100/70">
+                                Purchase, confirm delivery, or raise disputes
+                            </p>
                         </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            fetchItems();
+                            fetchStats();
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-[10px] font-medium text-emerald-200 hover:bg-emerald-500/20 transition-colors"
+                    >
+                        <RefreshCw className="w-3 h-3" />
+                        Refresh
+                    </button>
+                </div>
+
+                <div className="grid gap-2 md:grid-cols-3">
+                    <div className="space-y-1.5">
+                        <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
+                            Purchase item ID
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            value={purchaseItemId}
+                            onChange={(e) => setPurchaseItemId(e.target.value)}
+                            placeholder="0"
+                            className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
+                        />
+                        <button
+                            type="button"
+                            onClick={handlePurchaseItem}
+                            disabled={!canInteract || txStatus.status === 'pending'}
+                            className={cn(
+                                'inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
+                                'bg-emerald-500 text-emerald-950 hover:bg-emerald-400',
+                                'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-500',
+                                'transition-colors w-full',
+                            )}
+                        >
+                            Buy
+                        </button>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
+                            Confirm delivery ID
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            value={confirmItemId}
+                            onChange={(e) => setConfirmItemId(e.target.value)}
+                            placeholder="0"
+                            className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
+                        />
+                        <button
+                            type="button"
+                            onClick={handleConfirmDelivery}
+                            disabled={!canInteract || txStatus.status === 'pending'}
+                            className={cn(
+                                'inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
+                                'bg-emerald-500 text-emerald-950 hover:bg-emerald-400',
+                                'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-500',
+                                'transition-colors w-full',
+                            )}
+                        >
+                            Confirm
+                        </button>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="mb-1 block text-[10px] font-medium text-emerald-100/80">
+                            Dispute item ID
+                        </label>
+                        <input
+                            type="number"
+                            min="0"
+                            value={disputeItemId}
+                            onChange={(e) => setDisputeItemId(e.target.value)}
+                            placeholder="0"
+                            className="w-full rounded-lg border border-emerald-500/30 bg-black/20 px-3 py-2 text-xs text-emerald-50 placeholder:text-emerald-200/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/70"
+                        />
+                        <button
+                            type="button"
+                            onClick={handleRaiseDispute}
+                            disabled={!canInteract || txStatus.status === 'pending'}
+                            className={cn(
+                                'inline-flex items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium',
+                                'bg-red-500 text-red-950 hover:bg-red-400',
+                                'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500',
+                                'transition-colors w-full',
+                            )}
+                        >
+                            Dispute
+                        </button>
+                    </div>
+                </div>
 
             </div>
 
             {/* Marketplace activity */}
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/40 p-4 space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                                <div className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400">
-                                    <Users className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <h4 className="text-xs font-semibold text-emerald-50">Marketplace activity</h4>
-                                    <p className="text-[10px] text-emerald-100/70">
-                                        Live stats from the SimpleMarketplace contract
-                                    </p>
-                                </div>
-                            </div>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-medium text-emerald-300 border border-emerald-500/30">
-                                <TrendingUp className="w-3 h-3" />
-                                Overview
-                            </span>
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400">
+                            <Users className="w-4 h-4" />
                         </div>
+                        <div>
+                            <h4 className="text-xs font-semibold text-emerald-50">Marketplace activity</h4>
+                            <p className="text-[10px] text-emerald-100/70">
+                                Live stats from the SimpleMarketplace contract
+                            </p>
+                        </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-medium text-emerald-300 border border-emerald-500/30">
+                        <TrendingUp className="w-3 h-3" />
+                        Overview
+                    </span>
+                </div>
 
-                        {stats ? (
-                            <div className="grid grid-cols-2 gap-2 text-[11px] text-emerald-100">
-                                <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
-                                    <p className="text-[10px] text-emerald-200/70">Total items</p>
-                                    <p className="mt-0.5 text-sm font-semibold">
-                                        {stats.totalItems.toString()}
-                                    </p>
-                                </div>
-                                <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
-                                    <p className="text-[10px] text-emerald-200/70">Available</p>
-                                    <p className="mt-0.5 text-sm font-semibold">
-                                        {stats.availableItems.toString()}
-                                    </p>
-                                </div>
-                                <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
-                                    <p className="text-[10px] text-emerald-200/70">Sold</p>
-                                    <p className="mt-0.5 text-sm font-semibold">
-                                        {stats.soldItems.toString()}
-                                    </p>
-                                </div>
-                                <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
-                                    <p className="text-[10px] text-emerald-200/70">Completed</p>
-                                    <p className="mt-0.5 text-sm font-semibold">
-                                        {stats.completedItems.toString()}
-                                    </p>
-                                </div>
-                                <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
-                                    <p className="text-[10px] text-emerald-200/70">Disputed</p>
-                                    <p className="mt-0.5 text-sm font-semibold">
-                                        {stats.disputedItems.toString()}
-                                    </p>
-                                </div>
-                                <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
-                                    <p className="text-[10px] text-emerald-200/70">Cancelled</p>
-                                    <p className="mt-0.5 text-sm font-semibold">
-                                        {stats.cancelledItems.toString()}
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex items-center justify-center py-6 text-[11px] text-emerald-100/70">
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Loading stats...
-                            </div>
-                        )}
+                {stats ? (
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-emerald-100">
+                        <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
+                            <p className="text-[10px] text-emerald-200/70">Total items</p>
+                            <p className="mt-0.5 text-sm font-semibold">
+                                {stats.totalItems.toString()}
+                            </p>
+                        </div>
+                        <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
+                            <p className="text-[10px] text-emerald-200/70">Available</p>
+                            <p className="mt-0.5 text-sm font-semibold">
+                                {stats.availableItems.toString()}
+                            </p>
+                        </div>
+                        <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
+                            <p className="text-[10px] text-emerald-200/70">Sold</p>
+                            <p className="mt-0.5 text-sm font-semibold">
+                                {stats.soldItems.toString()}
+                            </p>
+                        </div>
+                        <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
+                            <p className="text-[10px] text-emerald-200/70">Completed</p>
+                            <p className="mt-0.5 text-sm font-semibold">
+                                {stats.completedItems.toString()}
+                            </p>
+                        </div>
+                        <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
+                            <p className="text-[10px] text-emerald-200/70">Disputed</p>
+                            <p className="mt-0.5 text-sm font-semibold">
+                                {stats.disputedItems.toString()}
+                            </p>
+                        </div>
+                        <div className="rounded-lg bg-black/10 p-2 border border-emerald-500/20">
+                            <p className="text-[10px] text-emerald-200/70">Cancelled</p>
+                            <p className="mt-0.5 text-sm font-semibold">
+                                {stats.cancelledItems.toString()}
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center py-6 text-[11px] text-emerald-100/70">
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Loading stats...
+                    </div>
+                )}
             </div>
 
             {/* Available listings */}
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-950/40 p-4 space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                                <div className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400">
-                                    <ShoppingBag className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <h4 className="text-xs font-semibold text-emerald-50">Available listings</h4>
-                                    <p className="text-[10px] text-emerald-100/70">
-                                        Browse items you can purchase from the marketplace
-                                    </p>
-                                </div>
-                            </div>
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-400">
+                            <ShoppingBag className="w-4 h-4" />
                         </div>
+                        <div>
+                            <h4 className="text-xs font-semibold text-emerald-50">Available listings</h4>
+                            <p className="text-[10px] text-emerald-100/70">
+                                Browse items you can purchase from the marketplace
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-                        <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1.5">
-                            {items.length === 0 ? (
-                                <div className="flex items-center justify-center py-6 text-[11px] text-emerald-100/70">
-                                    <ShoppingBag className="w-4 h-4 mr-2 opacity-60" />
-                                    No items listed yet. Create the first marketplace listing.
-                                </div>
-                            ) : (
-                                items.map((item) => (
-                                    <div
-                                        key={item.itemId.toString()}
-                                        className="rounded-lg border border-emerald-500/20 bg-black/10 p-3 space-y-1.5"
-                                    >
-                                        <div className="flex items-center justify-between gap-2">
-                                            <div className="flex items-center gap-2">
-                                                <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-300 text-[11px] font-semibold">
-                                                    #{item.itemId.toString()}
-                                                </span>
-                                                <div>
-                                                    <p className="text-[11px] font-semibold text-emerald-50">
-                                                        {item.name || 'Untitled listing'}
-                                                    </p>
-                                                    <p className="text-[10px] text-emerald-100/70">
-                                                        {formatPrice(item.price)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            {statusBadge(item.status)}
-                                        </div>
-                                        {item.description && (
-                                            <p className="text-[10px] text-emerald-100/80">
-                                                {item.description}
+                <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1.5">
+                    {items.length === 0 ? (
+                        <div className="flex items-center justify-center py-6 text-[11px] text-emerald-100/70">
+                            <ShoppingBag className="w-4 h-4 mr-2 opacity-60" />
+                            No items listed yet. Create the first marketplace listing.
+                        </div>
+                    ) : (
+                        items.map((item) => (
+                            <div
+                                key={item.itemId.toString()}
+                                className="rounded-lg border border-emerald-500/20 bg-black/10 p-3 space-y-1.5"
+                            >
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-300 text-[11px] font-semibold">
+                                            #{item.itemId.toString()}
+                                        </span>
+                                        <div>
+                                            <p className="text-[11px] font-semibold text-emerald-50">
+                                                {item.name || 'Untitled listing'}
                                             </p>
-                                        )}
-                                        <div className="grid grid-cols-2 gap-2 mt-1.5 text-[9px] text-emerald-200/80">
-                                            <div>
-                                                <p className="text-emerald-200/60">Seller</p>
-                                                <p className="font-mono truncate">
-                                                    {item.seller === userAddress
-                                                        ? 'You'
-                                                        : `${item.seller.slice(0, 6)}...${item.seller.slice(-4)}`}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-emerald-200/60">Buyer</p>
-                                                <p className="font-mono truncate">
-                                                    {item.buyer === '0x0000000000000000000000000000000000000000'
-                                                        ? '—'
-                                                        : item.buyer === userAddress
-                                                            ? 'You'
-                                                            : `${item.buyer.slice(0, 6)}...${item.buyer.slice(-4)}`}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-emerald-200/60">Listed</p>
-                                                <p>{formatDate(item.listedAt)}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-emerald-200/60">Completed</p>
-                                                <p>{formatDate(item.completedAt)}</p>
-                                            </div>
+                                            <p className="text-[10px] text-emerald-100/70">
+                                                {formatPrice(item.price)}
+                                            </p>
                                         </div>
                                     </div>
-                                ))
-                            )}
-                        </div>
+                                    {statusBadge(item.status)}
+                                </div>
+                                {item.description && (
+                                    <p className="text-[10px] text-emerald-100/80">
+                                        {item.description}
+                                    </p>
+                                )}
+                                <div className="grid grid-cols-2 gap-2 mt-1.5 text-[9px] text-emerald-200/80">
+                                    <div>
+                                        <p className="text-emerald-200/60">Seller</p>
+                                        <p className="font-mono truncate">
+                                            {item.seller === userAddress
+                                                ? 'You'
+                                                : `${item.seller.slice(0, 6)}...${item.seller.slice(-4)}`}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-emerald-200/60">Buyer</p>
+                                        <p className="font-mono truncate">
+                                            {item.buyer === '0x0000000000000000000000000000000000000000'
+                                                ? '—'
+                                                : item.buyer === userAddress
+                                                    ? 'You'
+                                                    : `${item.buyer.slice(0, 6)}...${item.buyer.slice(-4)}`}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-emerald-200/60">Listed</p>
+                                        <p>{formatDate(item.listedAt)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-emerald-200/60">Completed</p>
+                                        <p>{formatDate(item.completedAt)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </div>
         </div>
     );

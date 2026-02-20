@@ -20,59 +20,9 @@ import { useAccount } from 'wagmi';
 import { cn } from '@/lib/utils';
 import BnbChainLogo from '@/assets/blocks/BNB Chain.png';
 import AUCTION_ABI from '../../../../../packages/components/bnb-auction/contract/auction/auction-abi.json';
+import { BNB_AUCTION_NETWORKS, type BnbNetworkKey } from '@root/lib/bnb-network-config';
 
-const BNB_NETWORKS = {
-    testnet: {
-        id: 'testnet' as const,
-        name: 'BNB Smart Chain Testnet',
-        chainId: 97,
-        rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
-        explorerUrl: 'https://testnet.bscscan.com',
-        label: 'BNB Testnet',
-        description: 'Deployed SimpleAuction.sol contract on BNB Testnet',
-        disabled: false,
-        symbol: 'tBNB',
-        contractAddress: '0x00320016Ad572264a64C98142e51200E60f73bCE',
-    },
-    mainnet: {
-        id: 'mainnet' as const,
-        name: 'BSC Mainnet',
-        chainId: 56,
-        rpcUrl: 'https://bsc-dataseed.bnbchain.org',
-        explorerUrl: 'https://bscscan.com',
-        label: 'BNB Mainnet',
-        description: 'No auction contract deployed yet (coming soon)',
-        disabled: true,
-        symbol: 'BNB',
-        contractAddress: undefined,
-    },
-    opbnbTestnet: {
-        id: 'opbnbTestnet' as const,
-        name: 'opBNB Testnet',
-        chainId: 5611,
-        rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
-        explorerUrl: 'https://opbnb-testnet.bscscan.com',
-        label: 'opBNB Testnet',
-        description: 'Deployed SimpleAuction.sol contract on opBNB L2 Testnet',
-        disabled: false,
-        symbol: 'tBNB',
-        contractAddress: '0xea2c7377fd34366878516bd68ccb469016b529d9',
-    },
-    opbnbMainnet: {
-        id: 'opbnbMainnet' as const,
-        name: 'opBNB Mainnet',
-        chainId: 204,
-        rpcUrl: 'https://opbnb-mainnet-rpc.bnbchain.org',
-        explorerUrl: 'https://opbnbscan.com',
-        label: 'opBNB Mainnet',
-        description: 'opBNB L2 Mainnet (coming soon)',
-        disabled: true,
-        symbol: 'BNB',
-        contractAddress: undefined,
-    },
-} as const;
 
-type BnbNetworkKey = keyof typeof BNB_NETWORKS;
 
 export interface AuctionInteractionPanelProps {
     contractAddress?: string;
@@ -91,8 +41,8 @@ export function AuctionInteractionPanel({
 }: AuctionInteractionPanelProps) {
     const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
     const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
-    const networkConfig = BNB_NETWORKS[selectedNetwork];
-    const contractAddress = networkConfig.contractAddress ?? initialAddress ?? '0x00320016Ad572264a64C98142e51200E60f73bCE';
+    const networkConfig = BNB_AUCTION_NETWORKS[selectedNetwork];
+    const contractAddress = networkConfig.contracts.auction ?? initialAddress ?? '0x00320016Ad572264a64C98142e51200E60f73bCE';
 
     const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -263,7 +213,7 @@ export function AuctionInteractionPanel({
             setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 3000);
             return;
         }
-        
+
         const value = parseFloat(bidAmount);
         if (Number.isNaN(value) || value <= 0) {
             setTxStatus({ status: 'error', message: 'Bid amount must be a positive number' });
@@ -282,9 +232,9 @@ export function AuctionInteractionPanel({
         if (highestBid !== null) {
             const weiValue = ethers.parseEther(bidAmount);
             if (weiValue <= highestBid) {
-                setTxStatus({ 
-                    status: 'error', 
-                    message: `Bid must exceed ${ethers.formatEther(highestBid)} BNB (current highest bid)` 
+                setTxStatus({
+                    status: 'error',
+                    message: `Bid must exceed ${ethers.formatEther(highestBid)} BNB (current highest bid)`
                 });
                 setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 4000);
                 return;
@@ -302,7 +252,7 @@ export function AuctionInteractionPanel({
         } catch (error: any) {
             console.error('Auction transaction error:', error);
             let errorMsg = 'Failed to place bid';
-            
+
             if (error?.message?.includes('Auction has ended')) {
                 errorMsg = 'Auction has ended. Refresh to see current status.';
             } else if (error?.message?.includes('Auction already closed')) {
@@ -314,7 +264,7 @@ export function AuctionInteractionPanel({
             } else if (error?.message) {
                 errorMsg = error.message;
             }
-            
+
             setTxStatus({ status: 'error', message: errorMsg });
             setTimeout(() => setTxStatus({ status: 'idle', message: '' }), 6000);
         }
@@ -466,7 +416,7 @@ export function AuctionInteractionPanel({
                     {/* Dropdown Menu */}
                     {showNetworkDropdown && (
                         <div className="absolute top-full mt-1 w-full bg-forge-bg border border-forge-border rounded-lg shadow-xl z-50 overflow-hidden">
-                            {Object.entries(BNB_NETWORKS).map(([key, network]) => (
+                            {Object.entries(BNB_AUCTION_NETWORKS).map(([key, network]) => (
                                 <button
                                     key={key}
                                     type="button"
@@ -476,7 +426,7 @@ export function AuctionInteractionPanel({
                                             setSelectedNetwork(key as BnbNetworkKey);
                                             setShowNetworkDropdown(false);
                                             onNetworkChange?.(
-                                                network.contractAddress ?? '',
+                                                network.contracts.auction ?? '',
                                                 network.label,
                                             );
                                         }

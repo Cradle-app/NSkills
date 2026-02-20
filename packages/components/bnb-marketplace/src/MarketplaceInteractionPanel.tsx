@@ -19,54 +19,7 @@ import {
 import { useAccount } from 'wagmi';
 import { cn } from './cn';
 
-const BNB_NETWORKS = {
-    testnet: {
-        id: 'testnet' as const,
-        name: 'BNB Smart Chain Testnet',
-        chainId: 97,
-        rpcUrl: 'https://data-seed-prebsc-1-s1.bnbchain.org:8545',
-        explorerUrl: 'https://testnet.bscscan.com',
-        label: 'BNB Testnet',
-        description: 'Deployed SimpleMarketplace.sol contract on BNB Testnet',
-        disabled: false,
-        symbol: 'tBNB',
-    },
-    mainnet: {
-        id: 'mainnet' as const,
-        name: 'BSC Mainnet',
-        chainId: 56,
-        rpcUrl: 'https://bsc-dataseed.bnbchain.org',
-        explorerUrl: 'https://bscscan.com',
-        label: 'BNB Mainnet',
-        description: 'No marketplace contract deployed yet (coming soon)',
-        disabled: true,
-        symbol: 'BNB',
-    },
-    opbnbTestnet: {
-        id: 'opbnbTestnet' as const,
-        name: 'opBNB Testnet',
-        chainId: 5611,
-        rpcUrl: 'https://opbnb-testnet-rpc.bnbchain.org',
-        explorerUrl: 'https://testnet.opbnbscan.com',
-        label: 'opBNB Testnet',
-        description: 'opBNB L2 Testnet (coming soon)',
-        disabled: true,
-        symbol: 'tBNB',
-    },
-    opbnbMainnet: {
-        id: 'opbnbMainnet' as const,
-        name: 'opBNB Mainnet',
-        chainId: 204,
-        rpcUrl: 'https://opbnb-mainnet-rpc.bnbchain.org',
-        explorerUrl: 'https://opbnbscan.com',
-        label: 'opBNB Mainnet',
-        description: 'opBNB L2 Mainnet (coming soon)',
-        disabled: true,
-        symbol: 'BNB',
-    },
-} as const;
-
-type BnbNetworkKey = keyof typeof BNB_NETWORKS;
+import { BNB_MARKETPLACE_NETWORKS, type BnbNetworkKey } from '@root/lib/bnb-network-config';
 
 // Importing the ABI JSON is left to consumers; here we define the subset we use inline.
 // This mirrors the structure from Marketplace.json.
@@ -191,11 +144,11 @@ interface MarketplaceItem {
 export function MarketplaceInteractionPanel({
     contractAddress: initialAddress,
 }: MarketplaceInteractionPanelProps) {
-    const defaultAddress = initialAddress ?? '0x1E15115269D39e6F7D89a73331D7A0aC99a9Fb61';
-    const [contractAddress] = useState(defaultAddress);
+    const defaultAddress = initialAddress ?? BNB_MARKETPLACE_NETWORKS.testnet.contracts.marketplace;
+    const [contractAddress] = useState(defaultAddress || '');
     const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
     const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
-    const networkConfig = BNB_NETWORKS[selectedNetwork];
+    const networkConfig = BNB_MARKETPLACE_NETWORKS[selectedNetwork];
 
     const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 

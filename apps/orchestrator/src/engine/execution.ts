@@ -32,6 +32,47 @@ import {
 } from "./filesystem";
 import { GitHubIntegration } from "./github";
 
+const BNB_FEATURE_MAP: Record<
+  string,
+  { key: string; constantPrefix: string; networkObjectPrefix: string }
+> = {
+  "bnb-voting-contract": {
+    key: "voting",
+    constantPrefix: "VOTING",
+    networkObjectPrefix: "VOTING",
+  },
+  "bnb-auction-contract": {
+    key: "auction",
+    constantPrefix: "AUCTION",
+    networkObjectPrefix: "AUCTION",
+  },
+  "bnb-groupsavings-contract": {
+    key: "groupSavings",
+    constantPrefix: "GROUP_SAVINGS",
+    networkObjectPrefix: "GROUPSAVINGS",
+  },
+  "bnb-marketplace-contract": {
+    key: "marketplace",
+    constantPrefix: "MARKETPLACE",
+    networkObjectPrefix: "MARKETPLACE",
+  },
+  "bnb-lottery-contract": {
+    key: "lottery",
+    constantPrefix: "LOTTERY",
+    networkObjectPrefix: "LOTTERY",
+  },
+  "crowdfunding-contract": {
+    key: "crowdFunding",
+    constantPrefix: "CROWDFUNDING",
+    networkObjectPrefix: "CROWDFUNDING",
+  },
+  "bounty-board-contract": {
+    key: "bountyBoard",
+    constantPrefix: "BOUNTY_BOARD",
+    networkObjectPrefix: "BOUNTYBOARD",
+  },
+};
+
 export interface ExecutionOptions {
   dryRun?: boolean;
   createGitHubRepo?: boolean;
@@ -202,6 +243,9 @@ export class ExecutionEngine {
           { nodeId: node.id },
         );
       }
+
+      // Copy lib/bnb-network-config.ts
+      this.copyBnbNetworkConfig(fs, "/output", pathContext, sortedNodes);
 
       // Generate root files
       generateRootFiles(
@@ -735,6 +779,184 @@ export class ExecutionEngine {
         targetFs.writeFileSync(targetItem, content);
       }
     }
+  }
+  /**
+   * Copy the global BNB network config file to the output
+   */
+  private copyBnbNetworkConfig(
+    memFs: ReturnType<typeof createFsFromVolume>,
+    outputPath: string,
+    pathContext: PathContext,
+    nodes: BlueprintNode[],
+  ): void {
+    const currentFileDir = dirname(fileURLToPath(import.meta.url));
+    let projectRoot = process.env.PROJECT_ROOT;
+
+    if (!projectRoot) {
+      let currentDir = currentFileDir;
+      const rootMarker = "pnpm-workspace.yaml";
+      while (currentDir !== path.parse(currentDir).root) {
+        if (realFs.existsSync(path.join(currentDir, rootMarker))) {
+          projectRoot = currentDir;
+          break;
+        }
+        currentDir = path.dirname(currentDir);
+      }
+    }
+
+    if (!projectRoot) {
+      projectRoot = path.resolve(
+        currentFileDir,
+        currentFileDir.includes("dist") ? "../../../" : "../../../../",
+      );
+    }
+
+    const sourcePath = path.join(projectRoot, "lib/bnb-network-config.ts");
+
+    if (realFs.existsSync(sourcePath)) {
+      let content = realFs.readFileSync(sourcePath, "utf-8");
+
+      // Identify selected features
+      const nodeTypes = new Set(nodes.map((n) => n.type));
+      const activeFeatures = Object.entries(BNB_FEATURE_MAP)
+        .filter(([type]) => nodeTypes.has(type as any))
+        .map(([, config]) => config);
+
+      // If no BNB features selected, don't copy the file
+      if (activeFeatures.length === 0) return;
+
+      // Filter content to only include relevant contracts
+      const filteredContent = this.filterBnbNetworkConfig(
+        content,
+        activeFeatures,
+      );
+
+      // Resolve target path (if frontend exists, put in frontend lib)
+      const relativeTargetPath = resolveOutputPath(
+        "bnb-network-config.ts",
+        "frontend-lib",
+        pathContext,
+      );
+      const targetPath = `${outputPath}/${relativeTargetPath}`;
+
+      memFs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      memFs.writeFileSync(targetPath, filteredContent);
+      console.log(
+        `Copied filtered global config: ${sourcePath} -> ${targetPath} (${activeFeatures.length} features)`,
+      );
+    }
+  }
+
+  /**
+   * Filter the bnb-network-config.ts content to only include selected features
+   */
+  private filterBnbNetworkConfig(
+    content: string,
+    features: Array<{
+      key: string;
+      constantPrefix: string;
+      networkObjectPrefix: string;
+    }>,
+  ): string {
+    const lines = content.split("\n");
+    const result: string[] = [];
+
+    // 1. Keep imports and base networks (everything until "--- Feature Contract Addresses ---")
+    let i = 0;
+    while (
+      i < lines.length &&
+      !lines[i].includes("--- Feature Contract Addresses ---")
+    ) {
+      result.push(lines[i]);
+      i++;
+    }
+
+    if (i < lines.length) {
+      result.push(lines[i]); // Keep the marker
+      i++;
+    }
+
+    // 2. Add selected contract constants
+    for (const feature of features) {
+      const startMarker = `export const ${feature.constantPrefix}_CONTRACTS = {`;
+      let found = false;
+      let tempI = i;
+
+      while (tempI < lines.length) {
+        if (lines[tempI].trim().startsWith(startMarker)) {
+          found = true;
+          // Extract the whole block until };
+          while (tempI < lines.length) {
+            result.push(lines[tempI]);
+            if (lines[tempI].trim().startsWith("};")) break;
+            tempI++;
+          }
+          result.push(""); // spacer
+          break;
+        }
+        tempI++;
+      }
+    }
+
+    // 3. Skip until Feature-Specific Exports marker
+    while (
+      i < lines.length &&
+      !lines[i].includes("--- Feature-Specific Exports ---")
+    ) {
+      i++;
+    }
+
+    if (i < lines.length) {
+      result.push(lines[i]); // Keep marker
+      i++;
+    }
+
+    // 4. Add selected BNB__NETWORKS constants
+    for (const feature of features) {
+      const startMarker = `export const BNB_${feature.networkObjectPrefix}_NETWORKS = {`;
+      let tempI = i;
+      while (tempI < lines.length) {
+        if (lines[tempI].trim().startsWith(startMarker)) {
+          // Extract until } as const;
+          while (tempI < lines.length) {
+            result.push(lines[tempI]);
+            if (lines[tempI].trim().startsWith("} as const;")) break;
+            tempI++;
+          }
+          result.push(""); // spacer
+          break;
+        }
+        tempI++;
+      }
+    }
+
+    // 5. GenerateFiltered BNB_NETWORKS
+    result.push("// --- Combined Export (Single Source of Truth) ---");
+    result.push("");
+    result.push("export const BNB_NETWORKS = {");
+
+    const networks = [
+      "testnet",
+      "mainnet",
+      "opbnbTestnet",
+      "opbnbMainnet",
+    ] as const;
+    for (const network of networks) {
+      result.push(`  ${network}: {`);
+      result.push(`    ...BNB_BASE_NETWORKS.${network},`);
+      result.push(`    contracts: {`);
+      for (const feature of features) {
+        result.push(
+          `      ${feature.key}: ${feature.constantPrefix}_CONTRACTS.${network},`,
+        );
+      }
+      result.push(`    },`);
+      result.push(`  },`);
+    }
+
+    result.push("} as const;");
+
+    return result.join("\n");
   }
 }
 

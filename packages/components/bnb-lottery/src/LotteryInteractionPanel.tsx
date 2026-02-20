@@ -19,7 +19,7 @@ import {
 import { useAccount } from 'wagmi';
 import { cn } from './cn';
 
-import { BNB_NETWORKS, type BnbNetworkKey } from '../../../../lib/bnb-network-config';
+import { BNB_LOTTERY_NETWORKS, type BnbNetworkKey } from '@root/lib/bnb-network-config';
 import LOTTERY_ABI from '../contract/lottery/lottery-abi.json';
 
 export interface LotteryInteractionPanelProps {
@@ -35,11 +35,11 @@ interface TxStatus {
 export function LotteryInteractionPanel({
   contractAddress: initialAddress,
 }: LotteryInteractionPanelProps) {
-  const defaultAddress = initialAddress ?? '0x9bb658a999a46d149262fe74d37894ac203ca493';
-  const [contractAddress] = useState(defaultAddress);
+  const defaultAddress = initialAddress ?? BNB_LOTTERY_NETWORKS.testnet.contracts.lottery;
+  const [contractAddress] = useState(defaultAddress || '');
   const [selectedNetwork, setSelectedNetwork] = useState<BnbNetworkKey>('testnet');
   const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
-  const networkConfig = BNB_NETWORKS[selectedNetwork];
+  const networkConfig = BNB_LOTTERY_NETWORKS[selectedNetwork];
 
   const { address: userAddress, isConnected: walletConnected, chain } = useAccount();
 
@@ -348,8 +348,8 @@ export function LotteryInteractionPanel({
           {/* Dropdown Menu */}
           {showNetworkDropdown && (
             <div className="absolute top-full mt-1 w-full bg-forge-bg border border-forge-border rounded-lg shadow-xl z-50 overflow-hidden">
-              {(Object.keys(BNB_NETWORKS) as BnbNetworkKey[]).map((key) => {
-                const network = BNB_NETWORKS[key];
+              {(Object.keys(BNB_LOTTERY_NETWORKS) as BnbNetworkKey[]).map((key) => {
+                const network = BNB_LOTTERY_NETWORKS[key];
                 return (
                   <button
                     key={key}
