@@ -50,44 +50,54 @@ export function Features() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Create a master ScrollTrigger for the pinning
-      const st = ScrollTrigger.create({
-        trigger: containerRef.current,
-        start: 'top top',
-        end: `+=${features.length * 110}%`, // Extra tail room for full visibility
-        pin: true,
-        scrub: 1.5,
-        onUpdate: (self) => {
-          const progress = self.progress;
-          // Smooth active index mapping
-          const index = Math.min(
-            features.length - 1,
-            Math.floor(progress * (features.length + 0.1))
-          );
-          setActiveFeature(index);
+      const mm = gsap.matchMedia();
 
-          // Animate left side upwards
-          if (leftContentRef.current) {
-            gsap.to(leftContentRef.current, {
-              y: -progress * 120, // Move left content up to clear space
-              duration: 0.6,
-              ease: 'power2.out',
-              overwrite: 'auto'
-            });
-          }
+      mm.add({
+        isDesktop: "(min-width: 1024px)",
+        isMobile: "(max-width: 1023px)",
+      }, (context) => {
+        const { isMobile } = context.conditions as { isMobile: boolean };
 
-          // Shifting the content stack up to ensure bottom features are seen
-          if (scrollContentRef.current) {
-            gsap.to(scrollContentRef.current, {
-              y: -progress * 300, // Significant shift to bring bottom cards up
-              duration: 0.6,
-              ease: 'power2.out',
-              overwrite: 'auto'
-            });
+        ScrollTrigger.create({
+          trigger: containerRef.current,
+          start: 'top top',
+          end: `+=${features.length * 100}%`,
+          pin: true,
+          scrub: 1,
+          onUpdate: (self) => {
+            const progress = self.progress;
+            const index = Math.min(
+              features.length - 1,
+              Math.floor(progress * features.length)
+            );
+            setActiveFeature(index);
+
+            // Mobile: Move title up faster than list to prevent overlap
+            const titleY = isMobile ? -1000 : -120;
+            const listY = isMobile ? -850 : -300;
+
+            if (leftContentRef.current) {
+              gsap.to(leftContentRef.current, {
+                y: progress * titleY,
+                opacity: isMobile ? Math.max(0, 1 - progress * 3) : 1,
+                duration: 0.6,
+                ease: 'power2.out',
+                overwrite: 'auto'
+              });
+            }
+
+            if (scrollContentRef.current) {
+              gsap.to(scrollContentRef.current, {
+                y: progress * listY,
+                duration: 0.6,
+                ease: 'power2.out',
+                overwrite: 'auto'
+              });
+            }
           }
-        }
+        });
       });
-    }, containerRef.current!);
+    }, containerRef);
 
     return () => ctx.revert();
   }, []);
@@ -97,24 +107,23 @@ export function Features() {
       ref={containerRef}
       className="relative min-h-screen bg-[#050505] text-white overflow-hidden selection:bg-white selection:text-black font-sans"
     >
-      <div className="container mx-auto min-h-screen relative px-6 md:px-12 py-24 flex flex-col lg:flex-row gap-16 lg:gap-24">
+      <div className="container mx-auto relative px-6 md:px-12 sm:pt-24 sm:pb-12 flex flex-col lg:flex-row gap-12 sm:gap-16 lg:gap-24">
 
         {/* Left Column: Title Content */}
-        <div ref={leftContentRef} className="lg:w-5/12 flex flex-col justify-between py-12">
+        <div ref={leftContentRef} className="lg:w-5/12 flex flex-col justify-between py-8 sm:py-0">
           <div className="lg:sticky lg:top-24">
-            <h2 className="text-6xl md:text-8xl font-display font-bold tracking-tighter leading-[0.85] text-white mb-10">
+            <h2 className="text-4xl sm:text-6xl md:text-8xl font-display font-bold tracking-tighter leading-[0.85] text-white mb-6 sm:mb-10">
               Why<br />[N]Skills
             </h2>
 
-            <p className="text-xl md:text-2xl text-white/50 leading-relaxed max-w-sm font-medium">
+            <p className="text-base sm:text-xl md:text-2xl text-white/50 leading-relaxed max-w-sm font-medium">
               Skip the chaos of vibecoding from scratch. Design your foundation visually, generate structured code, then enhance with Cursor or Copilot.
             </p>
           </div>
         </div>
 
         {/* Right Column: Scroll-Controlled Stack */}
-        {/* Added bottom padding to ensure the last item is never cut off */}
-        <div ref={scrollContentRef} className="lg:w-7/12 flex flex-col justify-center relative pr-4">
+        <div ref={scrollContentRef} className="lg:w-7/12 flex flex-col justify-center relative pr-0 sm:pr-4">
           <div className="w-full space-y-4">
             {features.map((feature, index) => {
               const isActive = activeFeature === index;
@@ -122,7 +131,7 @@ export function Features() {
               return (
                 <div
                   key={index}
-                  className={`group transition-all duration-700 border-t border-white/10 ${isActive ? 'py-10' : 'py-6 opacity-40 hover:opacity-100'
+                  className={`feature-item-${index} group transition-all duration-700 border-t border-white/10 ${isActive ? 'py-6 sm:py-10' : 'py-3 sm:py-6 opacity-40 hover:opacity-100'
                     }`}
                 >
                   {/* Item Header */}
@@ -130,7 +139,7 @@ export function Features() {
                     <span className={`text-[12px] font-mono transition-colors duration-500 ${isActive ? 'text-white' : 'text-white/40'}`}>
                       ● {feature.id}
                     </span>
-                    <h3 className={`text-2xl md:text-3xl font-display font-bold tracking-tight transition-all duration-500 ${isActive ? 'text-white scale-[1.02] origin-left' : 'text-white/60'
+                    <h3 className={`text-xl md:text-3xl font-display font-bold tracking-tight transition-all duration-500 ${isActive ? 'text-white scale-[1.02] origin-left' : 'text-white/60'
                       }`}>
                       {feature.title.toUpperCase()}
                     </h3>
@@ -138,11 +147,11 @@ export function Features() {
 
                   {/* Expanded Card Content */}
                   <div
-                    className={`overflow-hidden transition-all duration-[900ms] cubic-bezier(0.16, 1, 0.3, 1) ${isActive ? 'max-h-[700px] mt-8 opacity-100' : 'max-h-0 opacity-0'
+                    className={`overflow-hidden transition-all duration-[900ms] cubic-bezier(0.16, 1, 0.3, 1) ${isActive ? 'max-h-[700px] mt-8 opacity-100' : 'max-h-0 mt-0 opacity-0'
                       }`}
                   >
                     <div
-                      className="rounded-2xl p-8 md:p-12 shadow-2xl relative overflow-hidden"
+                      className="rounded-2xl p-6 md:p-12 shadow-2xl relative overflow-hidden"
                       style={{
                         backgroundColor: BRAND_COLOR,
                         backgroundImage: `linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%)`
@@ -150,7 +159,7 @@ export function Features() {
                     >
                       <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 blur-[100px] -mr-32 -mt-32 rounded-lg" />
 
-                      <p className="text-xl md:text-2xl font-display font-bold tracking-tight text-white leading-snug mb-10 relative z-10">
+                      <p className="text-lg md:text-2xl font-display font-bold tracking-tight text-white leading-snug mb-10 relative z-10">
                         {feature.description}
                       </p>
 
@@ -177,10 +186,10 @@ export function Features() {
         </div>
       </div>
 
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+      {/* <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
         <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[hsl(18_76%_58%)]/05 blur-[150px] opacity-30" />
         <div className="absolute bottom-0 left-0 w-1/3 h-1/3 bg-[hsl(18_76%_58%)]/05 blur-[150px] opacity-30" />
-      </div>
+      </div> */}
     </section>
   );
 }

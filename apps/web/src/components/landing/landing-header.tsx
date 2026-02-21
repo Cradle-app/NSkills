@@ -98,7 +98,7 @@ export function LandingHeader() {
 
         {/* Logo Section */}
         <Link href="/">
-          <Image src={logo} alt="[N]Skills" width={100} height={100} className="w-32" />
+          <Image src={logo} alt="[N]Skills" width={100} height={100} className="w-24 sm:w-32" />
         </Link>
 
         {/* Actions */}
@@ -106,8 +106,8 @@ export function LandingHeader() {
           <Link
             href="/app"
             className="
-              relative flex items-center gap-2 px-5 py-2.5 rounded-lg
-              bg-white text-black text-[12px] font-bold
+              relative flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg
+              bg-white text-black text-[10px] sm:text-[12px] font-bold
               hover:bg-[#d97a4a] hover:text-white
               transition-all duration-500 active:scale-95
               shadow-[0_4px_12px_rgba(255,255,255,0.05)]
@@ -116,7 +116,7 @@ export function LandingHeader() {
           >
             <span>Launch App</span>
             <svg
-              className="w-3 h-3 transition-transform duration-500"
+              className="w-2.5 h-2.5 sm:w-3 sm:h-3 transition-transform duration-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
