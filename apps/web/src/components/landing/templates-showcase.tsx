@@ -38,7 +38,9 @@ function TemplateCard({
 
   useEffect(() => {
     const handleResize = () => {
-      setCardWidth(Math.min(380, window.innerWidth - 60));
+      // Even smaller cards on mobile for better visibility of the track
+      const isMobile = window.innerWidth < 768;
+      setCardWidth(isMobile ? Math.min(230, window.innerWidth - 100) : Math.min(380, window.innerWidth - 60));
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -55,18 +57,22 @@ function TemplateCard({
     return wrappedX;
   });
 
-  const y = useTransform(x, (val: number) => (val * val) * 0.0001);
-  const rotate = useTransform(x, (val: number) => val * 0.01);
+  const y = useTransform(x, (val: number) => {
+    // Make the arc slightly more pronounced on mobile
+    const factor = typeof window !== 'undefined' && window.innerWidth < 768 ? 0.00015 : 0.0001;
+    return (val * val) * factor;
+  });
+  const rotate = useTransform(x, (val: number) => val * 0.012);
   const scale = useTransform(x, (val: number) => {
     const absX = Math.abs(val);
-    return Math.max(0.8, 1 - absX / 2500);
+    return Math.max(0.75, 1 - absX / 2000);
   });
 
   const zIndex = useTransform(x, (val: number) => Math.round(100 - Math.abs(val) / 10));
   const opacity = useTransform(x, (val: number) => {
     const absX = Math.abs(val);
     if (absX > totalWidth / 2 - 20) return 0;
-    return 1 - (absX - 600) / 800;
+    return 1 - (absX - 500) / 800;
   });
 
   const handleDiscover = () => {
@@ -85,9 +91,9 @@ function TemplateCard({
         width: cardWidth,
         marginLeft: -cardWidth / 2,
       }}
-      className="absolute left-1/2 top-20 select-none pointer-events-none"
+      className="absolute left-1/2 top-5 md:top-20 select-none pointer-events-none"
     >
-      <div className="relative aspect-[4/5] w-full rounded-[2.5rem] overflow-hidden bg-forge-bg border border-white/[0.06] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] group pointer-events-auto transition-transform duration-500">
+      <div className="relative aspect-[4/5] w-full rounded-[1.25rem] md:rounded-[2.5rem] overflow-hidden bg-forge-bg border border-white/[0.1] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] group pointer-events-auto transition-transform duration-500">
         <div
           className="absolute inset-0 opacity-[0.12] group-hover:opacity-20 transition-opacity duration-700"
           style={{
@@ -95,25 +101,25 @@ function TemplateCard({
           }}
         />
 
-        <div className="absolute inset-0 p-10 flex flex-col justify-between z-10">
+        <div className="absolute inset-0 p-5 md:p-10 flex flex-col justify-between z-10">
           <div className="flex justify-between items-start">
-            <div className="px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] text-[8px] font-bold uppercase tracking-[0.2em] text-white/30">
-              [N]SKILLS Blueprints
+            <div className="px-2.5 py-1 md:px-4 md:py-1.5 rounded-full bg-white/[0.03] border border-white/[0.08] text-[6px] md:text-[8px] font-bold uppercase tracking-[0.2em] text-white/30">
+              Blueprint
             </div>
-            <div className="w-2 h-2 rounded-full bg-[#d97a4a] shadow-[0_0_10px_#d97a4a]" />
+            <div className="w-1 h-1 md:w-2 md:h-2 rounded-full bg-[#d97a4a] shadow-[0_0_10px_#d97a4a]" />
           </div>
 
-          <div className="flex flex-col flex-1 justify-center py-6">
-            <h3 className="text-3xl font-display font-bold text-white mb-4 leading-tight">
+          <div className="flex flex-col flex-1 justify-center py-3 md:py-6">
+            <h3 className="text-lg md:text-3xl font-display font-bold text-white mb-1.5 md:mb-4 leading-tight">
               {template.title}
             </h3>
-            <p className="text-forge-text-secondary text-sm leading-relaxed mb-6 opacity-70 line-clamp-3">
+            <p className="text-forge-text-secondary text-[10px] md:text-sm leading-relaxed mb-3 md:mb-6 opacity-70 line-clamp-3">
               {template.description}
             </p>
 
-            <div className="flex gap-2 flex-wrap">
-              {template.nodes.map((node, i) => (
-                <span key={i} className="px-3 py-1 rounded-lg bg-white/[0.03] border border-white/[0.05] text-[10px] font-medium text-white/40 tracking-tight">
+            <div className="flex gap-1 md:gap-2 flex-wrap">
+              {template.nodes.slice(0, 2).map((node, i) => (
+                <span key={i} className="px-1.5 py-0.5 md:px-3 md:py-1 rounded-lg bg-white/[0.03] border border-white/[0.05] text-[7px] md:text-[10px] font-medium text-white/40 tracking-tight">
                   {node}
                 </span>
               ))}
@@ -123,10 +129,10 @@ function TemplateCard({
           <div className="pt-2">
             <button
               onClick={handleDiscover}
-              className="w-full py-4 rounded-xl bg-white text-black font-bold text-xs tracking-wider flex items-center justify-center gap-2 group/btn transition-all active:scale-[0.98] hover:bg-[#efefef] hover:shadow-[0_8px_16px_-4px_rgba(255,255,255,0.2)]"
+              className="w-full py-2.5 md:py-4 rounded-lg md:rounded-xl bg-white text-black font-bold text-[9px] md:text-xs tracking-wider flex items-center justify-center gap-2 group/btn transition-all active:scale-[0.98] hover:bg-[#efefef]"
             >
-              Discover Blueprint
-              <ArrowUpRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1" />
+              Discover
+              <ArrowUpRight className="w-3 h-3 md:w-4 md:h-4 transition-transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1" />
             </button>
           </div>
         </div>
@@ -140,15 +146,32 @@ function RulerBackground() {
   const items = Array.from({ length: points });
 
   return (
-    <div className="absolute top-[60%] -translate-y-[50%] left-0 w-full pointer-events-none overflow-hidden h-[400px]">
-      <div className="relative w-full h-full flex items-center justify-center px-[5%]">
-        <svg viewBox="0 0 1000 200" className="w-full opacity-[0.1]" preserveAspectRatio="none">
+    <div className="absolute top-[50%] md:top-[60%] -translate-y-[50%] left-[-10%] w-[120%] pointer-events-none overflow-hidden h-[400px]">
+      <div className="relative w-full h-full flex items-center justify-center">
+        <svg viewBox="0 0 1000 200" className="w-full opacity-[0.4] md:opacity-[0.1]" preserveAspectRatio="none">
+          {/* Main Glow Track Line */}
+          <path
+            d="M 0 120 Q 500 20 1000 120"
+            fill="none"
+            stroke={ACCENT_COLOR}
+            strokeWidth="8"
+            className="opacity-10 blur-md"
+          />
+          {/* Main Track Line */}
+          <path
+            d="M 0 120 Q 500 20 1000 120"
+            fill="none"
+            stroke="white"
+            strokeWidth="3"
+            className="opacity-30"
+          />
+          {/* Dashed line for texture */}
           <path
             d="M 0 120 Q 500 20 1000 120"
             fill="none"
             stroke="white"
             strokeWidth="0.5"
-            strokeDasharray="2 8"
+            strokeDasharray="1 10"
           />
           {items.map((_, i) => {
             const progress = i / (points - 1);
@@ -161,11 +184,12 @@ function RulerBackground() {
               <line
                 key={i}
                 x1={x}
-                y1={y - 6}
+                y1={y - 12}
                 x2={x}
-                y2={y + 6}
+                y2={y + 12}
                 stroke="white"
-                strokeWidth="0.8"
+                strokeWidth="1.5"
+                className="opacity-40"
                 transform={`rotate(${angle}, ${x}, ${y})`}
               />
             );
@@ -195,25 +219,32 @@ export function TemplatesShowcase() {
   }, [mouseX, mouseY]);
 
   return (
-    <section className="py-24 md:py-32 relative overflow-hidden bg-forge-bg select-none">
+    <section className="py-20 md:py-32 relative overflow-hidden bg-forge-bg select-none">
       <div className="container mx-auto px-6 relative z-10 pointer-events-none">
-        <div className="max-w-xl mb-16">
-          <h2 className="text-4xl md:text-7xl font-display font-bold text-white mb-6 tracking-tight">
+        <div className="max-w-xl mb-8 sm:mb-16">
+          <h2 className="text-3xl sm:text-5xl md:text-7xl font-display font-bold text-white mb-4 sm:mb-6 tracking-tight">
             Pre-Built{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#d97a4a] to-[#a85d38]">
               Blueprints
             </span>
           </h2>
-          <p className="text-forge-text-secondary text-lg leading-relaxed max-w-md opacity-80">
+          <p className="text-forge-text-secondary text-sm sm:text-lg leading-relaxed max-w-md opacity-80">
             Start from proven architectures. Each blueprint is a complete, interconnected component structure ready to generate and deploy.
           </p>
+        </div>
+
+        {/* Mobile Drag Hint */}
+        <div className="flex md:hidden items-center justify-center gap-2 mb-12 opacity-30 animate-pulse">
+          <div className="h-px w-8 bg-white/20" />
+          <span className="text-[10px] font-mono tracking-[0.2em] uppercase">Drag to Explore</span>
+          <div className="h-px w-8 bg-white/20" />
         </div>
       </div>
 
       <RulerBackground />
 
       <div
-        className="relative h-[700px] w-full mt-[-40px]"
+        className="relative h-[480px] md:h-[700px] w-full mt-[-20px] md:mt-[-40px]"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => {
           setIsHovering(false);
