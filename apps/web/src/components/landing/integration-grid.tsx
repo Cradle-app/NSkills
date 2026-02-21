@@ -6,7 +6,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 
 import ArbitrumLogo from '@/assets/blocks/arbitrum.svg';
-import BnbLogo from '@/assets/blocks/BNB Chain.png';
 import StylusLogo from '@/assets/blocks/stylus.svg';
 import GithubLogo from '@/assets/blocks/github.png';
 import TelegramLogo from '@/assets/blocks/Telegram.jpg';
@@ -27,7 +26,6 @@ gsap.registerPlugin(ScrollTrigger);
 const integrations = [
   // Native / Core
   { name: 'Arbitrum', icon: ArbitrumLogo },
-  { name: 'BNB Chain', icon: BnbLogo },
   { name: 'Stylus', icon: StylusLogo },
   { name: 'Superposition', icon: SuperpositionLogo },
   { name: 'Aixbt', icon: AixbtLogo },
