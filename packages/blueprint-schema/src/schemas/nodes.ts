@@ -65,6 +65,7 @@ export const NodeType = z.enum([
   'sdk-generator',
   'wallet-auth',
   'rpc-provider',
+  'quicknode',
   'chain-data',
   'ipfs-storage',
   'chain-abstraction',
@@ -371,6 +372,34 @@ export const RPCProviderConfig = BaseNodeConfig.extend({
   privacyMode: z.boolean().default(false),
 });
 export type RPCProviderConfig = z.infer<typeof RPCProviderConfig>;
+
+/**
+ * Quicknode service IDs (from Quicknode docs)
+ */
+export const QuicknodeService = z.enum([
+  'core-rpc',
+  'webhooks',
+  'streams',
+  'ipfs',
+  'key-value-store',
+  'custom-rpc',
+  'token-api',
+  'nft-api',
+  'marketplace',
+  'sdk',
+  'console-api',
+]);
+export type QuicknodeService = z.infer<typeof QuicknodeService>;
+
+/**
+ * Quicknode configuration
+ */
+export const QuicknodeConfig = BaseNodeConfig.extend({
+  selectedService: QuicknodeService.default('core-rpc'),
+  endpointUrl: z.string().url().optional(),
+  apiKey: z.string().optional(),
+});
+export type QuicknodeConfig = z.infer<typeof QuicknodeConfig>;
 
 /**
  * Arbitrum Bridge configuration
@@ -1046,6 +1075,7 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('eip7702-smart-eoa'), config: EIP7702SmartEOAConfig }),
   z.object({ type: z.literal('wallet-auth'), config: WalletAuthConfig }),
   z.object({ type: z.literal('rpc-provider'), config: RPCProviderConfig }),
+  z.object({ type: z.literal('quicknode'), config: QuicknodeConfig }),
   z.object({ type: z.literal('arbitrum-bridge'), config: ArbitrumBridgeConfig }),
   z.object({ type: z.literal('chain-data'), config: ChainDataConfig }),
   z.object({ type: z.literal('ipfs-storage'), config: IPFSStorageConfig }),
@@ -1139,6 +1169,7 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'sdk-generator': 'app',
     'wallet-auth': 'app',
     'rpc-provider': 'app',
+    'quicknode': 'app',
     'chain-data': 'app',
     'ipfs-storage': 'app',
     'chain-abstraction': 'app',
@@ -1203,6 +1234,7 @@ export function getConfigSchemaForType(type: NodeType) {
     'sdk-generator': SDKGeneratorConfig,
     'wallet-auth': WalletAuthConfig,
     'rpc-provider': RPCProviderConfig,
+    'quicknode': QuicknodeConfig,
     'chain-data': ChainDataConfig,
     'ipfs-storage': IPFSStorageConfig,
     'chain-abstraction': ChainAbstractionConfig,

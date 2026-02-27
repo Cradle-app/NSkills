@@ -21,6 +21,7 @@ import { FrontendScaffoldForm } from './forms/frontend-scaffold-form';
 import { EIP7702Form } from './forms/eip7702-form';
 import { WalletAuthForm } from './forms/wallet-auth-form';
 import { RPCProviderForm } from './forms/rpc-provider-form';
+import { QuicknodeForm } from './forms/quicknode-form';
 import { ArbitrumBridgeForm } from './forms/arbitrum-bridge-form';
 import { ChainDataForm } from './forms/chain-data-form';
 import { IPFSStorageForm } from './forms/ipfs-storage-form';
@@ -319,6 +320,9 @@ export function ConfigPanel() {
             )}
             {selectedNode.type === 'rpc-provider' && (
               <RPCProviderForm nodeId={selectedNode.id} config={selectedNode.config} />
+            )}
+            {(selectedNode.type as string) === 'quicknode' && (
+              <QuicknodeForm nodeId={selectedNode.id} config={selectedNode.config} />
             )}
             {selectedNode.type === 'arbitrum-bridge' && (
               <ArbitrumBridgeForm nodeId={selectedNode.id} config={selectedNode.config} />

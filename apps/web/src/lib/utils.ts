@@ -47,6 +47,7 @@ export function nodeTypeToLabel(type: string): string {
     // App
     'wallet-auth': 'Wallet Authentication',
     'rpc-provider': 'RPC Provider',
+    'quicknode': 'Quicknode',
     'arbitrum-bridge': 'Arbitrum Bridge',
     'chain-data': 'Chain Data',
     'ipfs-storage': 'IPFS Storage',
@@ -129,6 +130,7 @@ export function nodeTypeToColor(type: string): string {
     // App
     'wallet-auth': 'node-app',
     'rpc-provider': 'node-app',
+    'quicknode': 'node-app',
     'arbitrum-bridge': 'node-app',
     'chain-data': 'node-app',
     'ipfs-storage': 'node-app',

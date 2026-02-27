@@ -67,6 +67,7 @@ import GithubLogo from '@/assets/blocks/github.png';
 import RobinhoodLogo from '@/assets/blocks/robinhood.png';
 import OpenClawLogo from '@/assets/blocks/openclaw.jpg';
 import EigenAILogo from '@/assets/blocks/EigenAI.svg';
+import QuicknodeLogo from '@/assets/blocks/Quicknode.svg';
 
 /**
  * Centralized logo asset mapping
@@ -97,6 +98,7 @@ const LOGO_ASSETS: Record<string, any> = {
   'robinhood.png': RobinhoodLogo,
   'openclaw.jpg': OpenClawLogo,
   'EigenAI.svg': EigenAILogo,
+  'Quicknode.svg': QuicknodeLogo,
 };
 
 function getLogoAsset(logoAsset?: string): any | null {

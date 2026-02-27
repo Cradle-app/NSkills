@@ -38,6 +38,7 @@ import GithubLogo from '@/assets/blocks/github.png';
 import RobinhoodLogo from '@/assets/blocks/robinhood.png';
 import OpenClawLogo from '@/assets/blocks/openclaw.jpg';
 import EigenAILogo from '@/assets/blocks/EigenAI.svg';
+import QuicknodeLogo from '@/assets/blocks/Quicknode.svg';
 
 /** Node types with custom logos (matches palette) */
 const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
@@ -79,6 +80,7 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'ipfs-storage': { src: IpfsLogo, alt: 'IPFS' },
   'frontend-scaffold': { src: NextjsLogo, alt: 'Next.js' },
   'rpc-provider': { src: ArbitrumLogo, alt: 'Arbitrum' },
+  'quicknode': { src: QuicknodeLogo, alt: 'Quicknode' },
   'arbitrum-bridge': { src: ArbitrumLogo, alt: 'Arbitrum' },
   'chain-data': { src: ArbitrumLogo, alt: 'Arbitrum' },
   'chain-abstraction': { src: ArbitrumLogo, alt: 'Arbitrum' },
@@ -127,6 +129,7 @@ const iconMap: Record<string, typeof Box> = {
   'eip7702-smart-eoa': Key,
   'wallet-auth': Wallet,
   'rpc-provider': Globe,
+  'quicknode': Globe,
   'arbitrum-bridge': ArrowLeftRight,
   'chain-data': Database,
   'onchain-activity': Database,

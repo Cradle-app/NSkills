@@ -15,6 +15,7 @@ export { FrontendScaffoldPlugin } from './frontend-scaffold';
 export { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
 export { WalletAuthPlugin } from './wallet-auth';
 export { RPCProviderPlugin } from './rpc-provider';
+export { QuicknodePlugin } from './quicknode';
 export { ArbitrumBridgePlugin } from './arbitrum-bridge';
 export { ChainDataPlugin } from './chain-data';
 export { IPFSStoragePlugin } from './ipfs-storage';
@@ -84,6 +85,7 @@ import { FrontendScaffoldPlugin } from './frontend-scaffold';
 import { EIP7702SmartEOAPlugin } from './eip7702-smart-eoa';
 import { WalletAuthPlugin } from './wallet-auth';
 import { RPCProviderPlugin } from './rpc-provider';
+import { QuicknodePlugin } from './quicknode';
 import { ArbitrumBridgePlugin } from './arbitrum-bridge';
 import { ChainDataPlugin } from './chain-data';
 import { IPFSStoragePlugin } from './ipfs-storage';
@@ -162,6 +164,7 @@ export function registerOfficialPlugins(registry?: PluginRegistry): void {
   targetRegistry.register(new EIP7702SmartEOAPlugin());
   targetRegistry.register(new WalletAuthPlugin());
   targetRegistry.register(new RPCProviderPlugin());
+  targetRegistry.register(new QuicknodePlugin());
   targetRegistry.register(new ArbitrumBridgePlugin());
   targetRegistry.register(new ChainDataPlugin());
   targetRegistry.register(new IPFSStoragePlugin());
@@ -235,6 +238,7 @@ export function getOfficialPlugins() {
     new EIP7702SmartEOAPlugin(),
     new WalletAuthPlugin(),
     new RPCProviderPlugin(),
+    new QuicknodePlugin(),
     new ArbitrumBridgePlugin(),
     new ChainDataPlugin(),
     new IPFSStoragePlugin(),

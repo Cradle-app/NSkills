@@ -35,6 +35,9 @@ const toolTypeMap: Record<string, string> = {
   // App
   'wallet_auth': 'wallet-auth',
   'rpc_provider': 'rpc-provider',
+  'quicknode': 'quicknode',
+  'quick_node': 'quicknode',
+  'rpc_quicknode': 'quicknode',
   'arbitrum_bridge': 'arbitrum-bridge',
   'chain_data': 'chain-data',
   'ipfs_storage': 'ipfs-storage',
@@ -78,6 +81,7 @@ const validNodeTypes = [
   'compound-lending',
   'wallet-auth',
   'rpc-provider',
+  'quicknode',
   'arbitrum-bridge',
   'chain-data',
   'ipfs-storage',
@@ -179,6 +183,9 @@ const DEFAULT_NODE_CONFIGS: Record<string, Record<string, unknown>> = {
     healthCheckInterval: 30000,
     retryAttempts: 3,
     privacyMode: false,
+  },
+  'quicknode': {
+    selectedService: 'core-rpc',
   },
   'arbitrum-bridge': {
     supportedTokens: ['ETH'],
@@ -473,6 +480,7 @@ AGENTS:
 APP:
 - wallet_auth: WalletConnect, social login, SIWE authentication
 - rpc_provider: Multi-provider RPC with failover
+- quicknode: Multi-chain API - RPC, Webhooks, Streams, IPFS, Key-Value Store across 77+ chains
 - arbitrum_bridge: L1-L2 bridging with Arbitrum SDK
 - chain_data: Token/NFT data with Alchemy/Moralis
 - ipfs_storage: Decentralized storage (Pinata/Web3.Storage)

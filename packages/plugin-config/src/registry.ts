@@ -513,6 +513,24 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
             privacyMode: false,
         },
     },
+    'quicknode': {
+        id: 'quicknode',
+        name: 'Quicknode',
+        description: 'Multi-chain API: RPC, Webhooks, Streams, IPFS, Key-Value Store, and more',
+        icon: 'Globe',
+        logoAsset: 'Quicknode.svg',
+        color: 'node-tertiary',
+        category: 'app',
+        tags: ['rpc', 'webhooks', 'streams', 'ipfs', 'quicknode', 'blockchain-api'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'chain-data', 'rpc-provider'],
+            suggestedWith: ['arbitrum-bridge'],
+            requires: [],
+        },
+        defaultConfig: {
+            selectedService: 'core-rpc',
+        },
+    },
     'arbitrum-bridge': {
         id: 'arbitrum-bridge',
         name: 'Arbitrum Bridge',

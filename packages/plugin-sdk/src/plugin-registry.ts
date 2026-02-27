@@ -118,6 +118,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'eip7702-smart-eoa',
       'wallet-auth',
       'rpc-provider',
+      'quicknode',
       'arbitrum-bridge',
       'chain-data',
       'ipfs-storage',
