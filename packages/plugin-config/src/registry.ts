@@ -321,6 +321,28 @@ export const PLUGIN_REGISTRY: Record<string, PluginRegistryEntry> = {
         defaultConfig: {},
     },
 
+    'eigen-ai-agent': {
+        id: 'eigen-ai-agent',
+        name: 'EigenAI',
+        description: 'LLM agent powered by EigenAI with optional signature verification',
+        icon: 'Bot',
+        logoAsset: 'EigenAI.svg',
+        color: 'node-agents',
+        category: 'agents',
+        tags: ['eigenai', 'ai', 'agent', 'llm', 'signing'],
+        compatibility: {
+            compatibleWith: ['frontend-scaffold', 'wallet-auth', 'telegram-ai-agent'],
+            suggestedWith: ['onchain-activity', 'dune-transaction-history'],
+            requires: [],
+        },
+        defaultConfig: {
+            baseUrl: 'https://eigenai.eigencloud.xyz/v1',
+            model: 'gpt-oss-120b-f16',
+            network: 'mainnet',
+            enableSignatureVerification: true,
+        },
+    },
+
     // ============================================
     // PAYMENTS CATEGORY
     // ============================================

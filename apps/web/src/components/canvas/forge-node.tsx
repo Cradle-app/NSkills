@@ -37,6 +37,7 @@ import NextjsLogo from '@/assets/blocks/Nextjs.png';
 import GithubLogo from '@/assets/blocks/github.png';
 import RobinhoodLogo from '@/assets/blocks/robinhood.png';
 import OpenClawLogo from '@/assets/blocks/openclaw.jpg';
+import EigenAILogo from '@/assets/blocks/EigenAI.svg';
 
 /** Node types with custom logos (matches palette) */
 const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
@@ -62,6 +63,7 @@ const NODE_LOGO_MAP: Record<string, { src: typeof AaveLogo; alt: string }> = {
   'maxxit': { src: MaxxitLogo, alt: 'Maxxit' },
   'erc8004-agent-runtime': { src: AIbotLogo, alt: 'AIbot' },
   'onchain-activity': { src: WalletLogoPng, alt: 'Wallet' },
+  'eigen-ai-agent': { src: EigenAILogo, alt: 'EigenAI' },
   // Intelligence plugins
   'aixbt-momentum': { src: AixbtLogo, alt: 'AIXBT' },
   'aixbt-signals': { src: AixbtLogo, alt: 'AIXBT' },
@@ -136,6 +138,7 @@ const iconMap: Record<string, typeof Box> = {
   'uniswap-swap': Coins,
   'aave-lending': DollarSign,
   'compound-lending': DollarSign,
+  'eigen-ai-agent': Bot,
   'aixbt-momentum': TrendingUp,
   'aixbt-signals': Zap,
   'aixbt-indigo': Sparkles,

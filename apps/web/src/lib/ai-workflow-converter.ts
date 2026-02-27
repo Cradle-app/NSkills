@@ -16,6 +16,9 @@ const toolTypeMap: Record<string, string> = {
   // Agents
   'erc8004_agent': 'erc8004-agent-runtime',
   'ai_agent': 'erc8004-agent-runtime',
+  'eigenai_agent': 'eigen-ai-agent',
+  'eigen_ai_agent': 'eigen-ai-agent',
+  'eigen_ai': 'eigen-ai-agent',
   'ostium_trading': 'ostium-trading',
   'maxxit_lazy_trader': 'maxxit',
   'maxxit_trader': 'maxxit',
@@ -65,6 +68,7 @@ const validNodeTypes = [
   'zk-primitives',
   'x402-paywall-api',
   'erc8004-agent-runtime',
+  'eigen-ai-agent',
   'ostium-trading',
   'maxxit',
   'onchain-activity',
@@ -124,6 +128,12 @@ const DEFAULT_NODE_CONFIGS: Record<string, Record<string, unknown>> = {
       requestsPerMinute: 60,
       tokensPerMinute: 100000,
     },
+  },
+  'eigen-ai-agent': {
+    baseUrl: 'https://eigenai.eigencloud.xyz/v1',
+    model: 'gpt-oss-120b-f16',
+    network: 'mainnet',
+    enableSignatureVerification: true,
   },
   'repo-quality-gates': {
     ciProvider: 'github',
@@ -455,6 +465,7 @@ PAYMENTS:
 
 AGENTS:
 - erc8004_agent: AI agent with on-chain registry (ERC-8004)
+- eigenai_agent: EigenAI LLM agent with signed responses and verification helpers
 - ostium_trading: One-click trading setup for Ostium
 - maxxit_lazy_trader: Maxxit Lazy Trader API integration
 - onchain_activity: Fetch wallet transactions by category

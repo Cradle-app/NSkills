@@ -297,6 +297,7 @@ function generateMockWorkflowResponse(query: string): AIWorkflowResponse {
   const hasToken = lowerQuery.includes('token') || lowerQuery.includes('erc20');
   const hasDeFi = lowerQuery.includes('defi') || lowerQuery.includes('trading') || lowerQuery.includes('swap') || lowerQuery.includes('yield');
   const hasAI = lowerQuery.includes('ai') || lowerQuery.includes('agent') || lowerQuery.includes('bot');
+  const hasEigenAI = lowerQuery.includes('eigenai') || lowerQuery.includes('eigen ai') || lowerQuery.includes('eigen ai');
   const hasTelegram = lowerQuery.includes('telegram') || lowerQuery.includes('notification') || lowerQuery.includes('alert');
   const hasBridge = lowerQuery.includes('bridge') || lowerQuery.includes('l1') || lowerQuery.includes('l2') || lowerQuery.includes('cross-chain');
   const hasIPFS = lowerQuery.includes('ipfs') || lowerQuery.includes('storage') || lowerQuery.includes('metadata');
@@ -426,7 +427,14 @@ function generateMockWorkflowResponse(query: string): AIWorkflowResponse {
       name: 'ERC-8004 AI Agent',
       next_tools: [],
     });
-  } else if (hasAI) {
+  } else if (hasEigenAI) {
+    tools.push({
+      id: getToolId(),
+      type: 'eigenai_agent',
+      name: 'EigenAI Agent',
+      next_tools: [],
+    });
+  } else if (hasAI || hasEigenAI) {
     if (hasTelegram) {
       tools.push({
         id: getToolId(),

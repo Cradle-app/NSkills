@@ -139,6 +139,7 @@ export function getDefaultRegistry(): PluginRegistry {
       'maxxit',
       'onchain-activity',
       'openclaw-agent',
+      'eigen-ai-agent',
       'pyth-oracle',
       'chainlink-price-feed',
       'aave-lending',

@@ -43,6 +43,7 @@ export function nodeTypeToLabel(type: string): string {
     'ostium-trading': 'Ostium One-Click Trading',
     'onchain-activity': 'Onchain Activity',
     'openclaw-agent': 'OpenClaw',
+    'eigen-ai-agent': 'EigenAI Agent',
     // App
     'wallet-auth': 'Wallet Authentication',
     'rpc-provider': 'RPC Provider',
@@ -124,6 +125,7 @@ export function nodeTypeToColor(type: string): string {
     'ostium-trading': 'node-agents',
     'onchain-activity': 'node-agents',
     'openclaw-agent': 'node-agents',
+    'eigen-ai-agent': 'node-agents',
     // App
     'wallet-auth': 'node-app',
     'rpc-provider': 'node-app',

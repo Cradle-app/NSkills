@@ -49,6 +49,7 @@ export const NodeType = z.enum([
   'maxxit',
   'onchain-activity',
   'openclaw-agent',
+  'eigen-ai-agent',
 
   // Oracles / Analytics
   'pyth-oracle',
@@ -208,6 +209,40 @@ export type ERC8004AgentConfig = z.infer<typeof ERC8004AgentConfig>;
  */
 export const OpenClawConfig = BaseNodeConfig.extend({});
 export type OpenClawConfig = z.infer<typeof OpenClawConfig>;
+
+/**
+ * EigenAI Agent configuration
+ * LLM integration with optional signature verification support.
+ */
+export const EigenAIConfig = BaseNodeConfig.extend({
+  /**
+   * Base URL for the EigenAI API (OpenAI-compatible).
+   */
+  baseUrl: z.string().url().default('https://eigenai.eigencloud.xyz/v1'),
+  /**
+   * Model identifier used when calling EigenAI (for example "gpt-oss-120b-f16").
+   */
+  model: z.string().default('gpt-oss-120b-f16'),
+  /**
+   * Logical network to target for signature verification.
+   * "mainnet" -> chainId = 1, "sepolia" -> chainId = 11155111.
+   */
+  network: z.enum(['mainnet', 'sepolia']).default('mainnet'),
+  /**
+   * Default system prompt applied to EigenAI conversations.
+   */
+  systemPrompt: z.string().max(4000).optional(),
+  /**
+   * Default temperature for text generation.
+   */
+  temperature: z.number().min(0).max(2).default(0.2),
+  /**
+   * When true, generated projects include helpers and routes
+   * for verifying EigenAI response signatures.
+   */
+  enableSignatureVerification: z.boolean().default(true),
+});
+export type EigenAIConfig = z.infer<typeof EigenAIConfig>;
 
 /**
  * Stylus ZK Contract configuration
@@ -1003,6 +1038,7 @@ export const NodeConfig = z.discriminatedUnion('type', [
   z.object({ type: z.literal('x402-paywall-api'), config: X402PaywallConfig }),
   z.object({ type: z.literal('erc8004-agent-runtime'), config: ERC8004AgentConfig }),
   z.object({ type: z.literal('openclaw-agent'), config: OpenClawConfig }),
+  z.object({ type: z.literal('eigen-ai-agent'), config: EigenAIConfig }),
   z.object({ type: z.literal('repo-quality-gates'), config: RepoQualityGatesConfig }),
   z.object({ type: z.literal('frontend-scaffold'), config: FrontendScaffoldConfig }),
   z.object({ type: z.literal('sdk-generator'), config: SDKGeneratorConfig }),
@@ -1093,6 +1129,7 @@ export function getNodeCategory(type: NodeType): NodeCategory {
     'maxxit': 'agents',
     'onchain-activity': 'agents',
     'openclaw-agent': 'agents',
+    'eigen-ai-agent': 'agents',
     'pyth-oracle': 'analytics',
     'chainlink-price-feed': 'analytics',
     'aave-lending': 'agents',
@@ -1160,6 +1197,7 @@ export function getConfigSchemaForType(type: NodeType) {
     'x402-paywall-api': X402PaywallConfig,
     'erc8004-agent-runtime': ERC8004AgentConfig,
     'openclaw-agent': OpenClawConfig,
+    'eigen-ai-agent': EigenAIConfig,
     'repo-quality-gates': RepoQualityGatesConfig,
     'frontend-scaffold': FrontendScaffoldConfig,
     'sdk-generator': SDKGeneratorConfig,
